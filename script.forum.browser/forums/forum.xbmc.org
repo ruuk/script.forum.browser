@@ -1,0 +1,62 @@
+# Parsing data for forum.xbmc.org
+
+# import other data here ex-> import:forum.xbmc.org
+
+### URLs ######################################
+# Base url including the trailing /
+url:base=http://forum.xbmc.org/
+url:forums=index.php
+url:threads=forumdisplay.php?f=!FORUMID!
+url:replies=showthread.php?t=!THREADID!
+url:subscriptions=subscription.php
+url:login=index.php
+# Not used yet
+url:private_messages=private.php
+url:newpost=newreply.php?do=newreply&noquote=1&p=!POSTID!
+url:deletepost=editpost.php?do=editpost&p=!POSTID!
+url:page_arg=page
+url:gotonewpost=&goto=newpost
+
+### Filters ###################################
+# valid match names are url and suburl
+filter:logo=<a href="index.php.*?"><img src="(?P<suburl>.*?)"
+# valid match names are forumid, title, and description
+filter:forums=(?P<subforum>\s/>\s)*(?<!\s/></a>|ntrol">|an="5">)(?:<a\shref="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:(?:<div class="smallfont">(?P<description>.*?)</div>)|,)
+# valid match names are threadid, title, starter and lastposter
+filter:threads=showthread.php\?.*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<title>.*?)</a>.*?window.open\(\'member.php\?.*?u=\d+\', \'_self\'\)">(?P<starter>.*?)</span.*?<a href="member.php.*?rel="nofollow">(?P<lastposter>.*?)</a>
+# this should match  the entire text for every post on the page from which the post filter will extract
+filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->
+# valid match names are postid, date, userid, user, avatar, title, and message
+filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong><a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
+filter:code=Code:</div><pre.+?>(?P<code>.+?)</pre>
+# valid match names are threadid, forumid, title, starter and lastposter
+filter:subscriptions===threads
+# if forum uses a start based url should match an integer for that value else any data for page bsed urls. Valid match names are page OR start
+filter:next=Next\sPage\s-\sResults\s([\d,]+)\sto\s([\d,]+)\sof\s([\d,]+).*?(?P<page>Next\sPage\s-\sResults\s[\d,]+\sto\s[\d,]+\sof\s[\d,]+)
+filter:prev=Prev\sPage\s-\sResults\s([\d,]+)\sto\s([\d,]+)\sof\s([\d,]+).*?(?P<page>Prev\sPage\s-\sResults\s[\d,]+\sto\s[\d,]+\sof\s[\d,]+)
+# valid match types display, page, and total
+filter:page=>(?P<display>Page\s(?P<page>\d+)\sof\s(?P<total>\d+))<
+
+### Theme ####################################
+theme:window_bg=FF111111
+theme:title_bg=FFFFFFFF
+theme:title_fg=FF000000
+theme:desc_fg=FF000000
+theme:post_code=FF005500
+
+### Forms ####################################
+form:login_action=login.php?do=login
+form:login_user=vb_login_username
+form:login_pass=vb_login_password
+form:post_name=vbform
+form:post_action=newreply.php
+form:post_title=title
+form:post_message=message
+form:post_submit_wait=1
+# must be contiguous starting right after the action="
+form:delete_action=editpost.php?do=deletepost
+form:delete_control1=radio:deletepost=delete
+
+## Formats ####################################
+format:quote=[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]

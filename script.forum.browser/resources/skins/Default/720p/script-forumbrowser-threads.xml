@@ -11,7 +11,7 @@
     <control type="group">
       <posx>100</posx>
       <posy>10</posy>
-      <control type="image">
+      <control type="image" id="101">
         <posx>0</posx>
         <posy>0</posy>
         <width>1090</width>
@@ -20,7 +20,16 @@
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
-      <control type="label">
+      <control type="image" id="251">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>4</posy>
+            <width>1057</width>
+            <height>113</height>
+            <texture>title-background.png</texture>
+      </control>
+        
+      <control type="label" id="103">
         <description>textarea</description>
         <posx>20</posx>
         <posy>30</posy>
@@ -59,11 +68,19 @@
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
       </control>
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>4</posy>
+            <width>1057</width>
+            <height>113</height>
+            <texture>overlay.png</texture>
+      </control>
       
       <control type="button" id="200">
        <description>The Button</description>
-       <onleft>123</onleft>
-       <onright>201</onright>
+       <onleft>120</onleft>
+       <onright>202</onright>
        <onup>120</onup>
        <ondown>120</ondown>
        <posx>30</posx>
@@ -81,7 +98,7 @@
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
       </control>
-      
+      <!--
       <control type="button" id="201">
        <description>The Button</description>
        <onleft>200</onleft>
@@ -97,13 +114,16 @@
        <font>font18</font>
        <align>center</align>
        <label>Blank</label>
+       <texturefocus>FBbutton-focus.png</texturefocus>
+       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
+      -->
       
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>201</onleft>
+       <onleft>200</onleft>
        <onright>120</onright>
        <onup>120</onup>
        <ondown>120</ondown>
@@ -133,6 +153,15 @@
             <texture>$INFO[Container(120).ListItem.Property(image)]</texture>
       </control>
       
+      <control type="image" id="351">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>524</posy>
+            <width>1057</width>
+            <height>72</height>
+            <texture>title-background.png</texture>
+      </control>
+      
       <control type="label">
         <description>textarea</description>
         <posx>25</posx>
@@ -146,56 +175,52 @@
         <wrapmultiline>true</wrapmultiline>
         <label>$INFO[Container(120).ListItem.Property(last)]</label>
       </control>
-      <control type="label">
-        <description>textarea</description>
-        <posx>25</posx>
-        <posy>535</posy>
-        <width>1055</width>
-        <height>45</height>
-        <font>font18</font>
-        <textcolor>green</textcolor>
-        <aligny>center</aligny>
-        <align>center</align>
-        <wrapmultiline>true</wrapmultiline>
-        <label>$INFO[Container(120).ListItem.Property(last)]</label>
-        <visible>StringCompare($INFO[Container(120).ListItem.Studio],me)</visible>
-      </control>
-      
       <control type="image">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>524</posy>
+            <width>1057</width>
+            <height>72</height>
+            <texture>overlay.png</texture>
+      </control>
+      <control type="image" id="300">
         <posx>20</posx>
         <posy>120</posy>
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
-      <control type="image">
+      <control type="image" id="310">
+        <posx>20</posx>
+        <posy>120</posy>
+        <width>1</width>
+        <height>2</height>
+        <texture>progress.png</texture>
+      </control>
+      <control type="image" id="301">
         <posx>20</posx>
         <posy>520</posy>
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
-      <control type="image">
-        <posx>20</posx>
-        <posy>524</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator2.png</texture>
-      </control>      
-      <control type="image">
-        <posx>20</posx>
-        <posy>596</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator2.png</texture>
-      </control> 
-      <control type="image">
+      <control type="image" id="302">
         <posx>20</posx>
         <posy>600</posy>
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
-      </control>      
+      </control>
+      
+      <control type="image">
+            <description>listbg</description>
+            <posx>15</posx>
+			<posy>122</posy>
+			<width>1066</width>
+			<height>400</height>
+			<colordiffuse>FF000000</colordiffuse>
+            <texture>text-background.png</texture>
+      </control>
 
       <!-- ** Required ** Do not change <id> or <type> -->
       <control type="list" id="120">
@@ -284,6 +309,33 @@
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Director,)</visible>
+          </control>
+          <control type="label">
+            <posx>10</posx>
+            <posy>0</posy>
+            <width>175</width>
+            <height>38</height>
+            <font>font18</font>
+            <aligny>center</aligny>
+            <textcolor>FF55FF55</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Director,me)</visible>
+          </control>
+           <control type="label">
+            <posx>200</posx>
+            <posy>0</posy>
+            <width>800</width>
+            <height>38</height>
+            <font>font18</font>
+            <aligny>center</aligny>
+            <textcolor>FFDDBBBB</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label2</info>
+            <visible>StringCompare(ListItem.Genre,)</visible>
           </control>
           <control type="label">
             <posx>200</posx>
@@ -305,10 +357,11 @@
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
-            <textcolor>FFDDBBBB</textcolor>
+            <textcolor>FFAAFFAA</textcolor>
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label2</info>
+            <visible>StringCompare(ListItem.Studio,me)</visible>
           </control>
         </focusedlayout>
       </control>

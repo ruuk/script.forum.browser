@@ -11,7 +11,7 @@
     <control type="group">
       <posx>100</posx>
       <posy>10</posy>
-      <control type="image">
+      <control type="image" id="101">
         <posx>0</posx>
         <posy>0</posy>
         <width>1090</width>
@@ -20,31 +20,58 @@
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
-        <control type="image" >
+		<control type="image" id="251">
             <description>page header tab icon</description>
             <posx>20</posx>
-            <posy>11</posy>
-            <width>518</width>
-            <height>100</height>
-            <texture>logo.png</texture>
+            <posy>4</posy>
+            <width>1057</width>
+            <height>113</height>
+            <texture>title-background.png</texture>
         </control>
-             
+        <control type="image" id="250">
+            <description>page header tab icon</description>
+            <posx>40</posx>
+            <posy>15</posy>
+            <width>340</width>
+            <height>93</height>
+            <aspectratio align="left">keep</aspectratio>
+        </control>
 
-
-      <control type="label">
+      <control type="label" id="103">
         <description>textarea</description>
-        <posx>580</posx>
+        <posx>375</posx>
         <posy>30</posy>
         <width>230</width>
         <height>60</height>
         <font>font18</font>
-        <textcolor>white</textcolor>
+        <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
         <label>Forums</label>
         <wrapmultiline>true</wrapmultiline>
       </control>
       
+      <control type="label" id="104">
+        <description>textarea</description>
+        <posx>625</posx>
+        <posy>30</posy>
+        <width>380</width>
+        <height>60</height>
+        <font>font18</font>
+        <textcolor>black</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <label>Loading...</label>
+        <wrapmultiline>true</wrapmultiline>
+      </control>
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>4</posy>
+            <width>1057</width>
+            <height>113</height>
+            <texture>overlay.png</texture>
+      </control>
       <control type="button" id="200">
        <description>The Button</description>
        <onleft>120</onleft>
@@ -60,6 +87,8 @@
        <font>font18</font>
        <align>center</align>
        <label>Settings</label>
+       <texturefocus>FBbutton-focus.png</texturefocus>
+       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -79,7 +108,8 @@
        <font>font18</font>
        <align>center</align>
        <label>Subscriptions</label>
-       <enable>false</enable>
+       <texturefocus>FBbutton-focus.png</texturefocus>
+       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -98,8 +128,9 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Private Messages</label>
-       <enable>false</enable>
+       <label>Change Forum</label>
+       <texturefocus>FBbutton-focus.png</texturefocus>
+       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -114,11 +145,19 @@
             <texture>$INFO[Container(120).ListItem.Property(image)]</texture>
       </control>
       
+      <control type="image" id="351">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>524</posy>
+            <width>1057</width>
+            <height>72</height>
+            <texture>title-background.png</texture>
+      </control>
       <control type="label">
         <description>textarea</description>
-        <posx>25</posx>
+        <posx>29</posx>
         <posy>535</posy>
-        <width>1055</width>
+        <width>1037</width>
         <height>45</height>
         <font>font18</font>
         <textcolor>white</textcolor>
@@ -127,48 +166,49 @@
         <wrapmultiline>true</wrapmultiline>
         <label>$INFO[Container(120).ListItem.Property(description)]</label>
       </control>
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>20</posx>
+            <posy>524</posy>
+            <width>1057</width>
+            <height>72</height>
+            <texture>overlay.png</texture>
+      </control>
+      <control type="image" id="300">
+        <posx>20</posx>
+        <posy>119</posy>
+        <width>1060</width>
+        <height>2</height>
+        <texture>TRseparator.png</texture>
+      </control>
+      <control type="image" id="301">
+        <posx>20</posx>
+        <posy>521</posy>
+        <width>1060</width>
+        <height>2</height>
+        <texture>TRseparator.png</texture>
+      </control>
+      <control type="image" id="302">
+        <posx>20</posx>
+        <posy>599</posy>
+        <width>1060</width>
+        <height>2</height>
+        <texture>TRseparator.png</texture>
+      </control>      
       
       <control type="image">
-        <posx>20</posx>
-        <posy>120</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator.png</texture>
+            <description>listbg</description>
+            <posx>15</posx>
+			<posy>122</posy>
+			<width>1066</width>
+			<height>400</height>
+            <texture>list-background.png</texture>
       </control>
-      <control type="image">
-        <posx>20</posx>
-        <posy>520</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator.png</texture>
-      </control>
-      <control type="image">
-        <posx>20</posx>
-        <posy>524</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator2.png</texture>
-      </control>      
-      <control type="image">
-        <posx>20</posx>
-        <posy>596</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator2.png</texture>
-      </control> 
-      <control type="image">
-        <posx>20</posx>
-        <posy>600</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator.png</texture>
-      </control>      
-
       <!-- ** Required ** Do not change <id> or <type> -->
       <control type="list" id="120">
         <posx>20</posx>
         <posy>132</posy>
-        <width>1040</width>
+        <width>1033</width>
         <height>380</height>
         <onleft>202</onleft>
         <onright>200</onright>
@@ -189,27 +229,13 @@
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
-            <visible>StringCompare(ListItem.Genre,bold)</visible>
           </control>
-          
-          <control type="label">
-            <posx>10</posx>
-            <posy>0</posy>
-            <width>990</width>
-            <height>38</height>
-            <font>font18</font>
-            <aligny>center</aligny>
-            <textcolor>FFDDBBBB</textcolor>
-            <selectedcolor>green</selectedcolor>
-            <align>left</align>
-            <info>ListItem.Label</info>
-          </control>          
         </itemlayout>
         <focusedlayout height="38">
           <control type="image">
             <posx>0</posx>
             <posy>0</posy>
-            <width>1040</width>
+            <width>1033</width>
             <height>38</height>
             <texture border="10">default-list-focus.png</texture>
             <visible>Control.HasFocus(120)</visible>
@@ -222,20 +248,6 @@
             <font>font18</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
-            <selectedcolor>green</selectedcolor>
-            <align>left</align>
-            <info>ListItem.Label</info>
-            <visible>StringCompare(ListItem.Genre,bold)</visible>
-          </control>
-          
-          <control type="label">
-            <posx>10</posx>
-            <posy>0</posy>
-            <width>990</width>
-            <height>38</height>
-            <font>font18</font>
-            <aligny>center</aligny>
-            <textcolor>FFDDBBBB</textcolor>
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>

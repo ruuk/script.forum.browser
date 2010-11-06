@@ -284,6 +284,17 @@ def is_third_party(request):
     return not domain_match(req_host, reach(request.origin_req_host))
 
 
+try:
+    all
+except NameError:
+    # python 2.4
+    def all(iterable):
+        for x in iterable:
+            if not x:
+                return False
+        return True
+
+
 class Cookie:
     """HTTP Cookie.
 
@@ -326,6 +337,14 @@ class Cookie:
     rather than"Port=80", for example); if this is the case, port is None.
 
     """
+
+
+    _attrs = ("version", "name", "value",
+              "port", "port_specified",
+              "domain", "domain_specified", "domain_initial_dot",
+              "path", "path_specified",
+              "secure", "expires", "discard", "comment", "comment_url",
+              "rfc2109", "_rest")
 
     def __init__(self, version, name, value,
                  port, port_specified,
@@ -381,6 +400,12 @@ class Cookie:
     def is_expired(self, now=None):
         if now is None: now = time.time()
         return (self.expires is not None) and (self.expires <= now)
+
+    def __eq__(self, other):
+        return all(getattr(self, a) == getattr(other, a) for a in self._attrs)
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def __str__(self):
         if self.port is None: p = ""
