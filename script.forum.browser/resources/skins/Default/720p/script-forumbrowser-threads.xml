@@ -94,7 +94,7 @@
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>Prev</label>
-       <textoffsetx>20</textoffsetx>
+       <textoffsetx>35</textoffsetx>
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
       </control>
@@ -138,7 +138,7 @@
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>Next</label>
-       <textoffsetx>20</textoffsetx>
+       <textoffsetx>35</textoffsetx>
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
       </control>

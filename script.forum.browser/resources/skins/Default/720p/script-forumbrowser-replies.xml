@@ -92,7 +92,7 @@
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>Prev</label>
-       <textoffsetx>20</textoffsetx>
+       <textoffsetx>35</textoffsetx>
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
       </control>
@@ -135,7 +135,7 @@
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>Next</label>
-       <textoffsetx>20</textoffsetx>
+       <textoffsetx>35</textoffsetx>
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
       </control>
@@ -168,7 +168,7 @@
         <description>My first text box control</description>
         <visible>true</visible>
         <colordiffuse>FFFFFFFF</colordiffuse>
-        <font>font13</font>
+        <font>font12</font>
         <scroll>true</scroll>
         <textcolor>FFFFFFFF</textcolor>
         <label>$INFO[Container(120).ListItem.Property(message)]</label>
