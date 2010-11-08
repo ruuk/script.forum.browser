@@ -220,10 +220,10 @@
       <control type="image">
             <description>listbg</description>
             <posx>15</posx>
-			<posy>122</posy>
-			<width>1066</width>
-			<height>400</height>
-			<colordiffuse>FF000000</colordiffuse>
+            <posy>122</posy>
+            <width>1066</width>
+            <height>400</height>
+            <colordiffuse>FF000000</colordiffuse>
             <texture>text-background.png</texture>
       </control>
 

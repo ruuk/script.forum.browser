@@ -20,7 +20,7 @@
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
-		<control type="image" id="251">
+        <control type="image" id="251">
             <description>page header tab icon</description>
             <posx>20</posx>
             <posy>4</posy>
@@ -199,9 +199,9 @@
       <control type="image">
             <description>listbg</description>
             <posx>15</posx>
-			<posy>122</posy>
-			<width>1066</width>
-			<height>400</height>
+            <posy>122</posy>
+            <width>1066</width>
+            <height>400</height>
             <texture>list-background.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
