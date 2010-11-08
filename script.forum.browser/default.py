@@ -781,7 +781,7 @@ class RepliesWindow(PageWindow):
 		self.lastid = kwargs.get('lastid','')
 		self.parent = kwargs.get('parent')
 		self._firstPage = 'Oldest Post'
-		self._lasPage = 'Newest Post'
+		self._lastPage = 'Newest Post'
 		self.me = self.parent.parent.getUsername()
 		
 	
