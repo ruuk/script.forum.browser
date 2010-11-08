@@ -56,17 +56,22 @@
         <wrapmultiline>true</wrapmultiline>
       </control>
       
-      <control type="label" id="105">
-        <description>textarea</description>
+      <control type="button" id="105">
+        <description>Page Button</description>
         <posx>800</posx>
-        <posy>30</posy>
+        <posy>40</posy>
         <width>230</width>
-        <height>60</height>
+        <height>40</height>
+        <onleft>202</onleft>
+        <onright>120</onright>
+        <onup>202</onup>
+        <ondown>120</ondown>
         <font>font18</font>
         <textcolor>white</textcolor>
         <aligny>center</aligny>
         <align>center</align>
-        <wrapmultiline>true</wrapmultiline>
+        <texturefocus>FBbutton-focus.png</texturefocus>
+       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
       </control>
       <control type="image">
             <description>page header tab icon</description>
@@ -82,7 +87,7 @@
        <onleft>120</onleft>
        <onright>202</onright>
        <onup>120</onup>
-       <ondown>120</ondown>
+       <ondown>105</ondown>
        <posx>30</posx>
        <posy>620</posy>
        <width>330</width>
@@ -124,9 +129,9 @@
       <control type="button" id="202">
        <description>The Button</description>
        <onleft>200</onleft>
-       <onright>120</onright>
+       <onright>105</onright>
        <onup>120</onup>
-       <ondown>120</ondown>
+       <ondown>105</ondown>
        <posx>738</posx>
        <posy>620</posy>
        <width>330</width>
@@ -228,7 +233,7 @@
         <posy>132</posy>
         <width>1040</width>
         <height>380</height>
-        <onleft>202</onleft>
+        <onleft>105</onleft>
         <onright>200</onright>
         <onup>120</onup>
         <ondown>120</ondown>

@@ -9,7 +9,7 @@ url:login=ucp.php?mode=login
 url:page_arg=start
 url:newpost=viewtopic.php?f=!FORUMID!&t=!THREADID!
 #url:newpost=posting.php?mode=reply&f=!FORUMID!&t=!THREADID!
-url:gotonewpost=&p=%s
+url:gotonewpost=&p=!POSTID!
 # The filters
 filter:logo=XBMCSVN.com"><img src="(.*?)"
 filter:forums=<tr>.*?(?<!<a)(?:\shref="\./viewforum.php\?).*?f=(?P<forumid>\d+).*?>(?P<title>.*?)</a>.*?<p class="forumdesc">(?P<description>.*?)</p>.*?</tr>
@@ -42,3 +42,5 @@ theme:post_code=FF005500
 
 ## Formats ####################################
 format:quote=[QUOTE=%(user)s;%(postid)s]%(quote)s[/QUOTE]
+format:replies_per_page=10
+format:threads_per_page=25

@@ -27,7 +27,8 @@ filter:threads=showthread.php\?.*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<
 # this should match  the entire text for every post on the page from which the post filter will extract
 filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->
 # valid match names are postid, date, userid, user, avatar, title, and message
-filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+#filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?<div id="postmenu_\d+">(?:(?:<a.+?href="member.php.+?u=(?P<userid>\d+)">(?P<user>.+?)</a>.+?)|(?P<guest>\w+)).*?</div><div class="smallfont">(?P<status>.+?)</div>(?:<div class="smallfont">.*?<a href="member.php.+?<img src="(?P<avatar>image.php?.+?u=\d+&amp;dateline=\d+)"\swidth=".+?</div>)?<div class="smallfont">.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
 filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong><a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
 filter:code=Code:</div><pre.+?>(?P<code>.+?)</pre>
 # valid match names are threadid, forumid, title, starter and lastposter
@@ -60,3 +61,49 @@ form:delete_control1=radio:deletepost=delete
 
 ## Formats ####################################
 format:quote=[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]
+
+## Smilies ####################################
+# regex should return smile groups that are represented below
+smilies:regex=<img\s.+?src="images/smilies/(?P<smiley>\w+)\.\w+".+?/>
+smilies:color=FF999900
+# the group match translation
+smilies:smile=:)
+smilies:tongue=:p
+smilies:wink=;)
+smilies:biggrin=:D
+smilies:redface=:o
+smilies:frown=:(
+#smilies:confused=:confused2:
+smilies:confused=%)
+smilies:eek=:eek2:
+smilies:cool=:cool2:
+smilies:rolleyes=:rolleyes2:
+#smilies:mad=:mad:
+smilies:mad=X-(
+
+smilies:sorry8bj=:blush:
+smilies:nerd6bs=:nerd:
+#smilies:laugh8kb=:laugh:
+smilies:laugh8kb=:-D
+#smilies:biggrin9gp=:grin:
+smilies:biggrin9gp=:D
+smilies:rolleyes5cz=:rolleyes:
+smilies:rofl8yi=:rofl:
+smilies:cool=:cool:
+#smilies:wink0st=:;):
+smilies:wink0st=;)
+smilies:yes4lo=:nod:
+smilies:eek4wd=:eek:
+#smilies:shocked7fl=:shocked:
+smilies:shocked7fl=8-0
+#smilies:confused1bb=:???:
+smilies:confused1bb=%)
+#smilies:sad9cd=:sad:
+smilies:sad9cd=:(
+#smilies:baffled5wh=:sniffle:
+smilies:baffled5wh=:-S
+smilies:oo7dt=:oo:
+smilies:frown3qg=:stare:
+#smilies:angry6wn=:angry:
+smilies:angry6wn=:-{ 
+smilies:no6xn=:no:

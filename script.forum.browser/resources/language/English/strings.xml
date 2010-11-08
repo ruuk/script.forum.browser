@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
     <string id="30000">General</string>
-    <string id="30001">forum.xbmc.org Login Username</string>
-    <string id="30002">forum.xbmc.org Login Password</string>
-    <string id="30003">Other Logins</string>
+    <string id="30001">Open Thread At Oldest Post</string>
+    <string id="30002">Show Oldest Post At Top</string>
 </strings>

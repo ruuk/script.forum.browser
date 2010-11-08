@@ -2,8 +2,8 @@
 <settings>
   <!-- General -->
   <category label="30000">
-    <setting id="login_user_forum_xbmc_org" type="text" label="30001"/>
-    <setting id="login_pass_forum_xbmc_org" type="text" option="hidden" label="30002"/>
+    <setting id="open_thread_to_oldest" type="bool" label="30001" default="false" />
+    <setting id="show_oldest_post_top" type="bool" label="30002" default="false" />
     <!--<setting id="set_logins" label="30003" type="action" action="XBMC.RunScript(special://home/addons/script.forum.browser/default.py,set_logins)"/>-->
   </category>
 </settings>
