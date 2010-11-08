@@ -1,5 +1,5 @@
 <window>
-  <defaultcontrol>120</defaultcontrol>
+  <defaultcontrol>202</defaultcontrol>
   <coordinates>
     <system>1</system>
     <posx>0</posx>
@@ -29,10 +29,10 @@
       
       <control type="button" id="200">
        <description>The Button</description>
-       <onleft>123</onleft>
-       <onright>201</onright>
-       <onup>120</onup>
-       <ondown>120</ondown>
+       <onleft>202</onleft>
+       <onright>202</onright>
+       <onup>200</onup>
+       <ondown>200</ondown>
        <posx>30</posx>
        <posy>620</posy>
        <width>330</width>
@@ -51,10 +51,10 @@
       
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>201</onleft>
-       <onright>120</onright>
-       <onup>120</onup>
-       <ondown>120</ondown>
+       <onleft>200</onleft>
+       <onright>200</onright>
+       <onup>202</onup>
+       <ondown>202</ondown>
        <posx>738</posx>
        <posy>620</posy>
        <width>330</width>
