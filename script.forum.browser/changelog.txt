@@ -1,6 +1,14 @@
 Forum Browser Changelog
 
-Current Version : 0.7.3
+Current Version : 0.7.4
+
+*** 0.7.4 ***
+
+Fixed a bug handling unicode chars in posts
+Added the ablity to view image links
+Added the ablity to download links
+Improved post formatting handling
+Fixed post quote handling regex for xbmc.org/boxee.tv
 
 *** 0.7.3 ***
 

@@ -1,11 +1,11 @@
-import urllib2, re, os, sys, time
+import urllib2, re, os, sys, time, urlparse, urllib
 import xbmc, xbmcgui, xbmcaddon
 
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '09-25-2010'
-__version__ = '0.7.3'
+__date__ = '11-10-2010'
+__version__ = '0.7.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -62,13 +62,19 @@ class ForumPost:
 		return messageToText(self.message)
 		
 	def messageAsDisplay(self):
-		return messageToDisplay(self.message)
+		return MC.messageToDisplay(self.message)
 		
 	def messageAsQuote(self):
 		return messageAsQuote(self.message)
 		
 	def imageURLs(self):
 		return re.findall('<img\s.+?src="(http://.+?)".+?/>',self.message)
+		
+	def linkImageURLs(self):
+		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?>',self.message,re.S)
+		
+	def linkURLs(self):
+		return re.finditer('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>',self.message,re.S)
 			
 class PageData:
 	def __init__(self,page_match,next_match,prev_match):
@@ -508,22 +514,20 @@ class PageWindow(BaseWindow):
 		self._firstPage = 'First Page'
 		self._lastPage = 'Last Page'
 		BaseWindow.__init__( self, *args, **kwargs )
-		
-	def onClick( self, controlId ):
-		pass
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
+	def onClick( self, controlID ):
+		if controlID == 200:
+			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
+		elif controlID == 202:
+			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
+		elif controlID == 105:
+			self.pageMenu()
+	
 	def onAction(self,action):
-		if action == ACTION_SELECT_ITEM or action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 200:
-				if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
-			elif self.getFocusId() == 202:
-				if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
-			elif self.getFocusId() == 105:
-				self.pageMenu()
-		elif action == ACTION_PARENT_DIR:
+		if action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
 		elif action == ACTION_NEXT_ITEM:
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
@@ -539,7 +543,7 @@ class PageWindow(BaseWindow):
 		elif idx == 2: self.askPageNumber()
 		
 	def askPageNumber(self):
-		page = doKeyboard('Enter Page Number')
+		page = xbmcgui.Dialog().numeric(0,'Enter Page Number')
 		try: int(page)
 		except: return
 		self.gotoPage(page)
@@ -575,9 +579,6 @@ class ImagesDialog(xbmcgui.WindowXMLDialog):
 			xbmcgui.unlock()
 			raise
 		xbmcgui.unlock()
-		
-	def onClick( self, controlId ):
-		pass
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -594,20 +595,16 @@ class ImagesDialog(xbmcgui.WindowXMLDialog):
 		self.index -= 1
 		if self.index < 0: self.index = len(self.images) - 1
 		self.showImage()
-		
+	
+	def onClick( self, controlID ):
+		if controlID == 200:
+			self.nextImage()
+		elif controlID == 202:
+			self.prevImage()
+	
 	def onAction(self,action):
-		if action == ACTION_SELECT_ITEM:
-			if self.getFocusId() == 200:
-				self.nextImage()
-			elif self.getFocusId() == 202:
-				self.prevImage()
-		elif action == ACTION_PARENT_DIR:
+		if action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
-		elif action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 200:
-				self.nextImage()
-			elif self.getFocusId() == 202:
-				self.prevImage()
 		elif action == ACTION_NEXT_ITEM:
 			self.nextImage()
 		elif action == ACTION_PREV_ITEM:
@@ -650,8 +647,17 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 			raise
 		xbmcgui.unlock()
 		
-	def onClick( self, controlId ):
-		pass
+	def onClick( self, controlID ):
+		if controlID == 200:
+			self.addLine()
+		elif controlID == 201:
+			self.addLineMulti()
+		elif controlID == 202:
+			self.postReply()
+		elif controlID == 120:
+			self.editLine()
+		elif controlID == 104:
+			self.setTitle()
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -659,30 +665,8 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
-		elif action == ACTION_SELECT_ITEM:
-			if self.getFocusId() == 200:
-				self.addLine()
-			elif self.getFocusId() == 201:
-				self.addLineMulti()
-			elif self.getFocusId() == 202:
-				self.postReply()
-			elif self.getFocusId() == 120:
-				self.editLine()
-			elif self.getFocusId() == 104:
-				self.setTitle()
 		elif action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
-		elif action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 200:
-				self.addLine()
-			elif self.getFocusId() == 201:
-				self.addLineMulti()
-			elif self.getFocusId() == 202:
-				self.postReply()
-			elif self.getFocusId() == 120:
-				self.editLine()
-			elif self.getFocusId() == 104:
-				self.setTitle()
 		xbmcgui.WindowXMLDialog.onAction(self,action)
 		
 	def doMenu(self):
@@ -700,7 +684,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	def updatePreview(self):
 		disp = self.display_base % self.getOutput()
 		self.getControl(122).reset()
-		self.getControl(122).setText(disp)
+		self.getControl(122).setText(self.parseCodes(disp))
 			
 	def addLine(self,line=''):
 		if not line:
@@ -768,6 +752,19 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.prog.close()
 		self.posted = True
 		self.close()
+		
+	def parseCodes(self,text):
+		quoteSub = '_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]\g<user>[/B]\n[I]\g<quote>[/I]\n_________________________\n'
+		genericQuoteSub = '_________________________\n[B]Quote:[/B]\n[I]\g<quote>[/I]\n_________________________\n'
+		codeSub = '_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
+		imageSub = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
+		linkSub = '\g<text> (Link: [B]\g<url>[/B])'
+		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',quoteSub,text)
+		text = re.sub('\[QUOTE\](?P<quote>.+?)\[/QUOTE\](?is)',genericQuoteSub,text)
+		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',codeSub,text)
+		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',imageSub,text)
+		text = re.sub('\[URL="(?P<url>.+?)"\](?P<text>.+?)\[/URL\](?is)',linkSub,text)
+		return text
 
 ######################################################################################
 # Replies Window
@@ -834,53 +831,85 @@ class RepliesWindow(PageWindow):
 				item.setProperty('quotable',post.messageAsQuote())
 				item.setProperty('post',post.postId)
 				item.setProperty('images',','.join(post.imageURLs()))
+				item.setProperty('link_images',','.join(post.linkImageURLs()))
+				item.setProperty('links',self.makeLinksString(post.linkURLs()))
 				self.getControl(120).addItem(item)
 		except:
 			xbmcgui.unlock()
 			raise
 		xbmcgui.unlock()
 			
+	def makeLinksString(self,miter):
+		urls = []
+		for m in miter:
+			urls.append(urllib.quote(m.group('text')) + '=' + urllib.quote(m.group('url')))
+		return ','.join(urls)
+			
 	def postSelected(self):
 		item = self.getControl(120).getSelectedItem()
 		
+	def onClick(self,controlID):
+		if controlID == 201:
+			self.openPostDialog()
+		elif controlID == 120:
+			self.postSelected()
+		PageWindow.onClick(self,controlID)
+		
 	def onAction(self,action):
-		#print "ACTION: " + str(action.getId()) + " FOCUS: " + str(self.getFocusId()) + " BC: " + str(action.getButtonCode())
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
-		elif action == ACTION_SELECT_ITEM:
-			if self.getFocusId() == 201:
-				self.openPostDialog()
-			elif self.getFocusId() == 120:
-				self.postSelected()
-		elif action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 201:
-				self.openPostDialog()
-			elif self.getFocusId() == 120:
-				self.postSelected()
 		PageWindow.onAction(self,action)
 	
 	def doMenu(self):
-		dialog = xbmcgui.Dialog()
 		options = ['Quote']
 		delete = None
 		images = None
+		link_images = None
+		links = None
 		item = self.getControl(120).getSelectedItem()
 		if item.getProperty('images'):
 			images = len(options)
 			options.append('View Images')
+		if item.getProperty('link_images'):
+			link_images = len(options)
+			options.append('View Link Images')
+		if item.getProperty('links'):
+			links = len(options)
+			options.append('Download A Link')
 		if FB.canDelete(item.getLabel()):
 			delete = len(options)
 			options.append('Delete Post')
-		idx = dialog.select('Options',options)
+		idx = xbmcgui.Dialog().select('Options',options)
 		if idx == 0: self.openPostDialog(quote=True)
 		elif idx == images: self.showImages(item.getProperty('images'))
+		elif idx == link_images: self.showImages(item.getProperty('link_images'))
+		elif idx == links: self.downloadLinks(item.getProperty('links'))
 		elif idx == delete: self.deletePost()
 		
+	def downloadLinks(self,linksstring):
+		links = linksstring.split(',')
+		texts = []
+		urls = []
+		for l in links:
+			text,url = l.split('=')
+			texts.append(urllib.unquote(text))
+			urls.append(urllib.unquote(url))
+		idx = xbmcgui.Dialog().select('Options',texts)
+		if idx < 0: return
+		url = urls[idx]
+		base = xbmcgui.Dialog().browse(3,'Choose Target Directory','files')
+		if not base: return
+		fname = Downloader(message='Downloading File').downloadURL(base,url)
+		if not fname: return
+		xbmcgui.Dialog().ok('Done','Downloaded file: ',fname)
+			
 	def showImages(self,imageliststring):
 		images = imageliststring.split(',')
 		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
+		image_files = Downloader(message='Downloading Images').downloadURLs(base,images,'.jpg')
+		'''
 		image_files = []
 		tot = len(images)
 		prog = xbmcgui.DialogProgress()
@@ -896,7 +925,8 @@ class RepliesWindow(PageWindow):
 			ERROR('SHOW IMAGES DOWNLOAD ERROR')
 			prog.close()
 		prog.close()
-		
+		'''
+		if not image_files: return
 		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),"Default",images=image_files,parent=self)
 		w.doModal()
 		del w
@@ -1022,22 +1052,18 @@ class ThreadsWindow(PageWindow):
 		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'), "Default",tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
 		w.doModal()
 		del w
-			
-	def onClick( self, controlId ):
-		pass
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
-		
+	
+	def onClick( self, controlID ):
+		if controlID == 120:
+			self.openRepliesWindow()
+		PageWindow.onClick(self,controlID)
+	
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			pass
-		elif action == ACTION_SELECT_ITEM:
-			if self.getFocusId() == 120:
-				self.openRepliesWindow()
-		elif action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 120:
-				self.openRepliesWindow()
 		PageWindow.onAction(self,action)
 		
 	def gotoPage(self,page):
@@ -1133,40 +1159,30 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 		idx = dialog.select('Forums',flist)
 		if idx < 0: return
 		FB.reloadForumData(flist[idx])
+		MC.resetRegex()
 		self.resetForum()
 		self.fillForumList()
 		__addon__.setSetting('last_forum',FB.forum)
-		
-	def onClick( self, controlId ):
-		pass
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
+	def onClick( self, controlID ):
+		if controlID == 200:
+			self.openSettings()
+		elif controlID == 201:
+			self.openSubscriptionsWindow()
+		elif controlID == 202:
+			self.changeForum()
+		elif controlID == 120:
+			self.openThreadsWindow()
+	
 	def onAction(self,action):
 		#print "ACTION: " + str(action.getId()) + " FOCUS: " + str(self.getFocusId()) + " BC: " + str(action.getButtonCode())
 		if action == ACTION_CONTEXT_MENU:
 			pass
-		elif action == ACTION_SELECT_ITEM:
-			if self.getFocusId() == 200:
-				self.openSettings()
-			elif self.getFocusId() == 201:
-				self.openSubscriptionsWindow()
-			elif self.getFocusId() == 202:
-				self.changeForum()
-			else:
-				self.openThreadsWindow()
 		elif action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
-		elif action == ACTION_MOUSE_LEFT_CLICK:
-			if self.getFocusId() == 200:
-				self.openSettings()
-			elif self.getFocusId() == 201:
-				self.openSubscriptionsWindow()
-			elif self.getFocusId() == 202:
-				self.changeForum()
-			elif self.getFocusId() == 120:
-				self.openThreadsWindow()
 		xbmcgui.WindowXMLDialog.onAction(self,action)
 		
 	def resetForum(self,hidelogo=True):
@@ -1179,6 +1195,116 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 		self.resetForum(False)
 
 ######################################################################################
+# Message Converter
+######################################################################################
+class MessageConverter:
+	def __init__(self):
+		self.resetOrdered(False)
+		self.resetRegex()
+		
+		#static replacements
+		self.quoteReplace = '_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]%s[/B]\n[I]%s[/I]\n_________________________\n'
+		self.aQuoteReplace = '_________________________\n[B]Quote:[/B]\n[I]%s[/I]\n_________________________\n'
+		self.quoteImageReplace = '<img\s.+?src="(?P<url>http://.+?)".+?/>','[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
+		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
+		self.linkReplace = '\g<text> (Link: [B]\g<url>[/B])'
+		
+		#static filters
+		self.imageFilter = re.compile('<img\s.+?src="(?P<url>http://.+?)".+?/>')
+		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
+		self.ulFilter = re.compile('<ul>(.+?)</ul>')
+		self.olFilter = re.compile('<ol.+?>(.+?)</ol>')
+		self.brFilter = re.compile('<br[ /]{0,2}>')
+		self.blockQuoteFilter = re.compile('<blockquote>(.+?)</blockquote>',re.S)
+		self.colorFilter = re.compile('<font color="(.+?)">(.+?)</font>')
+		self.tagFilter = re.compile('<.+?>',re.S)
+		
+	def resetRegex(self):
+		self.lineFilter = re.compile('[\n\r\t]')
+		f = FB.filters.get('quote')
+		self.quoteFilter = f and re.compile(f) or None
+		f = FB.filters.get('code')
+		self.codeFilter = f and re.compile(f) or None
+		f = FB.filters.get('php')
+		self.phpFilter = f and re.compile(f) or None
+		f = FB.filters.get('html')
+		self.htmlFilter = f and re.compile(f) or None
+		f = FB.smilies.get('regex')
+		self.smileyFilter = f and re.compile(f) or None
+		
+		#dynamic replacements
+		self.codeReplace = '_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
+		self.phpReplace = '_________________________\n[B]PHP Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR]\n_________________________\n'
+		self.htmlReplace = '_________________________\n[B]HTML Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR]\n_________________________\n'
+		
+	def resetOrdered(self,ordered):
+		self.ordered = ordered
+		self.ordered_count = 0
+		
+	def messageToDisplay(self,html):
+		html = self.lineFilter.sub('',html)
+		
+		if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
+		if self.codeFilter: html = self.codeFilter.sub(self.codeReplace,html)
+		if self.phpFilter: html = self.phpFilter.sub(self.phpReplace,html)
+		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
+		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
+		
+		html = self.imageFilter.sub(self.imageReplace,html)
+		html = self.linkFilter.sub(self.linkReplace,html)
+		html = self.ulFilter.sub(self.processBulletedList,html)
+		html = self.olFilter.sub(self.processOrderedList,html)
+		html = self.colorFilter.sub(self.convertColor,html)
+		html = self.brFilter.sub('\n',html)
+		html = self.blockQuoteFilter.sub(self.processIndent,html)
+		html = html.replace('<b>','[B]').replace('</b>','[/B]')
+		html = html.replace('<i>','[I]').replace('</i>','[/I]')
+		html = html.replace('<u>','_').replace('</u>','_')
+		html = html.replace('</table>','\n\n')
+		html = html.replace('</div></div>','\n') #to get rid of excessive new lines
+		html = html.replace('</div>','\n')
+		html = self.tagFilter.sub('',html)
+		return convertHTMLCodes(html).strip()
+
+	def smileyConvert(self,m):
+		replace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
+		return replace % FB.smilies.get(m.group('smiley'),'')
+		
+	def quoteConvert(self,m):
+		quote = self.imageFilter.sub(self.quoteImageReplace,m.group('quote'))
+		if m.group('user'):
+			return self.quoteReplace % (m.group('user'),quote)
+		else:
+			return self.aQuoteReplace % quote
+			
+	def processIndent(self,m):
+		return '    ' + re.sub('\n','\n    ',m.group(1)) + '\n'
+		
+	def convertColor(self,m):
+		if m.group(1).startswith('#'):
+			color = 'FF' + m.group(1)[1:]
+		else:
+			color = m.group(1)
+		return '[COLOR=%s]%s[/COLOR]' % (color,m.group(2))
+
+	def processBulletedList(self,m):
+		self.resetOrdered(False)
+		return self.processList(m.group(1))
+		
+	def processOrderedList(self,m):
+		self.resetOrdered(True)
+		return self.processList(m.group(1))
+			
+	def processList(self,html):
+		return re.sub('<li>(.+?)</li>',self.processItem,html) + '\n'
+
+	def processItem(self,m):
+		self.ordered_count += 1
+		if self.ordered: bullet = str(self.ordered_count) + '.'
+		else: bullet = '*'
+		return  '%s %s\n' % (bullet,m.group(1))
+		
+######################################################################################
 # Functions
 ######################################################################################
 
@@ -1189,63 +1315,25 @@ def calculatePage(low,high,total):
 	if high == total: return -1
 	return str(int(round(float(high)/((high-low)+1))))
 	
-def cConvert(m): return chr(int(m.group(1)))
+def cConvert(m): return unichr(int(m.group(1)))
 def convertHTMLCodes(html):
 	return 		re.sub('&#(\d{1,3});',cConvert,html)\
 				.replace("&lt;", "<")\
 				.replace("&gt;", ">")\
 				.replace("&amp;", "&")\
 				.replace("&quot;",'"')\
-				.replace("&apos;","'")
+				.replace("&apos;","'")\
+				.replace("&nbsp;"," ")
 				
 def messageToText(html):
 	html = re.sub('[\n\r\t]','',html)
 	html = re.sub('<br.*?>','\n',html)
 	html = html.replace('</table>','\n\n')
+	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
 	html = html.replace('</div>','\n')
 	html = re.sub('<.*?>','',html)
 	return convertHTMLCodes(html).strip()
-	
-def messageToDisplay(html):
-	html = re.sub('[\n\r\t]','',html)
-	qfilter = FB.filters.get('quote')
-	if qfilter:
-		try:
-			ureplace = '_________________________\nQuote:\nOriginally posted by: [B]%s\n[/B][I]%s[/I]\n_________________________\n'
-			replace = '_________________________\n[B]Quote:[/B]\n[I]%s[/I]\n_________________________\n'
-			for m in re.finditer(qfilter,html):
-				#Convert images here so we can skip italics
-				quote = re.sub('<img\s.+?src="(?P<url>http://.+?)".+?/>','[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>',m.group('quote'))
-				if m.group('user'):
-					html = html.replace(m.group(0),ureplace % (m.group('user'),quote))
-				else:
-					html = html.replace(m.group(0),replace % quote)
-		except:
-			ERROR('POST QUOTE FORMATTING')
-	cfilter = FB.filters.get('code')
-	if cfilter:
-		try:
-			replace = '_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']%s[/COLOR]\n_________________________\n'
-			for m in re.finditer(cfilter,html):
-				html = html.replace(m.group(0),replace % m.group('code'))
-		except:
-			ERROR('POST CODE FORMATTING')
-	sfilter = FB.smilies.get('regex')
-	if sfilter:
-		try:
-			color = FB.smilies.get('color','FF888888')
-			for m in re.finditer(sfilter,html):
-				html = html.replace(m.group(0),'[COLOR %s]%s[/COLOR]' % (color,FB.smilies.get(m.group('smiley'),'')))
-		except:
-			ERROR('SMILEY CONVERSION ERROR')
-	html = re.sub('<img\s.+?src="(?P<url>http://.+?)".+?/>','[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]',html)
-	html = re.sub('<a\shref="(?P<url>.+?)".*?>(?P<text>.+?)</a>','\g<text> (Link: [B]\g<url>[/B])',html)
-	html = re.sub('<br.*?>','\n',html)
-	html = html.replace('</table>','\n\n')
-	html = html.replace('</div>','\n')
-	html = re.sub('<.*?>','',html)
-	return convertHTMLCodes(html).strip()
-	
+		
 def messageAsQuote(html):
 	html = re.sub('[\n\r\t]','',html)
 	qfilter = FB.filters.get('quote')
@@ -1297,10 +1385,92 @@ def clearDirFiles(filepath):
 		
 def getFile(url,target=None):
 	if not target: return #do something else eventually if we need to
-	print 'frog'
 	req = urllib2.urlopen(url)
 	open(target,'w').write(req.read())
 	req.close()
+
+class Downloader:
+	def __init__(self,header='Downloading',message=''):
+		self.message = message
+		self.prog = xbmcgui.DialogProgress()
+		self.prog.create(header,message)
+		self.current = 0
+		self.display = ''
+		self.file_pct = 0
+		
+	def progCallback(self,read,total):
+		if self.prog.iscanceled(): return False
+		pct = ((float(read)/total) * (self.file_pct)) + (self.file_pct * self.current)
+		self.prog.update(pct)
+		return True
+		
+	def downloadURLs(self,targetdir,urllist,ext=''):
+		file_list = []
+		self.total = len(urllist)
+		self.file_pct = (100.0/self.total)
+		try:
+			for url,i in zip(urllist,range(0,self.total)):
+				self.current = i
+				if self.prog.iscanceled(): break
+				self.display = 'File %s of %s' % (i+1,self.total)
+				self.prog.update(int((i/float(self.total))*100),self.message,self.display)
+				fname = os.path.join(targetdir,str(i) + ext)
+				file_list.append(fname)
+				self.getUrlFile(url,fname,callback=self.progCallback)
+		except:
+			ERROR('DOWNLOAD URLS ERROR')
+			self.prog.close()
+			return None
+		self.prog.close()
+		return file_list
+	
+	def downloadURL(self,targetdir,url,fname=None):
+		if not fname:
+			fname = os.path.basename(urlparse.urlsplit(url)[2])
+			if not fname: fname = 'file'
+		f,e = os.path.splitext(fname)
+		fn = f
+		ct=0
+		while ct < 1000:
+			ct += 1
+			path = os.path.join(targetdir,fn + e)
+			if not os.path.exists(path): break
+			fn = f + str(ct)
+		else:
+			raise Exception
+		
+		try:
+			self.current = 0
+			self.display = 'Downloading %s' % os.path.basename(path)
+			self.prog.update(0,self.message,self.display)
+			self.getUrlFile(url,path,callback=self.progCallback)
+		except:
+			ERROR('DOWNLOAD URL ERROR')
+			self.prog.close()
+			return None
+		self.prog.close()
+		return os.path.basename(path)
+		
+		
+			
+	def fakeCallback(self,read,total): return True
+
+	def getUrlFile(self,url,target=None,callback=None):
+		if not target: return #do something else eventually if we need to
+		if not callback: callback = self.fakeCallback
+		urlObj = urllib2.urlopen(url)
+		size = int(urlObj.info().get("content-length",-1))
+		outfile = open(target, 'wb')
+		read = 0
+		bs = 1024 * 8
+		while 1:
+			block = urlObj.read(bs)
+			if block == "": break
+			read += len(block)
+			outfile.write(block)
+			if not callback(read, size): raise Exception
+		outfile.close()
+		urlObj.close()
 	
 ######################################################################################
 # Startup
@@ -1309,6 +1479,7 @@ if sys.argv[-1] == 'settings':
 	doSettings()
 else:
 	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org')
+	MC = MessageConverter()
 
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), "Default")
 	w.doModal()

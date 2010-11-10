@@ -29,8 +29,11 @@ filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->
 # valid match names are postid, date, userid, user, avatar, title, and message
 #filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
 filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?<div id="postmenu_\d+">(?:(?:<a.+?href="member.php.+?u=(?P<userid>\d+)">(?P<user>.+?)</a>.+?)|(?P<guest>\w+)).*?</div><div class="smallfont">(?P<status>.+?)</div>(?:<div class="smallfont">.*?<a href="member.php.+?<img src="(?P<avatar>image.php?.+?u=\d+&amp;dateline=\d+)"\swidth=".+?</div>)?<div class="smallfont">.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
-filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong><a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
-filter:code=Code:</div><pre.+?>(?P<code>.+?)</pre>
+#filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
+filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>(?:</div><div style="font-style:italic)?)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>(?!<div>).+?)(?:</div>)?</td>.*?</table>
+filter:code=<div .+?>Code:</div><pre.+?>(?P<code>.+?)</pre>
+filter:php=<div .+?>PHP Code:</div>.+?<!-- php buffer start -->.+?<span.+?>(?P<php>.+?)<.+?<!-- php buffer end -->
+filter:html=<div .+?>HTML Code:</div><pre.+?>(?P<html>.+?)</pre>
 # valid match names are threadid, forumid, title, starter and lastposter
 filter:subscriptions===threads
 # if forum uses a start based url should match an integer for that value else any data for page bsed urls. Valid match names are page OR start
