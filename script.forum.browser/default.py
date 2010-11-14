@@ -55,26 +55,38 @@ class ForumPost:
 			self.avatar = pdict.get('avatar','')
 			self.title = pdict.get('title','')
 			self.message = pdict.get('message','')
+			self.signature = pdict.get('signature','') or ''
 		else:
-			self.postId,self.date,self.userId,self.userName,self.avatar,self.title,self.message = ('','','','ERROR','','ERROR','')
+			self.postId,self.date,self.userId,self.userName,self.avatar,self.title,self.message,self.signature = ('','','','ERROR','','ERROR','','')
+			
+	def getMessage(self):
+		return self.message + self.signature
 	
 	def messageAsText(self):
-		return messageToText(self.message)
+		return messageToText(self.getMessage())
 		
 	def messageAsDisplay(self):
-		return MC.messageToDisplay(self.message)
+		return MC.messageToDisplay(self.getMessage())
 		
 	def messageAsQuote(self):
-		return messageAsQuote(self.message)
+		return MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
 		return re.findall('<img\s.+?src="(http://.+?)".+?/>',self.message)
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?>',self.message,re.S)
+		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
 		
 	def linkURLs(self):
-		return re.finditer('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>',self.message,re.S)
+		return re.finditer('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>',self.getMessage(),re.S)
+		
+	def threadLinkURLs(self):
+		if FB.filters.get('thread_link'): return re.finditer(FB.filters.get('thread_link'),self.getMessage(),re.S)
+		return None
+		
+	def postLinkURLs(self):
+		if FB.filters.get('post_link'): return re.finditer(FB.filters.get('post_link'),self.getMessage(),re.S)
+		return None
 			
 class PageData:
 	def __init__(self,page_match,next_match,prev_match):
@@ -86,6 +98,8 @@ class PageData:
 		self.urlMode = 'PAGE'
 		self.nextStart = '0'
 		self.prevStart = '0'
+		self.topic = ''
+		self.tid = ''
 		
 		if page_match:
 			pdict = page_match.groupdict()
@@ -114,6 +128,10 @@ class PageData:
 				self.prev = True
 				self.prevStart = start
 				self.urlMode = 'START'
+	
+	def setThreadData(self,topic,threadid):
+		self.topic = topic
+		self.tid = threadid
 				
 	def getNextPage(self):
 		if self.urlMode == 'PAGE':
@@ -264,11 +282,17 @@ class ForumBrowser:
 		threads = re.finditer(self.filters['threads'],re.sub('[\n\r\t]','',html))
 		return threads,self.getPageData(html,page)
 		
-	def getReplies(self,threadid,forumid,page='',lastid=''):
-		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid)
+	def getReplies(self,threadid,forumid,page='',lastid='',pid=''):
+		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
+		print url
 		html = self.readURL(url)
 		if not html: return None
 		replies = re.findall(self.filters['replies'],re.sub('[\n\r\t]','',html))
+		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),re.sub('[\n\r\t]','',html))
+		if not threadid:
+			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),re.sub('[\n\r\t]','',html))
+			threadid = threadid and threadid.group(1) or ''
+		topic = topic and topic.group(1) or ''
 		sreplies = []
 		for r in replies:
 			try:
@@ -277,7 +301,9 @@ class ForumBrowser:
 			except:
 				post = ForumPost()
 				sreplies.append(post)
-		return sreplies, self.getPageData(html,page)
+		pd = self.getPageData(html,page)
+		pd.setThreadData(topic,threadid)
+		return sreplies, pd
 		
 	def getSubscriptions(self,page='',callback=None):
 		if not callback: callback = self.fakeCallback
@@ -301,16 +327,16 @@ class ForumBrowser:
 		callback(100,'Reading Data')
 		return threads, self.getPageData(html,page)
 		
-	def getPageData(self,html,page,newpost=''):
+	def getPageData(self,html,page):
 		next_page = re.search(self.filters['next'],html,re.S)
 		prev_page= None
-		if (page or newpost) and page != '1':
+		if page != '1':
 			prev_page = re.search(self.filters['prev'],html,re.S)
 		page_disp = re.search(self.filters['page'],html)
 		return PageData(page_disp,next_page,prev_page)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
-		if sub == 'replies' and int(page) < 0:
+		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
 			page = self.URLSubs(gnp,pid=lastid)
 		else:
@@ -371,9 +397,11 @@ class ForumBrowser:
 			
 	def URLSubs(self,url,pid='',tid='',fid='',post=None):
 		if post:
-			return url.replace('!POSTID!',post.pid).replace('!THREADID!',post.tid).replace('!FORUMID!',post.fid)
+			url = url.replace('!POSTID!',post.pid).replace('!THREADID!',post.tid).replace('!FORUMID!',post.fid)
 		else:
-			return url.replace('!POSTID!',pid).replace('!THREADID!',tid).replace('!FORUMID!',fid)
+			url = url.replace('!POSTID!',pid).replace('!THREADID!',tid).replace('!FORUMID!',fid)
+		#removes empty vars
+		return re.sub('(?:\w+=&)|(?:\w+=$)','',url)
 		
 	def postURL(self,post):
 		return self.URLSubs(self.getURL('newpost'),post=post)
@@ -626,7 +654,14 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.post.quote:
 			format = FB.formats.get('quote')
-			self.addLine(format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote))
+			xbmcgui.lock()
+			try:
+				for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
+					self.addLine(line,emptyok=True)
+			except:
+				xbmcgui.unlock()
+			else:
+				xbmcgui.unlock()
 		self.setTheme()
 	
 	def setTheme(self):
@@ -684,22 +719,29 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	def updatePreview(self):
 		disp = self.display_base % self.getOutput()
 		self.getControl(122).reset()
-		self.getControl(122).setText(self.parseCodes(disp))
+		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
 			
-	def addLine(self,line=''):
-		if not line:
+	def addLine(self,line='',emptyok=False):
+		if not line and not emptyok:
 			keyboard = xbmc.Keyboard('','Enter Text')
 			keyboard.doModal()
 			if not keyboard.isConfirmed(): return False
 			line = keyboard.getText()
-		item = xbmcgui.ListItem(label=line.replace('\n',' '))
+		item = xbmcgui.ListItem(label=self.displayLine(line))
 		#we set text separately so we can have the display be formatted...
 		item.setProperty('text',line)
 		self.getControl(120).addItem(item)
 		self.getControl(120).selectItem(self.getControl(120).size()-1)
 		self.updatePreview()
 		return True
-			
+		
+	def displayLine(self,line):
+		return line	.replace('\n',' ')\
+					.replace('[/B]','[/B ]')\
+					.replace('[/I]','[/I ]')\
+					.replace('[/B]','[/B ]')\
+					.replace('[/COLOR]','[/COLOR ]')
+					
 	def addLineMulti(self):
 		while self.addLine(): pass
 		
@@ -723,7 +765,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		if not keyboard.isConfirmed(): return
 		line = keyboard.getText()
 		item.setProperty('text',line)
-		item.setLabel(line)
+		item.setLabel(self.displayLine(line))
 		self.updatePreview()
 		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',re.sub('[\n\r\t]','',test3))
 	
@@ -754,16 +796,13 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.close()
 		
 	def parseCodes(self,text):
-		quoteSub = '_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]\g<user>[/B]\n[I]\g<quote>[/I]\n_________________________\n'
-		genericQuoteSub = '_________________________\n[B]Quote:[/B]\n[I]\g<quote>[/I]\n_________________________\n'
-		codeSub = '_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
-		imageSub = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
-		linkSub = '\g<text> (Link: [B]\g<url>[/B])'
-		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',quoteSub,text)
-		text = re.sub('\[QUOTE\](?P<quote>.+?)\[/QUOTE\](?is)',genericQuoteSub,text)
-		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',codeSub,text)
-		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',imageSub,text)
-		text = re.sub('\[URL="(?P<url>.+?)"\](?P<text>.+?)\[/URL\](?is)',linkSub,text)
+		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',MC.quoteConvert,text)
+		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',MC.quoteConvert,text)
+		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',MC.codeReplace,text)
+		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',MC.phpReplace,text)
+		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',MC.htmlReplace,text)
+		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',MC.quoteImageReplace,text)
+		text = re.sub('\[URL="(?P<url>.+?)"\](?P<text>.+?)\[/URL\](?is)',MC.linkReplace,text)
 		return text
 
 ######################################################################################
@@ -774,20 +813,20 @@ class RepliesWindow(PageWindow):
 		PageWindow.__init__( self, *args, **kwargs )
 		self.tid = kwargs.get('tid','')
 		self.fid = kwargs.get('fid','')
+		self.pid = ''
 		self.topic = kwargs.get('topic','')
 		self.lastid = kwargs.get('lastid','')
 		self.parent = kwargs.get('parent')
 		self._firstPage = 'Oldest Post'
 		self._lastPage = 'Newest Post'
 		self.me = self.parent.parent.getUsername()
+		self.posts = {}
 		
 	
 	def onInit(self):
 		self.setTheme()
 		self.getControl(201).setEnabled(self.parent.parent.hasLogin())
-		page = '-1'
-		if __addon__.getSetting('open_thread_to_oldest') == 'true': page = '1'
-		self.fillRepliesList(page)
+		self.showThread()
 		self.setFocus(self.getControl(120))
 	
 	def setTheme(self):
@@ -808,16 +847,35 @@ class RepliesWindow(PageWindow):
 			raise
 		xbmcgui.unlock()
 		
+	def showThread(self,nopage=False):
+		if nopage:
+			page = ''
+		else:
+			page = '-1'
+			if __addon__.getSetting('open_thread_to_oldest') == 'true': page = '1'
+		
+		self.fillRepliesList(page)
+		
+		title_fg = FB.theme.get('title_fg','FF000000')
+		self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
+		self.pid = ''
+		
 	def fillRepliesList(self,page=''):
 		xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
-			replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid)
-			
+			replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid)
+			if not self.topic: self.topic = pageData.topic
+			if not self.tid: self.tid = pageData.tid
 			self.setupPage(pageData)
 			desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
 			if __addon__.getSetting('show_oldest_post_top') != 'true': replies.reverse()
-			for post in replies:
+			self.posts = {}
+			select = -1
+			for post,idx in zip(replies,range(0,len(replies))):
+				#print post.postId + ' ' + self.pid
+				if post.postId == self.pid: select = idx
+				self.posts[post.postId] = post
 				title = post.title
 				if not title: title = post.messageAsText()[:68].replace('\n',' ') + '...'
 				url = ''
@@ -828,23 +886,20 @@ class RepliesWindow(PageWindow):
 				if post.title: item.setInfo('video',{'Genre':'bold'})
 				if user == self.me: item.setInfo('video',{"Director":'me'})
 				item.setProperty('message',desc_base % post.messageAsDisplay())
-				item.setProperty('quotable',post.messageAsQuote())
 				item.setProperty('post',post.postId)
-				item.setProperty('images',','.join(post.imageURLs()))
-				item.setProperty('link_images',','.join(post.linkImageURLs()))
-				item.setProperty('links',self.makeLinksString(post.linkURLs()))
 				self.getControl(120).addItem(item)
+			if select > -1: self.getControl(120).selectItem(int(select))
 		except:
 			xbmcgui.unlock()
 			raise
 		xbmcgui.unlock()
 			
-	def makeLinksString(self,miter):
+	def makeLinksArray(self,miter):
 		urls = []
 		for m in miter:
-			urls.append(urllib.quote(m.group('text')) + '=' + urllib.quote(m.group('url')))
-		return ','.join(urls)
-			
+			urls.append(m)
+		return urls
+		
 	def postSelected(self):
 		item = self.getControl(120).getSelectedItem()
 		
@@ -866,66 +921,82 @@ class RepliesWindow(PageWindow):
 		images = None
 		link_images = None
 		links = None
+		thread_links = None
+		post_links = None
 		item = self.getControl(120).getSelectedItem()
-		if item.getProperty('images'):
+		post = self.posts.get(item.getProperty('post'))
+		img_urls = post.imageURLs()
+		link_img_urls = post.linkImageURLs()
+		link_urls = self.makeLinksArray(post.linkURLs())
+		thread_link_urls = self.makeLinksArray(post.threadLinkURLs())
+		post_link_urls = self.makeLinksArray(post.postLinkURLs())
+		if img_urls:
 			images = len(options)
 			options.append('View Images')
-		if item.getProperty('link_images'):
+		if link_img_urls:
 			link_images = len(options)
 			options.append('View Link Images')
-		if item.getProperty('links'):
+		if thread_link_urls:
+			thread_links = len(options)
+			options.append('Follow Thread Link')
+		if post_link_urls:
+			post_links = len(options)
+			options.append('Follow Post Link')
+		if link_urls:
 			links = len(options)
 			options.append('Download A Link')
 		if FB.canDelete(item.getLabel()):
 			delete = len(options)
 			options.append('Delete Post')
 		idx = xbmcgui.Dialog().select('Options',options)
-		if idx == 0: self.openPostDialog(quote=True)
-		elif idx == images: self.showImages(item.getProperty('images'))
-		elif idx == link_images: self.showImages(item.getProperty('link_images'))
-		elif idx == links: self.downloadLinks(item.getProperty('links'))
+		if idx == 0: self.openPostDialog(quote=post.messageAsQuote())
+		elif idx == images: self.showImages(img_urls)
+		elif idx == link_images: self.showImages(link_img_urls)
+		elif idx == thread_links: self.followThreadLink(thread_link_urls)
+		elif idx == post_links: self.followPostLink(post_link_urls)
+		elif idx == links: self.downloadLinks(link_urls)
 		elif idx == delete: self.deletePost()
 		
-	def downloadLinks(self,linksstring):
-		links = linksstring.split(',')
+	def followPostLink(self,linkdatas):
 		texts = []
-		urls = []
-		for l in links:
-			text,url = l.split('=')
-			texts.append(urllib.unquote(text))
-			urls.append(urllib.unquote(url))
+		for m in linkdatas: texts.append('%s - (Post ID: %s)' % (m.group('text'),m.group('postid')))
 		idx = xbmcgui.Dialog().select('Options',texts)
 		if idx < 0: return
-		url = urls[idx]
+		postid = linkdatas[idx].group('postid')
+		if postid:
+			self.pid = postid
+			self.tid = ''
+			self.topic = ''
+			self.showThread(nopage=True)
+		
+	def followThreadLink(self,linkdatas):
+		texts = []
+		for m in linkdatas: texts.append('%s - (Thread ID: %s)' % (m.group('text'),m.group('threadid')))
+		idx = xbmcgui.Dialog().select('Options',texts)
+		if idx < 0: return
+		threadid = linkdatas[idx].group('threadid')
+		if threadid:
+			self.tid = threadid
+			self.topic = ''
+			self.showThread()
+		
+	def downloadLinks(self,links):
+		texts = []
+		for m in links: texts.append('%s - (%s)' % (m.group('text'),m.group('url')))
+		idx = xbmcgui.Dialog().select('Options',texts)
+		if idx < 0: return
+		url = links[idx].group('url')
 		base = xbmcgui.Dialog().browse(3,'Choose Target Directory','files')
 		if not base: return
-		fname = Downloader(message='Downloading File').downloadURL(base,url)
+		fname,ftype = Downloader(message='Downloading File').downloadURL(base,url)
 		if not fname: return
-		xbmcgui.Dialog().ok('Done','Downloaded file: ',fname)
+		xbmcgui.Dialog().ok('Done','Downloaded file: ',fname,'Type: %s' % ftype)
 			
-	def showImages(self,imageliststring):
-		images = imageliststring.split(',')
+	def showImages(self,images):
 		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
 		image_files = Downloader(message='Downloading Images').downloadURLs(base,images,'.jpg')
-		'''
-		image_files = []
-		tot = len(images)
-		prog = xbmcgui.DialogProgress()
-		prog.create('Downloading','Downloading Images')
-		try:
-			for url,i in zip(images,range(0,len(images))):
-				if prog.iscanceled(): break
-				prog.update(int((i/float(tot))*100),'Downloading Images','File %s of %s' % (i+1,tot))
-				fname = os.path.join(base,str(i) + '.jpg')
-				image_files.append(fname)
-				getFile(url,fname)
-		except:
-			ERROR('SHOW IMAGES DOWNLOAD ERROR')
-			prog.close()
-		prog.close()
-		'''
 		if not image_files: return
 		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),"Default",images=image_files,parent=self)
 		w.doModal()
@@ -947,19 +1018,17 @@ class RepliesWindow(PageWindow):
 		prog.close()
 		self.fillRepliesList(self.pageData.page)
 		
-	def openPostDialog(self,quote=False):
+	def openPostDialog(self,quote=''):
 		if quote:
 			item = self.getControl(120).getSelectedItem()
-			quot = item.getProperty('quotable')
 			user = item.getLabel()
 		else:
 			item = self.getControl(120).getListItem(0)
-			quot = ''
 			user=''
 		if not item.getProperty('post'): item = self.getControl(120).getListItem(1)
 		post = item.getProperty('post')
 		pm = PostMessage(post,self.tid,self.fid)
-		if quote: pm.setQuote(user,quot)
+		if quote: pm.setQuote(user,quote)
 		w = PostDialog(	"script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),"Default",post=pm,parent=self)
 		w.doModal()
 		posted = w.posted
@@ -1203,21 +1272,23 @@ class MessageConverter:
 		self.resetRegex()
 		
 		#static replacements
-		self.quoteReplace = '_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]%s[/B]\n[I]%s[/I]\n_________________________\n'
-		self.aQuoteReplace = '_________________________\n[B]Quote:[/B]\n[I]%s[/I]\n_________________________\n'
-		self.quoteImageReplace = '<img\s.+?src="(?P<url>http://.+?)".+?/>','[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
+		self.quoteReplace = '\n_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]%s[/B]\n[I]%s[/I]\n_________________________\n'
+		self.aQuoteReplace = '\n_________________________\n[B]Quote:[/B]\n[I]%s[/I]\n_________________________\n'
+		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
 		self.linkReplace = '\g<text> (Link: [B]\g<url>[/B])'
 		
 		#static filters
-		self.imageFilter = re.compile('<img\s.+?src="(?P<url>http://.+?)".+?/>')
+		self.imageFilter = re.compile('<img[^<>]+?src="(?P<url>http://.+?)"[^<>]+?/>')
 		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
 		self.ulFilter = re.compile('<ul>(.+?)</ul>')
+		#<span style="text-decoration: underline">Underline</span>
 		self.olFilter = re.compile('<ol.+?>(.+?)</ol>')
 		self.brFilter = re.compile('<br[ /]{0,2}>')
 		self.blockQuoteFilter = re.compile('<blockquote>(.+?)</blockquote>',re.S)
 		self.colorFilter = re.compile('<font color="(.+?)">(.+?)</font>')
-		self.tagFilter = re.compile('<.+?>',re.S)
+		self.colorFilter2 = re.compile('<span.*?style=".*?color: ?(.+?)".*?>(.+?)</span>')
+		self.tagFilter = re.compile('<[^<>]+?>',re.S)
 		
 	def resetRegex(self):
 		self.lineFilter = re.compile('[\n\r\t]')
@@ -1233,9 +1304,10 @@ class MessageConverter:
 		self.smileyFilter = f and re.compile(f) or None
 		
 		#dynamic replacements
-		self.codeReplace = '_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
-		self.phpReplace = '_________________________\n[B]PHP Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR]\n_________________________\n'
-		self.htmlReplace = '_________________________\n[B]HTML Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR]\n_________________________\n'
+		self.codeReplace = '\n_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
+		self.phpReplace = '\n_________________________\n[B]PHP Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR]\n_________________________\n'
+		self.htmlReplace = '\n_________________________\n[B]HTML Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR]\n_________________________\n'
+		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
 		
 	def resetOrdered(self,ordered):
 		self.ordered = ordered
@@ -1255,20 +1327,66 @@ class MessageConverter:
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
 		html = self.colorFilter.sub(self.convertColor,html)
-		html = self.brFilter.sub('\n',html)
+		html = self.colorFilter2.sub(self.convertColor,html)
+		html = self.brFilter.sub('[CR]',html)
 		html = self.blockQuoteFilter.sub(self.processIndent,html)
 		html = html.replace('<b>','[B]').replace('</b>','[/B]')
 		html = html.replace('<i>','[I]').replace('</i>','[/I]')
 		html = html.replace('<u>','_').replace('</u>','_')
-		html = html.replace('</table>','\n\n')
-		html = html.replace('</div></div>','\n') #to get rid of excessive new lines
-		html = html.replace('</div>','\n')
+		html = html.replace('<strong>','[B]').replace('</strong>','[/B]')
+		html = html.replace('<em>','[I]').replace('</em>','[/I]')
+		html = html.replace('</table>','[CR][CR]')
+		html = html.replace('</div></div>','[CR]') #to get rid of excessive new lines
+		html = html.replace('</div>','[CR]')
 		html = self.tagFilter.sub('',html)
+		html = self.removeNested(html,'[B]','[/B]')
 		return convertHTMLCodes(html).strip()
 
+	def removeNested(self,html,start,end):
+		out = ''
+		u=html.split(end)
+		if len(u) == 1: return html
+		tot = len(u)
+		u.append('')
+		for s,i in zip(u,range(0,tot)):
+			next = u[i+1]
+			if start in s:
+				parts = s.split(start,1)
+				out += parts[0] + start + parts[1].replace(start,'')
+			else:
+				if not next: out += end
+				out += s
+			if start in next:
+				out += end
+		return out
+
+	def messageAsQuote(self,html):
+		html = re.sub('[\n\r\t]','',html)
+		if self.quoteFilter: html = self.quoteFilter.sub('',html)
+		if self.codeFilter: html = self.codeFilter.sub('[CODE]\g<code>[/CODE]',html)
+		if self.phpFilter: html = self.phpFilter.sub('[PHP]\g<php>[/PHP]',html)
+		if self.htmlFilter: html = self.htmlFilter.sub('[HTML]\g<html>[/HTML]',html)
+		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
+		html = self.linkFilter.sub('[URL="\g<url>"]\g<text>[/URL]',html)
+		html = self.imageFilter.sub('[IMG]\g<url>[/IMG]',html)
+		html = self.colorFilter.sub(self.convertColor,html)
+		html = self.colorFilter2.sub(self.convertColor,html)
+		html = html.replace('<b>','[B]').replace('</b>','[/B]')
+		html = html.replace('<i>','[I]').replace('</i>','[/I]')
+		html = html.replace('<u>','[U]').replace('</u>','[/U]')
+		html = html.replace('<strong>','[B]').replace('</strong>','[/B]')
+		html = html.replace('<em>','[I]').replace('</em>','[/I]')
+		html = re.sub('<br[^<>]*?>','\n',html)
+		html = html.replace('</table>','\n\n')
+		html = html.replace('</div>','\n')
+		html = re.sub('<[^<>]+?>','',html)
+		return convertHTMLCodes(html).strip()
+		
+	def smileyRawConvert(self,m):
+		return FB.smilies.get(m.group('smiley'),'')
+		
 	def smileyConvert(self,m):
-		replace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
-		return replace % FB.smilies.get(m.group('smiley'),'')
+		return self.smileyReplace % FB.smilies.get(m.group('smiley'),'')
 		
 	def quoteConvert(self,m):
 		quote = self.imageFilter.sub(self.quoteImageReplace,m.group('quote'))
@@ -1282,10 +1400,10 @@ class MessageConverter:
 		
 	def convertColor(self,m):
 		if m.group(1).startswith('#'):
-			color = 'FF' + m.group(1)[1:]
+			color = 'FF' + m.group(1)[1:].upper()
 		else:
-			color = m.group(1)
-		return '[COLOR=%s]%s[/COLOR]' % (color,m.group(2))
+			color = m.group(1).lower()
+		return '[COLOR %s]%s[/COLOR]' % (color,m.group(2))
 
 	def processBulletedList(self,m):
 		self.resetOrdered(False)
@@ -1330,21 +1448,6 @@ def messageToText(html):
 	html = re.sub('<br.*?>','\n',html)
 	html = html.replace('</table>','\n\n')
 	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
-	html = html.replace('</div>','\n')
-	html = re.sub('<.*?>','',html)
-	return convertHTMLCodes(html).strip()
-		
-def messageAsQuote(html):
-	html = re.sub('[\n\r\t]','',html)
-	qfilter = FB.filters.get('quote')
-	if qfilter:
-		try:
-			for m in re.finditer(qfilter,html):
-				html = html.replace(m.group(0),'')
-		except:
-			ERROR('POST CODE REMOVAL')
-	html = re.sub('<br.*?>','\n',html)
-	html = html.replace('</table>','\n\n')
 	html = html.replace('</div>','\n')
 	html = re.sub('<.*?>','',html)
 	return convertHTMLCodes(html).strip()
@@ -1443,13 +1546,13 @@ class Downloader:
 			self.current = 0
 			self.display = 'Downloading %s' % os.path.basename(path)
 			self.prog.update(0,self.message,self.display)
-			self.getUrlFile(url,path,callback=self.progCallback)
+			t,ftype = self.getUrlFile(url,path,callback=self.progCallback)
 		except:
 			ERROR('DOWNLOAD URL ERROR')
 			self.prog.close()
-			return None
+			return (None,'')
 		self.prog.close()
-		return os.path.basename(path)
+		return (os.path.basename(path),ftype)
 		
 		
 			
@@ -1460,6 +1563,7 @@ class Downloader:
 		if not callback: callback = self.fakeCallback
 		urlObj = urllib2.urlopen(url)
 		size = int(urlObj.info().get("content-length",-1))
+		ftype = urlObj.info().get("content-type",'')
 		outfile = open(target, 'wb')
 		read = 0
 		bs = 1024 * 8
@@ -1471,6 +1575,7 @@ class Downloader:
 			if not callback(read, size): raise Exception
 		outfile.close()
 		urlObj.close()
+		return (target,ftype)
 	
 ######################################################################################
 # Startup

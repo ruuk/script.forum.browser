@@ -7,7 +7,7 @@
 url:base=http://forum.xbmc.org/
 url:forums=index.php
 url:threads=forumdisplay.php?f=!FORUMID!
-url:replies=showthread.php?t=!THREADID!
+url:replies=showthread.php?t=!THREADID!&p=!POSTID!
 url:subscriptions=subscription.php
 url:login=index.php
 # Not used yet
@@ -25,20 +25,25 @@ filter:forums=(?P<subforum>\s/>\s)*(?<!\s/></a>|ntrol">|an="5">)(?:<a\shref="for
 # valid match names are threadid, title, starter and lastposter
 filter:threads=showthread.php\?.*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<title>.*?)</a>.*?window.open\(\'member.php\?.*?u=\d+\', \'_self\'\)">(?P<starter>.*?)</span.*?<a href="member.php.*?rel="nofollow">(?P<lastposter>.*?)</a>
 # this should match  the entire text for every post on the page from which the post filter will extract
-filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->
+filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->.*?(?:<!-- sig -->.+?<!-- / sig -->)?
 # valid match names are postid, date, userid, user, avatar, title, and message
 #filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
-filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?<div id="postmenu_\d+">(?:(?:<a.+?href="member.php.+?u=(?P<userid>\d+)">(?P<user>.+?)</a>.+?)|(?P<guest>\w+)).*?</div><div class="smallfont">(?P<status>.+?)</div>(?:<div class="smallfont">.*?<a href="member.php.+?<img src="(?P<avatar>image.php?.+?u=\d+&amp;dateline=\d+)"\swidth=".+?</div>)?<div class="smallfont">.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?<div id="postmenu_\d+">(?:(?:<a.+?href="member.php.+?u=(?P<userid>\d+)">(?P<user>.+?)</a>.+?)|(?P<guest>\w+)).*?</div><div class="smallfont">(?P<status>.+?)</div>(?:<div class="smallfont">.*?<a href="member.php.+?<img src="(?P<avatar>image.php?.+?u=\d+&amp;dateline=\d+)"\swidth=".+?</div>)?<div class="smallfont">.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->.*?(<!-- sig -->(?P<signature>.*?)<!-- / sig -->)?
+filter:thread_topic=<meta name="keywords" content="(?P<topic>.+?),
+filter:thread_id=href="showthread.php?[^<>]*?t=(?P<threadid>\d+)
 #filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
-filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>(?:</div><div style="font-style:italic)?)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>(?!<div>).+?)(?:</div>)?</td>.*?</table>
-filter:code=<div .+?>Code:</div><pre.+?>(?P<code>.+?)</pre>
-filter:php=<div .+?>PHP Code:</div>.+?<!-- php buffer start -->.+?<span.+?>(?P<php>.+?)<.+?<!-- php buffer end -->
-filter:html=<div .+?>HTML Code:</div><pre.+?>(?P<html>.+?)</pre>
+filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>.+?)</strong>(?:</div><div style="font-style:italic)?)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>(?!<div>).+?)(?:</div>)?</td>.*?</table>
 # valid match names are threadid, forumid, title, starter and lastposter
 filter:subscriptions===threads
+filter:code=<div class.+?>Code:</div><pre.+?>(?P<code>.+?)</pre>
+filter:php=<div class.+?>PHP Code:</div>.+?<!-- php buffer start --><code>(?P<php>.+?)</code><!-- php buffer end -->
+filter:html=<div class.+?>HTML Code:</div><pre.+?>(?P<html>.+?)</pre>
+filter:forum_link=href="[^<>"]*?forumdisplay.php?[^<>"]*?f=(?P<forumid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
+filter:thread_link=href="[^<>"]*?showthread.php?[^<>"]*?t=(?P<threadid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
+filter:post_link=href="[^<>"]*?showpost.php?[^<>"]*?p=(?P<postid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
 # if forum uses a start based url should match an integer for that value else any data for page bsed urls. Valid match names are page OR start
-filter:next=Next\sPage\s-\sResults\s([\d,]+)\sto\s([\d,]+)\sof\s([\d,]+).*?(?P<page>Next\sPage\s-\sResults\s[\d,]+\sto\s[\d,]+\sof\s[\d,]+)
-filter:prev=Prev\sPage\s-\sResults\s([\d,]+)\sto\s([\d,]+)\sof\s([\d,]+).*?(?P<page>Prev\sPage\s-\sResults\s[\d,]+\sto\s[\d,]+\sof\s[\d,]+)
+filter:next=Next Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Next Page - Results [\d,]+ to [\d,]+ of [\d,]+)
+filter:prev=Prev Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Prev Page - Results [\d,]+ to [\d,]+ of [\d,]+)
 # valid match types display, page, and total
 filter:page=>(?P<display>Page\s(?P<page>\d+)\sof\s(?P<total>\d+))<
 
