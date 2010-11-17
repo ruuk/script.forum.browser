@@ -86,7 +86,7 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Settings</label>
+       <label>$LOCALIZE[SCRIPT3003]</label>
        <texturefocus>FBbutton-focus.png</texturefocus>
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
@@ -107,7 +107,7 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Subscriptions</label>
+       <label>$LOCALIZE[SCRIPT3004]</label>
        <texturefocus>FBbutton-focus.png</texturefocus>
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
@@ -128,7 +128,7 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Change Forum</label>
+       <label>$LOCALIZE[SCRIPT3005]</label>
        <texturefocus>FBbutton-focus.png</texturefocus>
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
@@ -180,6 +180,13 @@
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
+      </control>
+      <control type="image" id="310">
+        <posx>20</posx>
+        <posy>120</posy>
+        <width>1</width>
+        <height>2</height>
+        <texture>progress.png</texture>
       </control>
       <control type="image" id="301">
         <posx>20</posx>

@@ -72,7 +72,7 @@ format:quote=[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]
 
 ## Smilies ####################################
 # regex should return smile groups that are represented below
-smilies:regex=<img\s.+?src="images/smilies/(?P<smiley>\w+)\.\w+".+?/>
+smilies:regex=<img[^<>]+?src="images/smilies/(?P<smiley>\w+)\.\w+"[^<>]+?/>
 smilies:color=FF999900
 # the group match translation
 smilies:smile=:)

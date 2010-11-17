@@ -84,7 +84,7 @@
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
-       <label>Add Line</label>
+       <label>$LOCALIZE[SCRIPT3006]</label>
       </control>
       
       <control type="button" id="201">
@@ -101,7 +101,7 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Add Lines</label>
+       <label>$LOCALIZE[SCRIPT3007]</label>
        <texturefocus>FBbutton-focus.png</texturefocus>
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
@@ -126,7 +126,7 @@
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
-       <label>Post</label>
+       <label>$LOCALIZE[SCRIPT3008]</label>
       </control>
       
       <control type="image" >

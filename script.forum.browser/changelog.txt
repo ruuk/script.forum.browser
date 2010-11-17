@@ -1,12 +1,19 @@
 Forum Browser Changelog
 
-Current Version : 0.7.4
+Current Version : 0.7.5
 
 *** 0.7.5 ***
 
 Fixed some color handling in posts
 Fixed some code box handling in posts
 Improved post editing preview
+Added forum.dvhk.pl
+Added ability to handle fourms which require login
+Add ability to translate posts with Google Translate
+Added language option in settings
+Added progress indicators for all windows
+Finished strings.xml for translatablity
+Added ability to follow thread and post links
 
 *** 0.7.4 ***
 

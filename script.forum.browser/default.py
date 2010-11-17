@@ -1,11 +1,12 @@
 import urllib2, re, os, sys, time, urlparse, urllib
 import xbmc, xbmcgui, xbmcaddon
+from googletranslate import googleTranslateAPI
 
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '11-10-2010'
-__version__ = '0.7.4'
+__version__ = '0.7.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -183,6 +184,7 @@ class ForumBrowser:
 		self._url = ''
 		self.browser = None
 		self.mechanize = None
+		self.needsLogin = True
 		
 		self.reloadForumData(forum)
 		
@@ -197,6 +199,7 @@ class ForumBrowser:
 		self.loadForumData(forum)
 		
 	def loadForumData(self,forum):
+		self.needsLogin = True
 		fname = xbmc.translatePath('special://home/addons/script.forum.browser/forums/%s' % forum)
 		if not os.path.exists(fname): return False
 		f = open(fname,'r')
@@ -254,39 +257,99 @@ class ForumBrowser:
 	def setLogin(self,user,password):
 		self.user = user
 		self.password = password
-				
-	def readURL(self,url):
-		req = urllib2.urlopen(url)
-		data = req.read()
-		req.close()
+			
+	def login(self):
+		LOG('LOGGING IN')
+		if not self.mechanize:
+			import mechanize
+			self.mechanize = mechanize
+		if not self.browser: self.browser = self.mechanize.Browser()
+		response = self.browser.open(self.getURL('login'))
+		html = response.read()
+		try:
+			self.browser.select_form(predicate=self.predicateLogin)
+		except:
+			ERROR('LOGIN FORM SELECT ERROR')
+			LOG('TRYING ALTERNATE METHOD')
+			form = self.getForm(html,self.forms.get('login_action'))
+			if form:
+				self.browser.form = form
+			else:
+				LOG('FAILED')
+				return False
+		self.browser[self.forms['login_user']] = self.user
+		self.browser[self.forms['login_pass']] = self.password
+		response = self.browser.submit()
+		html = response.read()
+		if not self.forms.get('login_action','@%+#') in html: return True
+		LOG('FAILED TO LOGIN')
+		return False
+		
+	def checkLogin(self,callback=None):
+		if not callback: callback = self.fakeCallback
+		if not self.browser or self.needsLogin:
+			self.needsLogin = False
+			callback(5,__language__(30100))
+			if not self.login():
+				return False
+		return True
+		
+	def browserReadURL(self,url,callback):
+		callback(30,__language__(30101))
+		response = self.browser.open(url)
+		callback(60,__language__(30102))
+		return response.read()
+		
+	def readURL(self,url,callback=None):
+		if not callback: callback = self.fakeCallback
+		if self.formats.get('login_required'):
+			if not self.checkLogin(callback=callback): return ''
+			data = self.browserReadURL(url,callback)
+			if self.forms.get('login_action','@%+#') in data:
+				self.login(callback=callback)
+				data = self.browserReadURL(url,callback)
+		else:
+			callback(5,__language__(30101))
+			req = urllib2.urlopen(url)
+			callback(50,__language__(30102))
+			data = req.read()
+			req.close()
+		
 		return data
 		
 	def makeURL(self,phppart):
 		url = self._url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
 		
-	def getForums(self):
-		html = self.readURL(self.getURL('forums'))
+	def getForums(self,callback=None):
+		if not callback: callback = self.fakeCallback
+		html = self.readURL(self.getURL('forums'),callback=callback)
 		#open('/home/ruuk/test3.html','w').write(html)
 		if not html: return None
+		callback(80,__language__(30103))
 		forums = re.finditer(self.filters['forums'],re.sub('[\n\t\r]','',html))
 		logo = ''
 		if self.filters.get('logo'): logo = re.findall(self.filters['logo'],html)[0]
 		if logo: logo = self.makeURL(logo)
+		callback(100,__language__(30052))
 		return forums, logo
 		
-	def getThreads(self,forumid,page=''):
+	def getThreads(self,forumid,page='',callback=None):
+		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
-		html = self.readURL(url)
+		html = self.readURL(url,callback=callback)
 		if not html: return None
+		callback(80,__language__(30103))
 		threads = re.finditer(self.filters['threads'],re.sub('[\n\r\t]','',html))
+		callback(100,__language__(30052))
 		return threads,self.getPageData(html,page)
 		
-	def getReplies(self,threadid,forumid,page='',lastid='',pid=''):
+	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None):
+		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
-		print url
-		html = self.readURL(url)
+		html = self.readURL(url,callback=callback)
 		if not html: return None
+		callback(80,__language__(30103))
 		replies = re.findall(self.filters['replies'],re.sub('[\n\r\t]','',html))
 		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),re.sub('[\n\r\t]','',html))
 		if not threadid:
@@ -303,17 +366,16 @@ class ForumBrowser:
 				sreplies.append(post)
 		pd = self.getPageData(html,page)
 		pd.setThreadData(topic,threadid)
+		callback(100,__language__(30052))
 		return sreplies, pd
 		
 	def getSubscriptions(self,page='',callback=None):
 		if not callback: callback = self.fakeCallback
-		callback(5,'Logging In')
-		if not self.checkLogin(): return False
+		if not self.checkLogin(callback=callback): return False
 		url = self.getPageUrl(page,'subscriptions')
-		html = self.readURL(url)
-		callback(30,'Opening URL')
+		callback(30,__language__(30101))
 		response = self.browser.open(url)
-		callback(55,'Reading Data')
+		callback(55,__language__(30102))
 		html = response.read()
 		if self.forms.get('login_action','@%+#') in html:
 			self.login()
@@ -322,9 +384,9 @@ class ForumBrowser:
 			if self.forms.get('login_action','@%+#') in html:
 				return None
 		if not html: return None
-		callback(80,'Parsing Data')
+		callback(80,__language__(30103))
 		threads = re.finditer(self.filters['subscriptions'],re.sub('[\n\r\t]','',html))
-		callback(100,'Reading Data')
+		callback(100,__language__(30052))
 		return threads, self.getPageData(html,page)
 		
 	def getPageData(self,html,page):
@@ -357,33 +419,10 @@ class ForumBrowser:
 	def predicateLogin(self,formobj):
 		return self.forms.get('login_action','@%+#') in formobj.action
 		
-	def login(self):
-		LOG('LOGGING IN')
-		if not self.mechanize:
-			import mechanize
-			self.mechanize = mechanize
-		if not self.browser: self.browser = self.mechanize.Browser()
-		response = self.browser.open(self.getURL('login'))
-		html = response.read()
-		self.browser.select_form(predicate=self.predicateLogin)
-		self.browser[self.forms['login_user']] = self.user
-		self.browser[self.forms['login_pass']] = self.password
-		response = self.browser.submit()
-		html = response.read()
-		if not self.forms.get('login_action','@%+#') in html: return True
-		LOG('FAILED TO LOGIN')
-		return False
-		
-	def checkLogin(self):
-		if not self.browser:
-			if not self.login():
-				return False
-		return True
-		
-	def getForm(self,html,action,name):
+	def getForm(self,html,action,name=None):
 		if not action: return None
 		try:
-			forms = self.mechanize.ParseString(''.join(re.findall('<form\saction="%s.*?</form>' % action,html,re.S)),self._url)
+			forms = self.mechanize.ParseString(''.join(re.findall('<form\saction="%s.+?</form>' % re.escape(action),html,re.S)),self._url)
 			if name:
 				for f in forms:
 					if f.name == name:
@@ -413,16 +452,16 @@ class ForumBrowser:
 	
 	def post(self,post,callback=None):
 		if not callback: callback = self.fakeCallback
-		callback(5,'Logging In')
-		if not self.checkLogin(): return False
+		if not self.checkLogin(callback=callback): return False
 		url = self.postURL(post)
 		res = self.browser.open(url)
 		html = res.read()
 		if self.forms.get('login_action','@%+#') in html:
+			callback(5,__language__(30100))
 			if not self.login(): return False
 			res = self.browser.open(url)
 			html = res.read()
-		callback(40,'Processing Form')
+		callback(40,__language__(30105))
 		selected = False
 		try:
 			if self.forms.get('post_name'):
@@ -447,11 +486,11 @@ class ForumBrowser:
 			self.setControls('post_controls%s')
 			#print self.browser.form
 			wait = int(self.forms.get('post_submit_wait',0))
-			if wait: callback(60,'Wating %s seconds' % wait)
+			if wait: callback(60,__language__(30107) % wait)
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
-			callback(80,'Submitting Form')
+			callback(80,__language__(30106))
 			res = self.browser.submit(name=self.forms.get('post_submit_name'),label=self.forms.get('post_submit_value'))
-			callback(100,'Done')
+			callback(100,__language__(30052))
 		except:
 			ERROR('FORM ERROR')
 			return False
@@ -539,8 +578,8 @@ class PageWindow(BaseWindow):
 		self.next = ''
 		self.prev = ''
 		self.pageData = None
-		self._firstPage = 'First Page'
-		self._lastPage = 'Last Page'
+		self._firstPage = __language__(30110)
+		self._lastPage = __language__(30111)
 		BaseWindow.__init__( self, *args, **kwargs )
                        
 	def onFocus( self, controlId ):
@@ -565,13 +604,13 @@ class PageWindow(BaseWindow):
 		
 	def pageMenu(self):
 		dialog = xbmcgui.Dialog()
-		idx = dialog.select('Go to ...',[self._firstPage,self._lastPage,'Goto page #'])
+		idx = dialog.select(__language__(30114),[self._firstPage,self._lastPage,__language__(30115)])
 		if idx == 0: self.gotoPage(1)
 		elif idx == 1: self.gotoPage(-1)
 		elif idx == 2: self.askPageNumber()
 		
 	def askPageNumber(self):
-		page = xbmcgui.Dialog().numeric(0,'Enter Page Number')
+		page = xbmcgui.Dialog().numeric(0,__language__(30116))
 		try: int(page)
 		except: return
 		self.gotoPage(page)
@@ -676,7 +715,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
 			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Post Reply'))
-			self.getControl(104).setLabel('[B]Set Title[/B]',textColor=title_fg)
+			self.getControl(104).setLabel('[B]%s[/B]' % __language__(30120),textColor=title_fg)
 		except:
 			xbmcgui.unlock()
 			raise
@@ -706,7 +745,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		
 	def doMenu(self):
 		dialog = xbmcgui.Dialog()
-		idx = dialog.select('Options',['Delete Line'])
+		idx = dialog.select(__language__(30051),[__language__(30122)])
 		if idx == 0: self.deleteLine()
 		
 	def getOutput(self):
@@ -723,7 +762,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 			
 	def addLine(self,line='',emptyok=False):
 		if not line and not emptyok:
-			keyboard = xbmc.Keyboard('','Enter Text')
+			keyboard = xbmc.Keyboard('',__language__(30123))
 			keyboard.doModal()
 			if not keyboard.isConfirmed(): return False
 			line = keyboard.getText()
@@ -760,7 +799,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
-		keyboard = xbmc.Keyboard(item.getProperty('text'),'Edit Line')
+		keyboard = xbmc.Keyboard(item.getProperty('text'),__language__(30124))
 		keyboard.doModal()
 		if not keyboard.isConfirmed(): return
 		line = keyboard.getText()
@@ -770,7 +809,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',re.sub('[\n\r\t]','',test3))
 	
 	def setTitle(self):
-		keyboard = xbmc.Keyboard(self.title,'Enter Post Title')
+		keyboard = xbmc.Keyboard(self.title,__language__(30125))
 		keyboard.doModal()
 		if not keyboard.isConfirmed(): return
 		title = keyboard.getText()
@@ -783,7 +822,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	def postReply(self):
 		message = self.getOutput()
 		self.prog = xbmcgui.DialogProgress()
-		self.prog.create('Posting','Posting. Please wait...')
+		self.prog.create(__language__(30126),__language__(30127))
 		self.prog.update(0)
 		self.post.setMessage(self.title,message)
 		try:
@@ -817,8 +856,8 @@ class RepliesWindow(PageWindow):
 		self.topic = kwargs.get('topic','')
 		self.lastid = kwargs.get('lastid','')
 		self.parent = kwargs.get('parent')
-		self._firstPage = 'Oldest Post'
-		self._lastPage = 'Newest Post'
+		self._firstPage = __language__(30113)
+		self._lastPage = __language__(30112)
 		self.me = self.parent.parent.getUsername()
 		self.posts = {}
 		
@@ -840,7 +879,7 @@ class RepliesWindow(PageWindow):
 			self.getControl(302).setColorDiffuse(title_bg) #sep
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Posts'))
+			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,__language__(30130)))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 		except:
 			xbmcgui.unlock()
@@ -861,10 +900,19 @@ class RepliesWindow(PageWindow):
 		self.pid = ''
 		
 	def fillRepliesList(self,page=''):
+		self.startProgress()
+		try:
+			replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid,callback=self.setProgress)
+		except:
+			ERROR('GET REPLIES ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30132))
+			self.endProgress()
+			return
+		self.endProgress()
+		
 		xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
-			replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid)
 			if not self.topic: self.topic = pageData.topic
 			if not self.tid: self.tid = pageData.tid
 			self.setupPage(pageData)
@@ -891,6 +939,8 @@ class RepliesWindow(PageWindow):
 			if select > -1: self.getControl(120).selectItem(int(select))
 		except:
 			xbmcgui.unlock()
+			ERROR('FILL REPLIES ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30133))
 			raise
 		xbmcgui.unlock()
 			
@@ -916,7 +966,7 @@ class RepliesWindow(PageWindow):
 		PageWindow.onAction(self,action)
 	
 	def doMenu(self):
-		options = ['Quote']
+		options = [__language__(30134),__language__(30135)]
 		delete = None
 		images = None
 		link_images = None
@@ -932,24 +982,25 @@ class RepliesWindow(PageWindow):
 		post_link_urls = self.makeLinksArray(post.postLinkURLs())
 		if img_urls:
 			images = len(options)
-			options.append('View Images')
+			options.append(__language__(30136))
 		if link_img_urls:
 			link_images = len(options)
-			options.append('View Link Images')
+			options.append(__language__(30137))
 		if thread_link_urls:
 			thread_links = len(options)
-			options.append('Follow Thread Link')
+			options.append(__language__(30138))
 		if post_link_urls:
 			post_links = len(options)
-			options.append('Follow Post Link')
+			options.append(__language__(30139))
 		if link_urls:
 			links = len(options)
-			options.append('Download A Link')
+			options.append(__language__(30140))
 		if FB.canDelete(item.getLabel()):
 			delete = len(options)
-			options.append('Delete Post')
-		idx = xbmcgui.Dialog().select('Options',options)
+			options.append(__language__(30141))
+		idx = xbmcgui.Dialog().select(__language__(30051),options)
 		if idx == 0: self.openPostDialog(quote=post.messageAsQuote())
+		elif idx == 1: self.translateMessage()
 		elif idx == images: self.showImages(img_urls)
 		elif idx == link_images: self.showImages(link_img_urls)
 		elif idx == thread_links: self.followThreadLink(thread_link_urls)
@@ -957,10 +1008,28 @@ class RepliesWindow(PageWindow):
 		elif idx == links: self.downloadLinks(link_urls)
 		elif idx == delete: self.deletePost()
 		
+	def subTags(self,m):
+		return '[%s]' % m.group(1).upper()
+		
+	def translateMessage(self):
+		item = self.getControl(120).getSelectedItem()
+		post =  self.posts.get(item.getProperty('post'))
+		pre = re.sub('\[(/?(?:(?:COLOR(?: \w+)?)|CR|B|I))\]',r'<\1>',post.messageAsDisplay()).replace('> ','><space>').replace(' <','<space><')
+		#print pre
+		message = TR.translate(pre,FB.formats.get('language','en'),getLanguage(),newline='<CR>',format='html')
+		message = convertHTMLCodes(message)
+		message = message.replace('> ','>').replace(' <','<').replace('<space>',' ')
+		#print unicode.encode(message,'ascii','replace')
+		message = re.sub('<(/?COLOR(?: \w+)?)>',r'[\1]',message)
+		message = re.sub('<([^<>]+?)>',self.subTags,message)
+		#print unicode.encode(message,'ascii','replace')
+		desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+		item.setProperty('message',desc_base % message)
+		
 	def followPostLink(self,linkdatas):
 		texts = []
-		for m in linkdatas: texts.append('%s - (Post ID: %s)' % (m.group('text'),m.group('postid')))
-		idx = xbmcgui.Dialog().select('Options',texts)
+		for m in linkdatas: texts.append('%s - (%s: %s)' % (m.group('text'),__language__(30142),m.group('postid')))
+		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
 		postid = linkdatas[idx].group('postid')
 		if postid:
@@ -971,8 +1040,8 @@ class RepliesWindow(PageWindow):
 		
 	def followThreadLink(self,linkdatas):
 		texts = []
-		for m in linkdatas: texts.append('%s - (Thread ID: %s)' % (m.group('text'),m.group('threadid')))
-		idx = xbmcgui.Dialog().select('Options',texts)
+		for m in linkdatas: texts.append('%s - (%s: %s)' % (m.group('text'),__language__(30143),m.group('threadid')))
+		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
 		threadid = linkdatas[idx].group('threadid')
 		if threadid:
@@ -983,20 +1052,20 @@ class RepliesWindow(PageWindow):
 	def downloadLinks(self,links):
 		texts = []
 		for m in links: texts.append('%s - (%s)' % (m.group('text'),m.group('url')))
-		idx = xbmcgui.Dialog().select('Options',texts)
+		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
 		url = links[idx].group('url')
-		base = xbmcgui.Dialog().browse(3,'Choose Target Directory','files')
+		base = xbmcgui.Dialog().browse(3,__language__(30144),'files')
 		if not base: return
-		fname,ftype = Downloader(message='Downloading File').downloadURL(base,url)
+		fname,ftype = Downloader(message=__language__(30145)).downloadURL(base,url)
 		if not fname: return
-		xbmcgui.Dialog().ok('Done','Downloaded file: ',fname,'Type: %s' % ftype)
+		xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
 			
 	def showImages(self,images):
 		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
-		image_files = Downloader(message='Downloading Images').downloadURLs(base,images,'.jpg')
+		image_files = Downloader(message=__language__(30148)).downloadURLs(base,images,'.jpg')
 		if not image_files: return
 		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),"Default",images=image_files,parent=self)
 		w.doModal()
@@ -1008,7 +1077,7 @@ class RepliesWindow(PageWindow):
 		post = PostMessage(item.getProperty('post'),self.tid,self.fid)
 		if not post.pid: return
 		prog = xbmcgui.DialogProgress()
-		prog.create('Deleting','Deleting Post. Please wait...')
+		prog.create(__language__(30149),__language__(30150))
 		prog.update(0)
 		try:
 			FB.deletePost(post)
@@ -1067,7 +1136,7 @@ class ThreadsWindow(PageWindow):
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			#self.getControl(121).setColorDiffuse(title_bg) #scroll bar doesn't work
 			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Threads'))
+			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,__language__(30160)))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 		except:
 			xbmcgui.unlock()
@@ -1075,18 +1144,25 @@ class ThreadsWindow(PageWindow):
 		xbmcgui.unlock()
 		
 	def fillThreadList(self,page=''):
+		self.startProgress()
 		try:
 			if self.fid == 'subscriptions':
-				self.startProgress()
 				threads,pageData = FB.getSubscriptions(page,callback=self.setProgress)
-				self.endProgress()
 			else:
-				threads,pageData = FB.getThreads(self.fid,page)
-			xbmcgui.lock()
+				threads,pageData = FB.getThreads(self.fid,page,callback=self.setProgress)
+		except:
+			ERROR('GET THREADS ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30161),__language__(30053))
+			self.endProgress()
+			return
+		self.endProgress()
+		
+		xbmcgui.lock()
+		try:
 			self.getControl(120).reset()
 			self.setupPage(pageData)
-			desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']Last Post By: %s[/COLOR]'
-			desc_bold = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+'][B]Last Post By: %s[/B][/COLOR]'
+			desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
+			desc_bold = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+'][B]'+__language__(30162)+' %s[/B][/COLOR]','utf8')
 			
 			for t in threads:
 				tdict = t.groupdict()
@@ -1109,7 +1185,8 @@ class ThreadsWindow(PageWindow):
 				self.getControl(120).addItem(item)
 		except:
 			xbmcgui.unlock()
-			raise
+			ERROR('FILL THREAD ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30163))
 		xbmcgui.unlock()
 						
 	def openRepliesWindow(self):
@@ -1141,10 +1218,10 @@ class ThreadsWindow(PageWindow):
 ######################################################################################
 # Forums Window
 ######################################################################################
-class ForumsWindow(xbmcgui.WindowXMLDialog):
+class ForumsWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		FB.setLogin(self.getUsername(),self.getPassword())
-		xbmcgui.WindowXML.__init__( self, *args, **kwargs )
+		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def getUsername(self):
 		return __addon__.getSetting('login_user_' + FB.forum.replace('.','_'))
@@ -1170,13 +1247,23 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 			self.getControl(302).setColorDiffuse(title_bg) #sep
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Forums'))
+			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,__language__(30170)))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,FB.forum))
 		except:
 			xbmcgui.unlock()
 			raise
 		xbmcgui.unlock()
-		forums, logo = FB.getForums()
+		
+		self.startProgress()
+		try:
+			forums, logo = FB.getForums(callback=self.setProgress)
+		except:
+			ERROR('GET FORUMS ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053))
+			self.endProgress()
+			return
+		self.endProgress()
+		
 		try:
 			xbmcgui.lock()
 			self.getControl(120).reset()
@@ -1187,15 +1274,15 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 				#print f.group(0)
 				fdict = f.groupdict()
 				fid = fdict.get('forumid','')
-				title = fdict.get('title','ERROR')
-				desc = fdict.get('description') or 'No Description'
+				title = fdict.get('title',__language__(30050))
+				desc = fdict.get('description') or __language__(30172)
 				sub = fdict.get('subforum')
 				if sub:
 					text = '[I][COLOR FFBBBBBB]%s[/COLOR][/I] '
-					desc = 'Sub-Forum'
+					desc = __language__(30173)
 				else:
 					text = '[B]%s[/B]'
-				title = convertHTMLCodes(re.sub('<.*?>','',title))
+				title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
 				item = xbmcgui.ListItem(label=text % title)
 				item.setProperty("description",desc_base % convertHTMLCodes(re.sub('<.*?>','',desc)))
 				item.setProperty("topic",title)
@@ -1203,7 +1290,8 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 				self.getControl(120).addItem(item)
 		except:
 			xbmcgui.unlock()
-			raise
+			ERROR('FILL FORUMS ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
 		xbmcgui.unlock()
 			
 	def openThreadsWindow(self):
@@ -1216,7 +1304,7 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 		
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
-		topic = 'Subscriptions'
+		topic = __language__(30175)
 		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), "Default",fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
@@ -1225,7 +1313,7 @@ class ForumsWindow(xbmcgui.WindowXMLDialog):
 		fpath = xbmc.translatePath('special://home/addons/script.forum.browser/forums/')
 		flist = os.listdir(fpath)
 		dialog = xbmcgui.Dialog()
-		idx = dialog.select('Forums',flist)
+		idx = dialog.select(__language__(30170),flist)
 		if idx < 0: return
 		FB.reloadForumData(flist[idx])
 		MC.resetRegex()
@@ -1272,11 +1360,11 @@ class MessageConverter:
 		self.resetRegex()
 		
 		#static replacements
-		self.quoteReplace = '\n_________________________\n[B]Quote:[/B]\nOriginally posted by: [B]%s[/B]\n[I]%s[/I]\n_________________________\n'
-		self.aQuoteReplace = '\n_________________________\n[B]Quote:[/B]\n[I]%s[/I]\n_________________________\n'
+		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR]','utf8')
+		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
-		self.linkReplace = '\g<text> (Link: [B]\g<url>[/B])'
+		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		
 		#static filters
 		self.imageFilter = re.compile('<img[^<>]+?src="(?P<url>http://.+?)"[^<>]+?/>')
@@ -1304,9 +1392,9 @@ class MessageConverter:
 		self.smileyFilter = f and re.compile(f) or None
 		
 		#dynamic replacements
-		self.codeReplace = '\n_________________________\n[B]Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR]\n_________________________\n'
-		self.phpReplace = '\n_________________________\n[B]PHP Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR]\n_________________________\n'
-		self.htmlReplace = '\n_________________________\n[B]HTML Code:[/B]\n[COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR]\n_________________________\n'
+		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR][CR]_________________________[CR]','utf8')
+		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR][CR]_________________________[CR]','utf8')
+		self.htmlReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30185)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR][CR]_________________________[CR]','utf8')
 		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
 		
 	def resetOrdered(self,ordered):
@@ -1340,6 +1428,7 @@ class MessageConverter:
 		html = html.replace('</div>','[CR]')
 		html = self.tagFilter.sub('',html)
 		html = self.removeNested(html,'[B]','[/B]')
+		html = self.removeNested(html,'[I]','[/I]')
 		return convertHTMLCodes(html).strip()
 
 	def removeNested(self,html,start,end):
@@ -1433,10 +1522,21 @@ def calculatePage(low,high,total):
 	if high == total: return -1
 	return str(int(round(float(high)/((high-low)+1))))
 	
-def cConvert(m): return unichr(int(m.group(1)))
+def cUConvert(m): return unichr(int(m.group(1)))
+def cConvert(m): return chr(int(m.group(1)))
 def convertHTMLCodes(html):
-	return 		re.sub('&#(\d{1,3});',cConvert,html)\
-				.replace("&lt;", "<")\
+	#conv = False
+	#try:
+	#	html = re.sub('&#(\d{1,3});',cConvert,html)
+	#	conv = True
+	#except:
+	#	pass
+	#if not conv:
+	try:
+		html = re.sub('&#(\d{1,3});',cUConvert,html)
+	except:
+		pass
+	return html	.replace("&lt;", "<")\
 				.replace("&gt;", ">")\
 				.replace("&amp;", "&")\
 				.replace("&quot;",'"')\
@@ -1463,19 +1563,19 @@ def setLogins():
 	fpath = xbmc.translatePath('special://home/addons/script.forum.browser/forums/')
 	flist = os.listdir(fpath)
 	dialog = xbmcgui.Dialog()
-	idx = dialog.select('Select Forum',flist)
+	idx = dialog.select(__language__(30200),flist)
 	if idx < 0: return
 	forum = flist[idx]
-	user = doKeyboard('Enter Username',__addon__.getSetting('login_user_' + forum.replace('.','_')))
+	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forum.replace('.','_')))
 	if not user: return
-	password = doKeyboard('Enter Password',__addon__.getSetting('login_pass_' + forum.replace('.','_')),True)
+	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forum.replace('.','_')),True)
 	if not password: return
 	__addon__.setSetting('login_user_' + forum.replace('.','_'),user)
 	__addon__.setSetting('login_pass_' + forum.replace('.','_'),password)
 	
 def doSettings():
 	dialog = xbmcgui.Dialog()
-	idx = dialog.select('Settings',['Set Logins','Settings'])
+	idx = dialog.select(__language__(30203),[__language__(30204),__language__(30203)])
 	if idx < 0: return
 	if idx == 0: setLogins()
 	elif idx == 1: __addon__.openSettings()
@@ -1492,8 +1592,16 @@ def getFile(url,target=None):
 	open(target,'w').write(req.read())
 	req.close()
 
+def getLanguage():
+		langs = ['Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Azerbaijani', 'Basque', 'Belarusian', 'Bengali', 'Bihari', 'Breton', 'Bulgarian', 'Burmese', 'Catalan', 'Cherokee', 'Chinese', 'Chinese_Simplified', 'Chinese_Traditional', 'Corsican', 'Croatian', 'Czech', 'Danish', 'Dhivehi', 'Dutch', 'English', 'Esperanto', 'Estonian', 'Faroese', 'Filipino', 'Finnish', 'French', 'Frisian', 'Galician', 'Georgian', 'German', 'Greek', 'Gujarati', 'Haitian_Creole', 'Hebrew', 'Hindi', 'Hungarian', 'Icelandic', 'Indonesian', 'Inuktitut', 'Irish', 'Italian', 'Japanese', 'Javanese', 'Kannada', 'Kazakh', 'Khmer', 'Korean', 'Kurdish', 'Kyrgyz', 'Lao', 'Latin', 'Latvian', 'Lithuanian', 'Luxembourgish', 'Macedonian', 'Malay', 'Malayalam', 'Maltese', 'Maori', 'Marathi', 'Mongolian', 'Nepali', 'Norwegian', 'Occitan', 'Oriya', 'Pashto', 'Persian', 'Polish', 'Portuguese', 'Portuguese_Portugal', 'Punjabi', 'Quechua', 'Romanian', 'Russian', 'Sanskrit', 'Scots_Gaelic', 'Serbian', 'Sindhi', 'Sinhalese', 'Slovak', 'Slovenian', 'Spanish', 'Sundanese', 'Swahili', 'Swedish', 'Syriac', 'Tajik', 'Tamil', 'Tatar', 'Telugu', 'Thai', 'Tibetan', 'Tonga', 'Turkish', 'Uighur', 'Ukrainian', 'Urdu', 'Uzbek', 'Vietnamese', 'Welsh', 'Yiddish', 'Yoruba', 'Unknown']
+		try:
+			idx = int(__addon__.getSetting('language'))
+		except:
+			return ''
+		return langs[idx]
+		
 class Downloader:
-	def __init__(self,header='Downloading',message=''):
+	def __init__(self,header=__language__(30205),message=''):
 		self.message = message
 		self.prog = xbmcgui.DialogProgress()
 		self.prog.create(header,message)
@@ -1544,7 +1652,7 @@ class Downloader:
 		
 		try:
 			self.current = 0
-			self.display = 'Downloading %s' % os.path.basename(path)
+			self.display = __language__(30206) % os.path.basename(path)
 			self.prog.update(0,self.message,self.display)
 			t,ftype = self.getUrlFile(url,path,callback=self.progCallback)
 		except:
@@ -1585,6 +1693,7 @@ if sys.argv[-1] == 'settings':
 else:
 	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org')
 	MC = MessageConverter()
+	TR = googleTranslateAPI()
 
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), "Default")
 	w.doModal()

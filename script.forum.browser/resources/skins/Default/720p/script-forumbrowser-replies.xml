@@ -96,7 +96,7 @@
        <align>right</align>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
-       <label>Prev</label>
+       <label>$LOCALIZE[SCRIPT3000]</label>
        <textoffsetx>35</textoffsetx>
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
@@ -116,7 +116,7 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <label>Post Reply</label>
+       <label>$LOCALIZE[SCRIPT3002]</label>
        <texturefocus>FBbutton-focus.png</texturefocus>
        <texturenofocus>FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
@@ -139,7 +139,7 @@
        <align>left</align>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
-       <label>Next</label>
+       <label>$LOCALIZE[SCRIPT3001]</label>
        <textoffsetx>35</textoffsetx>
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
