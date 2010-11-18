@@ -1,6 +1,10 @@
 Forum Browser Changelog
 
-Current Version : 0.7.5
+Current Version : 0.7.6
+
+*** 0.7.6 ***
+
+Added simplejson import to addon.xml
 
 *** 0.7.5 ***
 

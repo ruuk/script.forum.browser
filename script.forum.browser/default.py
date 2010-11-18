@@ -5,10 +5,12 @@ from googletranslate import googleTranslateAPI
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '11-10-2010'
-__version__ = '0.7.5'
+__date__ = '11-18-2010'
+__version__ = '0.7.6'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
+
+THEME = 'Default'
 
 ACTION_MOVE_LEFT      = 1
 ACTION_MOVE_RIGHT     = 2
@@ -1028,7 +1030,7 @@ class RepliesWindow(PageWindow):
 		
 	def followPostLink(self,linkdatas):
 		texts = []
-		for m in linkdatas: texts.append('%s - (%s: %s)' % (m.group('text'),__language__(30142),m.group('postid')))
+		for m in linkdatas: texts.append('%s - (%s: %s)' % (MC.tagFilter.sub('',m.group('text')),__language__(30142),m.group('postid')))
 		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
 		postid = linkdatas[idx].group('postid')
@@ -1040,7 +1042,7 @@ class RepliesWindow(PageWindow):
 		
 	def followThreadLink(self,linkdatas):
 		texts = []
-		for m in linkdatas: texts.append('%s - (%s: %s)' % (m.group('text'),__language__(30143),m.group('threadid')))
+		for m in linkdatas: texts.append('%s - (%s: %s)' % (MC.tagFilter.sub('',m.group('text')),__language__(30143),m.group('threadid')))
 		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
 		threadid = linkdatas[idx].group('threadid')
@@ -1067,7 +1069,7 @@ class RepliesWindow(PageWindow):
 		clearDirFiles(base)
 		image_files = Downloader(message=__language__(30148)).downloadURLs(base,images,'.jpg')
 		if not image_files: return
-		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),"Default",images=image_files,parent=self)
+		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
 		w.doModal()
 		del w
 		#xbmc.executebuiltin('SlideShow('+base+')')
@@ -1098,7 +1100,7 @@ class RepliesWindow(PageWindow):
 		post = item.getProperty('post')
 		pm = PostMessage(post,self.tid,self.fid)
 		if quote: pm.setQuote(user,quote)
-		w = PostDialog(	"script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),"Default",post=pm,parent=self)
+		w = PostDialog(	"script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
 		w.doModal()
 		posted = w.posted
 		del w
@@ -1195,7 +1197,7 @@ class ThreadsWindow(PageWindow):
 		fid = item.getProperty('fid') or self.fid
 		lastid = item.getProperty('lastid')
 		topic = item.getLabel2()
-		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'), "Default",tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
+		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'), THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
 		w.doModal()
 		del w
                        
@@ -1298,14 +1300,14 @@ class ForumsWindow(BaseWindow):
 		item = self.getControl(120).getSelectedItem()
 		fid = item.getProperty('id')
 		topic = item.getProperty('topic')
-		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), "Default",fid=fid,topic=topic,parent=self)
+		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
 		
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
 		topic = __language__(30175)
-		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), "Default",fid=fid,topic=topic,parent=self)
+		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
 		
@@ -1691,11 +1693,12 @@ class Downloader:
 if sys.argv[-1] == 'settings':
 	doSettings()
 else:
+	#THEME = 'Fullscreen'
 	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org')
 	MC = MessageConverter()
 	TR = googleTranslateAPI()
 
-	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), "Default")
+	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
 	w.doModal()
 	del w
 	sys.modules.clear()
