@@ -1,6 +1,11 @@
 Forum Browser Changelog
 
-Current Version : 0.7.6
+Current Version : 0.7.7
+
+*** 0.7.7 ***
+
+Re-designed Posts interface
+Added Post view with links and images side menus
 
 *** 0.7.6 ***
 

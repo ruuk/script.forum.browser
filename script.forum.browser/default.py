@@ -1,12 +1,13 @@
 import urllib2, re, os, sys, time, urlparse, urllib
 import xbmc, xbmcgui, xbmcaddon
 from googletranslate import googleTranslateAPI
+from threading import Thread, Event
 
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '11-18-2010'
-__version__ = '0.7.6'
+__version__ = '0.7.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -38,7 +39,9 @@ TITLE_FORMAT = '[COLOR %s][B]%s[/B][/COLOR]'
 #href="forumdisplay.php?f=27&amp;order=desc&amp;page=2" title="Next Page - Results 21 to 40 of 3,421">&gt;</a></td>
 
 def ERROR(message):
-	print 'FORUMBROWSER - %s::%s (%d) - %s' % (message,sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+	errtext = sys.exc_info()[1]
+	print 'FORUMBROWSER - %s::%s (%d) - %s' % (message,sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, errtext)
+	return str(errtext)
 	
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -46,7 +49,50 @@ def LOG(message):
 ######################################################################################
 # Forum Browser Classes
 ######################################################################################
-
+class PMLink:
+	def __init__(self,match=None):
+		self.url = ''
+		self.text = ''
+		self.pid = ''
+		self.tid = ''
+		self.fid = ''
+		self._isImage = False
+		
+		if match:
+			self.url = match.group('url')
+			text = match.group('text')
+			self.text = MC.tagFilter.sub('',text).strip()
+		self.processURL()
+			
+	def processURL(self):
+		if not self.url: return
+		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
+		if self._isImage: return
+		pm = re.search(FB.filters.get('post_link'),self.url)
+		tm = re.search(FB.filters.get('thread_link'),self.url)
+		if pm:
+			d = pm.groupdict()
+			self.pid = d.get('postid','')
+			self.tid = d.get('threadid','')
+		elif tm:
+			print 'mung'
+			d = tm.groupdict()
+			self.tid = d.get('threadid','')
+			
+	def urlShow(self):
+		if self.isPost(): return 'Post ID: %s' % self.pid
+		elif self.isThread(): return 'Thread ID: %s' % self.tid
+		return self.url
+		
+	def isImage(self):
+		return self._isImage
+		
+	def isPost(self):
+		return self.pid and True or False
+		
+	def isThread(self):
+		return self.tid and not self.pid
+		
 class ForumPost:
 	def __init__(self,pmatch=None):
 		if pmatch:
@@ -56,11 +102,12 @@ class ForumPost:
 			self.userId = pdict.get('userid','')
 			self.userName = pdict.get('user') or pdict.get('guest') or 'UERROR'
 			self.avatar = pdict.get('avatar','')
+			self.status = pdict.get('status','')
 			self.title = pdict.get('title','')
 			self.message = pdict.get('message','')
 			self.signature = pdict.get('signature','') or ''
 		else:
-			self.postId,self.date,self.userId,self.userName,self.avatar,self.title,self.message,self.signature = ('','','','ERROR','','ERROR','','')
+			self.postId,self.date,self.userId,self.userName,self.avatar,self.status,self.title,self.message,self.signature = ('','','','ERROR','','','ERROR','','')
 			
 	def getMessage(self):
 		return self.message + self.signature
@@ -75,13 +122,18 @@ class ForumPost:
 		return MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
-		return re.findall('<img\s.+?src="(http://.+?)".+?/>',self.message)
+		return re.findall('<img\s.+?src="(http://.+?)".+?/>',self.getMessage())
 		
 	def linkImageURLs(self):
 		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
 		
 	def linkURLs(self):
-		return re.finditer('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>',self.getMessage(),re.S)
+		return MC.linkFilter.finditer(self.getMessage(),re.S)
+		
+	def links(self):
+		links = []
+		for m in self.linkURLs(): links.append(PMLink(m))
+		return links
 		
 	def threadLinkURLs(self):
 		if FB.filters.get('thread_link'): return re.finditer(FB.filters.get('thread_link'),self.getMessage(),re.S)
@@ -320,6 +372,7 @@ class ForumBrowser:
 		return data
 		
 	def makeURL(self,phppart):
+		if not phppart: return ''
 		url = self._url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
 		
@@ -327,7 +380,7 @@ class ForumBrowser:
 		if not callback: callback = self.fakeCallback
 		html = self.readURL(self.getURL('forums'),callback=callback)
 		#open('/home/ruuk/test3.html','w').write(html)
-		if not html: return None
+		if not html: return (None,None)
 		callback(80,__language__(30103))
 		forums = re.finditer(self.filters['forums'],re.sub('[\n\t\r]','',html))
 		logo = ''
@@ -567,7 +620,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog):
 		self.getControl(310).setVisible(True)
 		
 	def setProgress(self,pct,message=''):
-		w = (pct/100.0)*1060
+		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
 		self.getControl(104).setLabel(TITLE_FORMAT % (self._title_fg,message))
 		
@@ -847,6 +900,96 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		return text
 
 ######################################################################################
+# Message Window
+######################################################################################
+class MessageWindow(BaseWindow):
+	def __init__( self, *args, **kwargs ):
+		self.post = kwargs.get('post')
+		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]'
+		self.imageReplace = 'IMG #%s'
+		self.action = None
+		BaseWindow.__init__( self, *args, **kwargs )
+		
+	def onInit(self):
+		text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % self.post.messageAsDisplay()
+		self.getControl(122).setText(text)
+		self.getControl(104).setLabel('[B]%s[/B]' % self.post.title or '')
+		self.getImages()
+		self.getLinks()
+                   
+	def getLinks(self):
+		ulist = self.getControl(148)
+		for link in self.post.links():
+			item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
+			if link.isImage():
+				item.setIconImage(link.url)
+			elif link.isPost():
+				item.setIconImage('post.png')
+			elif link.isThread():
+				item.setIconImage('thread.png')
+			else:
+				item.setIconImage('link.png')
+			ulist.addItem(item)
+
+	def getImages(self):
+		i=0
+		for url in self.post.imageURLs():
+			i+=1
+			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
+			item.setProperty('url',url)
+			self.getControl(150).addItem(item)
+		#targetdir = os.path.join(__addon__.getAddonInfo('profile'),'messageimages')
+		#TD.startDownload(targetdir,self.post.imageURLs(),ext='.jpg',callback=self.getImagesCallback)
+		
+	def getImagesCallback(self,file_dict):
+		for fname,idx in zip(file_dict.values(),range(0,self.getControl(150).size())):
+			fname = xbmc.translatePath(fname)
+			self.getControl(150).getListItem(idx).setIconImage(fname)
+			
+	def onFocus( self, controlId ):
+		self.controlId = controlId
+		
+	def onClick( self, controlID ):
+		if controlID == 148:
+			self.linkSelected()
+		elif controlID == 150:
+			self.showImage(self.getControl(150).getSelectedItem().getProperty('url'))
+	
+	def linkSelected(self):
+		idx = self.getControl(148).getSelectedPosition()
+		if idx < 0: return
+		links = self.post.links()
+		if idx >= len(links): return
+		link = links[idx]
+		
+		if link.isImage():
+			self.showImage(link.url)
+		elif link.isPost() or link.isThread():
+			self.action = PostMessage(tid=link.tid,pid=link.pid)
+			self.close()
+		else:
+			base = xbmcgui.Dialog().browse(3,__language__(30144),'files')
+			if not base: return
+			fname,ftype = Downloader(message=__language__(30145)).downloadURL(base,link.url)
+			if not fname: return
+			xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
+		
+	def showImage(self,url):
+		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
+		if not os.path.exists(base): os.makedirs(base)
+		clearDirFiles(base)
+		image_files = Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
+		if not image_files: return
+		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
+		w.doModal()
+		del w
+			
+	def onAction(self,action):
+		if action == ACTION_PARENT_DIR:
+			action = ACTION_PREVIOUS_MENU
+		BaseWindow.onAction(self,action)
+	
+######################################################################################
 # Replies Window
 ######################################################################################
 class RepliesWindow(PageWindow):
@@ -865,6 +1008,7 @@ class RepliesWindow(PageWindow):
 		
 	
 	def onInit(self):
+		self.postSelected()
 		self.setTheme()
 		self.getControl(201).setEnabled(self.parent.parent.hasLogin())
 		self.showThread()
@@ -880,9 +1024,10 @@ class RepliesWindow(PageWindow):
 			self.getControl(301).setColorDiffuse(title_bg) #sep
 			self.getControl(302).setColorDiffuse(title_bg) #sep
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
-			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
+			#self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
 			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,__language__(30130)))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
+			self.listItemBG = title_bg
 		except:
 			xbmcgui.unlock()
 			raise
@@ -918,7 +1063,7 @@ class RepliesWindow(PageWindow):
 			if not self.topic: self.topic = pageData.topic
 			if not self.tid: self.tid = pageData.tid
 			self.setupPage(pageData)
-			desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+			desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
 			if __addon__.getSetting('show_oldest_post_top') != 'true': replies.reverse()
 			self.posts = {}
 			select = -1
@@ -926,17 +1071,19 @@ class RepliesWindow(PageWindow):
 				#print post.postId + ' ' + self.pid
 				if post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
-				title = post.title
-				if not title: title = post.messageAsText()[:68].replace('\n',' ') + '...'
+				title = post.title or ''
+				if title: title = '[B]%s[/B][CR][CR]' % title
 				url = ''
 				if post.avatar: url = FB.makeURL(post.avatar)
-				#print 'AVATAR: ' + url
 				user = re.sub('<.*?>','',post.userName)
-				item = xbmcgui.ListItem(label=user,label2=post.date + ': ' + title,iconImage=url)
+				item = xbmcgui.ListItem(label=user,label2=post.date + ': ' + title)
 				if post.title: item.setInfo('video',{'Genre':'bold'})
 				if user == self.me: item.setInfo('video',{"Director":'me'})
-				item.setProperty('message',desc_base % post.messageAsDisplay())
+				item.setProperty('message',desc_base % (title + post.messageAsDisplay()))
 				item.setProperty('post',post.postId)
+				item.setProperty('avatar',url)
+				item.setProperty('status',post.status)
+				item.setProperty('date',post.date)
 				self.getControl(120).addItem(item)
 			if select > -1: self.getControl(120).selectItem(int(select))
 		except:
@@ -945,17 +1092,53 @@ class RepliesWindow(PageWindow):
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30133))
 			raise
 		xbmcgui.unlock()
+		if select > -1: self.postSelected(itemindex=select)
+		self.getAvatars()
+		
+	def getAvatars(self):
+		urls = {}
+		for post in self.posts.values():
+			url = FB.makeURL(post.avatar)
+			if url: urls[url] = 1
+		targetdir = os.path.join(__addon__.getAddonInfo('profile'),'avatars')
+		TD.startDownload(targetdir,urls.keys(),ext='.jpg',callback=self.getAvatarsCallback)
+		
+	def getAvatarsCallback(self,file_dict):
+		clist = self.getControl(120)
+		for idx in range(0,clist.size()):
+			item = clist.getListItem(idx)
+			post = self.posts[item.getProperty('post')]
+			fname = file_dict.get(FB.makeURL(post.avatar))
+			if fname:
+				fname = xbmc.translatePath(fname)
+				item.setProperty('avatar',fname)
 			
 	def makeLinksArray(self,miter):
+		if not miter: return []
 		urls = []
 		for m in miter:
 			urls.append(m)
 		return urls
 		
-	def postSelected(self):
-		item = self.getControl(120).getSelectedItem()
+	def postSelected(self,itemindex=-1):
+		if itemindex >= 0:
+			item = self.getControl(120).getListItem(itemindex)
+		else:
+			item = self.getControl(120).getSelectedItem()
+		if not item: return
+		post = self.posts.get(item.getProperty('post'))
+		w = MessageWindow("script-forumbrowser-message.xml" ,__addon__.getAddonInfo('path'),THEME,post=post,parent=self)
+		w.doModal()
+		if w.action:
+			self.topic = ''
+			self.pid = w.action.pid
+			self.tid = w.action.tid
+			if w.action.pid: self.showThread(nopage=True)
+			else: self.showThread()
+		del w
 		
 	def onClick(self,controlID):
+		print controlID
 		if controlID == 201:
 			self.openPostDialog()
 		elif controlID == 120:
@@ -1025,18 +1208,22 @@ class RepliesWindow(PageWindow):
 		message = re.sub('<(/?COLOR(?: \w+)?)>',r'[\1]',message)
 		message = re.sub('<([^<>]+?)>',self.subTags,message)
 		#print unicode.encode(message,'ascii','replace')
-		desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+		desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
 		item.setProperty('message',desc_base % message)
+		self.setFocusId(105)
+		self.setFocusId(120)
+		item.select(True)
 		
 	def followPostLink(self,linkdatas):
 		texts = []
 		for m in linkdatas: texts.append('%s - (%s: %s)' % (MC.tagFilter.sub('',m.group('text')),__language__(30142),m.group('postid')))
 		idx = xbmcgui.Dialog().select(__language__(30051),texts)
 		if idx < 0: return
-		postid = linkdatas[idx].group('postid')
+		postid = linkdatas[idx].groupdict().get('postid','')
+		threadid = linkdatas[idx].groupdict().get('threadid','')
 		if postid:
 			self.pid = postid
-			self.tid = ''
+			self.tid = threadid
 			self.topic = ''
 			self.showThread(nopage=True)
 		
@@ -1259,9 +1446,13 @@ class ForumsWindow(BaseWindow):
 		self.startProgress()
 		try:
 			forums, logo = FB.getForums(callback=self.setProgress)
+			if not forums:
+				xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
+				self.endProgress()
+				return
 		except:
-			ERROR('GET FORUMS ERROR')
-			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053))
+			reason = ERROR('GET FORUMS ERROR')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),reason)
 			self.endProgress()
 			return
 		self.endProgress()
@@ -1365,7 +1556,7 @@ class MessageConverter:
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR]','utf8')
 		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
-		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: [I]\g<url>[/I]'
+		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I]'
 		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		
 		#static filters
@@ -1412,7 +1603,8 @@ class MessageConverter:
 		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
 		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
 		
-		html = self.imageFilter.sub(self.imageReplace,html)
+		self.imageCount = 0
+		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.linkFilter.sub(self.linkReplace,html)
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
@@ -1431,7 +1623,8 @@ class MessageConverter:
 		html = self.tagFilter.sub('',html)
 		html = self.removeNested(html,'[B]','[/B]')
 		html = self.removeNested(html,'[I]','[/I]')
-		return convertHTMLCodes(html).strip()
+		html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
+		return convertHTMLCodes(html)
 
 	def removeNested(self,html,start,end):
 		out = ''
@@ -1472,6 +1665,10 @@ class MessageConverter:
 		html = html.replace('</div>','\n')
 		html = re.sub('<[^<>]+?>','',html)
 		return convertHTMLCodes(html).strip()
+		
+	def imageConvert(self,m):
+		self.imageCount += 1
+		return self.imageReplace % (self.imageCount,m.group('url'))
 		
 	def smileyRawConvert(self,m):
 		return FB.smilies.get(m.group('smiley'),'')
@@ -1602,6 +1799,67 @@ def getLanguage():
 			return ''
 		return langs[idx]
 		
+class ThreadDownloader:
+	def __init__(self):
+		self.thread = None
+		
+	def startDownload(self,targetdir,urllist,ext='',callback=None):
+		old_thread = None
+		if self.thread and self.thread.isAlive():
+			self.thread.stop()
+			old_thread = self.thread
+		self.thread = DownloadThread(targetdir,urllist,ext,callback,old_thread)
+	
+	def stop(self):
+		self.thread.stop()
+		
+class DownloadThread(Thread):
+	def __init__(self,targetdir,urllist,ext='',callback=None,old_thread=None):
+		Thread.__init__(self)
+		if not os.path.exists(targetdir): os.makedirs(targetdir)
+		self.callback = callback
+		self.targetdir = targetdir
+		self.urllist = urllist
+		self.ext = ext
+		self.old_thread = old_thread
+		self._stop = Event()
+		self.start()
+		
+	def stop(self):
+		self._stop.set()
+		
+	def stopped(self):
+		return self._stop.isSet()
+		
+	def run(self):
+		#Wait until old downloader is stopped
+		if self.old_thread: self.old_thread.join()
+		clearDirFiles(self.targetdir)
+		file_list = {}
+		total = len(self.urllist)
+		fnbase = 'file_' + str(int(time.time())) + '%s' + self.ext
+		try:
+			for url,i in zip(self.urllist,range(0,total)):
+				current = i
+				fname = os.path.join(self.targetdir,fnbase % i)
+				file_list[url] = fname
+				if self.stopped(): return None
+				self.getUrlFile(url,fname)
+			if self.stopped(): return None
+		except:
+			ERROR('THREADED DOWNLOAD URLS ERROR')
+			return None
+		self.callback(file_list)
+		
+	def getUrlFile(self,url,target):
+		urlObj = urllib2.urlopen(url)
+		outfile = open(target, 'wb')
+		outfile.write(urlObj.read())
+		outfile.close()
+		urlObj.close()
+		return target
+		
+		
 class Downloader:
 	def __init__(self,header=__language__(30205),message=''):
 		self.message = message
@@ -1694,6 +1952,7 @@ if sys.argv[-1] == 'settings':
 	doSettings()
 else:
 	#THEME = 'Fullscreen'
+	TD = ThreadDownloader()
 	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org')
 	MC = MessageConverter()
 	TR = googleTranslateAPI()

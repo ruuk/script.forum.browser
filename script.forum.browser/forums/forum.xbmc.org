@@ -38,9 +38,10 @@ filter:subscriptions===threads
 filter:code=<div class.+?>Code:</div><pre.+?>(?P<code>.+?)</pre>
 filter:php=<div class.+?>PHP Code:</div>.+?<!-- php buffer start --><code>(?P<php>.+?)</code><!-- php buffer end -->
 filter:html=<div class.+?>HTML Code:</div><pre.+?>(?P<html>.+?)</pre>
-filter:forum_link=href="[^<>"]*?forumdisplay.php?[^<>"]*?f=(?P<forumid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
-filter:thread_link=href="[^<>"]*?showthread.php?[^<>"]*?t=(?P<threadid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
-filter:post_link=href="[^<>"]*?showpost.php?[^<>"]*?p=(?P<postid>\d+)[^<>"]*?"[^<>]*?>(?P<text>.+?)</a>
+#These must match within a url
+filter:forum_link=forumdisplay.php\?[^<>"]*?f=(?P<forumid>\d+)
+filter:thread_link=showthread.php\?[^<>"]*?t=(?P<threadid>\d+)
+filter:post_link=(?:showpost.php|showthread.php)\?[^<>"]*?p=(?P<postid>\d+)
 # if forum uses a start based url should match an integer for that value else any data for page bsed urls. Valid match names are page OR start
 filter:next=Next Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Next Page - Results [\d,]+ to [\d,]+ of [\d,]+)
 filter:prev=Prev Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Prev Page - Results [\d,]+ to [\d,]+ of [\d,]+)

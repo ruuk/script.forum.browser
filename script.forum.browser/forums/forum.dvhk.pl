@@ -27,6 +27,7 @@ theme:title_bg=FF2F302B
 theme:title_fg=FFFFFFFF
 theme:desc_fg=FF66CCFF
 theme:post_code=FF99FF99
+theme:mode=dark
 
 format:login_required=True
 format:language=pl
