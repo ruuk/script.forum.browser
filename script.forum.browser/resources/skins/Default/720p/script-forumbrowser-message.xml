@@ -28,9 +28,16 @@
             <height>80</height>
             <texture border="10">title-background.png</texture>
       </control>
+      <control type="image" id="102">
+            <description>Avatar</description>
+            <posx>14</posx>
+            <posy>12</posy>
+            <width>64</width>
+            <height>64</height>
+      </control>
       <control type="label" id="103">
         <description>textarea</description>
-        <posx>20</posx>
+        <posx>82</posx>
         <posy>22</posy>
         <width>100</width>
         <height>40</height>
@@ -45,7 +52,7 @@
       
       <control type="label" id="104">
         <description>Topic</description>
-        <posx>265</posx>
+        <posx>192</posx>
         <posy>14</posy>
         <width>635</width>
         <height>60</height>
@@ -54,6 +61,18 @@
         <aligny>center</aligny>
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
+      </control>
+      
+      <control type="label" id="105">
+        <description>Date</description>
+        <posx>837</posx>
+        <posy>14</posy>
+        <width>150</width>
+        <height>60</height>
+        <font>font18</font>
+        <textcolor>black</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
       </control>
       
       <control type="image" id="351">
@@ -118,7 +137,7 @@
       </control>
       <control type="image" id="310">
         <posx>10</posx>
-        <posy>88</posy>
+        <posy>86</posy>
         <width>1</width>
         <height>2</height>
         <texture>progress.png</texture>

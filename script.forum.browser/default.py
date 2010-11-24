@@ -75,7 +75,6 @@ class PMLink:
 			self.pid = d.get('postid','')
 			self.tid = d.get('threadid','')
 		elif tm:
-			print 'mung'
 			d = tm.groupdict()
 			self.tid = d.get('threadid','')
 			
@@ -108,7 +107,15 @@ class ForumPost:
 			self.signature = pdict.get('signature','') or ''
 		else:
 			self.postId,self.date,self.userId,self.userName,self.avatar,self.status,self.title,self.message,self.signature = ('','','','ERROR','','','ERROR','','')
+		self.translated = ''
+		self.avatarFinal = ''
+		self.pid = self.postId
+		self.tid = ''
+		self.fid = ''
 			
+	def cleanUserName(self):
+		return MC.tagFilter.sub('',self.userName)
+		
 	def getMessage(self):
 		return self.message + self.signature
 	
@@ -122,7 +129,7 @@ class ForumPost:
 		return MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
-		return re.findall('<img\s.+?src="(http://.+?)".+?/>',self.getMessage())
+		return MC.imageFilter.findall(self.getMessage(),re.S)
 		
 	def linkImageURLs(self):
 		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
@@ -134,14 +141,7 @@ class ForumPost:
 		links = []
 		for m in self.linkURLs(): links.append(PMLink(m))
 		return links
-		
-	def threadLinkURLs(self):
-		if FB.filters.get('thread_link'): return re.finditer(FB.filters.get('thread_link'),self.getMessage(),re.S)
-		return None
-		
-	def postLinkURLs(self):
-		if FB.filters.get('post_link'): return re.finditer(FB.filters.get('post_link'),self.getMessage(),re.S)
-		return None
+	
 			
 class PageData:
 	def __init__(self,page_match,next_match,prev_match):
@@ -210,9 +210,14 @@ class PageData:
 		if self.pageDisplay: return self.pageDisplay
 		if self.page and self.totalPages:
 			return 'Page %s of %s' % (self.page,self.totalPages)
-			
-class PostMessage:
+
+class Action:
+	def __init__(self,action=''):
+		self.action = action
+		
+class PostMessage(Action):
 	def __init__(self,pid='',tid='',fid='',title='',message=''):
+		Action.__init__(self,'CHANGE')
 		self.pid = pid
 		self.tid = tid
 		self.fid = fid
@@ -222,7 +227,7 @@ class PostMessage:
 		self.quser = ''
 		
 	def setQuote(self,user,quote):
-		self.quser = user
+		self.quser = MC.tagFilter.sub('',user)
 		self.quote = quote
 		
 	def setMessage(self,title,message):
@@ -911,9 +916,12 @@ class MessageWindow(BaseWindow):
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
-		text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % self.post.messageAsDisplay()
+		text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 		self.getControl(122).setText(text)
+		self.getControl(102).setImage(self.post.avatarFinal)
+		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
 		self.getControl(104).setLabel('[B]%s[/B]' % self.post.title or '')
+		self.getControl(105).setLabel('[B]%s[/B]' % self.post.date or '')
 		self.getImages()
 		self.getLinks()
                    
@@ -987,7 +995,53 @@ class MessageWindow(BaseWindow):
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
+		elif action == ACTION_CONTEXT_MENU:
+			self.doMenu()
 		BaseWindow.onAction(self,action)
+		
+	def doMenu(self):
+		options = [__language__(30134),__language__(30135)]
+		delete = None
+		if FB.canDelete(self.post.cleanUserName()):
+			delete = len(options)
+			options.append(__language__(30141))
+		idx = xbmcgui.Dialog().select(__language__(30051),options)
+		if idx == 0: self.openPostDialog(quote=self.post.messageAsQuote())
+		elif idx == 1: self.translateMessage()
+		elif idx == delete: self.deletePost()
+		
+	def translateMessage(self):
+		message = translateDisplay(self.post.messageAsDisplay())
+		desc_base = '[COLOR FF000000]%s[/COLOR][CR] [CR]'
+		self.getControl(122).setText(desc_base % message)
+		self.post.translated = message
+			
+	def deletePost(self):
+		post = PostMessage(self.post.pid,self.post.tid,self.post.fid)
+		if not self.post.pid: return
+		prog = xbmcgui.DialogProgress()
+		prog.create(__language__(30149),__language__(30150))
+		prog.update(0)
+		try:
+			FB.deletePost(post)
+		except:
+			prog.close()
+			raise
+		prog.close()
+		self.action = Action('REFRESH')
+		self.close()
+		
+	def openPostDialog(self,quote=''):
+		if quote:
+			user = self.post.userName
+		else:
+			user=''
+		pm = PostMessage(self.post.pid,self.post.tid,self.post.fid)
+		if quote: pm.setQuote(user,quote)
+		w = PostDialog("script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
+		w.doModal()
+		posted = w.posted
+		del w
 	
 ######################################################################################
 # Replies Window
@@ -1075,6 +1129,7 @@ class RepliesWindow(PageWindow):
 				if title: title = '[B]%s[/B][CR][CR]' % title
 				url = ''
 				if post.avatar: url = FB.makeURL(post.avatar)
+				post.avatarFinal = url
 				user = re.sub('<.*?>','',post.userName)
 				item = xbmcgui.ListItem(label=user,label2=post.date + ': ' + title)
 				if post.title: item.setInfo('video',{'Genre':'bold'})
@@ -1112,6 +1167,7 @@ class RepliesWindow(PageWindow):
 			if fname:
 				fname = xbmc.translatePath(fname)
 				item.setProperty('avatar',fname)
+				post.avatarFinal = fname
 			
 	def makeLinksArray(self,miter):
 		if not miter: return []
@@ -1127,14 +1183,19 @@ class RepliesWindow(PageWindow):
 			item = self.getControl(120).getSelectedItem()
 		if not item: return
 		post = self.posts.get(item.getProperty('post'))
+		post.tid = self.tid
+		post.fid = self.fid
 		w = MessageWindow("script-forumbrowser-message.xml" ,__addon__.getAddonInfo('path'),THEME,post=post,parent=self)
 		w.doModal()
 		if w.action:
-			self.topic = ''
-			self.pid = w.action.pid
-			self.tid = w.action.tid
-			if w.action.pid: self.showThread(nopage=True)
-			else: self.showThread()
+			if w.action.action == 'CHANGE':
+				self.topic = ''
+				self.pid = w.action.pid
+				self.tid = w.action.tid
+				if w.action.pid: self.showThread(nopage=True)
+				else: self.showThread()
+			elif w.action.action == 'REFRESH':
+				self.fillRepliesList(self.pageData.page)
 		del w
 		
 	def onClick(self,controlID):
@@ -1151,115 +1212,29 @@ class RepliesWindow(PageWindow):
 		PageWindow.onAction(self,action)
 	
 	def doMenu(self):
-		options = [__language__(30134),__language__(30135)]
+		options = [__language__(30134),__language__(30135),__language__(30054)]
 		delete = None
-		images = None
-		link_images = None
-		links = None
-		thread_links = None
-		post_links = None
 		item = self.getControl(120).getSelectedItem()
 		post = self.posts.get(item.getProperty('post'))
-		img_urls = post.imageURLs()
-		link_img_urls = post.linkImageURLs()
-		link_urls = self.makeLinksArray(post.linkURLs())
-		thread_link_urls = self.makeLinksArray(post.threadLinkURLs())
-		post_link_urls = self.makeLinksArray(post.postLinkURLs())
-		if img_urls:
-			images = len(options)
-			options.append(__language__(30136))
-		if link_img_urls:
-			link_images = len(options)
-			options.append(__language__(30137))
-		if thread_link_urls:
-			thread_links = len(options)
-			options.append(__language__(30138))
-		if post_link_urls:
-			post_links = len(options)
-			options.append(__language__(30139))
-		if link_urls:
-			links = len(options)
-			options.append(__language__(30140))
 		if FB.canDelete(item.getLabel()):
 			delete = len(options)
 			options.append(__language__(30141))
 		idx = xbmcgui.Dialog().select(__language__(30051),options)
 		if idx == 0: self.openPostDialog(quote=post.messageAsQuote())
 		elif idx == 1: self.translateMessage()
-		elif idx == images: self.showImages(img_urls)
-		elif idx == link_images: self.showImages(link_img_urls)
-		elif idx == thread_links: self.followThreadLink(thread_link_urls)
-		elif idx == post_links: self.followPostLink(post_link_urls)
-		elif idx == links: self.downloadLinks(link_urls)
+		elif idx == 2: self.fillRepliesList(self.pageData.page)
 		elif idx == delete: self.deletePost()
-		
-	def subTags(self,m):
-		return '[%s]' % m.group(1).upper()
 		
 	def translateMessage(self):
 		item = self.getControl(120).getSelectedItem()
 		post =  self.posts.get(item.getProperty('post'))
-		pre = re.sub('\[(/?(?:(?:COLOR(?: \w+)?)|CR|B|I))\]',r'<\1>',post.messageAsDisplay()).replace('> ','><space>').replace(' <','<space><')
-		#print pre
-		message = TR.translate(pre,FB.formats.get('language','en'),getLanguage(),newline='<CR>',format='html')
-		message = convertHTMLCodes(message)
-		message = message.replace('> ','>').replace(' <','<').replace('<space>',' ')
-		#print unicode.encode(message,'ascii','replace')
-		message = re.sub('<(/?COLOR(?: \w+)?)>',r'[\1]',message)
-		message = re.sub('<([^<>]+?)>',self.subTags,message)
-		#print unicode.encode(message,'ascii','replace')
+		message = translateDisplay(post.messageAsDisplay())
 		desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
 		item.setProperty('message',desc_base % message)
+		post.translated = message
 		self.setFocusId(105)
 		self.setFocusId(120)
 		item.select(True)
-		
-	def followPostLink(self,linkdatas):
-		texts = []
-		for m in linkdatas: texts.append('%s - (%s: %s)' % (MC.tagFilter.sub('',m.group('text')),__language__(30142),m.group('postid')))
-		idx = xbmcgui.Dialog().select(__language__(30051),texts)
-		if idx < 0: return
-		postid = linkdatas[idx].groupdict().get('postid','')
-		threadid = linkdatas[idx].groupdict().get('threadid','')
-		if postid:
-			self.pid = postid
-			self.tid = threadid
-			self.topic = ''
-			self.showThread(nopage=True)
-		
-	def followThreadLink(self,linkdatas):
-		texts = []
-		for m in linkdatas: texts.append('%s - (%s: %s)' % (MC.tagFilter.sub('',m.group('text')),__language__(30143),m.group('threadid')))
-		idx = xbmcgui.Dialog().select(__language__(30051),texts)
-		if idx < 0: return
-		threadid = linkdatas[idx].group('threadid')
-		if threadid:
-			self.tid = threadid
-			self.topic = ''
-			self.showThread()
-		
-	def downloadLinks(self,links):
-		texts = []
-		for m in links: texts.append('%s - (%s)' % (m.group('text'),m.group('url')))
-		idx = xbmcgui.Dialog().select(__language__(30051),texts)
-		if idx < 0: return
-		url = links[idx].group('url')
-		base = xbmcgui.Dialog().browse(3,__language__(30144),'files')
-		if not base: return
-		fname,ftype = Downloader(message=__language__(30145)).downloadURL(base,url)
-		if not fname: return
-		xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
-			
-	def showImages(self,images):
-		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
-		if not os.path.exists(base): os.makedirs(base)
-		clearDirFiles(base)
-		image_files = Downloader(message=__language__(30148)).downloadURLs(base,images,'.jpg')
-		if not image_files: return
-		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
-		w.doModal()
-		del w
-		#xbmc.executebuiltin('SlideShow('+base+')')
 			
 	def deletePost(self):
 		item = self.getControl(120).getSelectedItem()
@@ -1714,6 +1689,19 @@ class MessageConverter:
 # Functions
 ######################################################################################
 
+def subTags(m): return '[%s]' % m.group(1).upper()
+def translateDisplay(message):
+	pre = re.sub('\[(/?(?:(?:COLOR(?: \w+)?)|CR|B|I))\]',r'<\1>',message).replace('> ','><space>').replace(' <','<space><')
+	#print pre
+	message = TR.translate(pre,FB.formats.get('language','en'),getLanguage(),newline='<CR>',format='html')
+	message = convertHTMLCodes(message)
+	message = message.replace('> ','>').replace(' <','<').replace('<space>',' ')
+	#print unicode.encode(message,'ascii','replace')
+	message = re.sub('<(/?COLOR(?: \w+)?)>',r'[\1]',message)
+	message = re.sub('<([^<>]+?)>',subTags,message)
+	#print unicode.encode(message,'ascii','replace')
+	return message
+		
 def calculatePage(low,high,total):
 	low = int(low.replace(',',''))
 	high = int(high.replace(',',''))

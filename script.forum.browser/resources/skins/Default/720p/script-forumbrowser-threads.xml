@@ -70,8 +70,8 @@
         <textcolor>white</textcolor>
         <aligny>center</aligny>
         <align>center</align>
-        <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+        <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
       </control>
       <control type="image">
             <description>page header tab icon</description>

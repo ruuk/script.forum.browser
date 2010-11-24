@@ -60,8 +60,8 @@
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus  border="10">FBbutton-nofocus.png</texturenofocus>
        <font>font18</font>
        <align>center</align>
        <label>Set Title</label>

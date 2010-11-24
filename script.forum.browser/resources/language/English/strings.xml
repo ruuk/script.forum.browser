@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<!-- All %s must remain -->
+    <!-- All %s must remain -->
     <string id="30000">General</string>
     <string id="30001">Open Thread At Oldest Post</string>
     <string id="30002">Show Oldest Post At Top</string>
@@ -10,6 +10,7 @@
     <string id="30051">Options</string>
     <string id="30052">Done</string>
     <string id="30053">Please try again.</string>
+    <string id="30054">Refresh</string>
     
     <string id="30100">Logging In</string>
     <string id="30101">Opening URL</string>
@@ -53,7 +54,7 @@
     <string id="30145">Downloading File</string>
     <string id="30146">Downloaded File: </string>
     <string id="30147">Type: %s</string>
-    <string id="30148">Downloading Imagses</string>
+    <string id="30148">Downloading Images</string>
     <string id="30149">Deleting</string>
     <string id="30150">Deleting post. Please wait...</string>
     
