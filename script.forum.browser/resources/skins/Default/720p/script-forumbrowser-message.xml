@@ -30,10 +30,10 @@
       </control>
       <control type="image" id="102">
             <description>Avatar</description>
-            <posx>14</posx>
-            <posy>12</posy>
-            <width>64</width>
-            <height>64</height>
+            <posx>19</posx>
+            <posy>15</posy>
+            <width>59</width>
+            <height>59</height>
       </control>
       <control type="label" id="103">
         <description>textarea</description>
@@ -54,7 +54,7 @@
         <description>Topic</description>
         <posx>192</posx>
         <posy>14</posy>
-        <width>635</width>
+        <width>735</width>
         <height>60</height>
         <font>font18</font>
         <textcolor>black</textcolor>
@@ -65,9 +65,9 @@
       
       <control type="label" id="105">
         <description>Date</description>
-        <posx>837</posx>
+        <posx>937</posx>
         <posy>14</posy>
-        <width>150</width>
+        <width>300</width>
         <height>60</height>
         <font>font18</font>
         <textcolor>black</textcolor>
@@ -154,7 +154,7 @@
                 <posy>0</posy>
                 <width>315</width>
                 <height>720</height>
-                <texture border="10">FBbutton-focus.png</texture>
+                <texture border="10">Slide-panel.png</texture>
                 <visible>true</visible>
                 <colordiffuse>FFFFFFFF</colordiffuse>
         </control>
@@ -269,7 +269,7 @@
                 <posy>0</posy>
                 <width>515</width>
                 <height>720</height>
-                <texture border="10">FBbutton-focus.png</texture>
+                <texture border="10">Slide-panel.png</texture>
                 <visible>true</visible>
                 <colordiffuse>FFFFFFFF</colordiffuse>
         </control>

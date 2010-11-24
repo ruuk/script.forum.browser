@@ -1199,7 +1199,6 @@ class RepliesWindow(PageWindow):
 		del w
 		
 	def onClick(self,controlID):
-		print controlID
 		if controlID == 201:
 			self.openPostDialog()
 		elif controlID == 120:
@@ -1802,7 +1801,7 @@ class ThreadDownloader:
 		self.thread.stop()
 		
 class DownloadThread(Thread):
-	def __init__(self,targetdir,urllist,ext='',callback=None,old_thread=None):
+	def __init__(self,targetdir,urllist,ext='',callback=None,old_thread=None,nothread=False):
 		Thread.__init__(self)
 		if not os.path.exists(targetdir): os.makedirs(targetdir)
 		self.callback = callback
@@ -1811,7 +1810,10 @@ class DownloadThread(Thread):
 		self.ext = ext
 		self.old_thread = old_thread
 		self._stop = Event()
-		self.start()
+		if nothread:
+			self.run()
+		else:
+			self.start()
 		
 	def stop(self):
 		self._stop.set()
