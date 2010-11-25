@@ -7,6 +7,9 @@ Current Version : 0.7.7
 Re-designed Posts interface
 Added Post view with links and images side menus
 Added Polish translation - thanks to scalpel
+Added ability to view Private messages ('Messages' button) for xbmc.org, boxee.tv and dvhk.pl
+Added 'Always Login If Possible' setting, which for now allows updating pm count
+Added 'Add Line Before' in post editing context menu
 
 *** 0.7.6 ***
 

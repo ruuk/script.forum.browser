@@ -399,7 +399,7 @@
             <posy>68</posy>
             <width>128</width>
             <height>128</height>
-            <texture>$INFO[ListItem.Icon]</texture>
+            <texture>$INFO[ListItem.Property(avatar)]</texture>
             <aspectratio>keep</aspectratio>
             <visible>true</visible>
           </control>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-    <!-- All %s must remain -->
+    <!-- All %s must remain in string but can change position -->
     <string id="30000">General</string>
     <string id="30001">Open Thread At Oldest Post</string>
     <string id="30002">Show Oldest Post At Top</string>
     <string id="30003">Language</string>
+    <string id="30004">Always Login If Possible</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -19,6 +20,7 @@
     <string id="30105">Processing Form</string>
     <string id="30106">Submitting Form</string>
     <string id="30107">Wating %s seconds</string>
+    <string id="30108">Clearing Notifications</string>
     
     <string id="30110">First Page</string>
     <string id="30111">Last Page</string>
@@ -35,6 +37,7 @@
     <string id="30125">Enter Post Title</string>
     <string id="30126">Posting</string>
     <string id="30127">Posting. Please wait...</string>
+    <string id="30128">Add Line Before</string>
     
     <string id="30130">Posts</string>
     <string id="30131">Error getting posts</string>
@@ -69,6 +72,7 @@
     <string id="30173">Sub-Forum</string>
     <string id="30174">Error filling forum list.</string>
     <string id="30175">Subscriptions</string>
+    <string id="30176">Private Messages</string>
     
     <string id="30180">Quote:</string>
     <string id="30181">Originally posted by:</string>
@@ -94,6 +98,7 @@
     <string id="3006">Add Line</string>
     <string id="3007">Add Lines</string>
     <string id="3008">Submit Post</string>
+    <string id="3009">Messages</string>
     
     
 </strings>

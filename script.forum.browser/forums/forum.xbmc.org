@@ -10,12 +10,24 @@ url:threads=forumdisplay.php?f=!FORUMID!
 url:replies=showthread.php?t=!THREADID!&p=!POSTID!
 url:subscriptions=subscription.php
 url:login=index.php
-# Not used yet
-url:private_messages=private.php
+
 url:newpost=newreply.php?do=newreply&noquote=1&p=!POSTID!
 url:deletepost=editpost.php?do=editpost&p=!POSTID!
 url:page_arg=page
 url:gotonewpost=&goto=newpost
+
+url:control_panel=usercp.php
+url:private_messages=private.php
+url:private_message=private.php?do=showpm&pmid=!PMID!
+url:private_messages_csv=private.php?do=downloadpm&dowhat=csv
+url:avatar=image.php?u=!USERID!
+format:pm_csv_columns=date,folder,title,user,to,message
+format:pm_folder=Inbox
+filter:pm_counts1=<a href="private.php">(?P<display>Private Messages</a>: Unread (?P<unread>\d+), Total (?P<total>\d+)).</div>
+#<a href="usercp.php">Your Notifications:</a> <strong>1</strong>
+filter:pm_counts2=Private Messages.+?<a href="private.php".+?>(?P<unread>\d+)</a>
+
+
 
 ### Filters ###################################
 # valid match names are url and suburl
@@ -27,8 +39,9 @@ filter:threads=showthread.php\?.*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<
 # this should match  the entire text for every post on the page from which the post filter will extract
 filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->.*?(?:<!-- sig -->.+?<!-- / sig -->)?
 # valid match names are postid, date, userid, user, avatar, title, and message
-#filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?href="member.php.*?(?P<userid>\d+)">(?P<user>.*?)</a>.*?src="(?P<avatar>(?:image.php?.*?u=\d+&amp;dateline=\d+)*|(?=.)*).*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+filter:private_message===replies
 filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>[\w\d-]+,\s\d+:\d+).*?<!-- / status icon and date -->.*?<div id="postmenu_\d+">(?:(?:<a.+?href="member.php.+?u=(?P<userid>\d+)">(?P<user>.+?)</a>.+?)|(?P<guest>\w+)).*?</div><div class="smallfont">(?P<status>.+?)</div>(?:<div class="smallfont">.*?<a href="member.php.+?<img src="(?P<avatar>image.php?.+?u=\d+&amp;dateline=\d+)"\swidth=".+?</div>)?<div class="smallfont">.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->.*?(<!-- sig -->(?P<signature>.*?)<!-- / sig -->)?
+filter:pm_post===post
 filter:thread_topic=<meta name="keywords" content="(?P<topic>.+?),
 filter:thread_id=href="showthread.php?[^<>]*?t=(?P<threadid>\d+)
 #filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>

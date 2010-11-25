@@ -3,7 +3,7 @@ import:forum.xbmc.org
 # The URLs
 url:base=http://forum.dvhk.pl/
 url:forums=index.php
-
+format:pm_folder=Skrzynka odbiorcza
 # The filters
 filter:logo=<img src="(?P<suburl>.+?logo.jpg)"[^<>]+? />
 filter:forums=(?P<subforum>\s/>\s)*(?<!align="left">)(?:<a href="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:</div><div class="smallfont">(?P<description>.*?)</div>)?

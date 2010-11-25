@@ -3,6 +3,12 @@ import xbmc, xbmcgui, xbmcaddon
 from googletranslate import googleTranslateAPI
 from threading import Thread, Event
 
+'''TODO
+
+Get PM's via XML so we can mark as read and also view avatars
+
+'''
+
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
@@ -93,26 +99,38 @@ class PMLink:
 		return self.tid and not self.pid
 		
 class ForumPost:
-	def __init__(self,pmatch=None):
+	def __init__(self,pmatch=None,pdict=None):
+		self.isPM = False
 		if pmatch:
 			pdict = pmatch.groupdict()
-			self.postId = pdict.get('postid','')
-			self.date = pdict.get('date','')
-			self.userId = pdict.get('userid','')
-			self.userName = pdict.get('user') or pdict.get('guest') or 'UERROR'
-			self.avatar = pdict.get('avatar','')
-			self.status = pdict.get('status','')
-			self.title = pdict.get('title','')
-			self.message = pdict.get('message','')
-			self.signature = pdict.get('signature','') or ''
+			self.setVals(pdict)
+		elif pdict:
+			self.setVals(pdict)
 		else:
 			self.postId,self.date,self.userId,self.userName,self.avatar,self.status,self.title,self.message,self.signature = ('','','','ERROR','','','ERROR','','')
+			self.pid = ''
 		self.translated = ''
 		self.avatarFinal = ''
-		self.pid = self.postId
 		self.tid = ''
 		self.fid = ''
 			
+	def setVals(self,pdict):
+		self.setPostID(pdict.get('postid',''))
+		self.date = pdict.get('date','')
+		self.userId = pdict.get('userid','')
+		self.userName = pdict.get('user') or pdict.get('guest') or 'UERROR'
+		self.avatar = pdict.get('avatar','')
+		self.status = pdict.get('status','')
+		self.title = pdict.get('title','')
+		self.message = pdict.get('message','')
+		self.signature = pdict.get('signature','') or ''
+		self.isPM = self.postId.startswith('PM')
+			
+	def setPostID(self,pid):
+		self.postId = pid
+		self.pid = pid
+		self.isPM = pid.startswith('PM')
+		
 	def cleanUserName(self):
 		return MC.tagFilter.sub('',self.userName)
 		
@@ -123,7 +141,10 @@ class ForumPost:
 		return messageToText(self.getMessage())
 		
 	def messageAsDisplay(self):
-		return MC.messageToDisplay(self.getMessage())
+		if self.isPM:
+			return MC.parseCodes(self.getMessage())
+		else:
+			return MC.messageToDisplay(self.getMessage())
 		
 	def messageAsQuote(self):
 		return MC.messageAsQuote(self.message)
@@ -144,7 +165,7 @@ class ForumPost:
 	
 			
 class PageData:
-	def __init__(self,page_match,next_match,prev_match):
+	def __init__(self,page_match=None,next_match=None,prev_match=None):
 		self.next = False
 		self.prev = False
 		self.page = '1'
@@ -238,12 +259,14 @@ class PostMessage(Action):
 # Forum Browser API
 ######################################################################################
 class ForumBrowser:
-	def __init__(self,forum):
+	def __init__(self,forum,always_login=False):
 		self.forum = forum
 		self._url = ''
 		self.browser = None
 		self.mechanize = None
 		self.needsLogin = True
+		self.alwaysLogin = always_login
+		self.lastHTML = ''
 		
 		self.reloadForumData(forum)
 		
@@ -313,9 +336,10 @@ class ForumBrowser:
 		return True
 			
 		
-	def setLogin(self,user,password):
+	def setLogin(self,user,password,always=False):
 		self.user = user
 		self.password = password
+		self.alwaysLogin = always
 			
 	def login(self):
 		LOG('LOGGING IN')
@@ -359,13 +383,16 @@ class ForumBrowser:
 		callback(60,__language__(30102))
 		return response.read()
 		
-	def readURL(self,url,callback=None):
+	def readURL(self,url,callback=None,force_login=False,is_html=True):
+		if not url:
+			LOG('ERROR - EMPTY URL IN readURL()')
+			return ''
 		if not callback: callback = self.fakeCallback
-		if self.formats.get('login_required'):
+		if self.formats.get('login_required') or force_login or (self.alwaysLogin and self.password):
 			if not self.checkLogin(callback=callback): return ''
 			data = self.browserReadURL(url,callback)
 			if self.forms.get('login_action','@%+#') in data:
-				self.login(callback=callback)
+				self.login()
 				data = self.browserReadURL(url,callback)
 		else:
 			callback(5,__language__(30101))
@@ -373,7 +400,7 @@ class ForumBrowser:
 			callback(50,__language__(30102))
 			data = req.read()
 			req.close()
-		
+		if is_html: self.lastHTML = data
 		return data
 		
 	def makeURL(self,phppart):
@@ -381,18 +408,33 @@ class ForumBrowser:
 		url = self._url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
 		
+	def getPMCounts(self,html=''):
+		if not html: html = MC.lineFilter.sub('',self.lastHTML)
+		pm_counts = None
+		ct = 0
+		while not pm_counts:
+			ct += 1
+			if self.filters.get('pm_counts%s' % ct):
+				pm_counts = re.search(self.filters.get('pm_counts%s' % ct),html)
+			else:
+				break
+		if pm_counts: return pm_counts.groupdict()
+		return None
+		
 	def getForums(self,callback=None):
 		if not callback: callback = self.fakeCallback
 		html = self.readURL(self.getURL('forums'),callback=callback)
 		#open('/home/ruuk/test3.html','w').write(html)
 		if not html: return (None,None)
 		callback(80,__language__(30103))
-		forums = re.finditer(self.filters['forums'],re.sub('[\n\t\r]','',html))
+		html = MC.lineFilter.sub('',html)
+		forums = re.finditer(self.filters['forums'],html)
 		logo = ''
 		if self.filters.get('logo'): logo = re.findall(self.filters['logo'],html)[0]
+		pm_counts = self.getPMCounts(html)
 		if logo: logo = self.makeURL(logo)
 		callback(100,__language__(30052))
-		return forums, logo
+		return forums, logo, pm_counts
 		
 	def getThreads(self,forumid,page='',callback=None):
 		if not callback: callback = self.fakeCallback
@@ -400,7 +442,7 @@ class ForumBrowser:
 		html = self.readURL(url,callback=callback)
 		if not html: return None
 		callback(80,__language__(30103))
-		threads = re.finditer(self.filters['threads'],re.sub('[\n\r\t]','',html))
+		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
 		callback(100,__language__(30052))
 		return threads,self.getPageData(html,page)
 		
@@ -410,16 +452,17 @@ class ForumBrowser:
 		html = self.readURL(url,callback=callback)
 		if not html: return None
 		callback(80,__language__(30103))
-		replies = re.findall(self.filters['replies'],re.sub('[\n\r\t]','',html))
-		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),re.sub('[\n\r\t]','',html))
+		html = MC.lineFilter.sub('',html)
+		replies = re.findall(self.filters['replies'],html)
+		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		if not threadid:
-			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),re.sub('[\n\r\t]','',html))
+			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)
 			threadid = threadid and threadid.group(1) or ''
 		topic = topic and topic.group(1) or ''
 		sreplies = []
 		for r in replies:
 			try:
-				post = ForumPost(re.search(self.filters['post'],re.sub('[\n\r\t]','',r)))
+				post = ForumPost(re.search(self.filters['post'],MC.lineFilter.sub('',r)))
 				sreplies.append(post)
 			except:
 				post = ForumPost()
@@ -429,10 +472,33 @@ class ForumBrowser:
 		callback(100,__language__(30052))
 		return sreplies, pd
 		
+	def getPrivateMessages(self,callback=None):
+		if not callback: callback = self.fakeCallback
+		if not self.checkLogin(callback=callback): return None, None
+		pms = None
+		if self.urls.get('private_messages_csv'):
+			csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
+			if not csvstring: return None, None
+			callback(80,__language__(30103))
+			columns = self.formats.get('pm_csv_columns').split(',')
+			import csv
+			cdata = csv.DictReader(csvstring.splitlines()[1:],fieldnames=columns)
+			pms = []
+			folder = self.formats.get('pm_folder')
+			for d in cdata:
+				if folder and folder == d.get('folder'):
+					p = ForumPost(pdict=d)
+					p.setPostID('PM%s' % len(pms))
+					pms.append(p)
+		callback(100,__language__(30052))
+		return pms, None
+	
 	def getSubscriptions(self,page='',callback=None):
 		if not callback: callback = self.fakeCallback
-		if not self.checkLogin(callback=callback): return False
+		if not self.checkLogin(callback=callback): return None
 		url = self.getPageUrl(page,'subscriptions')
+		html = self.readURL(url,callback=callback,force_login=True)
+		'''
 		callback(30,__language__(30101))
 		response = self.browser.open(url)
 		callback(55,__language__(30102))
@@ -443,9 +509,10 @@ class ForumBrowser:
 			html = response.read()
 			if self.forms.get('login_action','@%+#') in html:
 				return None
+		'''
 		if not html: return None
 		callback(80,__language__(30103))
-		threads = re.finditer(self.filters['subscriptions'],re.sub('[\n\r\t]','',html))
+		threads = re.finditer(self.filters['subscriptions'],MC.lineFilter.sub('',html))
 		callback(100,__language__(30052))
 		return threads, self.getPageData(html,page)
 		
@@ -637,7 +704,7 @@ class PageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.next = ''
 		self.prev = ''
-		self.pageData = None
+		self.pageData = PageData()
 		self._firstPage = __language__(30110)
 		self._lastPage = __language__(30111)
 		BaseWindow.__init__( self, *args, **kwargs )
@@ -676,10 +743,10 @@ class PageWindow(BaseWindow):
 		self.gotoPage(page)
 		
 	def setupPage(self,pageData):
-		self.pageData = pageData
-		self.getControl(200).setEnabled(pageData.prev)
-		self.getControl(202).setEnabled(pageData.next)
-		self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme['title_fg'],pageData.getPageDisplay()))
+		if pageData: self.pageData = pageData
+		self.getControl(200).setEnabled(self.pageData.prev)
+		self.getControl(202).setEnabled(self.pageData.next)
+		self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme['title_fg'],self.pageData.getPageDisplay()))
 		
 	def gotoPage(self,page): pass
 
@@ -755,8 +822,12 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 			format = FB.formats.get('quote')
 			xbmcgui.lock()
 			try:
+				pid = self.post.pid
+				#This won't work with other formats, need to do this better TODO
+				if not pid or pid.startswith('PM'): format = format.replace(';!POSTID!','')
 				for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
-					self.addLine(line,emptyok=True)
+					self.addLine(line)
+				self.updatePreview()
 			except:
 				xbmcgui.unlock()
 			else:
@@ -783,7 +854,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		
 	def onClick( self, controlID ):
 		if controlID == 200:
-			self.addLine()
+			self.addLineSingle()
 		elif controlID == 201:
 			self.addLineMulti()
 		elif controlID == 202:
@@ -805,8 +876,9 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		
 	def doMenu(self):
 		dialog = xbmcgui.Dialog()
-		idx = dialog.select(__language__(30051),[__language__(30122)])
-		if idx == 0: self.deleteLine()
+		idx = dialog.select(__language__(30051),[__language__(30128),__language__(30122)])
+		if idx == 0: self.addLineSingle(before=True)
+		elif idx == 1: self.deleteLine()
 		
 	def getOutput(self):
 		llist = self.getControl(120)
@@ -820,18 +892,12 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.getControl(122).reset()
 		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
 			
-	def addLine(self,line='',emptyok=False):
-		if not line and not emptyok:
-			keyboard = xbmc.Keyboard('',__language__(30123))
-			keyboard.doModal()
-			if not keyboard.isConfirmed(): return False
-			line = keyboard.getText()
+	def addLine(self,line=''):
 		item = xbmcgui.ListItem(label=self.displayLine(line))
 		#we set text separately so we can have the display be formatted...
 		item.setProperty('text',line)
 		self.getControl(120).addItem(item)
 		self.getControl(120).selectItem(self.getControl(120).size()-1)
-		self.updatePreview()
 		return True
 		
 	def displayLine(self,line):
@@ -840,9 +906,31 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 					.replace('[/I]','[/I ]')\
 					.replace('[/B]','[/B ]')\
 					.replace('[/COLOR]','[/COLOR ]')
-					
+		
+	def addLineSingle(self,before=False,update=True):
+		keyboard = xbmc.Keyboard('',__language__(30123))
+		keyboard.doModal()
+		if not keyboard.isConfirmed(): return False
+		line = keyboard.getText()
+		if before:
+			clist = self.getControl(120)
+			idx = clist.getSelectedPosition()
+			lines = []
+			for i in range(0,clist.size()):
+				if i == idx: lines.append(line)
+				lines.append(clist.getListItem(i).getProperty('text'))
+			clist.reset()
+			for l in lines: self.addLine(l)
+			self.updatePreview()
+			return True
+				
+		else:
+			self.addLine(line)
+			self.updatePreview()
+			return True
+		
 	def addLineMulti(self):
-		while self.addLine(): pass
+		while self.addLineSingle(): pass
 		
 	def deleteLine(self):
 		llist = self.getControl(120)
@@ -851,10 +939,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		for x in range(0,llist.size()):
 			if x != pos: lines.append(llist.getListItem(x).getProperty('text'))
 		llist.reset()
-		for line in lines:
-			item = xbmcgui.ListItem(label=line)
-			item.setProperty('text',line)
-			llist.addItem(item)
+		for line in lines: self.addLine(line)
 		self.updatePreview()
 	
 	def editLine(self):
@@ -866,7 +951,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		item.setProperty('text',line)
 		item.setLabel(self.displayLine(line))
 		self.updatePreview()
-		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',re.sub('[\n\r\t]','',test3))
+		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',MC.lineFilter.sub('',test3))
 	
 	def setTitle(self):
 		keyboard = xbmc.Keyboard(self.title,__language__(30125))
@@ -895,14 +980,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.close()
 		
 	def parseCodes(self,text):
-		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',MC.quoteConvert,text)
-		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',MC.quoteConvert,text)
-		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',MC.codeReplace,text)
-		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',MC.phpReplace,text)
-		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',MC.htmlReplace,text)
-		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',MC.quoteImageReplace,text)
-		text = re.sub('\[URL="(?P<url>.+?)"\](?P<text>.+?)\[/URL\](?is)',MC.linkReplace,text)
-		return text
+		return MC.parseCodes(text)
 
 ######################################################################################
 # Message Window
@@ -1103,7 +1181,10 @@ class RepliesWindow(PageWindow):
 	def fillRepliesList(self,page=''):
 		self.startProgress()
 		try:
-			replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid,callback=self.setProgress)
+			if self.tid == 'private_messages':
+				replies, pageData = FB.getPrivateMessages(callback=self.setProgress)
+			else:
+				replies, pageData = FB.getReplies(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid,callback=self.setProgress)
 		except:
 			ERROR('GET REPLIES ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30132))
@@ -1123,7 +1204,7 @@ class RepliesWindow(PageWindow):
 			select = -1
 			for post,idx in zip(replies,range(0,len(replies))):
 				#print post.postId + ' ' + self.pid
-				if post.postId == self.pid: select = idx
+				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
 				title = post.title or ''
 				if title: title = '[B]%s[/B][CR][CR]' % title
@@ -1383,7 +1464,8 @@ class ThreadsWindow(PageWindow):
 ######################################################################################
 class ForumsWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
-		FB.setLogin(self.getUsername(),self.getPassword())
+		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
+		self.parent = self
 		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def getUsername(self):
@@ -1419,7 +1501,7 @@ class ForumsWindow(BaseWindow):
 		
 		self.startProgress()
 		try:
-			forums, logo = FB.getForums(callback=self.setProgress)
+			forums, logo, pm_counts = FB.getForums(callback=self.setProgress)
 			if not forums:
 				xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
 				self.endProgress()
@@ -1435,6 +1517,7 @@ class ForumsWindow(BaseWindow):
 			xbmcgui.lock()
 			self.getControl(120).reset()
 			self.getControl(250).setImage(logo)
+			self.setPMCounts(pm_counts)
 			#print forums
 			desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]'
 			for f in forums:
@@ -1461,6 +1544,17 @@ class ForumsWindow(BaseWindow):
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
 		xbmcgui.unlock()
 			
+	def setPMCounts(self,pm_counts=None):
+		disp = ''
+		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
+		self.getControl(203).setLabel(__language__(3009) + disp)
+		
+	def openPMWindow(self):
+		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'), THEME,tid='private_messages',topic=__language__(30176),parent=self)
+		w.doModal()
+		del w
+		self.setPMCounts(FB.getPMCounts())
+		
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
 		fid = item.getProperty('id')
@@ -1468,6 +1562,7 @@ class ForumsWindow(BaseWindow):
 		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
+		self.setPMCounts(FB.getPMCounts())
 		
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
@@ -1475,6 +1570,7 @@ class ForumsWindow(BaseWindow):
 		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
+		self.setPMCounts(FB.getPMCounts())
 		
 	def changeForum(self):
 		fpath = xbmc.translatePath('special://home/addons/script.forum.browser/forums/')
@@ -1496,6 +1592,8 @@ class ForumsWindow(BaseWindow):
 			self.openSettings()
 		elif controlID == 201:
 			self.openSubscriptionsWindow()
+		elif controlID == 203:
+			self.openPMWindow()
 		elif controlID == 202:
 			self.changeForum()
 		elif controlID == 120:
@@ -1510,7 +1608,7 @@ class ForumsWindow(BaseWindow):
 		xbmcgui.WindowXMLDialog.onAction(self,action)
 		
 	def resetForum(self,hidelogo=True):
-		FB.setLogin(self.getUsername(),self.getPassword())
+		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
 		self.getControl(201).setEnabled(self.hasLogin())
 		if hidelogo: self.getControl(250).setImage('')
 		
@@ -1619,7 +1717,7 @@ class MessageConverter:
 		return out
 
 	def messageAsQuote(self,html):
-		html = re.sub('[\n\r\t]','',html)
+		html = self.lineFilter.sub('',html)
 		if self.quoteFilter: html = self.quoteFilter.sub('',html)
 		if self.codeFilter: html = self.codeFilter.sub('[CODE]\g<code>[/CODE]',html)
 		if self.phpFilter: html = self.phpFilter.sub('[PHP]\g<php>[/PHP]',html)
@@ -1684,6 +1782,17 @@ class MessageConverter:
 		else: bullet = '*'
 		return  '%s %s\n' % (bullet,m.group(1))
 		
+	def parseCodes(self,text):
+		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',MC.quoteConvert,text)
+		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',MC.quoteConvert,text)
+		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',MC.codeReplace,text)
+		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',MC.phpReplace,text)
+		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',MC.htmlReplace,text)
+		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',MC.quoteImageReplace,text)
+		text = re.sub('\[URL="(?P<url>.+?)"\](?P<text>.+?)\[/URL\](?is)',MC.linkReplace,text)
+		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',MC.linkReplace,text)
+		return text
+		
 ######################################################################################
 # Functions
 ######################################################################################
@@ -1730,7 +1839,7 @@ def convertHTMLCodes(html):
 				.replace("&nbsp;"," ")
 				
 def messageToText(html):
-	html = re.sub('[\n\r\t]','',html)
+	html = MC.lineFilter.sub('',html)
 	html = re.sub('<br.*?>','\n',html)
 	html = html.replace('</table>','\n\n')
 	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
@@ -1943,7 +2052,7 @@ if sys.argv[-1] == 'settings':
 else:
 	#THEME = 'Fullscreen'
 	TD = ThreadDownloader()
-	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org')
+	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org',always_login=__addon__.getSetting('always_login') == 'true')
 	MC = MessageConverter()
 	TR = googleTranslateAPI()
 

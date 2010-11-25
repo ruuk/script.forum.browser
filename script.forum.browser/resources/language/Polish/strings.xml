@@ -68,6 +68,7 @@
     <string id="30173">Sub-Forum</string>
     <string id="30174">Błąd wypełniania listy forum.</string>
     <string id="30175">Subskrypcje</string>
+    <string id="30176">Prywatne Wiadomości</string>
     
     <string id="30180">Cytat:</string>
     <string id="30181">Oryginał napisał:</string>
@@ -93,6 +94,7 @@
     <string id="3006">Dodaj linię</string>
     <string id="3007">Dodaj linijki</string>
     <string id="3008">Wyślij post</string>
+    <string id="3009">Wiadomości</string>
     
     
 </strings>

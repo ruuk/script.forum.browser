@@ -80,15 +80,15 @@
        <ondown>120</ondown>
        <posx>30</posx>
        <posy>620</posy>
-       <width>330</width>
+       <width>242</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3003]</label>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -96,41 +96,62 @@
       <control type="button" id="201">
        <description>The Button</description>
        <onleft>200</onleft>
-       <onright>202</onright>
+       <onright>203</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>384</posx>
+       <posx>295</posx>
        <posy>620</posy>
-       <width>330</width>
+       <width>242</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3004]</label>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+       <textcolor>FFFFFFFF</textcolor>
+       <disabledcolor>80FFFFFF</disabledcolor>
+      </control>
+      
+      <control type="button" id="203">
+       <description>The Button</description>
+       <onleft>201</onleft>
+       <onright>202</onright>
+       <onup>120</onup>
+       <ondown>120</ondown>
+       <posx>560</posx>
+       <posy>620</posy>
+       <width>242</width>
+       <height>40</height>
+       <visible>true</visible>
+       <colordiffuse>FFFFFFFF</colordiffuse>
+       <font>font18</font>
+       <align>center</align>
+       <label>$LOCALIZE[SCRIPT3009]</label>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
       
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>201</onleft>
+       <onleft>203</onleft>
        <onright>120</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>738</posx>
+       <posx>825</posx>
        <posy>620</posy>
-       <width>330</width>
+       <width>242</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3005]</label>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -183,7 +204,7 @@
       </control>
       <control type="image" id="310">
         <posx>20</posx>
-        <posy>120</posy>
+        <posy>119</posy>
         <width>1</width>
         <height>2</height>
         <texture>progress.png</texture>
