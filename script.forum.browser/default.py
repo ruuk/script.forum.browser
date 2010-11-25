@@ -12,7 +12,7 @@ Get PM's via XML so we can mark as read and also view avatars
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '11-18-2010'
+__date__ = '11-25-2010'
 __version__ = '0.7.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString

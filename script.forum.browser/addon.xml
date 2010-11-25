@@ -15,6 +15,6 @@
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <summary lang="en">Browse forums within XBMC</summary>
-    <description lang="en">Browse Forums in XBMC. View forums, threads, posts, and subscriptions. Post replies, delete posts, quote posts. View images in posts. Currently supports Forums: xbmc.org,boxee.tv,xbmc4xbox.org</description>
+    <description lang="en">Browse Forums in XBMC. View forums, threads, posts, subscriptions and private messages. Post replies, delete posts, quote posts. View images in posts, follow post forum links and download post links. Currently supports Forums: xbmc.org,boxee.tv,xbmc4xbox.org,dvhk.pl</description>
   </extension>
 </addon>
