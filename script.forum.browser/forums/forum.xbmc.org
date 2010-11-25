@@ -7,7 +7,7 @@
 url:base=http://forum.xbmc.org/
 url:forums=index.php
 url:threads=forumdisplay.php?f=!FORUMID!
-url:replies=showthread.php?t=!THREADID!&p=!POSTID!
+url:replies=showthread.php?t=!THREADID!&p=!POSTID!&mode=linear
 url:subscriptions=subscription.php
 url:login=index.php
 

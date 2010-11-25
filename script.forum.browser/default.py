@@ -418,8 +418,6 @@ class ForumBrowser:
 				pm_counts = re.search(self.filters.get('pm_counts%s' % ct),html)
 			else:
 				break
-			print ct
-		print pm_counts
 		#print html
 		if pm_counts: return pm_counts.groupdict()
 		return None
@@ -535,8 +533,13 @@ class ForumBrowser:
 			per_page = self.formats.get('%s_per_page' % sub)
 			if per_page and page:
 				try:
-					if int(page) < 0: page = 1000
+					if int(page) < 0: page = 9999
 					page = str((int(page) - 1) * int(per_page))
+				except:
+					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
+			elif page:
+				try:
+					if int(page) < 0: page = '9999'
 				except:
 					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 			if page: page = '&%s=%s' % (self.urls.get('page_arg',''),page)
@@ -710,6 +713,7 @@ class PageWindow(BaseWindow):
 		self.pageData = PageData()
 		self._firstPage = __language__(30110)
 		self._lastPage = __language__(30111)
+		self._newestPage = None
 		BaseWindow.__init__( self, *args, **kwargs )
                        
 	def onFocus( self, controlId ):
@@ -734,10 +738,15 @@ class PageWindow(BaseWindow):
 		
 	def pageMenu(self):
 		dialog = xbmcgui.Dialog()
-		idx = dialog.select(__language__(30114),[self._firstPage,self._lastPage,__language__(30115)])
-		if idx == 0: self.gotoPage(1)
-		elif idx == 1: self.gotoPage(-1)
-		elif idx == 2: self.askPageNumber()
+		options = [self._firstPage,self._lastPage]
+		if self._newestPage: options.append(self._newestPage)
+		options.append(__language__(30115))
+		idx = dialog.select(__language__(30114),options)
+		if idx < 0: return
+		if options[idx] == self._firstPage: self.gotoPage(1)
+		elif options[idx] == self._lastPage: self.gotoPage(9999)
+		elif options[idx] == self._newestPage: self.gotoPage(-1)
+		else: self.askPageNumber()
 		
 	def askPageNumber(self):
 		page = xbmcgui.Dialog().numeric(0,__language__(30116))
@@ -1136,8 +1145,8 @@ class RepliesWindow(PageWindow):
 		self.topic = kwargs.get('topic','')
 		self.lastid = kwargs.get('lastid','')
 		self.parent = kwargs.get('parent')
-		self._firstPage = __language__(30113)
-		self._lastPage = __language__(30112)
+		#self._firstPage = __language__(30113)
+		self._newestPage = __language__(30112)
 		self.me = self.parent.parent.getUsername()
 		self.posts = {}
 		
@@ -1172,8 +1181,8 @@ class RepliesWindow(PageWindow):
 		if nopage:
 			page = ''
 		else:
-			page = '-1'
-			if __addon__.getSetting('open_thread_to_oldest') == 'true': page = '1'
+			page = '1'
+			if __addon__.getSetting('open_thread_to_newest') == 'true': page = '-1'
 		
 		self.fillRepliesList(page)
 		
@@ -1202,7 +1211,7 @@ class RepliesWindow(PageWindow):
 			if not self.tid: self.tid = pageData.tid
 			self.setupPage(pageData)
 			desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
-			if __addon__.getSetting('show_oldest_post_top') != 'true': replies.reverse()
+			if __addon__.getSetting('reverse_sort') != 'true': replies.reverse()
 			self.posts = {}
 			select = -1
 			for post,idx in zip(replies,range(0,len(replies))):

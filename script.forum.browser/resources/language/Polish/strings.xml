@@ -2,8 +2,8 @@
 <strings>
     <!-- All %s must remain -->
     <string id="30000">Ogólne</string>
-    <string id="30001">Otwórz wątek od nastarzszego postu</string>
-    <string id="30002">Pokazuj starsze posty u góry</string>
+    <string id="30001">Otwórz wątek od najnowszych postu</string>
+    <string id="30002">Reverse postów Sortuj</string>
     <string id="30003">Język</string>
     
     <string id="30050">Błąd</string>

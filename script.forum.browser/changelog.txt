@@ -10,6 +10,8 @@ Added Polish translation - thanks to scalpel
 Added ability to view Private messages ('Messages' button) for xbmc.org, boxee.tv and dvhk.pl
 Added 'Always Login If Possible' setting, which for now allows updating pm count
 Added 'Add Line Before' in post editing context menu
+Changed page jumping on posts and threads to handle logged in sort/page number issues
+Changed page options in settings to 'Open Thread At Newest Post' and 'Reverse Sort Posts'
 
 *** 0.7.6 ***
 
