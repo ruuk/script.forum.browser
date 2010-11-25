@@ -418,6 +418,9 @@ class ForumBrowser:
 				pm_counts = re.search(self.filters.get('pm_counts%s' % ct),html)
 			else:
 				break
+			print ct
+		print pm_counts
+		#print html
 		if pm_counts: return pm_counts.groupdict()
 		return None
 		

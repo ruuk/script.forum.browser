@@ -4,6 +4,9 @@ import:forum.xbmc.org
 url:base=http://forum.dvhk.pl/
 url:forums=index.php
 format:pm_folder=Skrzynka odbiorcza
+#Nieprzeczytane Prywatne Wiadomości
+filter:pm_counts1=<a href="private.php\?">(?P<display>Prywatne Wiadomo.{1,2}ci</a>: (?:<strong>)?(?P<unread>\d+)(?:</strong>)? nie przeczytanych, razem (?P<total>\d+)).</div>
+filter:pm_counts2=Prywatne Wiadomo.{1,2}ci.+?<a href="private.php"[^<>]+?>(?P<unread>\d+)</a>
 # The filters
 filter:logo=<img src="(?P<suburl>.+?logo.jpg)"[^<>]+? />
 filter:forums=(?P<subforum>\s/>\s)*(?<!align="left">)(?:<a href="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:</div><div class="smallfont">(?P<description>.*?)</div>)?
