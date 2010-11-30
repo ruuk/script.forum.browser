@@ -34,7 +34,7 @@
        <onup>200</onup>
        <ondown>200</ondown>
        <posx>30</posx>
-       <posy>620</posy>
+       <posy>625</posy>
        <width>330</width>
        <height>40</height>
        <visible>true</visible>
@@ -56,7 +56,7 @@
        <onup>202</onup>
        <ondown>202</ondown>
        <posx>738</posx>
-       <posy>620</posy>
+       <posy>625</posy>
        <width>330</width>
        <height>40</height>
        <visible>true</visible>

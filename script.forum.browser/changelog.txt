@@ -1,6 +1,19 @@
 Forum Browser Changelog
 
-Current Version : 0.7.7
+Current Version : 0.7.8
+
+*** 0.7.8 ***
+
+Added avatars to private messages
+Fixed avatar image updating issue
+Added theme coloring to post message window
+Changed colors for xbmc.org
+Forums, threads and posts now load in a background thread and are interruptable/cancelable
+Fixed bug with xbmc4xboc paging
+Improved Forums and Threads window interface.
+Fixed handling of nested display tags.
+Added the ability to delete private messages (xbmc.org,boxee.tv,dvhk.pl)
+Added theming to lists (dark and light) default is to set by forum, but can be overridden in settings.
 
 *** 0.7.7 ***
 

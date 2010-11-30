@@ -6,6 +6,11 @@
     <string id="30002">Reverse Sort Posts</string>
     <string id="30003">Language</string>
     <string id="30004">Always Login If Possible</string>
+    <string id="30005">Theme List Background Style</string>
+    
+    <string id="30010">Forum Default</string>
+    <string id="30011">Dark</string>
+    <string id="30012">Light</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -89,6 +94,9 @@
     <string id="30205">Downloading</string>
     <string id="30206">Downloading %s</string>
     
+    <string id="30220">Waiting...</string>
+    <string id="30221">Waiting for thread to stop...</string>
+    
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
     <string id="3002">Post Reply</string>
@@ -99,6 +107,7 @@
     <string id="3007">Add Lines</string>
     <string id="3008">Submit Post</string>
     <string id="3009">Messages</string>
+    <string id="3010">STOP</string>
     
     
 </strings>

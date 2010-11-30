@@ -74,6 +74,14 @@
         <aligny>center</aligny>
         <align>center</align>
       </control>
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>10</posx>
+            <posy>4</posy>
+            <width>1260</width>
+            <height>80</height>
+            <texture>overlay.png</texture>
+      </control>
       
       <control type="image" id="351">
             <description>page header tab icon</description>

@@ -80,8 +80,8 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>$LOCALIZE[SCRIPT3006]</label>
@@ -102,8 +102,8 @@
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3007]</label>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -122,14 +122,14 @@
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font18</font>
        <align>center</align>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">FBbutton-focus.png</texturefocus>
+       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80555555</disabledcolor>
        <label>$LOCALIZE[SCRIPT3008]</label>
       </control>
       
-      <control type="image" >
+      <control type="image" id="115">
             <description>page header tab icon</description>
             <posx>844</posx>
             <posy>11</posy>

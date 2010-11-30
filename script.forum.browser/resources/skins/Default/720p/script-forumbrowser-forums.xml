@@ -9,22 +9,22 @@
   <animation effect="fade" time="250">WindowClose</animation>
   <controls>
     <control type="group">
-      <posx>100</posx>
-      <posy>10</posy>
+      <posx>0</posx>
+      <posy>0</posy>
       <control type="image" id="101">
         <posx>0</posx>
         <posy>0</posy>
-        <width>1090</width>
-        <height>700</height>
-        <texture border="40">default-panel.png</texture>
+        <width>1280</width>
+        <height>720</height>
+        <texture border="40">default-panel-full.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
         <control type="image" id="251">
             <description>page header tab icon</description>
-            <posx>20</posx>
+            <posx>10</posx>
             <posy>4</posy>
-            <width>1057</width>
+            <width>1260</width>
             <height>113</height>
             <texture>title-background.png</texture>
         </control>
@@ -64,11 +64,30 @@
         <label>Loading...</label>
         <wrapmultiline>true</wrapmultiline>
       </control>
+      <control type="button" id="105">
+        <description>Stop Button</description>
+        <posx>1045</posx>
+        <posy>45</posy>
+        <width>60</width>
+        <height>30</height>
+        <onleft>120</onleft>
+        <onright>120</onright>
+        <onup>200</onup>
+        <ondown>120</ondown>
+        <font>font12</font>
+        <textcolor>FF000000</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <label>$LOCALIZE[SCRIPT3010]</label>
+        <colordiffuse>FFFF0000</colordiffuse>
+        <texturefocus border="10">FBbutton-focus.png</texturefocus>
+        <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+      </control>
       <control type="image">
             <description>page header tab icon</description>
-            <posx>20</posx>
+            <posx>10</posx>
             <posy>4</posy>
-            <width>1057</width>
+            <width>1260</width>
             <height>113</height>
             <texture>overlay.png</texture>
       </control>
@@ -78,9 +97,9 @@
        <onright>201</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>30</posx>
-       <posy>620</posy>
-       <width>242</width>
+       <posx>20</posx>
+       <posy>670</posy>
+       <width>295</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
@@ -99,9 +118,9 @@
        <onright>203</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>295</posx>
-       <posy>620</posy>
-       <width>242</width>
+       <posx>325</posx>
+       <posy>670</posy>
+       <width>295</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
@@ -120,9 +139,9 @@
        <onright>202</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>560</posx>
-       <posy>620</posy>
-       <width>242</width>
+       <posx>640</posx>
+       <posy>670</posy>
+       <width>295</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
@@ -141,9 +160,9 @@
        <onright>120</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>825</posx>
-       <posy>620</posy>
-       <width>242</width>
+       <posx>955</posx>
+       <posy>670</posy>
+       <width>295</width>
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
@@ -156,7 +175,7 @@
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
       
-      <control type="image" >
+      <!--<control type="image" >
             <description>page header tab icon</description>
             <posx>844</posx>
             <posy>11</posy>
@@ -164,23 +183,23 @@
             <height>100</height>
             <aspectratio>keep</aspectratio>
             <texture>$INFO[Container(120).ListItem.Property(image)]</texture>
-      </control>
+      </control>-->
       
       <control type="image" id="351">
             <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>524</posy>
-            <width>1057</width>
+            <posx>10</posx>
+            <posy>584</posy>
+            <width>1260</width>
             <height>72</height>
             <texture>title-background.png</texture>
       </control>
       <control type="label">
         <description>textarea</description>
         <posx>29</posx>
-        <posy>535</posy>
-        <width>1037</width>
+        <posy>595</posy>
+        <width>1222</width>
         <height>45</height>
-        <font>font18</font>
+        <font>font12</font>
         <textcolor>white</textcolor>
         <aligny>center</aligny>
         <align>center</align>
@@ -189,55 +208,56 @@
       </control>
       <control type="image">
             <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>524</posy>
-            <width>1057</width>
+            <posx>10</posx>
+            <posy>584</posy>
+            <width>1260</width>
             <height>72</height>
             <texture>overlay.png</texture>
       </control>
       <control type="image" id="300">
-        <posx>20</posx>
+        <posx>10</posx>
         <posy>119</posy>
-        <width>1060</width>
+        <width>1260</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
       <control type="image" id="310">
-        <posx>20</posx>
+        <posx>10</posx>
         <posy>119</posy>
         <width>1</width>
         <height>2</height>
         <texture>progress.png</texture>
       </control>
       <control type="image" id="301">
-        <posx>20</posx>
-        <posy>521</posy>
-        <width>1060</width>
+        <posx>10</posx>
+        <posy>581</posy>
+        <width>1260</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
       <control type="image" id="302">
-        <posx>20</posx>
-        <posy>599</posy>
-        <width>1060</width>
+        <posx>10</posx>
+        <posy>659</posy>
+        <width>1260</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>      
       
-      <control type="image">
+      <control type="image" id="115">
             <description>listbg</description>
-            <posx>15</posx>
+            <posx>10</posx>
             <posy>122</posy>
-            <width>1066</width>
-            <height>400</height>
+            <width>1260</width>
+            <height>460</height>
+            <colordiffuse>BBFFFFFF</colordiffuse>
             <texture>list-background.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
       <control type="list" id="120">
         <posx>20</posx>
         <posy>132</posy>
-        <width>1033</width>
-        <height>380</height>
+        <width>1223</width>
+        <height>440</height>
         <onleft>202</onleft>
         <onright>200</onright>
         <onup>120</onup>
@@ -263,7 +283,7 @@
           <control type="image">
             <posx>0</posx>
             <posy>0</posy>
-            <width>1033</width>
+            <width>1223</width>
             <height>38</height>
             <texture border="10">default-list-focus.png</texture>
             <visible>Control.HasFocus(120)</visible>
@@ -283,14 +303,14 @@
         </focusedlayout>
       </control>
       <control type="group">
-        <posx>1055</posx>
+        <posx>1250</posx>
         <posy>132</posy>
         <control type="scrollbar" id="121">
           <description>scroll bar indicator for lists</description>
           <posx>0</posx>
           <posy>0</posy>
           <width>12</width>
-          <height>380</height>
+          <height>440</height>
           <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
           <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
           <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>

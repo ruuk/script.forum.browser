@@ -9,32 +9,32 @@
   <animation effect="fade" time="250">WindowClose</animation>
   <controls>
     <control type="group">
-      <posx>100</posx>
-      <posy>10</posy>
+      <posx>0</posx>
+      <posy>0</posy>
       <control type="image" id="101">
         <posx>0</posx>
         <posy>0</posy>
-        <width>1090</width>
-        <height>700</height>
-        <texture border="40">default-panel.png</texture>
+        <width>1280</width>
+        <height>720</height>
+        <texture border="40">default-panel-full.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
       <control type="image" id="251">
             <description>page header tab icon</description>
-            <posx>20</posx>
+            <posx>10</posx>
             <posy>4</posy>
-            <width>1057</width>
-            <height>113</height>
-            <texture>title-background.png</texture>
+            <width>1260</width>
+            <height>80</height>
+            <texture border="10">title-background.png</texture>
       </control>
         
       <control type="label" id="103">
         <description>textarea</description>
-        <posx>20</posx>
-        <posy>30</posy>
-        <width>218</width>
-        <height>60</height>
+        <posx>40</posx>
+        <posy>22</posy>
+        <width>100</width>
+        <height>40</height>
         <font>font18</font>
         <textcolor>white</textcolor>
         <aligny>center</aligny>
@@ -42,12 +42,12 @@
         <label>Threads</label>
         <wrapmultiline>true</wrapmultiline>
       </control>
-
+      
       <control type="label" id="104">
-        <description>textarea</description>
-        <posx>280</posx>
-        <posy>30</posy>
-        <width>510</width>
+        <description>Topic</description>
+        <posx>150</posx>
+        <posy>14</posy>
+        <width>750</width>
         <height>60</height>
         <font>font18</font>
         <textcolor>white</textcolor>
@@ -56,99 +56,96 @@
         <wrapmultiline>true</wrapmultiline>
       </control>
       
-      <control type="button" id="105">
-        <description>Page Button</description>
-        <posx>800</posx>
-        <posy>40</posy>
-        <width>230</width>
-        <height>40</height>
-        <onleft>202</onleft>
-        <onright>120</onright>
-        <onup>202</onup>
-        <ondown>120</ondown>
-        <font>font18</font>
-        <textcolor>white</textcolor>
-        <aligny>center</aligny>
-        <align>center</align>
-        <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
-      </control>
-      <control type="image">
-            <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>4</posy>
-            <width>1057</width>
-            <height>113</height>
-            <texture>overlay.png</texture>
-      </control>
-      
       <control type="button" id="200">
        <description>The Button</description>
-       <onleft>120</onleft>
-       <onright>202</onright>
+       <onleft>202</onleft>
+       <onright>105</onright>
        <onup>120</onup>
-       <ondown>105</ondown>
-       <posx>30</posx>
-       <posy>620</posy>
-       <width>330</width>
-       <height>40</height>
+       <ondown>120</ondown>
+       <posx>905</posx>
+       <posy>31</posy>
+       <width>50</width>
+       <height>27</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font12</font>
        <align>right</align>
-       <textcolor>FFFFFFFF</textcolor>
-       <disabledcolor>80555555</disabledcolor>
-       <label>$LOCALIZE[SCRIPT3000]</label>
-       <textoffsetx>35</textoffsetx>
+       <textcolor>FF000000</textcolor>
+       <disabledcolor>20555555</disabledcolor>
+       <label>&lt;</label>
+       <textoffsetx>33</textoffsetx>
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
       </control>
-      <!--
-      <control type="button" id="201">
-       <description>The Button</description>
-       <onleft>200</onleft>
-       <onright>202</onright>
-       <onup>120</onup>
-       <ondown>120</ondown>
-       <posx>384</posx>
-       <posy>620</posy>
-       <width>330</width>
-       <height>40</height>
-       <visible>true</visible>
-       <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
-       <align>center</align>
-       <label>Blank</label>
-       <texturefocus>FBbutton-focus.png</texturefocus>
-       <texturenofocus>FBbutton-nofocus.png</texturenofocus>
-       <textcolor>FFFFFFFF</textcolor>
-       <disabledcolor>80FFFFFF</disabledcolor>
+      <control type="button" id="105">
+        <description>Page Button</description>
+        <posx>960</posx>
+        <posy>29</posy>
+        <width>230</width>
+        <height>30</height>
+        <onleft>200</onleft>
+        <onright>106</onright>
+        <onup>120</onup>
+        <ondown>120</ondown>
+        <font>font12</font>
+        <textcolor>FF000000</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <texturefocus border="10">FBbutton-focus.png</texturefocus>
+        <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+        <visible>!Control.IsVisible(106)</visible>
       </control>
-      -->
-      
+      <control type="button" id="106">
+        <description>Stop Button</description>
+        <posx>1045</posx>
+        <posy>29</posy>
+        <width>60</width>
+        <height>30</height>
+        <onleft>105</onleft>
+        <onright>202</onright>
+        <onup>120</onup>
+        <ondown>120</ondown>
+        <font>font12</font>
+        <textcolor>FF000000</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <label>$LOCALIZE[SCRIPT3010]</label>
+        <colordiffuse>FFFF0000</colordiffuse>
+        <texturefocus border="10">FBbutton-focus.png</texturefocus>
+        <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+      </control>
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>200</onleft>
-       <onright>105</onright>
+       <onleft>106</onleft>
+       <onright>200</onright>
        <onup>120</onup>
-       <ondown>105</ondown>
-       <posx>738</posx>
-       <posy>620</posy>
-       <width>330</width>
-       <height>40</height>
+       <ondown>120</ondown>
+       <posx>1194</posx>
+       <posy>31</posy>
+       <width>50</width>
+       <height>27</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
        <font>font12</font>
        <align>left</align>
-       <textcolor>FFFFFFFF</textcolor>
-       <disabledcolor>80555555</disabledcolor>
-       <label>$LOCALIZE[SCRIPT3001]</label>
-       <textoffsetx>35</textoffsetx>
+       <textcolor>FF000000</textcolor>
+       <disabledcolor>20555555</disabledcolor>
+       <label>&gt;</label>
+       <textoffsetx>4</textoffsetx>
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
       </control>
       
-      <control type="image" >
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>10</posx>
+            <posy>4</posy>
+            <width>1260</width>
+            <height>80</height>
+            <texture>overlay.png</texture>
+      </control>
+      
+     <!-- <control type="image" >
             <description>page header tab icon</description>
             <posx>844</posx>
             <posy>11</posy>
@@ -156,22 +153,22 @@
             <height>100</height>
             <aspectratio>keep</aspectratio>
             <texture>$INFO[Container(120).ListItem.Property(image)]</texture>
-      </control>
+      </control>-->
       
       <control type="image" id="351">
             <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>524</posy>
-            <width>1057</width>
+            <posx>10</posx>
+            <posy>642</posy>
+            <width>1260</width>
             <height>72</height>
             <texture>title-background.png</texture>
       </control>
       
       <control type="label">
         <description>textarea</description>
-        <posx>25</posx>
-        <posy>535</posy>
-        <width>1055</width>
+        <posx>29</posx>
+        <posy>655</posy>
+        <width>1222</width>
         <height>45</height>
         <font>font18</font>
         <textcolor>white</textcolor>
@@ -182,58 +179,50 @@
       </control>
       <control type="image">
             <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>524</posy>
-            <width>1057</width>
+            <posx>10</posx>
+            <posy>642</posy>
+            <width>1260</width>
             <height>72</height>
             <texture>overlay.png</texture>
       </control>
       <control type="image" id="300">
-        <posx>20</posx>
-        <posy>120</posy>
-        <width>1060</width>
+        <posx>10</posx>
+        <posy>86</posy>
+        <width>1260</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
       <control type="image" id="310">
-        <posx>20</posx>
-        <posy>120</posy>
+        <posx>10</posx>
+        <posy>86</posy>
         <width>1</width>
         <height>2</height>
         <texture>progress.png</texture>
       </control>
       <control type="image" id="301">
-        <posx>20</posx>
-        <posy>520</posy>
-        <width>1060</width>
+        <posx>10</posx>
+        <posy>638</posy>
+        <width>1260</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
-      </control>
-      <control type="image" id="302">
-        <posx>20</posx>
-        <posy>600</posy>
-        <width>1060</width>
-        <height>2</height>
-        <texture>TRseparator.png</texture>
-      </control>
+      </control> 
       
-      <control type="image">
+      <control type="image" id="115">
             <description>listbg</description>
-            <posx>15</posx>
-            <posy>122</posy>
-            <width>1066</width>
-            <height>400</height>
-            <colordiffuse>FF000000</colordiffuse>
-            <texture>text-background.png</texture>
+            <posx>10</posx>
+            <posy>89</posy>
+            <width>1260</width>
+            <height>549</height>
+            <texture>list-background.png</texture>
       </control>
 
       <!-- ** Required ** Do not change <id> or <type> -->
       <control type="list" id="120">
         <posx>20</posx>
-        <posy>132</posy>
-        <width>1040</width>
-        <height>380</height>
-        <onleft>105</onleft>
+        <posy>99</posy>
+        <width>1223</width>
+        <height>529</height>
+        <onleft>202</onleft>
         <onright>200</onright>
         <onup>120</onup>
         <ondown>120</ondown>
@@ -270,7 +259,7 @@
           <control type="label">
             <posx>200</posx>
             <posy>0</posy>
-            <width>800</width>
+            <width>1013</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -283,7 +272,7 @@
           <control type="label">
             <posx>200</posx>
             <posy>0</posy>
-            <width>800</width>
+            <width>1013</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -298,7 +287,7 @@
           <control type="image">
             <posx>0</posx>
             <posy>0</posy>
-            <width>1040</width>
+            <width>1223</width>
             <height>38</height>
             <texture border="10">default-list-focus.png</texture>
             <visible>Control.HasFocus(120)</visible>
@@ -332,7 +321,7 @@
            <control type="label">
             <posx>200</posx>
             <posy>0</posy>
-            <width>800</width>
+            <width>1013</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -345,7 +334,7 @@
           <control type="label">
             <posx>200</posx>
             <posy>0</posy>
-            <width>800</width>
+            <width>1013</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -358,7 +347,7 @@
           <control type="label">
             <posx>200</posx>
             <posy>0</posy>
-            <width>800</width>
+            <width>1013</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -371,14 +360,14 @@
         </focusedlayout>
       </control>
       <control type="group">
-        <posx>1055</posx>
-        <posy>132</posy>
+        <posx>1250</posx>
+        <posy>99</posy>
         <control type="scrollbar" id="121">
           <description>scroll bar indicator for lists</description>
           <posx>0</posx>
           <posy>0</posy>
           <width>12</width>
-          <height>380</height>
+          <height>529</height>
           <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
           <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
           <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>

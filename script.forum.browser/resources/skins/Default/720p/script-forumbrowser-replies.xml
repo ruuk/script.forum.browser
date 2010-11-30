@@ -44,11 +44,11 @@
        <description>Post Reply</description>
        <onleft>202</onleft>
        <onright>200</onright>
-       <onup>123</onup>
-       <ondown>123</ondown>
+       <onup>120</onup>
+       <ondown>120</ondown>
        <posx>130</posx>
        <posy>30</posy>
-       <width>120</width>
+       <width>135</width>
        <height>28</height>
        <visible>true</visible>
        <font>font12</font>
@@ -62,9 +62,9 @@
       
       <control type="label" id="104">
         <description>Topic</description>
-        <posx>265</posx>
+        <posx>280</posx>
         <posy>14</posy>
-        <width>635</width>
+        <width>620</width>
         <height>60</height>
         <font>font18</font>
         <textcolor>white</textcolor>
@@ -77,8 +77,8 @@
        <description>The Button</description>
        <onleft>201</onleft>
        <onright>105</onright>
-       <onup>123</onup>
-       <ondown>123</ondown>
+       <onup>120</onup>
+       <ondown>120</ondown>
        <posx>905</posx>
        <posy>31</posy>
        <width>50</width>
@@ -101,22 +101,42 @@
         <width>230</width>
         <height>30</height>
         <onleft>200</onleft>
-        <onright>202</onright>
-        <onup>123</onup>
-        <ondown>123</ondown>
+        <onright>106</onright>
+        <onup>120</onup>
+        <ondown>120</ondown>
         <font>font12</font>
         <textcolor>FF000000</textcolor>
         <aligny>center</aligny>
         <align>center</align>
         <texturefocus border="10">FBbutton-focus.png</texturefocus>
         <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+        <visible>!Control.IsVisible(106)</visible>
+      </control>
+      <control type="button" id="106">
+        <description>Stop Button</description>
+        <posx>1045</posx>
+        <posy>29</posy>
+        <width>60</width>
+        <height>30</height>
+        <onleft>105</onleft>
+        <onright>202</onright>
+        <onup>120</onup>
+        <ondown>120</ondown>
+        <font>font12</font>
+        <textcolor>FF000000</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <label>$LOCALIZE[SCRIPT3010]</label>
+        <colordiffuse>FFFF0000</colordiffuse>
+        <texturefocus border="10">FBbutton-focus.png</texturefocus>
+        <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
       </control>
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>105</onleft>
+       <onleft>106</onleft>
        <onright>201</onright>
-       <onup>123</onup>
-       <ondown>123</ondown>
+       <onup>120</onup>
+       <ondown>120</ondown>
        <posx>1194</posx>
        <posy>31</posy>
        <width>50</width>
@@ -140,72 +160,7 @@
             <width>1260</width>
             <height>80</height>
             <texture>overlay.png</texture>
-      </control>
-      
-      <control type="image" >
-            <description>page header tab icon</description>
-            <posx>844</posx>
-            <posy>11</posy>
-            <width>213</width>
-            <height>100</height>
-            <aspectratio>keep</aspectratio>
-            <texture>$INFO[Container(120).ListItem.Icon]</texture>
-            <visible>false</visible>
-      </control>
-      
-      <control type="image" id="351">
-            <description>page header tab icon</description>
-            <posx>10</posx>
-            <posy>90</posy>
-            <width>1245</width>
-            <height>626</height>
-            <texture border="10">text-background.png</texture>
-            <visible>false</visible>
-      </control>
-      
-      <control type="textbox" id="122">
-        <posx>30</posx>
-        <posy>70</posy>
-        <width>1205</width>
-        <height>646</height>
-        <pagecontrol>123</pagecontrol>
-        <description>My first text box control</description>
-        <colordiffuse>FFFFFFFF</colordiffuse>
-        <font>font18</font>
-        <scroll>true</scroll>
-        <textcolor>FFFFFFFF</textcolor>
-        <label>$INFO[Container(120).ListItem.Property(message)]</label>
-		<visible>false</visible>
-      </control>
-      <control type="image">
-            <description>page header tab icon</description>
-            <posx>20</posx>
-            <posy>395</posy>
-            <width>1025</width>
-            <height>205</height>
-            <texture>text-overlay.png</texture>
-            <visible>false</visible>
-      </control>
-      
-      <control type="scrollbar" id="123">
-         <description>Message Scrollbar</description>
-         <posx>1258</posx>
-         <posy>90</posy>
-         <width>12</width>
-         <height>626</height>
-         <onleft>202</onleft>
-         <onright>201</onright>
-         <onup>120</onup>
-         <ondown>120</ondown>
-         <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
-         <texturesliderbar border="6">default-scroll_dark.png</texturesliderbar>
-         <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
-         <textureslidernib>-</textureslidernib>
-         <textureslidernibfocus>-</textureslidernibfocus>
-         <orientation>vertical</orientation>
-         <showonepage>true</showonepage>
-         <visible>Control.IsVisible(122)</visible>
-      </control>
+      </control>     
       
       <control type="image" id="300">
         <posx>10</posx>
@@ -238,7 +193,7 @@
         <visible>false</visible>
       </control>
       
-      <control type="image">
+      <control type="image" id="115">
             <description>listbg</description>
             <posx>15</posx>
             <posy>122</posy>
@@ -255,8 +210,8 @@
         <posy>90</posy>
         <width>1245</width>
         <height>626</height>
-        <onleft>105</onleft>
-        <onright>123</onright>
+        <onleft>202</onleft>
+        <onright>201</onright>
         <onup>120</onup>
         <ondown>120</ondown>
         <viewtype label="535">list</viewtype>
@@ -269,8 +224,17 @@
             <width>1045</width>
             <height>100</height>
             <texture border="10">text-background.png</texture>
-            <visible>true</visible>
+            <visible>StringCompare(ListItem.Genre,light)</visible>
             <colordiffuse>A0FFFFFF</colordiffuse>
+          </control>
+          <control type="image">
+            <posx>200</posx>
+            <posy>0</posy>
+            <width>1045</width>
+            <height>100</height>
+            <texture border="10">text-background.png</texture>
+            <visible>StringCompare(ListItem.Genre,dark)</visible>
+            <colordiffuse>AA000000</colordiffuse>
           </control>
           <control type="label">
             <posx>10</posx>
@@ -321,6 +285,20 @@
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Property(date)</info>
+            <visible>StringCompare(ListItem.Genre,light)</visible>
+          </control>
+          <control type="label">
+            <posx>210</posx>
+            <posy>0</posy>
+            <width>1025</width>
+            <height>15</height>
+            <font>font12</font>
+            <aligny>left</aligny>
+            <textcolor>FFAAAAAA</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Property(date)</info>
+            <visible>StringCompare(ListItem.Genre,dark)</visible>
           </control>
           <control type="textbox">
             <posx>210</posx>
@@ -347,14 +325,32 @@
           </control>
         </itemlayout>
         <focusedlayout height="200">
-        <control type="image">
+          <control type="image">
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>1245</width>
+            <height>200</height>
+            <texture border="10">default-list-focus.png</texture>
+            <visible>Control.HasFocus(120)</visible>
+            <colordiffuse>BBFFFFFF</colordiffuse>
+          </control>
+          <control type="image">
             <posx>200</posx>
             <posy>0</posy>
             <width>1045</width>
             <height>200</height>
             <texture border="10">text-background.png</texture>
-            <visible>true</visible>
+            <visible>StringCompare(ListItem.Genre,light)</visible>
             <colordiffuse>BBFFFFFF</colordiffuse>
+          </control>
+          <control type="image">
+            <posx>200</posx>
+            <posy>0</posy>
+            <width>1045</width>
+            <height>200</height>
+            <texture border="10">text-background.png</texture>
+            <visible>StringCompare(ListItem.Genre,dark)</visible>
+            <colordiffuse>BB000000</colordiffuse>
           </control>
           <control type="label">
             <posx>10</posx>
@@ -403,15 +399,6 @@
             <aspectratio>keep</aspectratio>
             <visible>true</visible>
           </control>
-          <control type="image">
-            <posx>0</posx>
-            <posy>0</posy>
-            <width>1245</width>
-            <height>200</height>
-            <texture border="10">default-list-focus.png</texture>
-            <visible>Control.HasFocus(120)</visible>
-            <colordiffuse>66FFFFFF</colordiffuse>
-          </control>
           <control type="label">
             <posx>210</posx>
             <posy>0</posy>
@@ -423,6 +410,20 @@
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Property(date)</info>
+            <visible>StringCompare(ListItem.Genre,light)</visible>
+          </control>
+          <control type="label">
+            <posx>210</posx>
+            <posy>0</posy>
+            <width>1025</width>
+            <height>15</height>
+            <font>font12</font>
+            <aligny>left</aligny>
+            <textcolor>FFAAAAAA</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Property(date)</info>
+            <visible>StringCompare(ListItem.Genre,dark)</visible>
           </control>
           <control type="textbox">
             <posx>210</posx>
