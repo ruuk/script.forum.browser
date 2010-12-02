@@ -215,14 +215,14 @@
             <texture>overlay.png</texture>
       </control>
       <control type="image" id="300">
-        <posx>10</posx>
+        <posx>14</posx>
         <posy>119</posy>
-        <width>1260</width>
+        <width>1252</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
       <control type="image" id="310">
-        <posx>10</posx>
+        <posx>14</posx>
         <posy>119</posy>
         <width>1</width>
         <height>2</height>

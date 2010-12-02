@@ -13,10 +13,10 @@ url:gotonewpost=&p=!POSTID!
 # The filters
 filter:logo=XBMCSVN.com"><img src="(.*?)"
 filter:forums=<tr>.*?(?<!<a)(?:\shref="\./viewforum.php\?).*?f=(?P<forumid>\d+).*?>(?P<title>.*?)</a>.*?<p class="forumdesc">(?P<description>.*?)</p>.*?</tr>
-filter:threads=<tr>.*?href="\./viewtopic.php?.*?t=(?P<threadid>\d+).*?class="topictitle">(?P<title>.*?)</a>.*?<a href="./memberlist.php.*?>(?P<starter>.*?)</a>.*?<a href="./memberlist.php.*?>(?P<lastposter>.*?)</a>.*?<a href="\./viewtopic.php\?.*?;p=(?P<lastid>\d+).*?</tr>
+filter:threads=<tr><td class="row1"[^<>].+?><img src="[^<>]+?(?:(?P<sticky>ann)ounce)?_\w+\.gif[^<>]+?width="[^<>]+?" />.+?href="\./viewtopic.php\?[^<>]*?t=(?P<threadid>\d+).*?class="topictitle">(?P<title>.*?)</a>.*?<a href="./memberlist.php.*?>(?P<starter>.*?)</a>.*?<a href="./memberlist.php.*?>(?P<lastposter>.*?)</a>.*?<a href="\./viewtopic.php\?.*?;p=(?P<lastid>\d+).*?</tr>
 filter:subscriptions=<tr>.*?href="\./viewtopic.php?.*?f=(?P<forumid>\d+).*?t=(?P<threadid>\d+)">(?P<title>.*?)</a>.*?<a href="./memberlist.php.*?>(?P<lastposter>.*?)</a>.*?<a href="\./viewtopic.php\?.*?;p=(?P<lastid>\d+).*?</tr>
 filter:replies=<table class="tablebg" width="100%" cellspacing="1">.*?<tr class="row\d">.*?<td class="spacer" colspan="2" height="1"><img src="images/spacer.gif" alt="" width="1" height="1" /></td></tr></table>
-filter:post=<a name="p(?P<postid>\d+)"></a>.*?<b class="postauthor".*?>(?P<user>.*?)</b>.*?Post subject:</b>(?P<title>.*?)</div>.*?(?P<date>\w+\s\w+\s\d+,\s\d+\s\d+:\d+\s\w\w).*?(?:(?:<img src="(?P<avatar>\./download/file.php\?avatar=.*?)")|(?:,)).*?<div class="postbody" id="postdiv.*?>(?P<message>.*?)<br clear="all" /><br />.*?\?mode=viewprofile&amp;u=
+filter:post=<a name="p(?P<postid>\d+)"></a>.*?<b class="postauthor".*?>(?P<user>.*?)</b>.*?Post subject:</b>(?P<title>.*?)</div>.*?(?P<date>\w+\s\w+\s\d+,\s\d+\s\d+:\d+\s\w\w).*?<td class="postdetails">(?P<status>.+?)</td>.+?(?:(?:<img src="(?P<avatar>\./download/file.php\?avatar=.*?)")|(?:,)).*?<div class="postbody" id="postdiv.*?>(?P<message>.*?)<br clear="all" /><br />.*?\?mode=viewprofile&amp;u=
 filter:quote=<div class="quotetitle">(?:(?P<user>\w+)+\swrote:)?.*?</div><div class="quotecontent">(?P<quote>.+?)</div>
 filter:code=<div class="codetitle"><b>Code:</b></div><div class="codecontent">(?P<code>.+?)</div>
 filter:page=>&nbsp;Page\s<strong>(?P<page>\d+)</strong> of <strong>(?P<total>\d+)</strong>

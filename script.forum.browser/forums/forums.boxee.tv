@@ -5,8 +5,8 @@ url:base=http://forums.boxee.tv/
 
 # The filters
 filter:forums=(?<!</a>|<td>)(?:<a href="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:(?:<div class="smallfont">(?P<description>.*?)</div>)|<td class="alt2">.*?</td>).*?</tr>
-# puts garbage for the avatar image data
-filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>(?:(?:[\w\d-]+)|(?:\w+\s\d+\w+,\s\d+)),\s\d+:\d+\s\w+).*?<!-- / status icon and date -->.*?href="member.php.*?u=(?P<userid>\d+)">.*?(?P<user>\w+?)</.*?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
+
+filter:post=<table\s.*?id="post(?P<postid>\d+).*?<!-- status icon and date -->.*?(?P<date>(?:(?:[\w\d-]+)|(?:\w+\s\d+\w+,\s\d+)),\s\d+:\d+\s\w+).*?<!-- / status icon and date -->.*?(?:<img src="(?P<avatar>image.php\?u=\d+&amp;dateline=\d+)" width=".+?</a></td>)?<td nowrap="nowrap">.*?href="member.php.*?u=(?P<userid>\d+)">.*?(?P<user>\w+?)</.*?</div><div class="smallfont">(?P<status>.+?)</div>.+?<!-- icon and title -->.*?(?:(?:<strong>(?P<title>.*?)</strong>)|(?:</div>)).*?<!-- / icon and title -->.*?<!-- message -->(?P<message>.*?)<!-- / message -->
 theme:window_bg=FF104601
 theme:title_bg=FF8CC641
 theme:title_fg=FFFFFFFF

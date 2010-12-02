@@ -1,6 +1,15 @@
 Forum Browser Changelog
 
-Current Version : 0.7.8
+Current Version : 0.7.9
+
+*** 0.7.9 ***
+
+Modifed theme in replies for highlighted users
+Added default avatar for users without avatar
+Fix dialogs and displays for private messages to match the context
+Got avatars working for boxee.tv and member status working for boxee.tv and xbmc4xbox.org
+Mark sticky threads for all forums (probably including dvhk.pl if I can ever connect to it)
+Next/Previous paging buttons now only visible if necessary.
 
 *** 0.7.8 ***
 

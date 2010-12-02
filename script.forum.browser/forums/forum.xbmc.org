@@ -58,7 +58,8 @@ filter:logo=<a href="index.php.*?"><img src="(?P<suburl>.*?)"
 # valid match names are forumid, title, and description
 filter:forums=(?P<subforum>\s/>\s)*(?<!\s/></a>|ntrol">|an="5">)(?:<a\shref="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:(?:<div class="smallfont">(?P<description>.*?)</div>)|,)
 # valid match names are threadid, title, starter and lastposter
-filter:threads=(?P<sticky>Sticky:)?<a href="showthread.php\?.*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<title>.*?)</a>.*?window.open\(\'member.php\?.*?u=\d+\', \'_self\'\)">(?P<starter>.*?)</span.*?<a href="member.php.*?rel="nofollow">(?P<lastposter>.*?)</a>
+filter:threads_start_after=<!-- threads list  -->
+filter:threads=(?P<sticky>Sticky: )?<a href="showthread.php\?[^<>]*?t=(?P<threadid>\d+)"\sid="thread_title.*?>(?P<title>.*?)</a>.*?window.open\(\'member.php\?.*?u=\d+\', \'_self\'\)">(?P<starter>.*?)</span.*?<a href="member.php.*?rel="nofollow">(?P<lastposter>.*?)</a>
 # this should match  the entire text for every post on the page from which the post filter will extract
 filter:replies=<table\s.*?id="post\d+.*?<!-- / message -->.*?(?:<!-- sig -->.+?<!-- / sig -->)?
 # valid match names are postid, date, userid, user, avatar, title, and message

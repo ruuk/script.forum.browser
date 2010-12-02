@@ -5,6 +5,7 @@ import threading
 
 '''TODO
 
+Read/Delete PM's in xbmc4xbox.org
 
 '''
 
@@ -12,7 +13,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '11-30-2010'
-__version__ = '0.7.8'
+__version__ = '0.7.9'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -482,6 +483,7 @@ class ForumBrowser:
 				return
 			else:
 				return (None,None)
+		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
 		callback(100,__language__(30052))
 		pd = self.getPageData(html,page,page_type='threads')
@@ -1041,8 +1043,8 @@ class PageWindow(BaseWindow):
 		
 	def setupPage(self,pageData):
 		if pageData: self.pageData = pageData
-		self.getControl(200).setEnabled(self.pageData.prev)
-		self.getControl(202).setEnabled(self.pageData.next)
+		self.getControl(200).setVisible(self.pageData.prev)
+		self.getControl(202).setVisible(self.pageData.next)
 		self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme['title_fg'],self.pageData.getPageDisplay()))
 		
 	def gotoPage(self,page): pass
@@ -1485,7 +1487,8 @@ class RepliesWindow(PageWindow):
 			self.getControl(302).setColorDiffuse(title_bg) #sep
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			#self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,__language__(30130)))
+			mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
+			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,mtype))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
 				self.mode = 'dark'
@@ -1524,7 +1527,7 @@ class RepliesWindow(PageWindow):
 				xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30132))
 			return
 		self.empty = False
-		
+		defAvatar = os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','avatar-none.png')
 		xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
@@ -1540,7 +1543,7 @@ class RepliesWindow(PageWindow):
 				self.posts[post.postId] = post
 				title = post.title or ''
 				if title: title = '[B]%s[/B][CR][CR]' % title
-				url = ''
+				url = defAvatar
 				if post.avatar: url = FB.makeURL(post.avatar)
 				post.avatarFinal = url
 				user = re.sub('<.*?>','',post.userName)
@@ -1802,8 +1805,10 @@ class ThreadsWindow(PageWindow):
 				last = tdict.get('lastposter','?')
 				tid = tdict.get('threadid','')
 				fid = tdict.get('forumid','')
+				sticky = tdict.get('sticky') and 'sticky' or ''
+				print 'test' + sticky
 				item = xbmcgui.ListItem(label=self.textBase % starter,label2=self.textBase % title)
-				if '<strong>' in title: item.setInfo('video',{"Genre":'bold'})
+				item.setInfo('video',{"Genre":sticky})
 				if starter == self.me: item.setInfo('video',{"Director":'me'})
 				#if last == self.me: item.setInfo('video',{"Studio":'me'})
 				item.setProperty("id",tid)

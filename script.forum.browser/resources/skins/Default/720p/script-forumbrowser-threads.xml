@@ -72,7 +72,6 @@
        <align>right</align>
        <textcolor>FF000000</textcolor>
        <disabledcolor>20555555</disabledcolor>
-       <label>&lt;</label>
        <textoffsetx>33</textoffsetx>
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
@@ -130,7 +129,6 @@
        <align>left</align>
        <textcolor>FF000000</textcolor>
        <disabledcolor>20555555</disabledcolor>
-       <label>&gt;</label>
        <textoffsetx>4</textoffsetx>
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
@@ -186,14 +184,14 @@
             <texture>overlay.png</texture>
       </control>
       <control type="image" id="300">
-        <posx>10</posx>
+        <posx>14</posx>
         <posy>86</posy>
-        <width>1260</width>
+        <width>1252</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
       </control>
       <control type="image" id="310">
-        <posx>10</posx>
+        <posx>14</posx>
         <posy>86</posy>
         <width>1</width>
         <height>2</height>
@@ -230,6 +228,14 @@
         <pagecontrol>121</pagecontrol>
         <scrolltime>200</scrolltime>
         <itemlayout height="38">
+          <control type="image">
+            <posx>187</posx>
+            <posy>2</posy>
+            <width>28</width>
+            <height>34</height>
+            <texture>sticky.png</texture>
+            <visible>StringCompare(ListItem.Genre,sticky)</visible>
+          </control>
           <control type="label">
             <posx>10</posx>
             <posy>0</posy>
@@ -257,9 +263,9 @@
             <visible>StringCompare(ListItem.Director,me)</visible>
           </control>
           <control type="label">
-            <posx>200</posx>
+            <posx>224</posx>
             <posy>0</posy>
-            <width>1013</width>
+            <width>989</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -270,9 +276,9 @@
             <visible>StringCompare(ListItem.Studio,me)</visible>
           </control>
           <control type="label">
-            <posx>200</posx>
+            <posx>224</posx>
             <posy>0</posy>
-            <width>1013</width>
+            <width>989</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -291,6 +297,14 @@
             <height>38</height>
             <texture border="10">default-list-focus.png</texture>
             <visible>Control.HasFocus(120)</visible>
+          </control>
+          <control type="image">
+            <posx>187</posx>
+            <posy>2</posy>
+            <width>28</width>
+            <height>34</height>
+            <texture>sticky.png</texture>
+            <visible>StringCompare(ListItem.Genre,sticky)</visible>
           </control>
           <control type="label">
             <posx>10</posx>
@@ -319,9 +333,9 @@
             <visible>StringCompare(ListItem.Director,me)</visible>
           </control>
            <control type="label">
-            <posx>200</posx>
+            <posx>224</posx>
             <posy>0</posy>
-            <width>1013</width>
+            <width>989</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
@@ -329,25 +343,12 @@
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label2</info>
-            <visible>StringCompare(ListItem.Genre,)</visible>
+            <visible>true</visible>
           </control>
           <control type="label">
-            <posx>200</posx>
+            <posx>224</posx>
             <posy>0</posy>
-            <width>1013</width>
-            <height>38</height>
-            <font>font18</font>
-            <aligny>center</aligny>
-            <textcolor>white</textcolor>
-            <selectedcolor>green</selectedcolor>
-            <align>left</align>
-            <info>ListItem.Label2</info>
-            <visible>StringCompare(ListItem.Genre,bold)</visible>
-          </control>
-          <control type="label">
-            <posx>200</posx>
-            <posy>0</posy>
-            <width>1013</width>
+            <width>989</width>
             <height>38</height>
             <font>font18</font>
             <aligny>center</aligny>
