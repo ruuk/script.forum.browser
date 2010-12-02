@@ -1766,9 +1766,11 @@ class ThreadsWindow(PageWindow):
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
 				self.textBase = '[COLOR FFFFFFFF]%s[/COLOR]'
+				self.highBase = '[COLOR FF00DD00]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('BB000000')
 			else:
 				self.textBase = '[COLOR FF000000]%s[/COLOR]'
+				self.highBase = '[COLOR FF006600]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('99FFFFFF')
 		except:
 			xbmcgui.unlock()
@@ -1806,11 +1808,11 @@ class ThreadsWindow(PageWindow):
 				tid = tdict.get('threadid','')
 				fid = tdict.get('forumid','')
 				sticky = tdict.get('sticky') and 'sticky' or ''
-				print 'test' + sticky
-				item = xbmcgui.ListItem(label=self.textBase % starter,label2=self.textBase % title)
+				if starter == self.me: starterbase = self.highBase
+				else: starterbase = self.textBase
+				
+				item = xbmcgui.ListItem(label=starterbase % starter,label2=self.textBase % title)
 				item.setInfo('video',{"Genre":sticky})
-				if starter == self.me: item.setInfo('video',{"Director":'me'})
-				#if last == self.me: item.setInfo('video',{"Studio":'me'})
 				item.setProperty("id",tid)
 				item.setProperty("fid",fid)
 				if last == self.me:
