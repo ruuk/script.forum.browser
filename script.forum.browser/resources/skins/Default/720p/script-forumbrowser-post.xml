@@ -157,9 +157,7 @@
         <visible>true</visible>
         <colordiffuse>FFFF0000</colordiffuse>
         <font>font12</font>
-        <scroll>true</scroll>
-        <textcolor>FFFFFFFF</textcolor>
-        <label>$INFO[Container(120).ListItem.Property(message)]</label>
+        <textcolor>FF000000</textcolor>
       </control>
       <control type="image">
         <description>page header tab icon</description>

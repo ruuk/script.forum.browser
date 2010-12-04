@@ -1,6 +1,10 @@
 Forum Browser Changelog
 
-Current Version : 0.7.9
+Current Version : 0.8.0
+
+*** 0.8.0 ***
+
+Fixed: Selecting the post editor list when empty caused error.
 
 *** 0.7.9 ***
 

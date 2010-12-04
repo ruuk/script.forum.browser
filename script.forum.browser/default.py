@@ -1113,6 +1113,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		self.title = self.post.title
 		self.posted = False
 		self.display_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+		self.buffer = ''
 		xbmcgui.WindowXML.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
@@ -1171,7 +1172,61 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 			self.doMenu()
 		elif action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
+		#else:
+		#	if self.checkKeys(action): return
 		xbmcgui.WindowXMLDialog.onAction(self,action)
+		
+	def checkKeys(self,action):
+		aid = action.getId()
+		bc = action.getButtonCode()
+		print aid,bc
+		try:
+			if not bc: bc = aid
+			char = None
+			if aid == ACTION_PARENT_DIR:
+				self.backspace()
+			elif aid == 122:
+				xbmc.executebuiltin('Action(previousmenu)')
+				char = 's'
+			elif aid == 88:
+				if bc == 61627:
+					char = '='
+				else:
+					char = '+'
+			elif bc == 61453:
+				char = '\n'
+			elif bc == 61472:
+				char = ' '
+			elif bc > 61504 and bc < 61531:
+				char = chr(bc-61408)
+			elif bc > 61535 and bc < 61546:
+				char = chr(bc-61488)
+			elif bc == 61626:
+				char = ';'
+			elif bc == 61632:
+				char = '`'
+			elif bc == 61678:
+				char = "'"
+			elif bc > 61626 and bc < 61678:
+				char = chr(bc-61584)
+			elif bc > 61726 and bc < 61823:
+				char = chr(bc-61696)
+			if char:
+				self.addChar(char)
+				return True
+		except:
+			return False
+			
+		return False
+		
+	def backspace(self):
+		self.buffer = self.buffer[:-1]
+		self.getControl(122).setText(self.buffer)
+		
+	def addChar(self,char):
+		self.buffer += char
+		self.getControl(122).setText(self.buffer)
+		#self.getControl(122).scroll(len(self.buffer)-1)
 		
 	def doMenu(self):
 		dialog = xbmcgui.Dialog()
@@ -1243,6 +1298,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 	
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
+		if not item: return
 		keyboard = xbmc.Keyboard(item.getProperty('text'),__language__(30124))
 		keyboard.doModal()
 		if not keyboard.isConfirmed(): return
