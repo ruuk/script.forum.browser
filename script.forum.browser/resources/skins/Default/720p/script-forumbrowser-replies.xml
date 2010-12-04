@@ -64,7 +64,7 @@
         <description>Topic</description>
         <posx>280</posx>
         <posy>14</posy>
-        <width>620</width>
+        <width>600</width>
         <height>60</height>
         <font>font18</font>
         <textcolor>white</textcolor>
@@ -79,7 +79,7 @@
        <onright>105</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>905</posx>
+       <posx>885</posx>
        <posy>31</posy>
        <width>50</width>
        <height>27</height>
@@ -95,7 +95,7 @@
       </control>
       <control type="button" id="105">
         <description>Page Button</description>
-        <posx>960</posx>
+        <posx>940</posx>
         <posy>29</posy>
         <width>230</width>
         <height>30</height>
@@ -113,7 +113,7 @@
       </control>
       <control type="button" id="106">
         <description>Stop Button</description>
-        <posx>1045</posx>
+        <posx>1025</posx>
         <posy>29</posy>
         <width>60</width>
         <height>30</height>
@@ -136,7 +136,7 @@
        <onright>201</onright>
        <onup>120</onup>
        <ondown>120</ondown>
-       <posx>1194</posx>
+       <posx>1174</posx>
        <posy>31</posy>
        <width>50</width>
        <height>27</height>
@@ -150,7 +150,15 @@
        <texturefocus>right-focus.png</texturefocus>
        <texturenofocus>right-nofocus.png</texturenofocus>
       </control>
-      
+      <control type="button" id="110">
+        <description>Close Button</description>
+        <posx>1230</posx>
+        <posy>15</posy>
+        <width>32</width>
+        <height>28</height>
+        <texturefocus>close-button-focus.png</texturefocus>
+        <texturenofocus>close-button.png</texturenofocus>
+      </control>
       <control type="image">
             <description>page header tab icon</description>
             <posx>10</posx>
@@ -346,7 +354,7 @@
             <height>25</height>
             <texture>triangle.png</texture>
             <visible>StringCompare(ListItem.Genre,dark)</visible>
-            <colordiffuse>BB000000</colordiffuse>
+            <colordiffuse>FF000000</colordiffuse>
           </control>
           <control type="image">
             <posx>144</posx>
@@ -355,25 +363,25 @@
             <height>25</height>
             <texture>triangle.png</texture>
             <visible>StringCompare(ListItem.Genre,light)</visible>
-            <colordiffuse>BBFFFFFF</colordiffuse>
+            <colordiffuse>FFFFFFFF</colordiffuse>
           </control>
           <control type="image">
             <posx>200</posx>
             <posy>0</posy>
             <width>1045</width>
             <height>200</height>
-            <texture border="10">text-background.png</texture>
+            <texture border="10">text-background-fade.png</texture>
             <visible>StringCompare(ListItem.Genre,light)</visible>
-            <colordiffuse>BBFFFFFF</colordiffuse>
+            <colordiffuse>FFFFFFFF</colordiffuse>
           </control>
           <control type="image">
             <posx>200</posx>
             <posy>0</posy>
             <width>1045</width>
             <height>200</height>
-            <texture border="10">text-background.png</texture>
+            <texture border="10">text-background-fade.png</texture>
             <visible>StringCompare(ListItem.Genre,dark)</visible>
-            <colordiffuse>BB000000</colordiffuse>
+            <colordiffuse>FF000000</colordiffuse>
           </control>
           <control type="label">
             <posx>10</posx>

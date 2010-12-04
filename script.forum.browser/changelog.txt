@@ -4,7 +4,8 @@ Current Version : 0.8.0
 
 *** 0.8.0 ***
 
-Fixed: Selecting the post editor list when empty caused error.
+Fixed: Selecting the post editor list when empty caused error
+Added close buttons for mouse users
 
 *** 0.7.9 ***
 

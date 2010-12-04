@@ -174,7 +174,15 @@
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
-      
+      <control type="button" id="110">
+        <description>Close Button</description>
+        <posx>1220</posx>
+        <posy>20</posy>
+        <width>32</width>
+        <height>28</height>
+        <texturefocus>close-button-focus.png</texturefocus>
+        <texturenofocus>close-button.png</texturenofocus>
+      </control>
       <!--<control type="image" >
             <description>page header tab icon</description>
             <posx>844</posx>

@@ -48,7 +48,15 @@
        <texturefocus>left-focus.png</texturefocus>
        <texturenofocus>left-nofocus.png</texturenofocus>
       </control>
-      
+      <control type="button" id="110">
+        <description>Close Button</description>
+        <posx>533</posx>
+        <posy>625</posy>
+        <width>32</width>
+        <height>28</height>
+        <texturefocus>close-button-focus.png</texturefocus>
+        <texturenofocus>close-button.png</texturenofocus>
+      </control>
       <control type="button" id="202">
        <description>The Button</description>
        <onleft>200</onleft>

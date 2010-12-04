@@ -74,6 +74,15 @@
         <aligny>center</aligny>
         <align>center</align>
       </control>
+      <control type="button" id="110">
+        <description>Close Button</description>
+        <posx>1230</posx>
+        <posy>15</posy>
+        <width>32</width>
+        <height>28</height>
+        <texturefocus>close-button-focus.png</texturefocus>
+        <texturenofocus>close-button.png</texturenofocus>
+      </control>
       <control type="image">
             <description>page header tab icon</description>
             <posx>10</posx>

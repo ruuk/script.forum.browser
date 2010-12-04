@@ -48,6 +48,15 @@
             <height>113</height>
             <texture>overlay.png</texture>
       </control>
+      <control type="button" id="110">
+        <description>Close Button</description>
+        <posx>1036</posx>
+        <posy>15</posy>
+        <width>32</width>
+        <height>28</height>
+        <texturefocus>close-button-focus.png</texturefocus>
+        <texturenofocus>close-button.png</texturenofocus>
+      </control>
       <control type="button" id="104">
        <description>The Button</description>
        <onleft>123</onleft>
@@ -129,15 +138,7 @@
        <label>$LOCALIZE[SCRIPT3008]</label>
       </control>
       
-      <control type="image" id="115">
-            <description>page header tab icon</description>
-            <posx>844</posx>
-            <posy>11</posy>
-            <width>213</width>
-            <height>100</height>
-            <aspectratio>keep</aspectratio>
-            <texture>$INFO[Container(120).ListItem.Thumb]</texture>
-      </control>
+      
       
       <control type="image" id="351">
         <posx>17</posx>

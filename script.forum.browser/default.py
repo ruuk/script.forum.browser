@@ -101,6 +101,9 @@ class PMLink:
 	def isThread(self):
 		return self.tid and not self.pid
 		
+################################################################################
+# ForumPost
+################################################################################
 class ForumPost:
 	def __init__(self,pmatch=None,pdict=None):
 		self.isPM = False
@@ -178,6 +181,9 @@ class ForumPost:
 		return self.avatar
 	
 			
+################################################################################
+# PageData
+################################################################################
 class PageData:
 	def __init__(self,page_match=None,next_match=None,prev_match=None,page_type=''):
 		self.next = False
@@ -258,10 +264,16 @@ class PageData:
 		if self.page and self.totalPages:
 			return 'Page %s of %s' % (self.page,self.totalPages)
 
+################################################################################
+# Action
+################################################################################
 class Action:
 	def __init__(self,action=''):
 		self.action = action
 		
+################################################################################
+# PostMessage
+################################################################################
 class PostMessage(Action):
 	def __init__(self,pid='',tid='',fid='',title='',message='',is_pm=False):
 		Action.__init__(self,'CHANGE')
@@ -973,7 +985,13 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		self._progMessageSave = ''
 		ThreadWindow.__init__(self)
 		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
-		
+	
+	def onClick( self, controlID ):
+		if controlID == 110:
+			xbmc.executebuiltin('Action(previousmenu)')
+			return True
+		return False
+			
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
@@ -1007,7 +1025,7 @@ class PageWindow(BaseWindow):
                        
 	def onFocus( self, controlId ):
 		self.controlId = controlId
-		
+
 	def onClick( self, controlID ):
 		if controlID == 200:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
@@ -1015,6 +1033,7 @@ class PageWindow(BaseWindow):
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
 		elif controlID == 105:
 			self.pageMenu()
+		BaseWindow.onClick(self,controlID)
 	
 	def onAction(self,action):
 		BaseWindow.onAction(self,action)
@@ -1052,7 +1071,7 @@ class PageWindow(BaseWindow):
 ######################################################################################
 # Image Dialog
 ######################################################################################
-class ImagesDialog(xbmcgui.WindowXMLDialog):
+class ImagesDialog(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.images = kwargs.get('images')
 		self.index = 0
@@ -1090,6 +1109,7 @@ class ImagesDialog(xbmcgui.WindowXMLDialog):
 		self.showImage()
 	
 	def onClick( self, controlID ):
+		if BaseWindow.onClick(self, controlID): return
 		if controlID == 200:
 			self.nextImage()
 		elif controlID == 202:
@@ -1107,7 +1127,7 @@ class ImagesDialog(xbmcgui.WindowXMLDialog):
 ######################################################################################
 # Post Dialog
 ######################################################################################
-class PostDialog(xbmcgui.WindowXMLDialog):
+class PostDialog(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
 		self.title = self.post.title
@@ -1153,6 +1173,7 @@ class PostDialog(xbmcgui.WindowXMLDialog):
 		xbmcgui.unlock()
 		
 	def onClick( self, controlID ):
+		if BaseWindow.onClick(self, controlID): return
 		if controlID == 200:
 			self.addLineSingle()
 		elif controlID == 201:
@@ -1418,6 +1439,7 @@ class MessageWindow(BaseWindow):
 		self.controlId = controlId
 		
 	def onClick( self, controlID ):
+		if BaseWindow.onClick(self, controlID): return
 		if controlID == 148:
 			self.linkSelected()
 		elif controlID == 150:
@@ -2089,6 +2111,7 @@ class ForumsWindow(BaseWindow):
 		elif controlID == 105:
 			self.stopThread()
 			return
+		if BaseWindow.onClick(self, controlID): return
 		if self.empty: self.fillForumList()
 	
 	def onAction(self,action):
