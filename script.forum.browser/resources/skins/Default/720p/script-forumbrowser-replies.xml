@@ -158,6 +158,8 @@
         <height>28</height>
         <texturefocus>close-button-focus.png</texturefocus>
         <texturenofocus>close-button.png</texturenofocus>
+        <visible>system.getbool(input.enablemouse)</visible>
+        <onclick>PreviousMenu</onclick>
       </control>
       <control type="image">
             <description>page header tab icon</description>
@@ -426,7 +428,7 @@
             <posy>68</posy>
             <width>128</width>
             <height>128</height>
-            <texture>$INFO[ListItem.Property(avatar)]</texture>
+            <texture fallback="avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
             <aspectratio>keep</aspectratio>
             <visible>true</visible>
           </control>

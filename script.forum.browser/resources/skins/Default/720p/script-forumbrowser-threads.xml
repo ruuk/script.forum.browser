@@ -141,6 +141,8 @@
         <height>28</height>
         <texturefocus>close-button-focus.png</texturefocus>
         <texturenofocus>close-button.png</texturenofocus>
+        <visible>system.getbool(input.enablemouse)</visible>
+        <onclick>PreviousMenu</onclick>
       </control>
       <control type="image">
             <description>page header tab icon</description>

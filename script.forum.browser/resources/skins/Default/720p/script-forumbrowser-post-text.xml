@@ -1,5 +1,5 @@
 <window>
-  <defaultcontrol>120</defaultcontrol>
+  <defaultcontrol>200</defaultcontrol>
   <coordinates>
     <system>1</system>
     <posx>0</posx>
@@ -59,12 +59,43 @@
             <height>113</height>
             <texture>overlay.png</texture>
       </control>
+      <control type="label" id="104">
+       <description>Title</description>
+       <posx>280</posx>
+       <posy>40</posy>
+       <width>750</width>
+       <height>40</height>
+        <font>font18</font>
+        <textcolor>white</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <label>No Title</label>
+        <wrapmultiline>true</wrapmultiline>
+      </control>
+      <control type="button" id="200">
+       <description>The Button</description>
+       <onleft>200</onleft>
+       <onright>200</onright>
+       <onup>200</onup>
+       <ondown>200</ondown>
+       <posx>-500</posx>
+       <posy>-500</posy>
+       <width>10</width>
+       <height>10</height>
+       <visible>true</visible>
+       <colordiffuse>FFFFFFFF</colordiffuse>
+       <font>font18</font>
+       <align>center</align>
+       <textcolor>FFFFFFFF</textcolor>
+       <disabledcolor>80555555</disabledcolor>
+      </control>
+      <!--
       <control type="button" id="104">
        <description>The Button</description>
-       <onleft>123</onleft>
-       <onright>120</onright>
+       <onleft>104</onleft>
+       <onright>104</onright>
        <onup>123</onup>
-       <ondown>120</ondown>
+       <ondown>121</ondown>
        <posx>280</posx>
        <posy>40</posy>
        <width>750</width>
@@ -77,53 +108,33 @@
        <align>center</align>
        <label>Set Title</label>
       </control>
-      <control type="button" id="200">
-       <description>The Button</description>
-       <onleft>202</onleft>
-       <onright>201</onright>
-       <onup>120</onup>
-       <ondown>123</ondown>
-       <posx>30</posx>
-       <posy>397</posy>
-       <width>330</width>
-       <height>40</height>
-       <visible>true</visible>
-       <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
-       <align>center</align>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
-       <textcolor>FFFFFFFF</textcolor>
-       <disabledcolor>80555555</disabledcolor>
-       <label>$LOCALIZE[SCRIPT3006]</label>
-      </control>
       
-      <control type="button" id="201">
-       <description>The Button</description>
-       <onleft>200</onleft>
-       <onright>202</onright>
-       <onup>120</onup>
-       <ondown>123</ondown>
-       <posx>384</posx>
-       <posy>397</posy>
-       <width>330</width>
-       <height>40</height>
-       <visible>true</visible>
-       <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
-       <align>center</align>
-       <label>$LOCALIZE[SCRIPT3007]</label>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
-       <textcolor>FFFFFFFF</textcolor>
-       <disabledcolor>80FFFFFF</disabledcolor>
+      <control type="radiobutton" id="200">
+	      <description>Edit Button</description>
+	      <onleft>202</onleft>
+	      <onright>202</onright>
+	      <onup>104</onup>
+	      <ondown>123</ondown>
+	      <posx>30</posx>
+	      <posy>397</posy>
+	      <width>330</width>
+	      <height>40</height>
+	      <visible>true</visible>
+	      <colordiffuse>FFFFFFFF</colordiffuse>
+	      <texturefocus>FBbutton-focus.png</texturefocus>
+	      <texturenofocus>FBbutton-nofocus.png</texturenofocus>
+	      <font>font18</font>
+	      <textcolor>FFFFFFFF</textcolor>
+	      <disabledcolor>80FFFFFF</disabledcolor>
+	      <align>center</align>
+	      <label>Edit</label>
       </control>
       
       <control type="button" id="202">
        <description>The Button</description>
-       <onleft>201</onleft>
+       <onleft>200</onleft>
        <onright>200</onright>
-       <onup>120</onup>
+       <onup>121</onup>
        <ondown>123</ondown>
        <posx>738</posx>
        <posy>397</posy>
@@ -139,47 +150,47 @@
        <disabledcolor>80555555</disabledcolor>
        <label>$LOCALIZE[SCRIPT3008]</label>
       </control>
-      
-      
-      
+      -->
       <control type="image" id="351">
         <posx>17</posx>
-        <posy>449</posy>
+        <posy>398</posy>
         <width>1063</width>
-        <height>223</height>
+        <height>274</height>
         <texture>editBackground.png</texture>
       </control>
       
       <control type="textbox" id="122">
         <posx>25</posx>
-        <posy>455</posy>
+        <posy>405</posy>
         <width>1025</width>
-        <height>207</height>
+        <height>258</height>
         <pagecontrol>123</pagecontrol>
         <description>My first text box control</description>
         <visible>true</visible>
         <colordiffuse>FFFF0000</colordiffuse>
         <font>font12</font>
+        <scroll>true</scroll>
         <textcolor>FF000000</textcolor>
+        <!--<autoscroll delay="1000" time="500" repeat="1000">true</autoscroll>-->
       </control>
       <control type="image">
         <description>page header tab icon</description>
         <posx>17</posx>
-        <posy>449</posy>
+        <posy>398</posy>
         <width>1063</width>
-        <height>223</height>
+        <height>274</height>
         <texture>text-overlay.png</texture>
       </control>
       <control type="scrollbar" id="123">
          <description>scroll bar indicator for lists</description>
          <posx>1055</posx>
-         <posy>455</posy>
+         <posy>405</posy>
          <width>12</width>
-         <height>207</height>
+         <height>258</height>
          <onleft>202</onleft>
-         <onright>104</onright>
-         <onup>202</onup>
-         <ondown>104</ondown>
+         <onright>202</onright>
+         <onup>123</onup>
+         <ondown>123</ondown>
          <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
          <texturesliderbar border="6">default-scroll_dark.png</texturesliderbar>
          <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
@@ -199,7 +210,7 @@
       </control>
       <control type="image" id="301">
         <posx>20</posx>
-        <posy>387</posy>
+        <posy>394</posy>
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
@@ -210,6 +221,7 @@
         <width>1060</width>
         <height>2</height>
         <texture>TRseparator.png</texture>
+        <visible>false</visible>
       </control>
       
       <control type="image">
@@ -223,74 +235,37 @@
       </control>
 
       <!-- ** Required ** Do not change <id> or <type> -->
-      <control type="list" id="120">
+      <control type="textbox" id="120">
         <posx>20</posx>
         <posy>132</posy>
         <width>1040</width>
         <height>250</height>
-        <onleft>104</onleft>
-        <onright>200</onright>
-        <onup>104</onup>
-        <ondown>200</ondown>
-        <viewtype label="535">list</viewtype>
-        <pagecontrol>121</pagecontrol>
-        <scrolltime>200</scrolltime>
-        <itemlayout height="38">
-          <control type="label">
-            <posx>10</posx>
-            <posy>0</posy>
-            <width>990</width>
-            <height>38</height>
-            <font>font18</font>
-            <aligny>center</aligny>
-            <textcolor>white</textcolor>
-            <selectedcolor>green</selectedcolor>
-            <align>left</align>
-            <info>ListItem.Label</info>
-          </control>
-        </itemlayout>
-        <focusedlayout height="38">
-          <control type="image">
-            <posx>0</posx>
-            <posy>0</posy>
-            <width>1040</width>
-            <height>38</height>
-            <texture border="10">default-list-focus.png</texture>
-            <visible>Control.HasFocus(120)</visible>
-          </control>
-          <control type="label">
-            <posx>10</posx>
-            <posy>0</posy>
-            <width>990</width>
-            <height>38</height>
-            <font>font18</font>
-            <aligny>center</aligny>
-            <textcolor>white</textcolor>
-            <selectedcolor>green</selectedcolor>
-            <align>left</align>
-            <info>ListItem.Label</info>
-          </control>
-        </focusedlayout>
+        <!--<pagecontrol>121</pagecontrol>-->
+        <description>My first text box control</description>
+        <visible>true</visible>
+        <colordiffuse>FFFF0000</colordiffuse>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
       </control>
-      <control type="group">
-        <posx>1055</posx>
-        <posy>132</posy>
-        <control type="scrollbar" id="121">
-          <description>scroll bar indicator for lists</description>
-          <posx>0</posx>
-          <posy>0</posy>
-          <width>12</width>
-          <height>250</height>
-          <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
-          <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
-          <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
-          <textureslidernib>-</textureslidernib>
-          <textureslidernibfocus>-</textureslidernibfocus>
-          <orientation>vertical</orientation>
-          <showonepage>false</showonepage>
-          <visible>Control.IsVisible(120)</visible>
-        </control>
-      </control>
+      <!--<control type="scrollbar" id="121">
+         <description>scroll bar indicator for lists</description>
+         <posx>1055</posx>
+         <posy>132</posy>
+         <width>12</width>
+         <height>250</height>
+         <onleft>121</onleft>
+         <onright>121</onright>
+         <onup>121</onup>
+         <ondown>121</ondown>
+         <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
+         <texturesliderbar border="6">default-scroll_dark.png</texturesliderbar>
+         <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
+         <textureslidernib>-</textureslidernib>
+         <textureslidernibfocus>-</textureslidernibfocus>
+         <orientation>vertical</orientation>
+         <showonepage>false</showonepage>
+         <visible>Control.IsVisible(120)</visible>
+      </control>-->
 
     </control>
   </controls>

@@ -1,8 +1,10 @@
 # Parsing data for forum.dvhk.pl
 import:forum.xbmc.org
 # The URLs
-url:base=http://forum.dvhk.pl/
+url:base=http://dvhk.to/
 url:forums=index.php
+filter:pm_xml_folders=<folder name="Wys.{1,2}ane">(?P<inbox>.+?)</folder>
+
 format:pm_folder=Skrzynka odbiorcza
 #Nieprzeczytane Prywatne Wiadomości
 filter:pm_counts1=<a href="private.php\?">(?P<display>Prywatne Wiadomo.{1,2}ci</a>: (?:<strong>)?(?P<unread>\d+)(?:</strong>)? nie przeczytanych, razem (?P<total>\d+)).</div>

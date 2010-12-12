@@ -1,9 +1,10 @@
-import urllib2, re, os, sys, time, urlparse, urllib
-import xbmc, xbmcgui, xbmcaddon
+import urllib2, re, os, sys, time, urlparse
+import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from googletranslate import googleTranslateAPI
 import threading
 
-'''TODO
+'''
+TODO:
 
 Read/Delete PM's in xbmc4xbox.org
 
@@ -12,7 +13,7 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '11-30-2010'
+__date__ = '12-12-2010'
 __version__ = '0.8.0'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
@@ -44,8 +45,6 @@ ACTION_RUN_IN_MAIN = 27
 
 TITLE_FORMAT = '[COLOR %s][B]%s[/B][/COLOR]'
 
-#href="forumdisplay.php?f=27&amp;order=desc&amp;page=171" title="Prev Page - Results 3,401 to 3,420 of 3,421">&lt;</a></td>
-#href="forumdisplay.php?f=27&amp;order=desc&amp;page=2" title="Next Page - Results 21 to 40 of 3,421">&gt;</a></td>
 
 def ERROR(message):
 	errtext = sys.exc_info()[1]
@@ -152,7 +151,6 @@ class ForumPost:
 		
 	def messageAsDisplay(self):
 		if self.isPM:
-			m = self.getMessage()
 			return MC.parseCodes(self.getMessage())
 		else:
 			return MC.messageToDisplay(self.getMessage())
@@ -470,11 +468,8 @@ class ForumBrowser:
 		html = self.readURL(self.getURL('forums'),callback=callback)
 		#open('/home/ruuk/test3.html','w').write(html)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None,None)
-				return
-			else:
-				return (None,None,None)
+			if donecallback: donecallback(None,None,None)
+			return (None,None,None)
 		html = MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = ''
@@ -490,11 +485,8 @@ class ForumBrowser:
 		url = self.getPageUrl(page,'threads',fid=forumid)
 		html = self.readURL(url,callback=callback)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
+			if donecallback: donecallback(None,None)
+			return (None,None)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
 		callback(100,__language__(30052))
@@ -534,6 +526,9 @@ class ForumBrowser:
 		if donecallback: donecallback(sreplies, pd)
 		else: return sreplies, pd
 		
+	def hasPM(self):
+		return bool(self.urls.get('private_messages_xml') or self.urls.get('private_messages_csv'))
+	
 	def getPrivateMessages(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		#if not self.checkLogin(callback=callback): return None, None
@@ -555,7 +550,6 @@ class ForumBrowser:
 					return (None,None)
 			messages = re.finditer(self.filters.get('pm_xml_messages'),folders.group('inbox'),re.S)
 			pms = []
-			avatar_url = self.urls.get('avatar')
 			for m in messages:
 				p = ForumPost(m)
 				p.setPostID('PM%s' % len(pms))
@@ -584,6 +578,9 @@ class ForumBrowser:
 		
 		if donecallback: donecallback(pms,None)
 		else: return pms, None
+	
+	def hasSubscriptions(self):
+		return bool(self.urls.get('subscriptions'))
 	
 	def getSubscriptions(self,page='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
@@ -987,9 +984,6 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
 	
 	def onClick( self, controlID ):
-		if controlID == 110:
-			xbmc.executebuiltin('Action(previousmenu)')
-			return True
 		return False
 			
 	def onAction(self,action):
@@ -1022,7 +1016,7 @@ class PageWindow(BaseWindow):
 		self._lastPage = __language__(30111)
 		self._newestPage = None
 		BaseWindow.__init__( self, *args, **kwargs )
-                       
+		
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 
@@ -1091,7 +1085,7 @@ class ImagesDialog(BaseWindow):
 			xbmcgui.unlock()
 			raise
 		xbmcgui.unlock()
-                       
+
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
@@ -1133,8 +1127,7 @@ class PostDialog(BaseWindow):
 		self.title = self.post.title
 		self.posted = False
 		self.display_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
-		self.buffer = ''
-		xbmcgui.WindowXML.__init__( self, *args, **kwargs )
+		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		self.getControl(122).setText(' ') #to remove scrollbar
@@ -1146,7 +1139,7 @@ class PostDialog(BaseWindow):
 				#This won't work with other formats, need to do this better TODO
 				if not pid or pid.startswith('PM'): format = format.replace(';!POSTID!','')
 				for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
-					self.addLine(line)
+					self.addQuote(line)
 				self.updatePreview()
 			except:
 				xbmcgui.unlock()
@@ -1166,7 +1159,7 @@ class PostDialog(BaseWindow):
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
 			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Post Reply'))
-			self.getControl(104).setLabel('[B]%s[/B]' % __language__(30120),textColor=title_fg)
+			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,__language__(30120)))
 		except:
 			xbmcgui.unlock()
 			raise
@@ -1174,80 +1167,76 @@ class PostDialog(BaseWindow):
 		
 	def onClick( self, controlID ):
 		if BaseWindow.onClick(self, controlID): return
+		if controlID == 202:
+			self.postReply()
+		elif controlID == 104:
+			self.setTitle()
+
+	def onFocus( self, controlId ):
+		self.controlId = controlId
+		
+	def onAction(self,action):
+		BaseWindow.onAction(self,action)
+		
+	
+	def setTitle(self):
+		keyboard = xbmc.Keyboard(self.title,__language__(30125))
+		keyboard.doModal()
+		if not keyboard.isConfirmed(): return
+		title = keyboard.getText()
+		title_fg = FB.theme.get('title_fg','FF000000')
+		self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,title))
+		self.title = title
+	
+	def dialogCallback(self,pct,message):
+		self.prog.update(pct,message)
+		return True
+		
+	def postReply(self):
+		message = self.getOutput()
+		self.prog = xbmcgui.DialogProgress()
+		self.prog.create(__language__(30126),__language__(30127))
+		self.prog.update(0)
+		self.post.setMessage(self.title,message)
+		try:
+			if not self.post.isPM:
+				FB.post(self.post,callback=self.dialogCallback)
+			else:
+				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
+		except:
+			self.prog.close()
+			raise
+		self.prog.close()
+		self.posted = True
+		self.close()
+		
+	def parseCodes(self,text):
+		return MC.parseCodes(text)
+	
+	def updatePreview(self):
+		disp = self.display_base % self.getOutput()
+		self.getControl(122).reset()
+		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
+
+class LinePostDialog(PostDialog):
+	def addQuote(self,quote):
+		self.addLine(quote)
+		
+	def onClick( self, controlID ):
 		if controlID == 200:
 			self.addLineSingle()
 		elif controlID == 201:
 			self.addLineMulti()
-		elif controlID == 202:
-			self.postReply()
 		elif controlID == 120:
 			self.editLine()
-		elif controlID == 104:
-			self.setTitle()
-                       
-	def onFocus( self, controlId ):
-		self.controlId = controlId
-		
+		PostDialog.onClick(self, controlID)
+			
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 		elif action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
-		#else:
-		#	if self.checkKeys(action): return
-		xbmcgui.WindowXMLDialog.onAction(self,action)
-		
-	def checkKeys(self,action):
-		aid = action.getId()
-		bc = action.getButtonCode()
-		print aid,bc
-		try:
-			if not bc: bc = aid
-			char = None
-			if aid == ACTION_PARENT_DIR:
-				self.backspace()
-			elif aid == 122:
-				xbmc.executebuiltin('Action(previousmenu)')
-				char = 's'
-			elif aid == 88:
-				if bc == 61627:
-					char = '='
-				else:
-					char = '+'
-			elif bc == 61453:
-				char = '\n'
-			elif bc == 61472:
-				char = ' '
-			elif bc > 61504 and bc < 61531:
-				char = chr(bc-61408)
-			elif bc > 61535 and bc < 61546:
-				char = chr(bc-61488)
-			elif bc == 61626:
-				char = ';'
-			elif bc == 61632:
-				char = '`'
-			elif bc == 61678:
-				char = "'"
-			elif bc > 61626 and bc < 61678:
-				char = chr(bc-61584)
-			elif bc > 61726 and bc < 61823:
-				char = chr(bc-61696)
-			if char:
-				self.addChar(char)
-				return True
-		except:
-			return False
-			
-		return False
-		
-	def backspace(self):
-		self.buffer = self.buffer[:-1]
-		self.getControl(122).setText(self.buffer)
-		
-	def addChar(self,char):
-		self.buffer += char
-		self.getControl(122).setText(self.buffer)
-		#self.getControl(122).scroll(len(self.buffer)-1)
+		PostDialog.onAction(self,action)
 		
 	def doMenu(self):
 		dialog = xbmcgui.Dialog()
@@ -1262,11 +1251,6 @@ class PostDialog(BaseWindow):
 			out += llist.getListItem(x).getProperty('text') + '\n'
 		return out
 		
-	def updatePreview(self):
-		disp = self.display_base % self.getOutput()
-		self.getControl(122).reset()
-		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
-			
 	def addLine(self,line=''):
 		item = xbmcgui.ListItem(label=self.displayLine(line))
 		#we set text separately so we can have the display be formatted...
@@ -1328,39 +1312,304 @@ class PostDialog(BaseWindow):
 		item.setLabel(self.displayLine(line))
 		self.updatePreview()
 		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',MC.lineFilter.sub('',test3))
+
+class TextPostDialog(PostDialog):
+	def __init__( self, *args, **kwargs ):
+		PostDialog.__init__( self, *args, **kwargs )
+		self.buffer = ''
+		self.cursor = '[COLOR red]|[/COLOR]'
+		#self.cursor = '|'
+		self.cursorPos = 0
+		self.charsPerLine = 100
+		self.linesPerPage = 12
+		self.lastViewStart = 0
+		self.posHint = -1
+		self.editButton = None
+		import string
+		self.transTable = string.maketrans("`1234567890-=abcdefghijklmnopqrstuvwxyz[]\\;',./", "~!@#$%^&*()_+ABCDEFGHIJKLMNOPQRSTUVWXYZ{}|:\"<>?")
 	
-	def setTitle(self):
-		keyboard = xbmc.Keyboard(self.title,__language__(30125))
-		keyboard.doModal()
-		if not keyboard.isConfirmed(): return
-		title = keyboard.getText()
-		self.getControl(104).setLabel('[B]%s[/B]' % title)
-		self.title = title
+	def onInit(self):
+		PostDialog.onInit(self)
+		self.editButton = self.getControl(200)
+		self.cursorPos = len(self.buffer)
+		self.showBuffer()
 	
-	def dialogCallback(self,pct,message):
-		self.prog.update(pct,message)
-		return True
+	def addQuote(self,quote):
+		self.buffer += quote + '\n'
 		
-	def postReply(self):
-		message = self.getOutput()
-		self.prog = xbmcgui.DialogProgress()
-		self.prog.create(__language__(30126),__language__(30127))
-		self.prog.update(0)
-		self.post.setMessage(self.title,message)
+	def getOutput(self):
+		return self.buffer
+	
+	def onClick(self,controlID):
+		PostDialog.onClick(self,controlID)
+		
+	def onAction(self,action):
+		if self.checkKeys(action): return
+		if action == ACTION_CONTEXT_MENU:
+			self.doMenu()
+			return
+		PostDialog.onAction(self,action)
+		
+	def doMenu(self):
+		dialog = xbmcgui.Dialog()
+		idx = dialog.select(__language__(30051),[__language__(30120),__language__(3008)])
+		if idx == 0: self.setTitle()
+		elif idx == 1: self.postReply()
+		
+	def checkKeys(self,action):
+		#if not self.editButton.isSelected(): return False
+		aid = action.getId()
+		bc = action.getButtonCode()
+		print aid,bc
 		try:
-			if not self.post.isPM:
-				FB.post(self.post,callback=self.dialogCallback)
-			else:
-				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
+			shift = False
+			if bc & 0x00020000:
+				#de-shift
+				bc = bc ^ 0x00020000
+				shift = True
+			if not bc: bc = aid
+			char = None
+			if aid == ACTION_PARENT_DIR:
+				self.backspace()
+				return True
+			#elif aid == 18:
+			#	print 'test'
+			#	char = '\\'
+			#	xbmc.executebuiltin('Action(fullscreen)')
+			elif aid == 122:
+				if bc == 61517:
+					char = 'm'
+				else:
+					xbmc.executebuiltin('Action(previousmenu)')
+					char = 's'
+			#elif aid == 88:
+			elif bc == 61627:
+				char = '='
+			#	else:
+			#		char = '+'
+			elif bc > 61476 and bc < 61481:
+				self.moveCursor(bc)
+				return True
+			elif bc == 61453:
+				char = '\n'
+			elif bc == 61472:
+				char = ' '
+			elif bc == 61475:
+				self.moveToEnd()
+			elif bc == 61476:
+				self.moveToStart()
+			elif bc > 61504 and bc < 61531:
+				#a-z
+				char = chr(bc-61408)
+			elif bc > 61535 and bc < 61546:
+				#0-9
+				char = chr(bc-61488)
+			elif bc == 61626:
+				char = ';'
+			elif bc == 61632:
+				char = '`'
+			elif bc == 61678:
+				char = "'"
+			elif bc > 61626 and bc < 61678:
+				char = chr(bc-61584)
+			elif bc > 61726 and bc < 61823:
+				char = chr(bc-61696)
+			elif bc == 61473:
+				#pgup
+				self.pageUp()
+			elif bc == 61474:
+				#pgdn
+				self.pageDown()
+			elif bc == 127009:
+				#ctrl-pgup
+				xbmc.executebuiltin('PageUp(123)')
+			elif bc == 127010:
+				#ctrl-pgdn
+				xbmc.executebuiltin('PageDown(123)')
+			elif bc == 127138:
+				char = '\\'
+			
+			if char:
+				if shift: char = char.translate(self.transTable)
+				self.addChar(char)
+				self.posHint = -1
+				return True
 		except:
-			self.prog.close()
 			raise
-		self.prog.close()
-		self.posted = True
-		self.close()
+			return False
+			
+		return False
 		
-	def parseCodes(self,text):
-		return MC.parseCodes(text)
+	def pageUp(self):
+		for x in range(0,self.linesPerPage-1): #@UnusedVariable
+			self.lastViewStart -= 1
+			if self.lastViewStart < 0:
+				self.lastViewStart = 0
+				break
+			self.moveCursor(61478)
+		
+	def pageDown(self):
+		cmax = len(self.getWrapped()) - self.linesPerPage
+		for x in range(0,self.linesPerPage-1): #@UnusedVariable
+			self.lastViewStart += 1
+			if self.lastViewStart > cmax:
+				self.lastViewStart = cmax
+				break
+			self.moveCursor(61480)
+	
+	def moveCursor(self,bc):
+		if bc == 61477:
+			#left
+			self.posHint = -1
+			self.cursorPos -= 1
+			if self.cursorPos < 0: self.cursorPos = 0
+		elif bc == 61478:
+			#up
+			oldPos = self.cursorPos
+			idx,pos,clen = self.getLinePos() #@UnusedVariable
+			relPos = pos % self.charsPerLine
+			if self.posHint < 0: self.posHint = relPos
+			posOff = self.posHint - relPos
+			if pos > self.charsPerLine-1:
+				self.cursorPos -= (self.charsPerLine - posOff)
+				if self.cursorPos < 0: self.cursorPos = 0
+			else:
+				line = self.getPreviousLine()
+				llen = len(line)
+				tail = llen % self.charsPerLine
+				self.cursorPos -= (pos + 1)
+				if tail > self.posHint: self.cursorPos -= (tail - self.posHint)
+			#if self.cursorPos == -1 and line: self.cursorPos = 0
+			if self.cursorPos < 0: self.cursorPos = oldPos
+		elif bc == 61479:
+			#right
+			self.posHint = -1
+			self.cursorPos += 1
+			if self.cursorPos > len(self.buffer): self.cursorPos = len(self.buffer)
+		elif bc == 61480:
+			#down
+			eol = self.buffer.find('\n',self.cursorPos)
+			sol = self.buffer.rfind('\n',0,self.cursorPos)
+			#if sol < 0: sol = 0
+			if eol < 0:
+				eol = len(self.buffer)
+				if eol - sol < self.charsPerLine: return
+			lpos = self.cursorPos - sol
+			relPos = lpos % self.charsPerLine
+			if self.posHint < 0: self.posHint = relPos - 1
+			posOff = (self.posHint - relPos) + 1
+			llen = eol - sol
+			#print '%s %s %s' % (sol,lpos,eol)
+			if lpos + self.charsPerLine < llen:
+				#print 'one'
+				self.cursorPos += self.charsPerLine + posOff
+			elif lpos != eol and llen > self.charsPerLine and llen % self.charsPerLine and lpos + self.charsPerLine < llen + (self.charsPerLine - (llen % self.charsPerLine)):
+				#print 'two'
+				self.cursorPos = eol
+			else:
+				next_eol = self.buffer.find('\n',eol+1)
+				if next_eol < 0: next_eol = len(self.buffer)
+				off = (lpos % self.charsPerLine)
+				newPos = eol + off + posOff
+				#print '%s %s' % (newPos,next_eol)
+				#if llen > self.charsPerLine: newPos += 1
+				if newPos > next_eol:
+					if newPos >= len(self.buffer): return
+					self.cursorPos = next_eol
+				else:
+					self.cursorPos = newPos
+			if self.cursorPos > len(self.buffer): self.cursorPos = oldPos
+		self.showBuffer(upPrev=False)
+	
+	def moveToEnd(self):
+		self.posHint = -1
+		eol = self.buffer.find('\n',self.cursorPos)
+		if eol < 0:
+			self.cursorPos = len(self.buffer)
+		else:
+			self.cursorPos = eol
+		self.showBuffer()
+		
+	def moveToStart(self):
+		self.posHint = -1
+		sol = self.buffer.rfind('\n',0,self.cursorPos) + 1
+		if sol:
+			self.cursorPos = sol
+		else:
+			self.cursorPos = 0
+		self.showBuffer()
+		
+	def getPreviousLine(self):
+		lines = self.buffer.split('\n')
+		ct=0
+		lastline = ''
+		for line in lines:
+			ct += len(line) + 1
+			if self.cursorPos < ct:
+				return lastline
+			lastline = line
+			
+	def getLinePos(self):
+		lines = self.buffer.split('\n')
+		ct=0
+		lastct=0
+		idx=0
+		for line in lines:
+			ct += len(line) + 1
+			if self.cursorPos < ct:
+				return (idx,self.cursorPos - lastct,len(line))
+			lastct = ct
+			idx += 1
+		return (idx-1,len(line),len(line))
+	
+	def backspace(self):
+		self.buffer = self.buffer[0:self.cursorPos-1] + self.buffer[self.cursorPos:]
+		self.cursorPos -= 1
+		self.showBuffer()
+		
+	def addChar(self,char):
+		self.buffer = self.buffer[0:self.cursorPos] + char + self.buffer[self.cursorPos:]
+		self.cursorPos += 1
+		self.showBuffer()
+				
+	def showBuffer(self,upPrev=True):
+		wrapped = self.getWrapped()
+		cursor_idx = 0
+		for w in wrapped:
+			if '\r' in w: break
+			cursor_idx += 1
+		if cursor_idx < self.lastViewStart:
+			self.lastViewStart = cursor_idx
+		elif cursor_idx >= self.lastViewStart + self.linesPerPage:
+			self.lastViewStart = (cursor_idx - self.linesPerPage) + 1
+		show = wrapped[self.lastViewStart:self.lastViewStart + self.linesPerPage]
+		self.getControl(120).setText('\n'.join(show).replace('\r',self.cursor))
+		if upPrev: self.updatePreview()
+		
+	def getWrapped(self):
+		buffer = self.buffer[0:self.cursorPos]+'\r'+self.buffer[self.cursorPos:]
+		lines = buffer.split('\n')
+		wrapped = []
+		for line in lines:
+			wrapped += self.splitLine(line)
+		return wrapped
+		
+	def splitLine(self,line):
+		llen = len(line)
+		if llen <= self.charsPerLine: return [line]
+		ct = 0
+		lastct = 0
+		out = []
+		while ct < llen:
+			ct += self.charsPerLine
+			sub = line[lastct:ct]
+			#Don't count cursor in line length
+			if '\r' in sub:
+				ct += 1
+				sub = line[lastct:ct]
+			out.append(sub)
+			lastct = ct
+		return out
 
 ######################################################################################
 # Message Window
@@ -1522,7 +1771,7 @@ class MessageWindow(BaseWindow):
 		if quote: pm.setQuote(user,quote)
 		w = PostDialog("script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
 		w.doModal()
-		posted = w.posted
+		#posted = w.posted
 		del w
 	
 ######################################################################################
@@ -1711,7 +1960,7 @@ class RepliesWindow(PageWindow):
 			self.stopThread()
 			self.openPostDialog()
 		elif controlID == 120:
-			self.stopThread()
+			if not self.empty: self.stopThread()
 			self.postSelected()
 		elif controlID == 106:
 			self.stopThread()
@@ -1798,7 +2047,10 @@ class RepliesWindow(PageWindow):
 			to = doKeyboard('Enter Receipient(s)')
 			if not to: return
 			pm.to = to
-		w = PostDialog(	"script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
+		if __addon__.getSetting('use_text_editor') == 'true':
+			w = TextPostDialog(	"script-forumbrowser-post-text.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
+		else:
+			w = LinePostDialog(	"script-forumbrowser-post.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm,parent=self)
 		w.doModal()
 		posted = w.posted
 		del w
@@ -1915,13 +2167,13 @@ class ThreadsWindow(PageWindow):
 		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'), THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
 		w.doModal()
 		del w
-                       
+
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 	
 	def onClick( self, controlID ):
 		if controlID == 120:
-			self.stopThread()
+			if not self.empty: self.stopThread()
 			self.openRepliesWindow()
 		elif controlID == 106:
 			self.stopThread()
@@ -1944,7 +2196,7 @@ class ThreadsWindow(PageWindow):
 class ForumsWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		BaseWindow.__init__( self, *args, **kwargs )
-		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
+		#FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
 		self.parent = self
 		self.empty = True
 		self.textBase = '%s'
@@ -1963,6 +2215,7 @@ class ForumsWindow(BaseWindow):
 	def onInit(self):
 		self.setStopControl(self.getControl(105))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
+		self.resetForum()
 		self.fillForumList()
 		self.setFocus(self.getControl(120))
 		
@@ -2060,12 +2313,14 @@ class ForumsWindow(BaseWindow):
 		
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
+		if not item: return False
 		fid = item.getProperty('id')
 		topic = item.getProperty('topic')
 		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
 		w.doModal()
 		del w
 		self.setPMCounts(FB.getPMCounts())
+		return True
 		
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
@@ -2089,7 +2344,7 @@ class ForumsWindow(BaseWindow):
 		self.fillForumList()
 		__addon__.setSetting('last_forum',FB.forum)
 		return True
-                       
+
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
@@ -2106,7 +2361,7 @@ class ForumsWindow(BaseWindow):
 		elif controlID == 202:
 			if self.changeForum(): return
 		elif controlID == 120:
-			self.stopThread()
+			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
 		elif controlID == 105:
 			self.stopThread()
@@ -2124,7 +2379,8 @@ class ForumsWindow(BaseWindow):
 		
 	def resetForum(self,hidelogo=True):
 		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
-		self.getControl(201).setEnabled(self.hasLogin())
+		self.getControl(201).setEnabled(self.hasLogin() and FB.hasSubscriptions())
+		self.getControl(203).setEnabled(FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
 		
 	def openSettings(self):
@@ -2447,7 +2703,6 @@ class DownloadThread(StoppableThread):
 		fnbase = 'file_' + str(int(time.time())) + '%s' + self.ext
 		try:
 			for url,i in zip(self.urllist,range(0,total)):
-				current = i
 				fname = os.path.join(self.targetdir,fnbase % i)
 				file_list[url] = fname
 				if self.stopped(): return None
@@ -2521,7 +2776,7 @@ class Downloader:
 			self.current = 0
 			self.display = __language__(30206) % os.path.basename(path)
 			self.prog.update(0,self.message,self.display)
-			t,ftype = self.getUrlFile(url,path,callback=self.progCallback)
+			t,ftype = self.getUrlFile(url,path,callback=self.progCallback) #@UnusedVariable
 		except:
 			ERROR('DOWNLOAD URL ERROR')
 			self.prog.close()
@@ -2563,7 +2818,7 @@ else:
 	FB = ForumBrowser(__addon__.getSetting('last_forum') or 'forum.xbmc.org',always_login=__addon__.getSetting('always_login') == 'true')
 	MC = MessageConverter()
 	TR = googleTranslateAPI()
-
+	
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
 	w.doModal()
 	del w

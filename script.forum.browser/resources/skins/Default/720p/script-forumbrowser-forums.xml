@@ -83,14 +83,6 @@
         <texturefocus border="10">FBbutton-focus.png</texturefocus>
         <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
       </control>
-      <control type="image">
-            <description>page header tab icon</description>
-            <posx>10</posx>
-            <posy>4</posy>
-            <width>1260</width>
-            <height>113</height>
-            <texture>overlay.png</texture>
-      </control>
       <control type="button" id="200">
        <description>The Button</description>
        <onleft>120</onleft>
@@ -182,6 +174,16 @@
         <height>28</height>
         <texturefocus>close-button-focus.png</texturefocus>
         <texturenofocus>close-button.png</texturenofocus>
+        <visible>system.getbool(input.enablemouse)</visible>
+        <onclick>PreviousMenu</onclick>
+      </control>
+      <control type="image">
+            <description>page header tab icon</description>
+            <posx>10</posx>
+            <posy>4</posy>
+            <width>1260</width>
+            <height>113</height>
+            <texture>overlay.png</texture>
       </control>
       <!--<control type="image" >
             <description>page header tab icon</description>

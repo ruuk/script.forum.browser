@@ -4,8 +4,19 @@ Current Version : 0.8.0
 
 *** 0.8.0 ***
 
+Fixed: dvhk.pl now works again (Can view and create PM's but PM counts on the message button don't work - I will have to fix that)
 Fixed: Selecting the post editor list when empty caused error
 Added close buttons for mouse users
+Missing images in Post Message window now show a default if XBMC fails to display them 
+Fixed: Clicking on empty list while loading was aborting load
+Now disables "Messages" button when not implemented (for example xbmc4xbox.org, currently)
+Experimental: Added an option in settings to use a text editor instead of the current 'line' editor
+  for editing posts/PM's. Currently needs a keyboard and will probably only work with US keyboards.
+  XBMC doesn't have a multi-line text input so I had to do some fancy tricks to make to make this work.
+  Expect a few minor quirks with text navigation. Also - and = will work but will also change the volume. 
+  Use CTRL-\ for backslash otherwise you'll just toggle fullscreen and there's nothing I can do about that :)
+  Controls: Use the context menu button/right mouse click for options. CTRL-PgUp/PgDn will operate on
+    the preview window.
 
 *** 0.7.9 ***
 
