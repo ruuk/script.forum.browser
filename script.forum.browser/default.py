@@ -447,7 +447,10 @@ class ForumBrowser:
 		
 	def makeURL(self,phppart):
 		if not phppart: return ''
-		url = self._url + phppart
+		if phppart.startswith('http://'):
+			url = phppart
+		else:
+			url = self._url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
 		
 	def getPMCounts(self,html=''):
