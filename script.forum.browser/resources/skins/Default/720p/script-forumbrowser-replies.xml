@@ -16,7 +16,8 @@
 				<posy>0</posy>
 				<width>1280</width>
 				<height>720</height>
-				<texture border="40">default-panel-full.png</texture>
+				<texture border="40">forum-browser-panel-full.png</texture>
+				<colordiffuse>FF222222</colordiffuse>
 			</control>
 
 			<control type="image" id="251">
@@ -25,7 +26,7 @@
 				<posy>4</posy>
 				<width>1260</width>
 				<height>80</height>
-				<texture border="10">title-background.png</texture>
+				<texture border="10">forum-browser-title-background.png</texture>
 			</control>
 			<control type="label" id="103">
 				<description>textarea</description>
@@ -34,7 +35,7 @@
 				<width>100</width>
 				<height>40</height>
 				<font>font18</font>
-				<textcolor>white</textcolor>
+				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>Posts</label>
@@ -55,7 +56,7 @@
 				<align>center</align>
 				<aligny>center</aligny>
 				<label>$LOCALIZE[SCRIPT3002]</label>
-				<texturefocus border="10">FBbutton-focus.png</texturefocus>
+				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
 				<texturenofocus border="10">FBbutton-nofocus.png
 				</texturenofocus>
 				<textcolor>FF000000</textcolor>
@@ -68,7 +69,7 @@
 				<width>600</width>
 				<height>60</height>
 				<font>font18</font>
-				<textcolor>white</textcolor>
+				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -91,8 +92,8 @@
 				<textcolor>FF000000</textcolor>
 				<disabledcolor>20555555</disabledcolor>
 				<textoffsetx>33</textoffsetx>
-				<texturefocus>left-focus.png</texturefocus>
-				<texturenofocus>left-nofocus.png</texturenofocus>
+				<texturefocus>forum-browser-left-focus.png</texturefocus>
+				<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 			</control>
 			<control type="button" id="105">
 				<description>Page Button</description>
@@ -108,9 +109,8 @@
 				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<texturefocus border="10">FBbutton-focus.png</texturefocus>
-				<texturenofocus border="10">FBbutton-nofocus.png
-				</texturenofocus>
+				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
 				<visible>!Control.IsVisible(106)</visible>
 			</control>
 			<control type="button" id="106">
@@ -129,9 +129,8 @@
 				<align>center</align>
 				<label>$LOCALIZE[SCRIPT3010]</label>
 				<colordiffuse>FFFF0000</colordiffuse>
-				<texturefocus border="10">FBbutton-focus.png</texturefocus>
-				<texturenofocus border="10">FBbutton-nofocus.png
-				</texturenofocus>
+				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
 			</control>
 			<control type="button" id="202">
 				<description>The Button</description>
@@ -150,8 +149,8 @@
 				<textcolor>FF000000</textcolor>
 				<disabledcolor>20555555</disabledcolor>
 				<textoffsetx>4</textoffsetx>
-				<texturefocus>right-focus.png</texturefocus>
-				<texturenofocus>right-nofocus.png</texturenofocus>
+				<texturefocus>forum-browser-right-focus.png</texturefocus>
+				<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 			</control>
 			<control type="button" id="110">
 				<description>Close Button</description>
@@ -159,8 +158,8 @@
 				<posy>15</posy>
 				<width>32</width>
 				<height>28</height>
-				<texturefocus>close-button-focus.png</texturefocus>
-				<texturenofocus>close-button.png</texturenofocus>
+				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
+				<texturenofocus>forum-browser-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
 			</control>
@@ -170,7 +169,7 @@
 				<posy>4</posy>
 				<width>1260</width>
 				<height>80</height>
-				<texture>overlay.png</texture>
+				<texture>forum-browser-overlay.png</texture>
 			</control>
 
 			<control type="image" id="300">
@@ -178,21 +177,21 @@
 				<posy>86</posy>
 				<width>1252</width>
 				<height>2</height>
-				<texture>TRseparator.png</texture>
+				<texture>forum-browser-separator.png</texture>
 			</control>
 			<control type="image" id="310">
 				<posx>14</posx>
 				<posy>86</posy>
 				<width>1</width>
 				<height>2</height>
-				<texture>progress.png</texture>
+				<texture>forum-browser-progress.png</texture>
 			</control>
 			<control type="image" id="301">
 				<posx>10</posx>
 				<posy>387</posy>
 				<width>1260</width>
 				<height>2</height>
-				<texture>TRseparator.png</texture>
+				<texture>forum-browser-separator.png</texture>
 				<visible>false</visible>
 			</control>
 			<control type="image" id="302">
@@ -200,7 +199,7 @@
 				<posy>604</posy>
 				<width>1260</width>
 				<height>2</height>
-				<texture>TRseparator.png</texture>
+				<texture>forum-browser-separator.png</texture>
 				<visible>false</visible>
 			</control>
 
@@ -210,8 +209,8 @@
 				<posy>122</posy>
 				<width>1066</width>
 				<height>270</height>
-				<colordiffuse>FF000000</colordiffuse>
-				<texture>text-background.png</texture>
+				<colordiffuse>BB000000</colordiffuse>
+				<texture>forum-browser-text-background.png</texture>
 				<visible>false</visible>
 			</control>
 		</control>
@@ -237,7 +236,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>100</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 						<colordiffuse>A0FFFFFF</colordiffuse>
 					</control>
@@ -246,7 +245,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>100</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>AA000000</colordiffuse>
 					</control>
@@ -321,8 +320,8 @@
 						<height>55</height>
 						<font>font12</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<selectedcolor>white</selectedcolor>
+						<textcolor>black</textcolor>
+						<selectedcolor>black</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
@@ -334,7 +333,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>100</height>
-						<texture>overlay.png</texture>
+						<texture>forum-browser-overlay.png</texture>
 						<visible>true</visible>
 					</control>
 				</itemlayout>
@@ -344,7 +343,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>200</height>
-						<texture border="10">text-background-border.png</texture>
+						<texture border="10">forum-browser-text-background-border.png</texture>
 						<visible>true</visible>
 					</control>
 					<control type="image">
@@ -352,7 +351,7 @@
 						<posy>147</posy>
 						<width>60</width>
 						<height>25</height>
-						<texture>triangle-outline.png</texture>
+						<texture>forum-browser-triangle-outline.png</texture>
 						<visible>true</visible>
 					</control>
 					<control type="image">
@@ -360,7 +359,7 @@
 						<posy>147</posy>
 						<width>60</width>
 						<height>25</height>
-						<texture>triangle.png</texture>
+						<texture>forum-browser-triangle.png</texture>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>FF000000</colordiffuse>
 					</control>
@@ -369,7 +368,7 @@
 						<posy>147</posy>
 						<width>60</width>
 						<height>25</height>
-						<texture>triangle.png</texture>
+						<texture>forum-browser-triangle.png</texture>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -378,7 +377,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>200</height>
-						<texture border="10">text-background-fade.png</texture>
+						<texture border="10">forum-browser-text-background-fade.png</texture>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -387,7 +386,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>200</height>
-						<texture border="10">text-background-fade.png</texture>
+						<texture border="10">forum-browser-text-background-fade.png</texture>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>FF000000</colordiffuse>
 					</control>
@@ -434,7 +433,7 @@
 						<posy>68</posy>
 						<width>128</width>
 						<height>128</height>
-						<texture fallback="avatar-none.png">$INFO[ListItem.Property(avatar)]
+						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]
 						</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
@@ -472,7 +471,7 @@
 						<height>175</height>
 						<font>font12</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>black</textcolor>
 						<selectedcolor>green</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>

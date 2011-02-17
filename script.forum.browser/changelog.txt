@@ -1,6 +1,11 @@
 Forum Browser Changelog
 
-Current Version : 0.8.2
+Current Version : 0.8.3
+
+*** 0.8.3 ***
+
+Added 'Use Forum Colors' option in settings (disabled by default). Allows other skins to diplay properly.
+Renamed skin image files to give a unique namespace
 
 *** 0.8.2 ***
 

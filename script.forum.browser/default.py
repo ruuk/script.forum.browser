@@ -14,8 +14,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '01-22-2011'
-__version__ = '0.8.2'
+__date__ = '02-17-2011'
+__version__ = '0.8.3'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1084,6 +1084,7 @@ class ImagesDialog(BaseWindow):
 		self.showImage()
 		
 	def setTheme(self):
+		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
@@ -1154,6 +1155,7 @@ class PostDialog(BaseWindow):
 		self.setTheme()
 	
 	def setTheme(self):
+		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -1640,6 +1642,7 @@ class MessageWindow(BaseWindow):
 		self.getLinks()
 
 	def setTheme(self):
+		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -1668,11 +1671,11 @@ class MessageWindow(BaseWindow):
 			if link.isImage():
 				item.setIconImage(link.url)
 			elif link.isPost():
-				item.setIconImage('post.png')
+				item.setIconImage('forum-browser-post.png')
 			elif link.isThread():
-				item.setIconImage('thread.png')
+				item.setIconImage('forum-browser-thread.png')
 			else:
-				item.setIconImage('link.png')
+				item.setIconImage('forum-browser-link.png')
 			ulist.addItem(item)
 
 	def getImages(self):
@@ -1797,8 +1800,8 @@ class RepliesWindow(PageWindow):
 		self.me = self.parent.parent.getUsername()
 		self.posts = {}
 		self.empty = True
-		self.desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
-		
+		self.desc_base = '[CR]%s[CR] [CR]'
+		self.mode = 'light'
 	
 	def onInit(self):
 		self.setStopControl(self.getControl(106))
@@ -1810,6 +1813,7 @@ class RepliesWindow(PageWindow):
 		self.setFocus(self.getControl(120))
 	
 	def setTheme(self):
+		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -1860,7 +1864,7 @@ class RepliesWindow(PageWindow):
 				xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30132))
 			return
 		self.empty = False
-		defAvatar = os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','avatar-none.png')
+		defAvatar = os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png')
 		xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
@@ -2078,6 +2082,7 @@ class ThreadsWindow(PageWindow):
 		self.me = self.parent.getUsername()
 		self.empty = True
 		self.textBase = '%s'
+		self.highBase = '%s'
 		PageWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -2088,6 +2093,15 @@ class ThreadsWindow(PageWindow):
 		self.setFocus(self.getControl(120))
 		
 	def setTheme(self):
+		self.desc_base = unicode.encode(__language__(30162)+' %s','utf8')
+		self.desc_bold = unicode.encode('[B]'+__language__(30162)+' %s[/B]','utf8')
+		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30160))
+		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
+			
+		if __addon__.getSetting('use_forum_colors') == 'false': return
+		
+		self.desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
+		self.desc_bold = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+'][B]'+__language__(30162)+' %s[/B][/COLOR]','utf8')
 		try:
 			xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -2132,8 +2146,7 @@ class ThreadsWindow(PageWindow):
 		try:
 			self.getControl(120).reset()
 			self.setupPage(pageData)
-			desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
-			desc_bold = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+'][B]'+__language__(30162)+' %s[/B][/COLOR]','utf8')
+			
 			
 			for t in threads:
 				tdict = t.groupdict()
@@ -2152,9 +2165,9 @@ class ThreadsWindow(PageWindow):
 				item.setProperty("id",tid)
 				item.setProperty("fid",fid)
 				if last == self.me:
-					item.setProperty("last",desc_bold % last)
+					item.setProperty("last",self.desc_bold % last)
 				else:
-					item.setProperty("last",desc_base % last)
+					item.setProperty("last",self.desc_base % last)
 				item.setProperty("lastid",tdict.get('lastid',''))
 				item.setProperty('title',title)
 				self.getControl(120).addItem(item)
@@ -2207,6 +2220,7 @@ class ForumsWindow(BaseWindow):
 		self.empty = True
 		self.textBase = '%s'
 		self.subTextBase = '%s'
+		self.desc_base = '%s'
 		self.setAsMain()
 	
 	def getUsername(self):
@@ -2226,6 +2240,12 @@ class ForumsWindow(BaseWindow):
 		self.setFocus(self.getControl(120))
 		
 	def setTheme(self):
+		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30170))
+		self.getControl(104).setLabel('[B]%s[/B]' % FB.forum)
+			
+		if __addon__.getSetting('use_forum_colors') == 'false': return
+		
+		self.desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]'
 		try:
 			xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -2281,7 +2301,7 @@ class ForumsWindow(BaseWindow):
 			self.getControl(250).setImage(logo)
 			self.setPMCounts(pm_counts)
 			#print forums
-			desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]'
+			
 			for f in forums:
 				#print f.group(0)
 				fdict = f.groupdict()
@@ -2296,7 +2316,7 @@ class ForumsWindow(BaseWindow):
 					text = self.textBase
 				title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
 				item = xbmcgui.ListItem(label=text % title)
-				item.setProperty("description",desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
+				item.setProperty("description",self.desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
 				item.setProperty("id",fid)
 				self.getControl(120).addItem(item)

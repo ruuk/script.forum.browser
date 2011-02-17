@@ -16,7 +16,8 @@
         <posy>0</posy>
         <width>1280</width>
         <height>720</height>
-        <texture border="40">default-panel-full.png</texture>
+        <texture border="40">forum-browser-panel-full.png</texture>
+        <colordiffuse>FF222222</colordiffuse>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
 
@@ -26,7 +27,7 @@
             <posy>4</posy>
             <width>1260</width>
             <height>113</height>
-            <texture>title-background.png</texture>
+            <texture>forum-browser-title-background.png</texture>
         </control>
         <control type="image" id="250">
             <description>page header tab icon</description>
@@ -80,8 +81,8 @@
         <align>center</align>
         <label>$LOCALIZE[SCRIPT3010]</label>
         <colordiffuse>FFFF0000</colordiffuse>
-        <texturefocus border="10">FBbutton-focus.png</texturefocus>
-        <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+        <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+        <texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
       </control>
       <control type="button" id="200">
        <description>The Button</description>
@@ -98,8 +99,8 @@
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3003]</label>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+       <texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -119,8 +120,8 @@
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3004]</label>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+       <texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -140,8 +141,8 @@
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3009]</label>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+       <texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -161,8 +162,8 @@
        <font>font18</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3005]</label>
-       <texturefocus border="10">FBbutton-focus.png</texturefocus>
-       <texturenofocus border="10">FBbutton-nofocus.png</texturenofocus>
+       <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
+       <texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
        <textcolor>FFFFFFFF</textcolor>
        <disabledcolor>80FFFFFF</disabledcolor>
       </control>
@@ -172,8 +173,8 @@
         <posy>20</posy>
         <width>32</width>
         <height>28</height>
-        <texturefocus>close-button-focus.png</texturefocus>
-        <texturenofocus>close-button.png</texturenofocus>
+        <texturefocus>forum-browser-close-button-focus.png</texturefocus>
+        <texturenofocus>forum-browser-close-button.png</texturenofocus>
         <visible>system.getbool(input.enablemouse)</visible>
         <onclick>PreviousMenu</onclick>
       </control>
@@ -183,7 +184,7 @@
             <posy>4</posy>
             <width>1260</width>
             <height>113</height>
-            <texture>overlay.png</texture>
+            <texture>forum-browser-overlay.png</texture>
       </control>
       <!--<control type="image" >
             <description>page header tab icon</description>
@@ -201,7 +202,7 @@
             <posy>584</posy>
             <width>1260</width>
             <height>72</height>
-            <texture>title-background.png</texture>
+            <texture>forum-browser-title-background.png</texture>
       </control>
       <control type="label">
         <description>textarea</description>
@@ -210,7 +211,7 @@
         <width>1222</width>
         <height>45</height>
         <font>font12</font>
-        <textcolor>white</textcolor>
+        <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
@@ -222,35 +223,35 @@
             <posy>584</posy>
             <width>1260</width>
             <height>72</height>
-            <texture>overlay.png</texture>
+            <texture>forum-browser-overlay.png</texture>
       </control>
       <control type="image" id="300">
         <posx>14</posx>
         <posy>119</posy>
         <width>1252</width>
         <height>2</height>
-        <texture>TRseparator.png</texture>
+        <texture>forum-browser-separator.png</texture>
       </control>
       <control type="image" id="310">
         <posx>14</posx>
         <posy>119</posy>
         <width>1</width>
         <height>2</height>
-        <texture>progress.png</texture>
+        <texture>forum-browser-progress.png</texture>
       </control>
       <control type="image" id="301">
         <posx>10</posx>
         <posy>581</posy>
         <width>1260</width>
         <height>2</height>
-        <texture>TRseparator.png</texture>
+        <texture>forum-browser-separator.png</texture>
       </control>
       <control type="image" id="302">
         <posx>10</posx>
         <posy>659</posy>
         <width>1260</width>
         <height>2</height>
-        <texture>TRseparator.png</texture>
+        <texture>forum-browser-separator.png</texture>
       </control>      
       
       <control type="image" id="115">
@@ -259,8 +260,8 @@
             <posy>122</posy>
             <width>1260</width>
             <height>460</height>
-            <colordiffuse>BBFFFFFF</colordiffuse>
-            <texture>list-background.png</texture>
+            <colordiffuse>BB000000</colordiffuse>
+            <texture>forum-browser-list-background.png</texture>
       </control>
       <!-- ** Required ** Do not change <id> or <type> -->
       <control type="list" id="120">
@@ -295,7 +296,7 @@
             <posy>0</posy>
             <width>1223</width>
             <height>38</height>
-            <texture border="10">default-list-focus.png</texture>
+            <texture border="10">forum-browser-list-focus.png</texture>
             <visible>Control.HasFocus(120)</visible>
           </control>
           <control type="label">
@@ -321,9 +322,9 @@
           <posy>0</posy>
           <width>12</width>
           <height>440</height>
-          <texturesliderbackground border="6">default-scroll_back.png</texturesliderbackground>
-          <texturesliderbar border="6">default-scroll_mid.png</texturesliderbar>
-          <texturesliderbarfocus border="6">default-scroll_mid.png</texturesliderbarfocus>
+          <texturesliderbackground border="6">forum-browser-scroll_back.png</texturesliderbackground>
+          <texturesliderbar border="6">forum-browser-scroll_mid.png</texturesliderbar>
+          <texturesliderbarfocus border="6">forum-browser-scroll_mid.png</texturesliderbarfocus>
           <textureslidernib>-</textureslidernib>
           <textureslidernibfocus>-</textureslidernibfocus>
           <orientation>vertical</orientation>

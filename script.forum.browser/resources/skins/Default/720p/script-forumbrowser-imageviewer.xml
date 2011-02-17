@@ -16,7 +16,8 @@
         <posy>0</posy>
         <width>1090</width>
         <height>700</height>
-        <texture border="40">default-panel.png</texture>
+        <texture border="40">forum-browser-panel.png</texture>
+        <colordiffuse>FF222222</colordiffuse>
       </control>
       
       <control type="image" id="102">
@@ -45,8 +46,8 @@
        <disabledcolor>80555555</disabledcolor>
        <label>$LOCALIZE[SCRIPT3000]</label>
        <textoffsetx>35</textoffsetx>
-       <texturefocus>left-focus.png</texturefocus>
-       <texturenofocus>left-nofocus.png</texturenofocus>
+       <texturefocus>forum-browser-left-focus.png</texturefocus>
+       <texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
       </control>
       <control type="button" id="110">
         <description>Close Button</description>
@@ -54,8 +55,8 @@
         <posy>625</posy>
         <width>32</width>
         <height>28</height>
-        <texturefocus>close-button-focus.png</texturefocus>
-        <texturenofocus>close-button.png</texturenofocus>
+        <texturefocus>forum-browser-close-button-focus.png</texturefocus>
+        <texturenofocus>forum-browser-close-button.png</texturenofocus>
         <visible>system.getbool(input.enablemouse)</visible>
         <onclick>PreviousMenu</onclick>
       </control>
@@ -77,8 +78,8 @@
        <disabledcolor>80555555</disabledcolor>
        <label>$LOCALIZE[SCRIPT3001]</label>
        <textoffsetx>35</textoffsetx>
-       <texturefocus>right-focus.png</texturefocus>
-       <texturenofocus>right-nofocus.png</texturenofocus>
+       <texturefocus>forum-browser-right-focus.png</texturefocus>
+       <texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
       </control>
 
     </control>

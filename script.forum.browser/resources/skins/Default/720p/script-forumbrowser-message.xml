@@ -16,7 +16,7 @@
 				<posy>0</posy>
 				<width>1280</width>
 				<height>720</height>
-				<texture border="40">default-panel-full.png</texture>
+				<texture border="40">forum-browser-panel-full.png</texture>
 				<colordiffuse>FF000000</colordiffuse>
 			</control>
 
@@ -26,7 +26,7 @@
 				<posy>4</posy>
 				<width>1260</width>
 				<height>80</height>
-				<texture border="10">title-background.png</texture>
+				<texture border="10">forum-browser-title-background.png</texture>
 			</control>
 			<control type="image" id="102">
 				<description>Avatar</description>
@@ -80,8 +80,8 @@
 				<posy>15</posy>
 				<width>32</width>
 				<height>28</height>
-				<texturefocus>close-button-focus.png</texturefocus>
-				<texturenofocus>close-button.png</texturenofocus>
+				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
+				<texturenofocus>forum-browser-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
 			</control>
@@ -91,7 +91,7 @@
 				<posy>4</posy>
 				<width>1260</width>
 				<height>80</height>
-				<texture>overlay.png</texture>
+				<texture>forum-browser-overlay.png</texture>
 			</control>
 
 			<control type="image" id="351">
@@ -100,7 +100,7 @@
 				<posy>90</posy>
 				<width>1245</width>
 				<height>626</height>
-				<texture border="10">text-background.png</texture>
+				<texture border="10">forum-browser-text-background.png</texture>
 				<visible>true</visible>
 			</control>
 
@@ -123,7 +123,7 @@
 				<posy>395</posy>
 				<width>1025</width>
 				<height>205</height>
-				<texture>text-overlay.png</texture>
+				<texture>forum-browser-text-overlay.png</texture>
 				<visible>false</visible>
 			</control>
 
@@ -155,14 +155,14 @@
 				<posy>86</posy>
 				<width>1260</width>
 				<height>2</height>
-				<texture>TRseparator.png</texture>
+				<texture>forum-browser-separator.png</texture>
 			</control>
 			<control type="image" id="310">
 				<posx>10</posx>
 				<posy>86</posy>
 				<width>1</width>
 				<height>2</height>
-				<texture>progress.png</texture>
+				<texture>forum-browser-progress.png</texture>
 			</control>
 		</control>
 
@@ -177,7 +177,7 @@
 				<posy>0</posy>
 				<width>315</width>
 				<height>720</height>
-				<texture border="10">Slide-panel.png</texture>
+				<texture border="10">forum-browser-Slide-panel.png</texture>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
@@ -199,7 +199,7 @@
 						<posy>1</posy>
 						<width>300</width>
 						<height>166</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>true</visible>
 						<colordiffuse>CC999999</colordiffuse>
 					</control>
@@ -208,7 +208,7 @@
 						<posy>1</posy>
 						<width>300</width>
 						<height>166</height>
-						<texture border="10">FBbutton-focus.png</texture>
+						<texture border="10">forum-browser-button-focus.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -217,7 +217,7 @@
 						<posy>4</posy>
 						<width>128</width>
 						<height>128</height>
-						<texture fallback="broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<visible>true</visible>
 						<colordiffuse>A0FFFFFF</colordiffuse>
 						<aspectratio>keep</aspectratio>
@@ -242,7 +242,7 @@
 						<posy>1</posy>
 						<width>300</width>
 						<height>298</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -251,7 +251,7 @@
 						<posy>1</posy>
 						<width>300</width>
 						<height>298</height>
-						<texture border="10">FBbutton-focus.png</texture>
+						<texture border="10">forum-browser-button-focus.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -260,7 +260,7 @@
 						<posy>4</posy>
 						<width>256</width>
 						<height>256</height>
-						<texture fallback="broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 						<aspectratio>keep</aspectratio>
@@ -293,7 +293,7 @@
 				<posy>0</posy>
 				<width>515</width>
 				<height>720</height>
-				<texture border="10">Slide-panel.png</texture>
+				<texture border="10">forum-browser-Slide-panel.png</texture>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
@@ -315,7 +315,7 @@
 						<posy>1</posy>
 						<width>500</width>
 						<height>58</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>true</visible>
 						<colordiffuse>CC999999</colordiffuse>
 					</control>
@@ -324,7 +324,7 @@
 						<posy>1</posy>
 						<width>500</width>
 						<height>58</height>
-						<texture border="10">FBbutton-focus.png</texture>
+						<texture border="10">forum-browser-button-focus.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -333,7 +333,7 @@
 						<posy>6</posy>
 						<width>58</width>
 						<height>48</height>
-						<texture fallback="broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
@@ -359,7 +359,7 @@
 						<posy>1</posy>
 						<width>500</width>
 						<height>118</height>
-						<texture border="10">text-background.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -368,7 +368,7 @@
 						<posy>1</posy>
 						<width>500</width>
 						<height>118</height>
-						<texture border="10">FBbutton-focus.png</texture>
+						<texture border="10">forum-browser-button-focus.png</texture>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -377,7 +377,7 @@
 						<posy>10</posy>
 						<width>100</width>
 						<height>100</height>
-						<texture fallback="broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
