@@ -1,6 +1,10 @@
 Forum Browser Changelog
 
-Current Version : 0.8.3
+Current Version : 0.8.4
+
+*** 0.8.4 ***
+
+More changes to enable successful skinning
 
 *** 0.8.3 ***
 

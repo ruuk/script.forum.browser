@@ -34,7 +34,7 @@
         <posy>30</posy>
         <width>218</width>
         <height>60</height>
-        <font>font18</font>
+        <font>font13_title</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>

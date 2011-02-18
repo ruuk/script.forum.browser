@@ -39,9 +39,9 @@
 				<description>textarea</description>
 				<posx>82</posx>
 				<posy>22</posy>
-				<width>100</width>
+				<width>120</width>
 				<height>40</height>
-				<font>font18</font>
+				<font>font13_title</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
@@ -52,11 +52,11 @@
 
 			<control type="label" id="104">
 				<description>Topic</description>
-				<posx>192</posx>
+				<posx>212</posx>
 				<posy>14</posy>
-				<width>735</width>
+				<width>715</width>
 				<height>60</height>
-				<font>font18</font>
+				<font>font13_title</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>

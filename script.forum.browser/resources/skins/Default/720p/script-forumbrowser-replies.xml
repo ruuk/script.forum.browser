@@ -34,7 +34,7 @@
 				<posy>22</posy>
 				<width>100</width>
 				<height>40</height>
-				<font>font18</font>
+				<font>font13_title</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
@@ -57,8 +57,7 @@
 				<aligny>center</aligny>
 				<label>$LOCALIZE[SCRIPT3002]</label>
 				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
-				<texturenofocus border="10">FBbutton-nofocus.png
-				</texturenofocus>
+				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 			</control>
 
@@ -68,7 +67,7 @@
 				<posy>14</posy>
 				<width>600</width>
 				<height>60</height>
-				<font>font18</font>
+				<font>font13_title</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>

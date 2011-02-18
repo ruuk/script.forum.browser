@@ -14,8 +14,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '02-17-2011'
-__version__ = '0.8.3'
+__date__ = '02-18-2011'
+__version__ = '0.8.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -44,7 +44,7 @@ ACTION_CONTEXT_MENU   = 117
 #Actually it's show codec info but I'm using in a threaded callback
 ACTION_RUN_IN_MAIN = 27
 
-TITLE_FORMAT = '[COLOR %s][B]%s[/B][/COLOR]'
+TITLE_FORMAT = '[COLOR %s]%s[/COLOR]'
 
 
 def ERROR(message):
@@ -324,7 +324,8 @@ class ForumBrowser:
 		
 	def loadForumData(self,forum):
 		self.needsLogin = True
-		fname = xbmc.translatePath('special://home/addons/script.forum.browser/forums/%s' % forum)
+		fname = os.path.join(__addon__.getAddonInfo('path'),'forums',forum)
+		#fname = xbmc.translatePath('special://home/addons/script.forum.browser/forums/%s' % forum)
 		if not os.path.exists(fname): return False
 		f = open(fname,'r')
 		data = f.read()
@@ -983,7 +984,11 @@ class ThreadWindow:
 		
 class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	def __init__( self, *args, **kwargs ):
-		self._progMessageSave = ''
+		self._progMessageSave = ''		
+		if __addon__.getSetting('use_forum_colors') == 'false':
+			self._prog_format = '%s'
+		else:
+			self._prog_format = '[COLOR '+FB.theme.get('title_fg','FF000000')+']%s[/COLOR]'
 		ThreadWindow.__init__(self)
 		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
 	
@@ -999,14 +1004,13 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		xbmcgui.WindowXMLDialog.onAction(self,action)
 	
 	def startProgress(self):
-		self._title_fg = FB.theme.get('title_fg','FF000000')
 		self._progMessageSave = self.getControl(104).getLabel()
 		self.getControl(310).setVisible(True)
 	
 	def setProgress(self,pct,message=''):
 		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
-		self.getControl(104).setLabel(TITLE_FORMAT % (self._title_fg,message))
+		self.getControl(104).setLabel(self._prog_format % message)
 		return True
 		
 	def endProgress(self):
@@ -1064,7 +1068,10 @@ class PageWindow(BaseWindow):
 		if pageData: self.pageData = pageData
 		self.getControl(200).setVisible(self.pageData.prev)
 		self.getControl(202).setVisible(self.pageData.next)
-		self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme['title_fg'],self.pageData.getPageDisplay()))
+		if __addon__.getSetting('use_forum_colors') == 'false':
+			self.getControl(105).setLabel(self.pageData.getPageDisplay())
+		else:
+			self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme['title_fg'],self.pageData.getPageDisplay()))
 		
 	def gotoPage(self,page): pass
 
@@ -1133,7 +1140,10 @@ class PostDialog(BaseWindow):
 		self.post = kwargs.get('post')
 		self.title = self.post.title
 		self.posted = False
-		self.display_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+		if __addon__.getSetting('use_forum_colors') == 'false':
+			self.display_base = '%s\n \n'
+		else:
+			self.display_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
 		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
@@ -1631,10 +1641,13 @@ class MessageWindow(BaseWindow):
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
-		if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
-			text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+		if __addon__.getSetting('use_forum_colors') == 'true':
+			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
+				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+			else:
+				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 		else:
-			text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
@@ -1642,6 +1655,9 @@ class MessageWindow(BaseWindow):
 		self.getLinks()
 
 	def setTheme(self):
+		self.getControl(103).setLabel(self.post.cleanUserName() or '')
+		self.getControl(104).setLabel(self.post.title or '')
+		self.getControl(105).setLabel(self.post.date or '')
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
@@ -1658,7 +1674,6 @@ class MessageWindow(BaseWindow):
 				self.getControl(351).setColorDiffuse('FF000000')
 			else:
 				self.getControl(351).setColorDiffuse('FFFFFFFF')
-			self.listItemBG = title_bg
 		except:
 			xbmcgui.unlock()
 			raise
@@ -1813,6 +1828,10 @@ class RepliesWindow(PageWindow):
 		self.setFocus(self.getControl(120))
 	
 	def setTheme(self):
+		mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
+		self.getControl(103).setLabel(mtype)
+		self.getControl(104).setLabel(self.topic)
+			
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		xbmcgui.lock()
 		try:
@@ -1824,7 +1843,6 @@ class RepliesWindow(PageWindow):
 			self.getControl(302).setColorDiffuse(title_bg) #sep
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 			#self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
 			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,mtype))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
@@ -1901,8 +1919,11 @@ class RepliesWindow(PageWindow):
 			raise
 		xbmcgui.unlock()
 		if select > -1: self.postSelected(itemindex=select)
-		title_fg = FB.theme.get('title_fg','FF000000')
-		self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
+		if __addon__.getSetting('use_forum_colors') == 'false':
+			self.getControl(104).setLabel(self.topic)
+		else:
+			title_fg = FB.theme.get('title_fg','FF000000')
+			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 		self.pid = ''
 		self.getAvatars()
 		
@@ -2094,14 +2115,12 @@ class ThreadsWindow(PageWindow):
 		
 	def setTheme(self):
 		self.desc_base = unicode.encode(__language__(30162)+' %s','utf8')
-		self.desc_bold = unicode.encode('[B]'+__language__(30162)+' %s[/B]','utf8')
-		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30160))
-		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
+		self.getControl(103).setLabel(__language__(30160))
+		self.getControl(104).setLabel(self.topic)
 			
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		
 		self.desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
-		self.desc_bold = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+'][B]'+__language__(30162)+' %s[/B][/COLOR]','utf8')
 		try:
 			xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -2162,12 +2181,11 @@ class ThreadsWindow(PageWindow):
 				
 				item = xbmcgui.ListItem(label=starterbase % starter,label2=self.textBase % title)
 				item.setInfo('video',{"Genre":sticky})
+				item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
+				item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
 				item.setProperty("id",tid)
 				item.setProperty("fid",fid)
-				if last == self.me:
-					item.setProperty("last",self.desc_bold % last)
-				else:
-					item.setProperty("last",self.desc_base % last)
+				item.setProperty("last",self.desc_base % last)
 				item.setProperty("lastid",tdict.get('lastid',''))
 				item.setProperty('title',title)
 				self.getControl(120).addItem(item)
@@ -2219,7 +2237,7 @@ class ForumsWindow(BaseWindow):
 		self.parent = self
 		self.empty = True
 		self.textBase = '%s'
-		self.subTextBase = '%s'
+		self.subTextBase = '[I]%s [/I]'
 		self.desc_base = '%s'
 		self.setAsMain()
 	
@@ -2240,8 +2258,8 @@ class ForumsWindow(BaseWindow):
 		self.setFocus(self.getControl(120))
 		
 	def setTheme(self):
-		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30170))
-		self.getControl(104).setLabel('[B]%s[/B]' % FB.forum)
+		self.getControl(103).setLabel(__language__(30170))
+		self.getControl(104).setLabel(FB.forum)
 			
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		
@@ -2260,11 +2278,11 @@ class ForumsWindow(BaseWindow):
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,FB.forum))
 			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
 				self.subTextBase = '[I][COLOR FFBBBBBB]%s[/COLOR][/I] '
-				self.textBase = '[B][COLOR FFFFFFFF]%s[/COLOR][/B]'
+				self.textBase = '[COLOR FFFFFFFF]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('BB000000')
 			else:
 				self.subTextBase = '[I][COLOR FF333333]%s[/COLOR][/I] '
-				self.textBase = '[B][COLOR FF000000]%s[/COLOR][/B]'
+				self.textBase = '[COLOR FF000000]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('99FFFFFF')
 		except:
 			xbmcgui.unlock()
@@ -2316,6 +2334,7 @@ class ForumsWindow(BaseWindow):
 					text = self.textBase
 				title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
 				item = xbmcgui.ListItem(label=text % title)
+				item.setInfo('video',{"Genre":sub and 'sub' or ''})
 				item.setProperty("description",self.desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
 				item.setProperty("id",fid)
@@ -2357,7 +2376,7 @@ class ForumsWindow(BaseWindow):
 		self.setPMCounts(FB.getPMCounts())
 		
 	def changeForum(self):
-		fpath = xbmc.translatePath('special://home/addons/script.forum.browser/forums/')
+		fpath = os.path.join(__addon__.getAddonInfo('path'),'forums')
 		flist = os.listdir(fpath)
 		dialog = xbmcgui.Dialog()
 		idx = dialog.select(__language__(30170),flist)
@@ -2641,7 +2660,7 @@ def doKeyboard(prompt,default='',hidden=False):
 	return keyboard.getText()
 			
 def setLogins():
-	fpath = xbmc.translatePath('special://home/addons/script.forum.browser/forums/')
+	fpath = os.path.join(__addon__.getAddonInfo('path'),'forums')
 	flist = os.listdir(fpath)
 	dialog = xbmcgui.Dialog()
 	idx = dialog.select(__language__(30200),flist)

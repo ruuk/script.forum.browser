@@ -44,7 +44,7 @@
         <posy>30</posy>
         <width>230</width>
         <height>60</height>
-        <font>font18</font>
+        <font>font13_title</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
@@ -58,7 +58,7 @@
         <posy>30</posy>
         <width>380</width>
         <height>60</height>
-        <font>font18</font>
+        <font>font13_title</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
@@ -96,7 +96,7 @@
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
+       <font>font13</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3003]</label>
        <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
@@ -117,7 +117,7 @@
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
+       <font>font13</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3004]</label>
        <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
@@ -138,7 +138,7 @@
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
+       <font>font13</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3009]</label>
        <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
@@ -159,7 +159,7 @@
        <height>40</height>
        <visible>true</visible>
        <colordiffuse>FFFFFFFF</colordiffuse>
-       <font>font18</font>
+       <font>font13</font>
        <align>center</align>
        <label>$LOCALIZE[SCRIPT3005]</label>
        <texturefocus border="10">forum-browser-button-focus.png</texturefocus>
@@ -282,12 +282,26 @@
             <posy>0</posy>
             <width>990</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13_title</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Genre,)</visible>
+          </control>
+          <control type="label">
+            <posx>10</posx>
+            <posy>0</posy>
+            <width>990</width>
+            <height>38</height>
+            <font>font13</font>
+            <aligny>center</aligny>
+            <textcolor>FFAAAAAA</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Genre,sub)</visible>
           </control>
         </itemlayout>
         <focusedlayout height="38">
@@ -304,12 +318,26 @@
             <posy>0</posy>
             <width>990</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13_title</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
             <selectedcolor>green</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Genre,)</visible>
+          </control>
+          <control type="label">
+            <posx>10</posx>
+            <posy>0</posy>
+            <width>990</width>
+            <height>38</height>
+            <font>font13</font>
+            <aligny>center</aligny>
+            <textcolor>FFAAAAAA</textcolor>
+            <selectedcolor>green</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Genre,sub)</visible>
           </control>
         </focusedlayout>
       </control>

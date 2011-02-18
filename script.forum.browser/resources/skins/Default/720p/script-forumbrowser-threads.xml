@@ -34,9 +34,9 @@
         <description>textarea</description>
         <posx>40</posx>
         <posy>22</posy>
-        <width>100</width>
+        <width>110</width>
         <height>40</height>
-        <font>font18</font>
+        <font>font13_title</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
@@ -46,11 +46,11 @@
       
       <control type="label" id="104">
         <description>Topic</description>
-        <posx>150</posx>
+        <posx>160</posx>
         <posy>14</posy>
-        <width>730</width>
+        <width>720</width>
         <height>60</height>
-        <font>font18</font>
+        <font>font13_title</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
@@ -179,12 +179,27 @@
         <posy>655</posy>
         <width>1222</width>
         <height>45</height>
-        <font>font18</font>
+        <font>font13</font>
         <textcolor>black</textcolor>
         <aligny>center</aligny>
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
         <label>$INFO[Container(120).ListItem.Property(last)]</label>
+        <visible>$INFO[StringCompare(Container(120).ListItem.Studio,)]</visible>
+      </control>
+      <control type="label">
+        <description>textarea</description>
+        <posx>29</posx>
+        <posy>655</posy>
+        <width>1222</width>
+        <height>45</height>
+        <font>font13_title</font>
+        <textcolor>black</textcolor>
+        <aligny>center</aligny>
+        <align>center</align>
+        <wrapmultiline>true</wrapmultiline>
+        <label>$INFO[Container(120).ListItem.Property(last)]</label>
+        <visible>$INFO[StringCompare(Container(120).ListItem.Studio,me)]</visible>
       </control>
       <control type="image">
             <description>page header tab icon</description>
@@ -253,20 +268,33 @@
             <posy>0</posy>
             <width>175</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
             <selectedcolor>white</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
-            <visible>true</visible>
+            <visible>StringCompare(ListItem.Director,)</visible>
+          </control>
+          <control type="label">
+            <posx>10</posx>
+            <posy>0</posy>
+            <width>175</width>
+            <height>38</height>
+            <font>font13</font>
+            <aligny>center</aligny>
+            <textcolor>FF00DD00</textcolor>
+            <selectedcolor>white</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Director,me)</visible>
           </control>
           <control type="label">
             <posx>224</posx>
             <posy>0</posy>
             <width>989</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
             <selectedcolor>green</selectedcolor>
@@ -297,20 +325,33 @@
             <posy>0</posy>
             <width>175</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13</font>
             <aligny>center</aligny>
             <textcolor>white</textcolor>
-            <selectedcolor>green</selectedcolor>
+            <selectedcolor>white</selectedcolor>
             <align>left</align>
             <info>ListItem.Label</info>
-            <visible>true</visible>
+            <visible>StringCompare(ListItem.Director,)</visible>
+          </control>
+          <control type="label">
+            <posx>10</posx>
+            <posy>0</posy>
+            <width>175</width>
+            <height>38</height>
+            <font>font13</font>
+            <aligny>center</aligny>
+            <textcolor>FF00DD00</textcolor>
+            <selectedcolor>white</selectedcolor>
+            <align>left</align>
+            <info>ListItem.Label</info>
+            <visible>StringCompare(ListItem.Director,me)</visible>
           </control>
            <control type="label">
             <posx>224</posx>
             <posy>0</posy>
             <width>989</width>
             <height>38</height>
-            <font>font18</font>
+            <font>font13</font>
             <aligny>center</aligny>
             <textcolor>FFDDBBBB</textcolor>
             <selectedcolor>green</selectedcolor>
