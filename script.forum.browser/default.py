@@ -2,7 +2,13 @@ import urllib2, re, os, sys, time, urlparse, htmlentitydefs
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from googletranslate import googleTranslateAPI
 import threading
-from webviewer import webviewer #@UnresolvedImport
+try:
+	from webviewer import webviewer #@UnresolvedImport
+	print 'FORUM BROWSER: WEB VIEWER IMPORTED'
+except:
+	import traceback
+	traceback.print_exc()
+	print 'FORUM BROWSER: COULD NOT IMPORT WEB VIEWER'
 
 '''
 TODO:
@@ -15,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '02-18-2011'
-__version__ = '0.8.4'
+__version__ = '0.8.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -45,6 +51,8 @@ ACTION_CONTEXT_MENU   = 117
 ACTION_RUN_IN_MAIN = 27
 
 TITLE_FORMAT = '[COLOR %s]%s[/COLOR]'
+
+MEDIA_PATH = os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media')
 
 
 def ERROR(message):
@@ -1686,11 +1694,11 @@ class MessageWindow(BaseWindow):
 			if link.isImage():
 				item.setIconImage(link.url)
 			elif link.isPost():
-				item.setIconImage('forum-browser-post.png')
+				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
 			elif link.isThread():
-				item.setIconImage('forum-browser-thread.png')
+				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-thread.png'))
 			else:
-				item.setIconImage('forum-browser-link.png')
+				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-link.png'))
 			ulist.addItem(item)
 
 	def getImages(self):
@@ -1731,13 +1739,19 @@ class MessageWindow(BaseWindow):
 			self.action = PostMessage(tid=link.tid,pid=link.pid)
 			self.close()
 		else:
-			webviewer.getWebResult(link.url,dialog=True)
-			return
-			base = xbmcgui.Dialog().browse(3,__language__(30144),'files')
-			if not base: return
-			fname,ftype = Downloader(message=__language__(30145)).downloadURL(base,link.url)
-			if not fname: return
-			xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
+			try:
+				webviewer.getWebResult(link.url,dialog=True)
+			except:
+				#We're in Boxee
+				wvPath = os.path.join(__addon__.getAddonInfo('path'),'webviewer')
+				webviewer.getWebResult(link.url,dialog=True,runFromSubDir=wvPath)
+				#xbmc.executebuiltin('XBMC.RunScript(special://home/apps/script.web.viewer/default.py,%s)' % link.url)
+			
+#			base = xbmcgui.Dialog().browse(3,__language__(30144),'files')
+#			if not base: return
+#			fname,ftype = Downloader(message=__language__(30145)).downloadURL(base,link.url)
+#			if not fname: return
+#			xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
 		
 	def showImage(self,url):
 		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
@@ -2856,5 +2870,5 @@ else:
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
 	w.doModal()
 	del w
-	sys.modules.clear()
+	#sys.modules.clear()
 	
