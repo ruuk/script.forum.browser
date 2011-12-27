@@ -20,8 +20,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '02-18-2011'
-__version__ = '0.8.5'
+__date__ = '12-27-2011'
+__version__ = '0.8.6'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -56,9 +56,10 @@ MEDIA_PATH = os.path.join(__addon__.getAddonInfo('path'),'resources','skins','de
 
 
 def ERROR(message):
-	errtext = sys.exc_info()[1]
-	print 'FORUMBROWSER - %s::%s (%d) - %s' % (message,sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, errtext)
-	return str(errtext)
+	LOG(message)
+	import traceback #@Reimport
+	traceback.print_exc()
+	return str(sys.exc_info()[1])
 	
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -478,7 +479,13 @@ class ForumBrowser:
 		
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		html = self.readURL(self.getURL('forums'),callback=callback)
+		try:
+			html = self.readURL(self.getURL('forums'),callback=callback)
+		except:
+			em = ERROR('ERROR GETTING FORUMS')
+			callback(-1,'%s' % em)
+			if donecallback: donecallback(None,None,None)
+			return (None,None,None)
 		#open('/home/ruuk/test3.html','w').write(html)
 		if not html or not callback(80,__language__(30103)):
 			if donecallback: donecallback(None,None,None)
@@ -486,7 +493,10 @@ class ForumBrowser:
 		html = MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = ''
-		if self.filters.get('logo'): logo = re.findall(self.filters['logo'],html)[0]
+		try:
+			if self.filters.get('logo'): logo = re.findall(self.filters['logo'],html)[0]
+		except:
+			ERROR("ERROR GETTING LOGO IMAGE")
 		pm_counts = self.getPMCounts(html)
 		if logo: logo = self.makeURL(logo)
 		callback(100,__language__(30052))
@@ -1016,6 +1026,10 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		self.getControl(310).setVisible(True)
 	
 	def setProgress(self,pct,message=''):
+		if pct<0:
+			self.stop()
+			xbmcgui.Dialog().ok('ERROR',message)
+			return False
 		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
 		self.getControl(104).setLabel(self._prog_format % message)
