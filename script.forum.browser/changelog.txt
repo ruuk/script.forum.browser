@@ -1,6 +1,10 @@
 Forum Browser Changelog
 
-Current Version : 0.8.6
+Current Version : 0.8.7
+
+*** 0.8.7 ***
+
+Changes for Eden
 
 *** 0.8.6 ***
 

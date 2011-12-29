@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '12-27-2011'
-__version__ = '0.8.6'
+__version__ = '0.8.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -52,7 +52,7 @@ ACTION_RUN_IN_MAIN = 27
 
 TITLE_FORMAT = '[COLOR %s]%s[/COLOR]'
 
-MEDIA_PATH = os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media')
+MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media'))
 
 
 def ERROR(message):
@@ -333,7 +333,7 @@ class ForumBrowser:
 		
 	def loadForumData(self,forum):
 		self.needsLogin = True
-		fname = os.path.join(__addon__.getAddonInfo('path'),'forums',forum)
+		fname = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums',forum))
 		#fname = xbmc.translatePath('special://home/addons/script.forum.browser/forums/%s' % forum)
 		if not os.path.exists(fname): return False
 		f = open(fname,'r')
@@ -1757,7 +1757,7 @@ class MessageWindow(BaseWindow):
 				webviewer.getWebResult(link.url,dialog=True)
 			except:
 				#We're in Boxee
-				wvPath = os.path.join(__addon__.getAddonInfo('path'),'webviewer')
+				wvPath = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'webviewer'))
 				webviewer.getWebResult(link.url,dialog=True,runFromSubDir=wvPath)
 				#xbmc.executebuiltin('XBMC.RunScript(special://home/apps/script.web.viewer/default.py,%s)' % link.url)
 			
@@ -1768,7 +1768,7 @@ class MessageWindow(BaseWindow):
 #			xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
 		
 	def showImage(self,url):
-		base = os.path.join(__addon__.getAddonInfo('profile'),'slideshow')
+		base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
 		image_files = Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
@@ -1910,7 +1910,7 @@ class RepliesWindow(PageWindow):
 				xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30132))
 			return
 		self.empty = False
-		defAvatar = os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png')
+		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
 		xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
@@ -1960,7 +1960,7 @@ class RepliesWindow(PageWindow):
 		for post in self.posts.values():
 			url = FB.makeURL(post.avatar)
 			if url: urls[url] = 1
-		targetdir = os.path.join(__addon__.getAddonInfo('profile'),'avatars')
+		targetdir = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'avatars'))
 		TD.startDownload(targetdir,urls.keys(),ext='.jpg',callback=self.getAvatarsCallback)
 		
 	def getAvatarsCallback(self,file_dict):
@@ -2404,7 +2404,7 @@ class ForumsWindow(BaseWindow):
 		self.setPMCounts(FB.getPMCounts())
 		
 	def changeForum(self):
-		fpath = os.path.join(__addon__.getAddonInfo('path'),'forums')
+		fpath = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 		flist = os.listdir(fpath)
 		dialog = xbmcgui.Dialog()
 		idx = dialog.select(__language__(30170),flist)
@@ -2688,7 +2688,7 @@ def doKeyboard(prompt,default='',hidden=False):
 	return keyboard.getText()
 			
 def setLogins():
-	fpath = os.path.join(__addon__.getAddonInfo('path'),'forums')
+	fpath = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 	flist = os.listdir(fpath)
 	dialog = xbmcgui.Dialog()
 	idx = dialog.select(__language__(30200),flist)
