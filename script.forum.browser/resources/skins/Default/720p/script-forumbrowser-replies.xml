@@ -227,6 +227,7 @@
 				<viewtype label="535">list</viewtype>
 				<pagecontrol>121</pagecontrol>
 				<scrolltime>200</scrolltime>
+				<preloaditems>2</preloaditems>
 				<itemlayout height="100">
 					<control type="image">
 						<posx>200</posx>
@@ -283,6 +284,16 @@
 						<selectedcolor>FFAAAAAA</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(status)</info>
+					</control>
+					<control type="image">
+						<posx>10</posx>
+						<posy>68</posy>
+						<width>20</width>
+						<height>20</height>
+						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]
+						</texture>
+						<aspectratio>keep</aspectratio>
+						<visible>true</visible>
 					</control>
 					<control type="label">
 						<posx>210</posx>

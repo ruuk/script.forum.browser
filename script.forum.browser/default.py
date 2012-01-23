@@ -1953,7 +1953,7 @@ class RepliesWindow(PageWindow):
 			title_fg = FB.theme.get('title_fg','FF000000')
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 		self.pid = ''
-		self.getAvatars()
+		#self.getAvatars()
 		
 	def getAvatars(self):
 		urls = {}
