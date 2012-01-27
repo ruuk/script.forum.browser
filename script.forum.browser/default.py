@@ -1114,13 +1114,13 @@ class ImagesDialog(BaseWindow):
 		
 	def setTheme(self):
 		if __addon__.getSetting('use_forum_colors') == 'false': return
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -1172,23 +1172,17 @@ class PostDialog(BaseWindow):
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.post.quote:
 			format = FB.formats.get('quote')
-			xbmcgui.lock()
-			try:
-				pid = self.post.pid
-				#This won't work with other formats, need to do this better TODO
-				if not pid or pid.startswith('PM'): format = format.replace(';!POSTID!','')
-				for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
-					self.addQuote(line)
-				self.updatePreview()
-			except:
-				xbmcgui.unlock()
-			else:
-				xbmcgui.unlock()
+			pid = self.post.pid
+			#This won't work with other formats, need to do this better TODO
+			if not pid or pid.startswith('PM'): format = format.replace(';!POSTID!','')
+			for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
+				self.addQuote(line)
+			self.updatePreview()
 		self.setTheme()
 	
 	def setTheme(self):
 		if __addon__.getSetting('use_forum_colors') == 'false': return
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
 			title_fg = FB.theme.get('title_fg','FF000000')
@@ -1201,9 +1195,9 @@ class PostDialog(BaseWindow):
 			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Post Reply'))
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,__language__(30120)))
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		
 	def onClick( self, controlID ):
 		if BaseWindow.onClick(self, controlID): return
@@ -1681,7 +1675,7 @@ class MessageWindow(BaseWindow):
 		self.getControl(104).setLabel(self.post.title or '')
 		self.getControl(105).setLabel(self.post.date or '')
 		if __addon__.getSetting('use_forum_colors') == 'false': return
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
 			title_fg = FB.theme.get('title_fg','FF000000')
@@ -1697,9 +1691,9 @@ class MessageWindow(BaseWindow):
 			else:
 				self.getControl(351).setColorDiffuse('FFFFFFFF')
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		
 	def getLinks(self):
 		ulist = self.getControl(148)
@@ -1861,7 +1855,7 @@ class RepliesWindow(PageWindow):
 		self.getControl(104).setLabel(self.topic)
 			
 		if __addon__.getSetting('use_forum_colors') == 'false': return
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
 			title_fg = FB.theme.get('title_fg','FF000000')
@@ -1881,9 +1875,9 @@ class RepliesWindow(PageWindow):
 				self.desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
 			if self.tid == 'private_messages': self.getControl(201).setLabel('Send Message')
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		
 	def showThread(self,nopage=False):
 		if nopage:
@@ -1911,7 +1905,7 @@ class RepliesWindow(PageWindow):
 			return
 		self.empty = False
 		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
 			if not self.topic: self.topic = pageData.topic
@@ -1941,11 +1935,11 @@ class RepliesWindow(PageWindow):
 				self.getControl(120).addItem(item)
 			if select > -1: self.getControl(120).selectItem(int(select))
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			ERROR('FILL REPLIES ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30133))
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		if select > -1: self.postSelected(itemindex=select)
 		if __addon__.getSetting('use_forum_colors') == 'false':
 			self.getControl(104).setLabel(self.topic)
@@ -1977,13 +1971,13 @@ class RepliesWindow(PageWindow):
 				item.setProperty('avatar',fname)
 				post.avatarFinal = fname
 		focus = self.getFocusId()
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		if focus == 120:
 			self.setFocusId(105)
 		else:
 			self.setFocusId(120)
 		self.setFocusId(focus)
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 			
 	def makeLinksArray(self,miter):
 		if not miter: return []
@@ -2150,7 +2144,7 @@ class ThreadsWindow(PageWindow):
 		
 		self.desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
 		try:
-			xbmcgui.lock()
+			#xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
 			title_fg = FB.theme.get('title_fg','FF000000')
 			self.getControl(251).setColorDiffuse(title_bg) #title bg
@@ -2170,9 +2164,9 @@ class ThreadsWindow(PageWindow):
 				self.highBase = '[COLOR FF006600]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('99FFFFFF')
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		
 	def fillThreadList(self,page=''):
 		if self.fid == 'subscriptions':
@@ -2189,7 +2183,7 @@ class ThreadsWindow(PageWindow):
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30161),__language__(30053))
 			return
 		self.empty = False
-		xbmcgui.lock()
+		#xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
 			self.setupPage(pageData)
@@ -2218,10 +2212,10 @@ class ThreadsWindow(PageWindow):
 				item.setProperty('title',title)
 				self.getControl(120).addItem(item)
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			ERROR('FILL THREAD ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30163))
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 						
 	def openRepliesWindow(self):
 		item = self.getControl(120).getSelectedItem()
@@ -2293,7 +2287,7 @@ class ForumsWindow(BaseWindow):
 		
 		self.desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]'
 		try:
-			xbmcgui.lock()
+			#xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
 			title_fg = FB.theme.get('title_fg','FF000000')
 			self.getControl(251).setColorDiffuse(title_bg) #title bg
@@ -2313,9 +2307,9 @@ class ForumsWindow(BaseWindow):
 				self.textBase = '[COLOR FF000000]%s[/COLOR]'
 				self.getControl(115).setColorDiffuse('99FFFFFF')
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			raise
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 		
 	def fillForumList(self):
 		self.setTheme()
@@ -2342,7 +2336,7 @@ class ForumsWindow(BaseWindow):
 		#return
 		
 		try:
-			xbmcgui.lock()
+			#xbmcgui.lock()
 			self.getControl(120).reset()
 			self.getControl(250).setImage(logo)
 			self.setPMCounts(pm_counts)
@@ -2368,10 +2362,10 @@ class ForumsWindow(BaseWindow):
 				item.setProperty("id",fid)
 				self.getControl(120).addItem(item)
 		except:
-			xbmcgui.unlock()
+			#xbmcgui.unlock()
 			ERROR('FILL FORUMS ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
-		xbmcgui.unlock()
+		#xbmcgui.unlock()
 			
 	def setPMCounts(self,pm_counts=None):
 		disp = ''

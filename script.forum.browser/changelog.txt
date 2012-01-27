@@ -1,6 +1,11 @@
 Forum Browser Changelog
 
-Current Version : 0.8.7
+Current Version : 0.8.8
+
+*** 0.8.8 ***
+
+Removed xbmcgui.lock()/unlock() to get rid of the log warnings
+Fixed a minor skin bug for highlighting threads with last reply by the user
 
 *** 0.8.7 ***
 

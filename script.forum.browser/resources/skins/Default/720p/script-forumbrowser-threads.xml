@@ -183,7 +183,7 @@
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
         <label>$INFO[Container(120).ListItem.Property(last)]</label>
-        <visible>$INFO[StringCompare(Container(120).ListItem.Studio,)]</visible>
+        <visible>StringCompare(Container(120).ListItem.Studio,)</visible>
       </control>
       <control type="label">
         <description>textarea</description>
@@ -197,7 +197,7 @@
         <align>center</align>
         <wrapmultiline>true</wrapmultiline>
         <label>$INFO[Container(120).ListItem.Property(last)]</label>
-        <visible>$INFO[StringCompare(Container(120).ListItem.Studio,me)]</visible>
+        <visible>StringCompare(Container(120).ListItem.Studio,me)</visible>
       </control>
       <control type="image">
             <description>page header tab icon</description>
