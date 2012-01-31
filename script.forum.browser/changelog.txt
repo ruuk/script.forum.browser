@@ -6,6 +6,8 @@ Current Version : 0.8.8
 
 Removed xbmcgui.lock()/unlock() to get rid of the log warnings
 Fixed a minor skin bug for highlighting threads with last reply by the user
+Added ability to handle forums in the threads listing
+Added forum www.xbmchub.info (Mostly)
 
 *** 0.8.7 ***
 

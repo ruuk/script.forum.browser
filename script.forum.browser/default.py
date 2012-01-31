@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '12-27-2011'
-__version__ = '0.8.7'
+__version__ = '0.8.8'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -512,6 +512,9 @@ class ForumBrowser:
 			return (None,None)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
+		if self.formats.get('forums_in_threads','False') == 'True':
+			forums = re.finditer(self.filters['forums'],html)
+			threads = (forums,threads)
 		callback(100,__language__(30052))
 		pd = self.getPageData(html,page,page_type='threads')
 		if donecallback: donecallback(threads,pd)
@@ -1929,7 +1932,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('message',self.desc_base % (title + post.messageAsDisplay()))
 				item.setProperty('post',post.postId)
 				item.setProperty('avatar',url)
-				item.setProperty('status',post.status)
+				item.setProperty('status',convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
 				item.setInfo('video',{'Genre':self.mode})
 				self.getControl(120).addItem(item)
@@ -2126,6 +2129,7 @@ class ThreadsWindow(PageWindow):
 		self.empty = True
 		self.textBase = '%s'
 		self.highBase = '%s'
+		self.forum_desc_base = '[B]%s[/B]'
 		PageWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -2143,6 +2147,8 @@ class ThreadsWindow(PageWindow):
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		
 		self.desc_base = unicode.encode('[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']'+__language__(30162)+' %s[/COLOR]','utf8')
+		self.forum_desc_base = '[B][COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR][/B]'
+		
 		try:
 			#xbmcgui.lock()
 			title_bg = FB.theme.get('title_bg','FFFFFFFF')
@@ -2188,44 +2194,74 @@ class ThreadsWindow(PageWindow):
 			self.getControl(120).reset()
 			self.setupPage(pageData)
 			
-			
-			for t in threads:
-				tdict = t.groupdict()
-				starter = tdict.get('starter','Unknown')
-				title = tdict.get('title','')
-				title = convertHTMLCodes(MC.tagFilter.sub('',title))
-				last = tdict.get('lastposter','?')
-				tid = tdict.get('threadid','')
-				fid = tdict.get('forumid','')
-				sticky = tdict.get('sticky') and 'sticky' or ''
-				if starter == self.me: starterbase = self.highBase
-				else: starterbase = self.textBase
-				
-				item = xbmcgui.ListItem(label=starterbase % starter,label2=self.textBase % title)
-				item.setInfo('video',{"Genre":sticky})
-				item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
-				item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
-				item.setProperty("id",tid)
-				item.setProperty("fid",fid)
-				item.setProperty("last",self.desc_base % last)
-				item.setProperty("lastid",tdict.get('lastid',''))
-				item.setProperty('title',title)
-				self.getControl(120).addItem(item)
+			if type(threads) == type(()):
+				LOG('Thread contains forums')
+				self.addForums(threads[0])
+				self.addThreads(threads[1])
+			else:
+				self.addThreads(threads)
 		except:
 			#xbmcgui.unlock()
 			ERROR('FILL THREAD ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30163))
 		#xbmcgui.unlock()
-						
+			
+	def addThreads(self,threads):
+		for t in threads:
+			tdict = t.groupdict()
+			tid = tdict.get('threadid','')
+			starter = tdict.get('starter','Unknown')
+			title = tdict.get('title','')
+			title = convertHTMLCodes(MC.tagFilter.sub('',title))
+			last = tdict.get('lastposter','?')
+			fid = tdict.get('forumid','')
+			sticky = tdict.get('sticky') and 'sticky' or ''
+			if starter == self.me: starterbase = self.highBase
+			else: starterbase = self.textBase
+			item = xbmcgui.ListItem(label=starterbase % starter,label2=self.textBase % title)
+			item.setInfo('video',{"Genre":sticky})
+			item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
+			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
+			item.setProperty("id",tid)
+			item.setProperty("fid",fid)
+			item.setProperty("last",self.desc_base % last)
+			item.setProperty("lastid",tdict.get('lastid',''))
+			item.setProperty('title',title)
+			self.getControl(120).addItem(item)
+			
+	def addForums(self,forums):
+		for f in forums:
+			fdict = f.groupdict()
+			fid = fdict.get('forumid','')
+			title = fdict.get('title',__language__(30050))
+			desc = fdict.get('description') or __language__(30172)
+			text = self.textBase
+			title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
+			item = xbmcgui.ListItem(label=self.textBase % __language__(30164),label2=text % title)
+			item.setInfo('video',{"Genre":'is_forum'})
+			item.setProperty("last",self.forum_desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
+			item.setProperty("title",title)
+			item.setProperty("id",fid)
+			item.setProperty("fid",fid)
+			item.setProperty("is_forum",'True')
+			self.getControl(120).addItem(item)
+				
 	def openRepliesWindow(self):
 		item = self.getControl(120).getSelectedItem()
 		tid = item.getProperty('id')
 		fid = item.getProperty('fid') or self.fid
 		lastid = item.getProperty('lastid')
 		topic = item.getProperty('title')
-		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
-		w.doModal()
-		del w
+		if item.getProperty('is_forum') == 'True':
+			self.fid = fid
+			self.topic = topic
+			self.setTheme()
+			self.fillThreadList()
+			self.setFocus(self.getControl(120))
+		else:
+			w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,parent=self)
+			w.doModal()
+			del w
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
