@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '12-27-2011'
-__version__ = '0.8.8'
+__version__ = '0.8.9'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -329,7 +329,9 @@ class ForumBrowser:
 		self.formats = {}
 		self.smilies = {}
 		
-		self.loadForumData(forum)
+		if not self.loadForumData(forum):
+			self.forum = 'forum.xbmc.org'
+			self.loadForumData(self.forum)
 		
 	def loadForumData(self,forum):
 		self.needsLogin = True
@@ -2485,6 +2487,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(201).setEnabled(self.hasLogin() and FB.hasSubscriptions())
 		self.getControl(203).setEnabled(FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
+		__addon__.setSetting('last_forum',FB.forum)
 		
 	def openSettings(self):
 		mode = __addon__.getSetting('color_mode')
