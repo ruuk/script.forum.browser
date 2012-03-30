@@ -1,0 +1,1 @@
+url:tapatalk_server=http://www.ign.com/boards/

@@ -30,7 +30,7 @@
         <control type="image" id="250">
             <description>page header tab icon</description>
             <posx>40</posx>
-            <posy>15</posy>
+            <posy>14</posy>
             <width>340</width>
             <height>93</height>
             <aspectratio align="left">keep</aspectratio>

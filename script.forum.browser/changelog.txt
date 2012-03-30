@@ -1,6 +1,13 @@
 Forum Browser Changelog
 
-Current Version : 0.8.9
+Current Version : 0.9.0
+
+*** 0.9.0 ***
+
+Added the ability to access Tapatalk enabled forums
+Added 'Add Tapatalk Enabled Forum' to settings menu
+Cosmetic changes to the posts view
+Small fixes here and there
 
 *** 0.8.9 ***
 

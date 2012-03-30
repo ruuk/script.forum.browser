@@ -1,5 +1,5 @@
 # Parsing data for www.xbmc4xbox.org
-#import:forum.xbmc.org
+#import:TT.forum.xbmc.org
 # The URLs
 url:base=http://www.xbmc4xbox.org/forum/
 url:threads=viewforum.php?f=!FORUMID!

@@ -278,7 +278,7 @@
 						<posy>40</posy>
 						<width>175</width>
 						<height>30</height>
-						<font>font12</font>
+						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<selectedcolor>FFAAAAAA</selectedcolor>
@@ -296,37 +296,37 @@
 						<visible>true</visible>
 					</control>
 					<control type="label">
-						<posx>210</posx>
-						<posy>0</posy>
-						<width>1025</width>
+						<posx>1220</posx>
+						<posy>10</posy>
+						<width>600</width>
 						<height>15</height>
-						<font>font12</font>
-						<aligny>left</aligny>
-						<textcolor>FF222222</textcolor>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF888888</textcolor>
 						<selectedcolor>green</selectedcolor>
-						<align>left</align>
+						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 					</control>
 					<control type="label">
-						<posx>210</posx>
-						<posy>0</posy>
-						<width>1025</width>
+						<posx>1220</posx>
+						<posy>10</posy>
+						<width>600</width>
 						<height>15</height>
-						<font>font12</font>
-						<aligny>left</aligny>
-						<textcolor>FFAAAAAA</textcolor>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF999999</textcolor>
 						<selectedcolor>green</selectedcolor>
-						<align>left</align>
+						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 					</control>
 					<control type="textbox">
 						<posx>210</posx>
-						<posy>15</posy>
+						<posy>5</posy>
 						<width>1025</width>
-						<height>55</height>
-						<font>font12</font>
+						<height>80</height>
+						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>black</textcolor>
 						<selectedcolor>black</selectedcolor>
@@ -429,7 +429,7 @@
 						<posy>40</posy>
 						<width>175</width>
 						<height>30</height>
-						<font>font12</font>
+						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<selectedcolor>FFAAAAAA</selectedcolor>
@@ -447,37 +447,37 @@
 						<visible>true</visible>
 					</control>
 					<control type="label">
-						<posx>210</posx>
-						<posy>0</posy>
-						<width>1025</width>
+						<posx>1220</posx>
+						<posy>10</posy>
+						<width>600</width>
 						<height>15</height>
-						<font>font12</font>
-						<aligny>left</aligny>
-						<textcolor>FF222222</textcolor>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF888888</textcolor>
 						<selectedcolor>green</selectedcolor>
-						<align>left</align>
+						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 					</control>
 					<control type="label">
-						<posx>210</posx>
-						<posy>0</posy>
-						<width>1025</width>
+						<posx>1220</posx>
+						<posy>10</posy>
+						<width>600</width>
 						<height>15</height>
-						<font>font12</font>
-						<aligny>left</aligny>
-						<textcolor>FFAAAAAA</textcolor>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF999999</textcolor>
 						<selectedcolor>green</selectedcolor>
-						<align>left</align>
+						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 					</control>
 					<control type="textbox">
 						<posx>210</posx>
-						<posy>15</posy>
+						<posy>5</posy>
 						<width>1025</width>
-						<height>175</height>
-						<font>font12</font>
+						<height>180</height>
+						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>black</textcolor>
 						<selectedcolor>green</selectedcolor>

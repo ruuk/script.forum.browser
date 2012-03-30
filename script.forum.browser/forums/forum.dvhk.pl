@@ -1,7 +1,7 @@
 # Parsing data for forum.dvhk.pl
-import:forum.xbmc.org
+import:TT.forum.xbmc.org
 # The URLs
-url:base=http://dvhk.to/
+url:base=http://forum.dvhk.pl/
 url:forums=index.php
 filter:pm_xml_folders=<folder name="Wys.{1,2}ane">(?P<inbox>.+?)</folder>
 
@@ -34,7 +34,7 @@ theme:desc_fg=FF66CCFF
 theme:post_code=FF99FF99
 theme:mode=dark
 
-format:login_required=True
+format:login_required=False
 format:language=pl
 
 ## Smilies ####################################

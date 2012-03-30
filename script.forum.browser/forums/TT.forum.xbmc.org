@@ -55,6 +55,7 @@ form:pm_submit_wait=1
 ### Filters ###################################
 # valid match names are url and suburl
 filter:logo=<a href="index.php.*?"><img src="(?P<suburl>.*?)"
+#<img src="http://forum.xbmc.org/images/xbmc/xbmc-lettering.png"
 # valid match names are forumid, title, and description
 filter:forums=(?P<subforum>\s/>\s)*(?<!\s/></a>|ntrol">|an="5">)(?:<a\shref="forumdisplay.php\?).*?f=(?P<forumid>\d+)">(?P<title>.*?)</a>.*?(?:(?:<div class="smallfont">(?P<description>.*?)</div>)|,)
 #start looking for threads after this string
