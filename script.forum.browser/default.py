@@ -23,7 +23,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1688,7 +1688,6 @@ class TextPostDialog(PostDialog):
 class MessageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
-		print self.post.message
 		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]'
 		self.imageReplace = 'IMG #%s'
 		self.action = None
@@ -2487,20 +2486,9 @@ class ForumsWindow(BaseWindow):
 		self.setPMCounts(FB.getPMCounts())
 		
 	def changeForum(self):
-		flist_tmp = os.listdir(FORUMS_STATIC_PATH)
-		flist2_tmp = os.listdir(FORUMS_PATH)
-		flist = []
-		flist_disp = []
-		for f in flist_tmp + flist2_tmp:
-			if not f.startswith('.'):
-				flist.append(f)
-				if f.startswith('TT.'): f = f[3:]
-				flist_disp.append(f)
-		dialog = xbmcgui.Dialog()
-		idx = dialog.select(__language__(30170),flist_disp)
-		if idx < 0: return False
+		forum = askForum()
+		if not forum: return
 		self.stopThread()
-		forum = flist[idx]
 		global FB
 		FB = getForumBrowser(forum)
 		#FB.resetBrowser()
@@ -2786,14 +2774,39 @@ def doKeyboard(prompt,default='',hidden=False):
 	keyboard.doModal()
 	if not keyboard.isConfirmed(): return ''
 	return keyboard.getText()
-			
-def setLogins():
-	fpath = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
-	flist = os.listdir(fpath)
+
+def askForum(just_added=False,just_favs=False):
+	favs = getFavorites()
+	flist_tmp = os.listdir(FORUMS_STATIC_PATH)
+	flist2_tmp = os.listdir(FORUMS_PATH)
+	rest = flist_tmp + flist2_tmp
+	if favs:
+		for f in favs:
+			if f in rest: rest.pop(rest.index(f))
+		favs.append('')
+	flist = []
+	flist_disp = []
+	if just_favs:
+		if not favs: return None
+		whole = favs[:-1]
+	elif just_added:
+		whole = flist2_tmp
+	else:
+		whole = favs + rest
+	for f in whole:
+		if not f.startswith('.'):
+			flist.append(f)
+			if f.startswith('TT.'): f = f[3:]
+			flist_disp.append(f)
 	dialog = xbmcgui.Dialog()
-	idx = dialog.select(__language__(30200),flist)
-	if idx < 0: return
+	idx = dialog.select(__language__(30170),flist_disp)
+	if idx < 0: return None
 	forum = flist[idx]
+	return forum
+	
+def setLogins():
+	forum = askForum()
+	if not forum: return
 	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forum.replace('.','_')))
 	if not user: return
 	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forum.replace('.','_')),True)
@@ -2803,11 +2816,37 @@ def setLogins():
 	
 def doSettings():
 	dialog = xbmcgui.Dialog()
-	idx = dialog.select(__language__(30203),[__language__(30222),__language__(30204),__language__(30203)])
+	idx = dialog.select(__language__(30203),[__language__(30223),__language__(30225),__language__(30222),__language__(30224),__language__(30204),__language__(30203)])
 	if idx < 0: return
-	if idx == 0: addTapatalkForum()
-	elif idx == 0: setLogins()
-	elif idx == 1: __addon__.openSettings()
+	if idx == 0: addFavorite()
+	elif idx == 1: removeFavorite()
+	elif idx == 2: addTapatalkForum()
+	elif idx == 3: removeForum()
+	elif idx == 4: setLogins()
+	elif idx == 5: __addon__.openSettings()
+	
+def addFavorite():
+	forum = FB.getForumID()
+	favs = getFavorites()
+	if forum in favs: return
+	favs.append(forum)
+	__addon__.setSetting('favorites','*:*'.join(favs))
+	
+def removeFavorite():
+	forum = askForum(just_favs=True)
+	if not forum: return
+	favs = getFavorites()
+	if not forum in favs: return
+	favs.pop(favs.index(forum))
+	__addon__.setSetting('favorites','*:*'.join(favs))
+	
+def getFavorites():
+	favs = __addon__.getSetting('favorites')
+	if favs:
+		favs = favs.split('*:*')
+	else:
+		favs = []
+	return favs
 	
 def addTapatalkForum():
 	forum = doKeyboard('Enter forum name or address')
@@ -2821,7 +2860,13 @@ def addTapatalkForum():
 	open(os.path.join(FORUMS_PATH,'TT.' + forum),'w').write('#%s\nurl:tapatalk_server=%s' % (forum,url))
 	xbmcgui.Dialog().ok('Added','Forum %s found' % forum,'',url)
 	
-		
+def removeForum():
+	forum = askForum(just_added=True)
+	if not forum: return
+	path = os.path.join(FORUMS_PATH,forum)
+	if not os.path.exists(path): return
+	os.remove(path)
+	
 def clearDirFiles(filepath):
 	if not os.path.exists(filepath): return
 	for f in os.listdir(filepath):

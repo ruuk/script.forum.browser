@@ -1,1 +1,1 @@
-url:tapatalk_server=http://www.ign.com/boards/
+url:tapatalk_server=http://www.ign.com/boards/mobiquo/mobiquo.php

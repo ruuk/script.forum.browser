@@ -1,6 +1,13 @@
 Forum Browser Changelog
 
-Current Version : 0.9.0
+Current Version : 0.9.1
+
+*** 0.9.1 ***
+
+Added ability to delete added forums
+Added the ablity to add/remove forums from favorites (favorites will be at the top of the list)
+Fixed the settings menu
+Fixed the ign.com forum def
 
 *** 0.9.0 ***
 
