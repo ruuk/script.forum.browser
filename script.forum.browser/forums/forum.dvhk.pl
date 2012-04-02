@@ -1,4 +1,6 @@
-# Parsing data for forum.dvhk.pl
+#forum.dvhk.pl
+#DVHD Forums
+url:logo=http://forum.dvhk.pl/disturbed/misc/dis_hdr_logo.jpg
 import:TT.forum.xbmc.org
 # The URLs
 url:base=http://forum.dvhk.pl/

@@ -1,4 +1,6 @@
-# Parsing data for forum.xbmc.org
+#forum.xbmc.org
+#XBMC Forums
+url:logo=http://forum.xbmc.org/images/xbmc/xbmc-lettering.png
 
 # import other data here ex-> import:forum.xbmc.org
 

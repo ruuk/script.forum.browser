@@ -23,7 +23,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.1'
+__version__ = '0.9.2'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2349,10 +2349,10 @@ class ForumsWindow(BaseWindow):
 		self.setAsMain()
 	
 	def getUsername(self):
-		return __addon__.getSetting('login_user_' + FB.forum.replace('.','_'))
+		return __addon__.getSetting('login_user_' + FB.getForumID().replace('.','_'))
 		
 	def getPassword(self):
-		return __addon__.getSetting('login_pass_' + FB.forum.replace('.','_'))
+		return __addon__.getSetting('login_pass_' + FB.getForumID().replace('.','_'))
 		
 	def hasLogin(self):
 		return self.getUsername() != '' and self.getPassword() != ''
@@ -2413,6 +2413,7 @@ class ForumsWindow(BaseWindow):
 		self.endProgress()
 		if not forums:
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
+			self.setFocusId(202)
 			return
 		self.empty = False
 		#reason = ERROR('GET FORUMS ERROR')
@@ -2775,6 +2776,11 @@ def doKeyboard(prompt,default='',hidden=False):
 	if not keyboard.isConfirmed(): return ''
 	return keyboard.getText()
 
+def getForumPath(forumID):
+	path = os.path.join(FORUMS_PATH,forumID)
+	if os.path.exists(path): return path
+	return os.path.join(FORUMS_STATIC_PATH,forumID)
+	
 def askForum(just_added=False,just_favs=False):
 	favs = getFavorites()
 	flist_tmp = os.listdir(FORUMS_STATIC_PATH)
@@ -2793,37 +2799,44 @@ def askForum(just_added=False,just_favs=False):
 		whole = flist2_tmp
 	else:
 		whole = favs + rest
+	menu = ImageChoiceMenu('Choose Forum')
 	for f in whole:
 		if not f.startswith('.'):
-			flist.append(f)
-			if f.startswith('TT.'): f = f[3:]
-			flist_disp.append(f)
-	dialog = xbmcgui.Dialog()
-	idx = dialog.select(__language__(30170),flist_disp)
-	if idx < 0: return None
-	forum = flist[idx]
+			if not f:
+				menu.addItem(None,None)
+				continue
+			ff = open(getForumPath(f),'r')
+			name = ff.readline().strip('\n')[1:]
+			desc = '[CR]' + ff.readline().strip('\n')[1:]
+			line = ff.readline()
+			if not 'url:logo=' in line: line = ff.readline()
+			logo = line.strip('\n').split('=')[-1]
+			ff.close()
+			menu.addItem(f, name,logo,desc)
+	forum = menu.getResult('script-forumbrowser-forum-select.xml')
 	return forum
-	
+
 def setLogins():
-	forum = askForum()
-	if not forum: return
-	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forum.replace('.','_')))
+	forumID = askForum()
+	if not forumID: return
+	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forumID.replace('.','_')))
 	if not user: return
-	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forum.replace('.','_')),True)
+	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forumID.replace('.','_')),True)
 	if not password: return
-	__addon__.setSetting('login_user_' + forum.replace('.','_'),user)
-	__addon__.setSetting('login_pass_' + forum.replace('.','_'),password)
+	__addon__.setSetting('login_user_' + forumID.replace('.','_'),user)
+	__addon__.setSetting('login_pass_' + forumID.replace('.','_'),password)
 	
 def doSettings():
 	dialog = xbmcgui.Dialog()
-	idx = dialog.select(__language__(30203),[__language__(30223),__language__(30225),__language__(30222),__language__(30224),__language__(30204),__language__(30203)])
+	idx = dialog.select(__language__(30203),[__language__(30223),__language__(30225),__language__(30222),__language__(30226),__language__(30224),__language__(30204),__language__(30203)])
 	if idx < 0: return
 	if idx == 0: addFavorite()
 	elif idx == 1: removeFavorite()
 	elif idx == 2: addTapatalkForum()
-	elif idx == 3: removeForum()
-	elif idx == 4: setLogins()
-	elif idx == 5: __addon__.openSettings()
+	elif idx == 3: addForumFromOnline()
+	elif idx == 4: removeForum()
+	elif idx == 5: setLogins()
+	elif idx == 6: __addon__.openSettings()
 	
 def addFavorite():
 	forum = FB.getForumID()
@@ -2849,16 +2862,78 @@ def getFavorites():
 	return favs
 	
 def addTapatalkForum():
-	forum = doKeyboard('Enter forum name or address')
-	if forum == None: return
-	url = tapatalk.testForum(forum)
-	if not url:
-		xbmcgui.Dialog().ok('Failed','Forum not found','or not tapatalk enabled')
-		return
-	forum = url.split('http://',1)[-1].split('/',1)[0]
-	LOG('Adding Forum: %s at URL: %s' % (forum,url))
-	open(os.path.join(FORUMS_PATH,'TT.' + forum),'w').write('#%s\nurl:tapatalk_server=%s' % (forum,url))
-	xbmcgui.Dialog().ok('Added','Forum %s found' % forum,'',url)
+	dialog = xbmcgui.DialogProgress()
+	dialog.create('Add Forum')
+	dialog.update(0,'Enter Name/Address')
+	try:
+		forum = doKeyboard('Enter forum name or address')
+		if forum == None: return
+		dialog.update(10,'Testing Forum')
+		url = tapatalk.testForum(forum)
+		if not url:
+			xbmcgui.Dialog().ok('Failed','Forum not found','or not tapatalk enabled')
+			return
+		xbmcgui.Dialog().ok('Found','Forum %s found' % forum,'',url)
+		forum = url.split('http://',1)[-1].split('/',1)[0]
+		pageURL = url.split('/mobiquo',1)[0]
+		dialog.update(20,'Getting Description And Images')
+		info = tapatalk.HTMLPageInfo(pageURL)
+		title = ''
+		images = []
+		if info.isValid:
+			tmp_desc = info.description(info.title(''))
+			tmp_desc = convertHTMLCodes(tmp_desc).strip()
+			images = info.images()
+		dialog.update(30,'Enter Description')
+		desc = doKeyboard('Enter Description',default=tmp_desc)
+		if not desc: desc = tmp_desc
+		dialog.update(40,'Choose Logo')
+		logo = chooseLogo(forum,images)
+		LOG('Adding Forum: %s at URL: %s' % (forum,url))
+		saveForum('TT.' + forum,forum,desc,url,logo)
+		dialog.update(60,'Add To Online Database')
+		addForumToOnlineDatabase(forum,url,desc,logo,dialog=dialog)
+	finally:
+		dialog.close()
+	
+def saveForum(forumID,name,desc,url,logo):
+	open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s' % (name,desc,url,logo))
+	
+def addForumFromOnline():
+	odb = tapatalk.FBTTOnlineDatabase()
+	flist = odb.getForumList()
+	menu = ImageChoiceMenu('Choose Forum')
+	for f in flist:
+		menu.addItem(f, f.get('name'), f.get('logo'), '[CR]' + f.get('desc'))
+	f = menu.getResult('script-forumbrowser-forum-select.xml')
+	if not f: return	
+	saveForum('TT.' + f['name'],f['name'],f.get('desc',''),f['url'],f.get('logo',''))	
+	
+def addForumToOnlineDatabase(name,url,desc,logo,dialog=None):
+	if not xbmcgui.Dialog().yesno('Add To Database?','Share to the Forum Browser','online database?'): return
+	LOG('Adding Forum To Online Database: %s at URL: %s' % (name,url))
+	if dialog: dialog.update(80,'Saving To Database')
+	odb = tapatalk.FBTTOnlineDatabase()
+	odb.addForum(name, url, logo, desc)
+	
+def chooseLogo(forum,image_urls):
+	if not image_urls: return
+	base = '.'.join(forum.split('.')[-2:])
+	top = []
+	middle = []
+	bottom = []
+	for u in image_urls:
+		if 'logo' in u.lower() and base in u:
+			top.append(u)
+		elif base in u:
+			middle.append(u)
+		else:
+			bottom.append(u)
+	image_urls = top + middle + bottom
+	menu = ImageChoiceMenu('Choose Logo')
+	for url in image_urls: menu.addItem(url, url, url)
+	url = menu.getResult()
+	return url
 	
 def removeForum():
 	forum = askForum(just_added=True)
@@ -2866,6 +2941,83 @@ def removeForum():
 	path = os.path.join(FORUMS_PATH,forum)
 	if not os.path.exists(path): return
 	os.remove(path)
+	
+class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
+	def __init__( self, *args, **kwargs ):
+		self.result = None
+		self.display = kwargs.get('display')
+		self.display2 = kwargs.get('display2')
+		self.icons = kwargs.get('icons')
+		self.caption = kwargs.get('caption')
+		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
+	
+	def onInit(self):
+		items = []
+		lastItem = None
+		for d,d2,i in zip(self.display,self.display2,self.icons):
+			if d == None:
+				if lastItem: lastItem.setProperty('SEPARATOR','SEPARATOR')
+				continue
+			item = xbmcgui.ListItem(label=d,label2=d2,thumbnailImage=i or '')
+			items.append(item)
+			lastItem = item
+			
+		self.getControl(120).addItems(items)
+		self.getControl(300).setLabel(self.caption)
+		
+	def onAction(self,action):
+		if action == 92 or action == 10:
+			self.close()
+		elif action == 7:
+			self.finish()
+	
+	def onClick( self, controlID ):
+		if controlID == 120:
+			self.finish()
+			
+	def finish(self):
+		self.result = self.getControl(120).getSelectedPosition()
+		self.close()
+		
+	def onFocus( self, controlId ): self.controlId = controlId
+	
+class ChoiceMenu():
+	def __init__(self,caption):
+		self.caption = caption
+		self.items = []
+		self.display = []
+		self.display2 = []
+		self.icons = []
+		
+	def addItem(self,ID,display,icon=None,display2=''):
+		if not ID: return self.addSep()
+		self.items.append(ID)
+		self.display.append(display)
+		self.display2.append(display2)
+		self.icons.append(icon)
+		
+	def addSep(self):
+		self.items.append(None)
+		self.display.append(None)
+		self.display2.append('')
+		self.icons.append('')
+	
+	def getChoiceIndex(self):
+		return xbmcgui.Dialog().select(self.caption,self.display)
+	
+	def getResult(self):
+		idx = self.getChoiceIndex()
+		if idx < 0: return None
+		return self.items[idx]
+		
+class ImageChoiceMenu(ChoiceMenu):
+	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml'):
+		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',display=self.display,display2=self.display2,icons=self.icons,caption=self.caption)
+		w.doModal()
+		result = w.result
+		del w
+		if result == None: return None
+		return self.items[result]
 	
 def clearDirFiles(filepath):
 	if not os.path.exists(filepath): return

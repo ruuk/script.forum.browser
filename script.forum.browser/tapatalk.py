@@ -1,8 +1,8 @@
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib
-import urllib2
+import urllib, urllib2
 import iso8601
-import xbmc #@UnresolvedImport
+#import xbmc #@UnresolvedImport
 
 def testForum(forum):
 	if forum.startswith('http://'):
@@ -30,6 +30,82 @@ def testForum(forum):
 		return None
 	return None
 
+class FBTTOnlineDatabase():
+	def __init__(self):
+		self.url = 'http://xbmc.2ndmind.net/forumbrowser/tapatalk.php'
+	
+	def postData(self,**data):
+		enc = urllib.urlencode(data)
+		try:
+			result = urllib2.urlopen(self.url,enc).read()
+			return result
+		except:
+			raise
+			#sys.modules["__main__"].ERROR('TTOnlineDatabase.postData()')
+			return None
+			
+	def addForum(self,name,url,logo='',desc=''):
+		print self.postData(do='add',name=name,url=url,desc=desc,logo=logo)
+		
+	def getForumList(self):
+		flist = self.postData(do='list')
+		if not flist: return None
+		flist = flist.split('\n')
+		print flist
+		final = []
+		for f in flist:
+			if f:
+				name, rest = f.split('=',1)
+				url,desc,logo = rest.split('\r',2)
+				final.append({'name':name,'url':url,'desc':desc,'logo':logo})
+		return final
+	
+class HTMLPageInfo:
+	def __init__(self,url):
+		self.url = url
+		base = url.rsplit('/',1)[0]
+		if base.endswith(':/'):
+			self.base = url
+		else:
+			self.base = base
+		self.base += '/'
+		self._getHTML()
+		self.isValid = True
+		
+	def _getHTML(self):
+		try:
+			opener = urllib2.build_opener()
+			o = opener.open(urllib2.Request(self.url,None,{'User-Agent':'Wget/1.12'}))
+			self.html = o.read()
+			o.close()
+		except:
+			self.isValid = False
+			print 'HTMLPageInfo: FAILED'
+		
+	def title(self,default=''):
+		try: return re.search('<title>(.*?)</title>',self.html).group(1) or ''
+		except: return default
+		
+	def description(self,default=''):
+		try: return re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html).group(1)
+		except: return default
+		
+	def images(self):
+		urlList = re.findall('<img[^>]*?src="([^"]+?)"[^>]*?>',self.html) #Image tags
+		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',self.html) #Meta tag images
+		final = []
+		for u in urlList + urlList2:
+			if u in final: continue
+			if u.startswith('http'):
+				final.append(u)
+			elif u.startswith('.'):
+				pass
+			elif u.startswith('/'):
+				pass
+			else:
+				final.append(self.base + u)
+		return final
+		
 class CookieResponse:
 	def __init__(self,response,url):
 		self.response = response
@@ -472,15 +548,15 @@ class TapatalkForumBrowser:
 		
 		forums = []
 		for general in flist:
-			forums.append(self.createForumDict(general))
+			if not general.get('sub_only'): forums.append(self.createForumDict(general))
 			for forum in general.get('child',[]):
-				forums.append(self.createForumDict(forum))
+				if not forum.get('sub_only'): forums.append(self.createForumDict(forum))
 				for sub in forum.get('child',[]):
-					forums.append(self.createForumDict(sub,True))
+					if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
 		if not callback(80,self.lang(30103)):
 			if donecallback: donecallback(None,None,None)
 			return (None,None,None)
-		logo = 'http://%s/favicon.ico' % self.forum
+		logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
 		pm_counts = self.getPMCounts()
 		callback(100,self.lang(30052))
 		if donecallback: donecallback(forums,logo,pm_counts)
