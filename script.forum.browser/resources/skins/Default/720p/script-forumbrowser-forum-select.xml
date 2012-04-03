@@ -10,6 +10,14 @@
 			<posx>100</posx>
 			<posy>50</posy>
 			<control type="image">
+				<posx>20</posx>
+				<posy>20</posy>
+				<width>610</width>
+				<height>630</height>
+				<texture border="20">forum-browser-white-box.png</texture>
+				<colordiffuse>AA000000</colordiffuse>
+			</control>
+			<control type="image">
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>600</width>
@@ -30,7 +38,7 @@
 				<posx>15</posx>
 				<posy>40</posy>
 				<width>570</width>
-				<height>580</height>
+				<height>570</height>
 				<onleft>120</onleft>
 				<onright>120</onright>
 				<onup>120</onup>
@@ -121,6 +129,14 @@
 		<control type="group" id="260">
 			<posx>720</posx>
 			<posy>50</posy>
+			<control type="image">
+				<posx>20</posx>
+				<posy>20</posy>
+				<width>470</width>
+				<height>430</height>
+				<texture border="20">forum-browser-white-box.png</texture>
+				<colordiffuse>AA000000</colordiffuse>
+			</control>
 			<control type="image">
 				<posx>0</posx>
 				<posy>0</posy>

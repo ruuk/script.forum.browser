@@ -23,7 +23,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.2'
+__version__ = '0.9.3'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1975,6 +1975,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('date',post.date)
 				item.setInfo('video',{'Genre':self.mode})
 				self.getControl(120).addItem(item)
+				self.setFocusId(120)
 			if select > -1: self.getControl(120).selectItem(int(select))
 		except:
 			#xbmcgui.unlock()
@@ -2276,6 +2277,7 @@ class ThreadsWindow(PageWindow):
 			item.setProperty('title',title)
 			item.setProperty('reply_count',reply_count)
 			self.getControl(120).addItem(item)
+			self.setFocusId(120)
 			
 	def addForums(self,forums):
 		for f in forums:
@@ -2450,6 +2452,7 @@ class ForumsWindow(BaseWindow):
 				item.setProperty("topic",title)
 				item.setProperty("id",fid)
 				self.getControl(120).addItem(item)
+				self.setFocusId(120)
 		except:
 			#xbmcgui.unlock()
 			ERROR('FILL FORUMS ERROR')
@@ -2803,7 +2806,7 @@ def askForum(just_added=False,just_favs=False):
 	for f in whole:
 		if not f.startswith('.'):
 			if not f:
-				menu.addItem(None,None)
+				menu.addSep()
 				continue
 			ff = open(getForumPath(f),'r')
 			name = ff.readline().strip('\n')[1:]
@@ -2945,25 +2948,19 @@ def removeForum():
 class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
 		self.result = None
-		self.display = kwargs.get('display')
-		self.display2 = kwargs.get('display2')
-		self.icons = kwargs.get('icons')
-		self.caption = kwargs.get('caption')
+		self.items = kwargs.get('items')
 		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		items = []
-		lastItem = None
-		for d,d2,i in zip(self.display,self.display2,self.icons):
-			if d == None:
-				if lastItem: lastItem.setProperty('SEPARATOR','SEPARATOR')
-				continue
-			item = xbmcgui.ListItem(label=d,label2=d2,thumbnailImage=i or '')
+		for i in self.items:
+			item = xbmcgui.ListItem(label=i['disp'],label2=i['disp2'],thumbnailImage=i['icon'])
+			if i['sep']: item.setProperty('SEPARATOR','SEPARATOR')
 			items.append(item)
-			lastItem = item
 			
 		self.getControl(120).addItems(items)
 		self.getControl(300).setLabel(self.caption)
+		self.setFocusId(120)
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
@@ -2985,39 +2982,24 @@ class ChoiceMenu():
 	def __init__(self,caption):
 		self.caption = caption
 		self.items = []
-		self.display = []
-		self.display2 = []
-		self.icons = []
 		
-	def addItem(self,ID,display,icon=None,display2=''):
+	def addItem(self,ID,display,icon='',display2='',sep=False):
 		if not ID: return self.addSep()
-		self.items.append(ID)
-		self.display.append(display)
-		self.display2.append(display2)
-		self.icons.append(icon)
+		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep})
 		
 	def addSep(self):
-		self.items.append(None)
-		self.display.append(None)
-		self.display2.append('')
-		self.icons.append('')
+		if self.items: self.items[-1]['sep'] = True
 	
-	def getChoiceIndex(self):
-		return xbmcgui.Dialog().select(self.caption,self.display)
-	
-	def getResult(self):
-		idx = self.getChoiceIndex()
-		if idx < 0: return None
-		return self.items[idx]
+	def getResult(self): pass
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml'):
-		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',display=self.display,display2=self.display2,icons=self.icons,caption=self.caption)
+		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',items=self.items,caption=self.caption)
 		w.doModal()
 		result = w.result
 		del w
 		if result == None: return None
-		return self.items[result]
+		return self.items[result]['id']
 	
 def clearDirFiles(filepath):
 	if not os.path.exists(filepath): return
