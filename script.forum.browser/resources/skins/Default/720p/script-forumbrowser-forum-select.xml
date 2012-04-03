@@ -1,5 +1,7 @@
 <window>
-	<defaultcontrol>120</defaultcontrol>
+	<defaultcontrol always="true">120</defaultcontrol>
+	<zorder>2</zorder>
+	<type>dialog</type>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>

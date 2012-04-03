@@ -1,6 +1,11 @@
 Forum Browser Changelog
 
-Current Version : 0.9.3
+Current Version : 0.9.4
+
+*** 0.9.4 ***
+
+Some skin changes
+Missing media now included
 
 *** 0.9.3 ***
 

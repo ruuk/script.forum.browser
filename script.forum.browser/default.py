@@ -23,7 +23,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.3'
+__version__ = '0.9.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1033,7 +1033,7 @@ class ThreadWindow:
 			self._currentThread = None
 			if self._endCommand: self._endCommand()
 		
-class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
+class BaseWindow(xbmcgui.WindowXML,ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''		
 		if __addon__.getSetting('use_forum_colors') == 'false':
@@ -1041,7 +1041,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		else:
 			self._prog_format = '[COLOR '+FB.theme.get('title_fg','FF000000')+']%s[/COLOR]'
 		ThreadWindow.__init__(self)
-		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
+		xbmcgui.WindowXML.__init__( self, *args, **kwargs )
 	
 	def onClick( self, controlID ):
 		return False
@@ -1052,7 +1052,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 			action = ACTION_PREVIOUS_MENU
 		if ThreadWindow.onAction(self,action): return
 		if action == ACTION_PREVIOUS_MENU: self.close()
-		xbmcgui.WindowXMLDialog.onAction(self,action)
+		xbmcgui.WindowXML.onAction(self,action)
 	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
@@ -1126,7 +1126,7 @@ class PageWindow(BaseWindow):
 		if __addon__.getSetting('use_forum_colors') == 'false':
 			self.getControl(105).setLabel(self.pageData.getPageDisplay())
 		else:
-			self.getControl(105).setLabel(TITLE_FORMAT % (FB.theme.get('title_fg','FF000000'),self.pageData.getPageDisplay()))
+			self.getControl(105).setLabel(self.pageData.getPageDisplay())
 		
 	def gotoPage(self,page): pass
 
@@ -1877,8 +1877,11 @@ class RepliesWindow(PageWindow):
 		self.empty = True
 		self.desc_base = '[CR]%s[CR] [CR]'
 		self.mode = 'light'
+		self.started = False
 	
 	def onInit(self):
+		if self.started: return
+		self.started = True
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.postSelected()
@@ -2174,9 +2177,12 @@ class ThreadsWindow(PageWindow):
 		self.textBase = '%s'
 		self.highBase = '%s'
 		self.forum_desc_base = '[B]%s[/B]'
+		self.started = False
 		PageWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
+		if self.started: return
+		self.started = True
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.setTheme()
@@ -2187,6 +2193,7 @@ class ThreadsWindow(PageWindow):
 		self.desc_base = unicode.encode(__language__(30162)+' %s','utf8')
 		self.getControl(103).setLabel(__language__(30160))
 		self.getControl(104).setLabel(self.topic)
+		return
 			
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		
@@ -2349,6 +2356,7 @@ class ForumsWindow(BaseWindow):
 		self.subTextBase = '[I]%s [/I]'
 		self.desc_base = '%s'
 		self.setAsMain()
+		self.started = False
 	
 	def getUsername(self):
 		return __addon__.getSetting('login_user_' + FB.getForumID().replace('.','_'))
@@ -2360,16 +2368,18 @@ class ForumsWindow(BaseWindow):
 		return self.getUsername() != '' and self.getPassword() != ''
 		
 	def onInit(self):
+		if self.started: return
+		self.started = True
 		self.setStopControl(self.getControl(105))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.resetForum()
 		self.fillForumList()
-		self.setFocus(self.getControl(120))
+		self.setFocusId(120)
 		
 	def setTheme(self):
 		self.getControl(103).setLabel(__language__(30170))
 		self.getControl(104).setLabel(FB.forum)
-			
+		return	
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		
 		self.desc_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]'
@@ -2949,18 +2959,20 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
 		self.result = None
 		self.items = kwargs.get('items')
+		self.caption = kwargs.get('caption')
 		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		items = []
+		clist = self.getControl(120)
+		clist.reset()
 		for i in self.items:
 			item = xbmcgui.ListItem(label=i['disp'],label2=i['disp2'],thumbnailImage=i['icon'])
 			if i['sep']: item.setProperty('SEPARATOR','SEPARATOR')
-			items.append(item)
+			clist.addItem(item)
 			
-		self.getControl(120).addItems(items)
 		self.getControl(300).setLabel(self.caption)
-		self.setFocusId(120)
+		self.setFocus(clist)
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
