@@ -1,6 +1,20 @@
 Forum Browser Changelog
 
-Current Version : 0.9.5
+TODO:
+  Handle nested quotes
+  
+Current Version : 0.9.6
+
+*** 0.9.6 ***
+
+Logged in status now checks api response headers value to catched expired login (previously just set to true on successful login)
+Imporved error handling and messages, should help with lost focus on errors
+When adding Tapatalk forum, adds favicon to the logo list (in case there is nothing better)
+Added the ability to remove/add built-in forums from the forums list
+Fixed a bug with page display being blank on PM's
+Fixed some issues with quoting from the message view
+Removed all translation code as google now has only a paid translation service
+Fixes some preview issues in the 'Post Reply' dialog
 
 *** 0.9.5 ***
 

@@ -50,10 +50,10 @@
 				<height>59</height>
 			</control>
 			<control type="label" id="103">
-				<description>textarea</description>
-				<posx>82</posx>
+				<description>User</description>
+				<posx>90</posx>
 				<posy>22</posy>
-				<width>120</width>
+				<width>150</width>
 				<height>40</height>
 				<font>font13_title</font>
 				<textcolor>black</textcolor>
@@ -66,9 +66,9 @@
 
 			<control type="label" id="104">
 				<description>Topic</description>
-				<posx>212</posx>
+				<posx>235</posx>
 				<posy>14</posy>
-				<width>715</width>
+				<width>680</width>
 				<height>60</height>
 				<font>font13_title</font>
 				<textcolor>black</textcolor>
@@ -79,14 +79,14 @@
 
 			<control type="label" id="105">
 				<description>Date</description>
-				<posx>937</posx>
+				<posx>1220</posx>
 				<posy>14</posy>
-				<width>300</width>
+				<width>330</width>
 				<height>60</height>
-				<font>font18</font>
+				<font>font12</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
-				<align>center</align>
+				<align>right</align>
 			</control>
 			<control type="button" id="110">
 				<description>Close Button</description>

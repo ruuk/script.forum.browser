@@ -256,9 +256,9 @@
       
 			<control type="label">
 				<description>textarea</description>
-				<posx>29</posx>
+				<posx>44</posx>
 				<posy>595</posy>
-				<width>1222</width>
+				<width>1192</width>
 				<height>45</height>
 				<font>font12</font>
 				<textcolor>black</textcolor>

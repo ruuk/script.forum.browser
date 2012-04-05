@@ -51,7 +51,6 @@ class FBTTOnlineDatabase():
 		flist = self.postData(do='list')
 		if not flist: return None
 		flist = flist.split('\n')
-		print flist
 		final = []
 		for f in flist:
 			if f:
@@ -120,8 +119,12 @@ class CookieResponse:
 class CookieTransport(xmlrpclib.Transport):
 	def __init__(self):
 		xmlrpclib.Transport.__init__(self)
+		self._loggedIn = False
 		self.jar = cookielib.CookieJar()
 
+	def loggedIn(self):
+		return self._loggedIn
+	
 	def single_request(self, host, handler, request_body, verbose=0):
 		# issue XML-RPC request
 
@@ -135,18 +138,20 @@ class CookieTransport(xmlrpclib.Transport):
 				cookval = []
 				for c in self.jar: cookval.append('%s=%s' % (c.name,c.value))
 				h.putheader('Cookie','; '.join(cookval))
-			#print h._buffer
 			self.send_host(h, host)
 			self.send_user_agent(h)
 			self.send_content(h, request_body)
 			response = h.getresponse(buffering=True)
 			
 			headers = {}
-			for k,v in response.getheaders(): headers[k] = v
+			for k,v in response.getheaders():
+				#Mobiquo_is_login: false
+				if k.lower() == 'mobiquo_is_login':
+					#print '%s=%s' % (k,v)
+					self._loggedIn = (v =='true')
+				headers[k] = v
 			req = urllib2.Request(host,request_body,headers)
 			self.jar.extract_cookies(CookieResponse(response,host), req)
-			#print headers
-			#for c in self.jar: print c
 			
 			if response.status == 200:
 				self.verbose = verbose
@@ -302,6 +307,7 @@ class ForumPost:
 		
 	def messageAsQuote(self):
 		qp = self.FB.server.get_quote_post(self.getID())
+		#print qp.get('result_text')
 		return str(qp.get('post_content',''))
 		
 	def imageURLs(self):
@@ -379,12 +385,19 @@ class PageData:
 # Forum Browser API for TapaTalk
 ######################################################################################
 class TapatalkForumBrowser:
+	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
+						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
+						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)'
+					}
+	
 	PageData = PageData
 	def __init__(self,forum,always_login=False):
 		self.forum = forum[3:]
 		self.prefix = 'TT.'
 		self._url = ''
+		self.transport = None
 		self.server = None
+		self.forumConfig = {}
 		self.needsLogin = True
 		self.alwaysLogin = always_login
 		self.lang = sys.modules["__main__"].__language__
@@ -398,7 +411,8 @@ class TapatalkForumBrowser:
 		return self.prefix + self.forum
 	
 	def isLoggedIn(self):
-		return self._loggedIn
+		#return self._loggedIn
+		return self.transport.loggedIn()
 	
 	def resetBrowser(self): pass
 	
@@ -471,8 +485,8 @@ class TapatalkForumBrowser:
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 						'image':'\[IMG\](?P<url>.+?)\[/IMG\](?is)',
-						'link':'\[URL=(?P<url>[^\]]+?)\](?P<text>.+?)\[/URL\](?is)',
-						'link2':'\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',
+						'link':'\[url=(?P<url>[^\]]+?)\](?P<text>.+?)\[/url\](?is)',
+						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'}
 		
@@ -484,12 +498,29 @@ class TapatalkForumBrowser:
 		self.needsLogin = True
 		if not self._url:
 			self._url = 'http://%s/mobiquo/mobiquo.php' % forum
-		print self._url
 		self.forum = forum
-		self.server = xmlrpclib.ServerProxy(self._url,transport=CookieTransport())
+		self.transport = CookieTransport()
+		self.server = xmlrpclib.ServerProxy(self._url,transport=self.transport)
+		self.getForumConfig()
 		return True
 			
+	def getForumConfig(self):
+		self.forumConfig = self.server.get_config()
+		self.LOG('Forum Type: ' + self.getForumType())
+		self.LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
 		
+	def getForumType(self):
+		return self.forumConfig.get('version','')[:2]
+	
+	def getQuoteFormat(self):
+		forumType = self.getForumType()
+		return self.quoteFormats.get(forumType)
+	
+	def getRegURL(self):
+		sub = self.forumConfig.get('reg_url','')
+		if not sub: return ''
+		return self._url.split('mobiquo/',1)[0] + sub
+	
 	def setLogin(self,user,password,always=False):
 		self.user = user
 		self.password = password
@@ -510,7 +541,7 @@ class TapatalkForumBrowser:
 	def checkLogin(self,callback=None):
 		if not self.user or not self.password: return False
 		if not callback: callback = self.fakeCallback
-		if self.needsLogin:
+		if self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
 			if not callback(5,self.lang(30100)): return False
 			if not self.login():
@@ -573,6 +604,7 @@ class TapatalkForumBrowser:
 		data['threadid'] = data.get('topic_id','')
 		data['starter'] = str(data.get('topic_author_name',self.user))
 		data['title'] = str(data.get('topic_title',''))
+		data['short_content'] = str(data.get('short_content',''))
 		#data['lastposter'] = 
 		#data['forumid'] = 
 		data['sticky'] = sticky
@@ -621,16 +653,13 @@ class TapatalkForumBrowser:
 			page = int(page)
 		except:
 			page = 0
-		#print page
 		if not callback: callback = self.fakeCallback
 		try:
 			sreplies = []
 			if pid:
 				test = self.server.get_thread_by_post(pid,20)
 				index = test.get('position')
-				#print index
 				start = int((index - 1) / 20) * 20
-				#print start
 				thread = self.server.get_thread(threadid,start,start + 19)
 			else:
 				thread = self.server.get_thread(threadid,page,page + 19)

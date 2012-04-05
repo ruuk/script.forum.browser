@@ -1,7 +1,7 @@
 #www.xbmchub.com
 #www.xbmchub.com
-url:logo=http://www.xbmchub.com/images/index-logo.png
 import:www.xbmc4xbox.org
+url:logo=http://www.xbmchub.com/images/index-logo.png
 # The URLs
 url:base=http://xbmchub.com/oldforums/
 # The filters

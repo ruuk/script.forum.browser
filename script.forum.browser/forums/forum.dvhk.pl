@@ -1,7 +1,7 @@
 #forum.dvhk.pl
-#DVHD Forums
-url:logo=http://forum.dvhk.pl/disturbed/misc/dis_hdr_logo.jpg
+#DVHK Forums
 import:TT.forum.xbmc.org
+url:logo=http://forum.dvhk.pl/disturbed/misc/dis_hdr_logo.jpg
 # The URLs
 url:base=http://forum.dvhk.pl/
 url:forums=index.php
