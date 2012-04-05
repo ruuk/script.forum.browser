@@ -214,22 +214,6 @@
 				<height>2</height>
 				<texture>forum-browser-progress.png</texture>
 			</control>
-			<control type="image" id="301">
-				<posx>10</posx>
-				<posy>387</posy>
-				<width>1260</width>
-				<height>2</height>
-				<texture>forum-browser-separator.png</texture>
-				<visible>false</visible>
-			</control>
-			<control type="image" id="302">
-				<posx>10</posx>
-				<posy>604</posy>
-				<width>1260</width>
-				<height>2</height>
-				<texture>forum-browser-separator.png</texture>
-				<visible>false</visible>
-			</control>
 
 			<control type="image" id="115">
 				<description>listbg</description>
@@ -522,23 +506,21 @@
 			</control>
 			<control type="group">
 				<posx>1258</posx>
-				<posy>90</posy>
+				<posy>100</posy>
 				<control type="scrollbar" id="121">
 					<description>scroll bar indicator for lists</description>
 					<posx>0</posx>
 					<posy>0</posy>
-					<width>12</width>
-					<height>626</height>
-					<texturesliderbackground border="6">default-scroll_back.png
-					</texturesliderbackground>
-					<texturesliderbar border="6">default-scroll_mid.png
-					</texturesliderbar>
-					<texturesliderbarfocus border="6">default-scroll_mid.png
-					</texturesliderbarfocus>
+					<width>4</width>
+					<height>600</height>
+					<texturesliderbackground>-</texturesliderbackground>
+					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
 					<textureslidernib>-</textureslidernib>
 					<textureslidernibfocus>-</textureslidernibfocus>
 					<orientation>vertical</orientation>
 					<showonepage>false</showonepage>
+					<colordiffuse>FF222222</colordiffuse>
 					<visible>Control.IsVisible(120)</visible>
 				</control>
 			</control>

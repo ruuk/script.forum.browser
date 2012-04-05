@@ -220,12 +220,13 @@
 				<onup>202</onup>
 				<ondown>104</ondown>
 				<texturesliderbackground>-</texturesliderbackground>
-				<texturesliderbar border="1">forum-browser-scroll_mid.png</texturesliderbar>
-				<texturesliderbarfocus border="1">forum-browser-scroll_mid.png</texturesliderbarfocus>
+				<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
+				<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
 				<textureslidernib>-</textureslidernib>
 				<textureslidernibfocus>-</textureslidernibfocus>
 				<orientation>vertical</orientation>
 				<showonepage>false</showonepage>
+				<colordiffuse>FF555555</colordiffuse>
 				<visible>Control.IsVisible(122)</visible>
 			</control>
      
@@ -287,12 +288,13 @@
 					<width>4</width>
 					<height>255</height>
 					<texturesliderbackground>-</texturesliderbackground>
-					<texturesliderbar border="1">forum-browser-scroll_mid.png</texturesliderbar>
-					<texturesliderbarfocus border="1">forum-browser-scroll_mid.png</texturesliderbarfocus>
+					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
 					<textureslidernib>-</textureslidernib>
 					<textureslidernibfocus>-</textureslidernibfocus>
 					<orientation>vertical</orientation>
 					<showonepage>false</showonepage>
+					<colordiffuse>FFAAAAAA</colordiffuse>
 					<visible>Control.IsVisible(120)</visible>
 				</control>
 			</control>

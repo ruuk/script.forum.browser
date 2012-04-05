@@ -380,13 +380,14 @@
 					<width>4</width>
 					<height>440</height>
 					<texturesliderbackground border="1">-</texturesliderbackground>
-					<texturesliderbar border="1">forum-browser-scroll_mid.png</texturesliderbar>
-					<texturesliderbarfocus border="1">forum-browser-scroll_mid.png</texturesliderbarfocus>
+					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
 					<textureslidernib>-</textureslidernib>
 					<textureslidernibfocus>-</textureslidernibfocus>
 					<orientation>vertical</orientation>
 					<showonepage>false</showonepage>
 					<visible>Control.IsVisible(120)</visible>
+					<colordiffuse>FF555555</colordiffuse>
 				</control>
 			</control>
 

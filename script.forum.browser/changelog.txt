@@ -15,6 +15,7 @@ Fixed a bug with page display being blank on PM's
 Fixed some issues with quoting from the message view
 Removed all translation code as google now has only a paid translation service
 Fixes some preview issues in the 'Post Reply' dialog
+Cleaned out unused images, fixed some scrollbars
 
 *** 0.9.5 ***
 
