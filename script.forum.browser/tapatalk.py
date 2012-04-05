@@ -739,7 +739,9 @@ class TapatalkForumBrowser:
 		result = self.server.reply_post(post.fid,post.tid,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
 		callback(100,self.lang(30052))
 		status = result.get('result',False)
-		if not status: post.error = str(result.get('result_text'))
+		if not status:
+			post.error = str(result.get('result_text'))
+			self.LOG('Failed To Post: ' + post.error)
 		return result.get('result',False)
 		
 	def doPrivateMessage(self,to,title,message,callback=None):

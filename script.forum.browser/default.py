@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1318,7 +1318,7 @@ class PostDialog(BaseWindow):
 			if not self.post.isPM:
 				if not FB.post(self.post,callback=self.dialogCallback):
 					self.posted = False
-					xbmcgui.Dialog().ok(__language__(30050),__language__(30227),post.error or '?')
+					xbmcgui.Dialog().ok(__language__(30050),__language__(30227),self.post.error or '?')
 			else:
 				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
 		except:
