@@ -23,7 +23,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -38,6 +38,7 @@ ACTION_PAGE_DOWN      = 6
 ACTION_SELECT_ITEM    = 7
 ACTION_HIGHLIGHT_ITEM = 8
 ACTION_PARENT_DIR     = 9
+ACTION_PARENT_DIR2	  = 92
 ACTION_PREVIOUS_MENU  = 10
 ACTION_SHOW_INFO      = 11
 ACTION_PAUSE          = 12
@@ -67,6 +68,8 @@ def ERROR(message):
 	
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
+
+LOG('Version: ' + __version__)
 
 ######################################################################################
 # Forum Browser Classes
@@ -326,9 +329,13 @@ class ForumBrowser:
 		self.lastHTML = ''
 		
 		self.reloadForumData(forum)
+		self._logggedIn = False
 		
 	def getForumID(self):
 		return self.forum
+	
+	def isLoggedIn(self):
+		return self._logggedIn
 	
 	def resetBrowser(self):
 		self.browser = None
@@ -454,7 +461,11 @@ class ForumBrowser:
 			self.needsLogin = False
 			if not callback(5,__language__(30100)): return False
 			if not self.login():
+				self._logggedIn = False
 				return False
+			else:
+				self._logggedIn = True
+		
 		return True
 		
 	def browserReadURL(self,url,callback):
@@ -1033,7 +1044,7 @@ class ThreadWindow:
 			self._currentThread = None
 			if self._endCommand: self._endCommand()
 		
-class BaseWindow(xbmcgui.WindowXML,ThreadWindow):
+class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''		
 		if __addon__.getSetting('use_forum_colors') == 'false':
@@ -1041,7 +1052,7 @@ class BaseWindow(xbmcgui.WindowXML,ThreadWindow):
 		else:
 			self._prog_format = '[COLOR '+FB.theme.get('title_fg','FF000000')+']%s[/COLOR]'
 		ThreadWindow.__init__(self)
-		xbmcgui.WindowXML.__init__( self, *args, **kwargs )
+		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onClick( self, controlID ):
 		return False
@@ -1120,6 +1131,10 @@ class PageWindow(BaseWindow):
 		self.gotoPage(self.pageData.getPageNumber(page))
 		
 	def setupPage(self,pageData):
+		if not pageData:
+			self.getControl(200).setVisible(False)
+			self.getControl(202).setVisible(False)
+			return
 		if pageData: self.pageData = pageData
 		self.getControl(200).setVisible(self.pageData.prev)
 		self.getControl(202).setVisible(self.pageData.next)
@@ -1218,6 +1233,9 @@ class PostDialog(BaseWindow):
 		self.setTheme()
 	
 	def setTheme(self):
+		self.getControl(103).setLabel('Post Reply')
+		self.getControl(104).setLabel(__language__(30120))
+		return
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		#xbmcgui.lock()
 		try:
@@ -1269,16 +1287,19 @@ class PostDialog(BaseWindow):
 		self.prog.create(__language__(30126),__language__(30127))
 		self.prog.update(0)
 		self.post.setMessage(self.title,message)
+		self.posted = True
 		try:
 			if not self.post.isPM:
-				FB.post(self.post,callback=self.dialogCallback)
+				if not FB.post(self.post,callback=self.dialogCallback):
+					self.posted = False
+					xbmcgui.Dialog().ok(__language__(30050),__language__(30227),post.error or '?')
 			else:
 				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
 		except:
 			self.prog.close()
+			self.posted = False
 			raise
 		self.prog.close()
-		self.posted = True
 		self.close()
 		
 	def parseCodes(self,text):
@@ -1431,7 +1452,7 @@ class TextPostDialog(PostDialog):
 		#if not self.editButton.isSelected(): return False
 		aid = action.getId()
 		bc = action.getButtonCode()
-		#print aid,bc
+		print aid,bc
 		try:
 			shift = False
 			if bc & 0x00020000:
@@ -1440,7 +1461,7 @@ class TextPostDialog(PostDialog):
 				shift = True
 			if not bc: bc = aid
 			char = None
-			if aid == ACTION_PARENT_DIR:
+			if aid == ACTION_PARENT_DIR or aid == ACTION_PARENT_DIR2:
 				self.backspace()
 				return True
 			#elif aid == 18:
@@ -1458,8 +1479,8 @@ class TextPostDialog(PostDialog):
 				char = '='
 			#	else:
 			#		char = '+'
-			elif bc > 61476 and bc < 61481:
-				self.moveCursor(bc)
+			elif aid > 0 and aid < 5:
+				self.moveCursor(aid)
 				return True
 			elif bc == 61453:
 				char = '\n'
@@ -1529,12 +1550,12 @@ class TextPostDialog(PostDialog):
 			self.moveCursor(61480)
 	
 	def moveCursor(self,bc):
-		if bc == 61477:
+		if bc == 1:
 			#left
 			self.posHint = -1
 			self.cursorPos -= 1
 			if self.cursorPos < 0: self.cursorPos = 0
-		elif bc == 61478:
+		elif bc == 3:
 			#up
 			oldPos = self.cursorPos
 			idx,pos,clen = self.getLinePos() #@UnusedVariable
@@ -1552,12 +1573,12 @@ class TextPostDialog(PostDialog):
 				if tail > self.posHint: self.cursorPos -= (tail - self.posHint)
 			#if self.cursorPos == -1 and line: self.cursorPos = 0
 			if self.cursorPos < 0: self.cursorPos = oldPos
-		elif bc == 61479:
+		elif bc == 2:
 			#right
 			self.posHint = -1
 			self.cursorPos += 1
 			if self.cursorPos > len(self.buffer): self.cursorPos = len(self.buffer)
-		elif bc == 61480:
+		elif bc == 4:
 			#down
 			eol = self.buffer.find('\n',self.cursorPos)
 			sol = self.buffer.rfind('\n',0,self.cursorPos)
@@ -1694,13 +1715,14 @@ class MessageWindow(BaseWindow):
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
-		if __addon__.getSetting('use_forum_colors') == 'true':
-			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
-				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-			else:
-				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-		else:
-			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+#		if __addon__.getSetting('use_forum_colors') == 'true':
+#			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
+#				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+#			else:
+#				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+#		else:
+#			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
+		text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
@@ -1711,6 +1733,7 @@ class MessageWindow(BaseWindow):
 		self.getControl(103).setLabel(self.post.cleanUserName() or '')
 		self.getControl(104).setLabel(self.post.title or '')
 		self.getControl(105).setLabel(self.post.date or '')
+		return
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		#xbmcgui.lock()
 		try:
@@ -1875,13 +1898,14 @@ class RepliesWindow(PageWindow):
 		self.me = self.parent.parent.getUsername()
 		self.posts = {}
 		self.empty = True
-		self.desc_base = '[CR]%s[CR] [CR]'
+		self.desc_base = u'[CR]%s[CR] [CR]'
 		self.mode = 'light'
 		self.started = False
 	
 	def onInit(self):
 		if self.started: return
 		self.started = True
+		self.setupPage(None)
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.postSelected()
@@ -1894,7 +1918,7 @@ class RepliesWindow(PageWindow):
 		mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
 		self.getControl(103).setLabel(mtype)
 		self.getControl(104).setLabel(self.topic)
-			
+		return
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		#xbmcgui.lock()
 		try:
@@ -1941,7 +1965,7 @@ class RepliesWindow(PageWindow):
 		
 	def setMessageProperty(self,post,item,short=False):
 		title = post.title or ''
-		title = '[B]%s[/B][CR]' % title
+		title = u'[B]%s[/B][CR]' % title.decode('utf8','replace')
 		item.setProperty('message',self.desc_base % (title + post.messageAsDisplay(short)))
 		
 	def doFillRepliesList(self,replies,pageData):
@@ -2183,6 +2207,7 @@ class ThreadsWindow(PageWindow):
 	def onInit(self):
 		if self.started: return
 		self.started = True
+		self.setupPage(None)
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.setTheme()
@@ -2468,11 +2493,13 @@ class ForumsWindow(BaseWindow):
 			ERROR('FILL FORUMS ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
 		#xbmcgui.unlock()
+		self.setLoggedIn()
 			
 	def setPMCounts(self,pm_counts=None):
 		disp = ''
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
 		self.getControl(203).setLabel(__language__(3009) + disp)
+		self.setLoggedIn()
 		
 	def openPMWindow(self):
 		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid='private_messages',topic=__language__(30176),parent=self)
@@ -2551,6 +2578,12 @@ class ForumsWindow(BaseWindow):
 		self.getControl(203).setEnabled(self.hasLogin() and FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
 		__addon__.setSetting('last_forum',FB.getForumID())
+		
+	def setLoggedIn(self):
+		if FB.isLoggedIn():
+			self.getControl(111).setColorDiffuse('FF00FF00')
+		else:
+			self.getControl(111).setColorDiffuse('FF555555')
 		
 	def openSettings(self):
 		mode = __addon__.getSetting('color_mode')
@@ -2960,7 +2993,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.result = None
 		self.items = kwargs.get('items')
 		self.caption = kwargs.get('caption')
-		xbmcgui.WindowXMLDialog.__init__( self, *args, **kwargs )
+		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
 		items = []

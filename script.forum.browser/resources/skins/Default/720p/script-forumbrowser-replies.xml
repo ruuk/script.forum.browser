@@ -19,12 +19,29 @@
 			</control>
 
 			<control type="image" id="251">
-				<description>page header tab icon</description>
+				<description>Large Back</description>
 				<posx>10</posx>
 				<posy>4</posy>
 				<width>1260</width>
-				<height>80</height>
-				<texture border="10">forum-browser-title-background.png</texture>
+				<height>712</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
+				<colordiffuse>FF888888</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>85</height>
+				<texture border="20">forum-browser-white-box.png</texture>
+			</control>
+			<control type="image" id="251">
+				<description>Smaller Back</description>
+				<posx>10</posx>
+				<posy>84</posy>
+				<width>1260</width>
+				<height>632</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
+				<colordiffuse>FF555555</colordiffuse>
 			</control>
 			<control type="label" id="103">
 				<description>textarea</description>
@@ -39,6 +56,15 @@
 				<label>Posts</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
+			
+			<control type="image">
+				<posx>130</posx>
+				<posy>19</posy>
+				<width>155</width>
+				<height>60</height>
+				<texture border="30">forum-browser-white-box.png</texture>
+				<colordiffuse>AA000000</colordiffuse>
+			</control>
 			<control type="button" id="201">
 				<description>Post Reply</description>
 				<onleft>202</onleft>
@@ -46,17 +72,18 @@
 				<onup>120</onup>
 				<ondown>120</ondown>
 				<posx>130</posx>
-				<posy>30</posy>
+				<posy>24</posy>
 				<width>135</width>
-				<height>28</height>
+				<height>40</height>
 				<visible>true</visible>
 				<font>font12</font>
 				<align>center</align>
 				<aligny>center</aligny>
 				<label>$LOCALIZE[SCRIPT3002]</label>
-				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
-				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
+				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
+				<focusedcolor>white</focusedcolor>
 			</control>
 
 			<control type="label" id="104">
@@ -72,101 +99,105 @@
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 
-			<control type="button" id="200">
-				<description>The Button</description>
-				<onleft>201</onleft>
-				<onright>105</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<posx>885</posx>
-				<posy>31</posy>
-				<width>50</width>
-				<height>27</height>
-				<visible>true</visible>
-				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font12</font>
-				<align>right</align>
-				<textcolor>FF000000</textcolor>
-				<disabledcolor>20555555</disabledcolor>
-				<textoffsetx>33</textoffsetx>
-				<texturefocus>forum-browser-left-focus.png</texturefocus>
-				<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
+			<control type="group">
+				<posx>915</posx>
+				<posy>14</posy>
+				<control type="image">
+					<description>Shadow</description>
+					<posx>25</posx>
+					<posy>-5</posy>
+					<width>250</width>
+					<height>80</height>
+					<texture border="20">forum-browser-white-box.png</texture>
+					<colordiffuse>AA000000</colordiffuse>
+				</control>
+				<control type="button" id="200">
+					<description>Previous</description>
+					<onleft>201</onleft>
+					<onright>105</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>-3</posx>
+					<posy>0</posy>
+					<width>48</width>
+					<height>60</height>
+					<visible>true</visible>
+					<font>font12</font>
+					<align>right</align>
+					<textcolor>FF000000</textcolor>
+					<disabledcolor>20555555</disabledcolor>
+					<texturefocus>forum-browser-left-focus.png</texturefocus>
+					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="202">
+					<description>Next</description>
+					<onleft>106</onleft>
+					<onright>201</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>234</posx>
+					<posy>0</posy>
+					<width>48</width>
+					<height>60</height>
+					<visible>true</visible>
+					<font>font12</font>
+					<align>left</align>
+					<textcolor>FF000000</textcolor>
+					<disabledcolor>20555555</disabledcolor>
+					<texturefocus>forum-browser-right-focus.png</texturefocus>
+					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="105">
+					<description>Page Button</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<onleft>200</onleft>
+					<onright>106</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<font>font12</font>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+					<textcolor>black</textcolor>
+					<disabledcolor>60000000</disabledcolor>
+					<focusedcolor>white</focusedcolor>
+					<visible>!Control.IsVisible(106)</visible>
+				</control>
+				<control type="button" id="106">
+					<description>Stop Button</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<onleft>105</onleft>
+					<onright>202</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<font>font12</font>
+					<textcolor>FF000000</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>$LOCALIZE[SCRIPT3010]</label>
+					<colordiffuse>FFFF0000</colordiffuse>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				</control>
 			</control>
-			<control type="button" id="105">
-				<description>Page Button</description>
-				<posx>940</posx>
-				<posy>29</posy>
-				<width>230</width>
-				<height>30</height>
-				<onleft>200</onleft>
-				<onright>106</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<font>font12</font>
-				<textcolor>FF000000</textcolor>
-				<aligny>center</aligny>
-				<align>center</align>
-				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
-				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
-				<visible>!Control.IsVisible(106)</visible>
-			</control>
-			<control type="button" id="106">
-				<description>Stop Button</description>
-				<posx>1025</posx>
-				<posy>29</posy>
-				<width>60</width>
-				<height>30</height>
-				<onleft>105</onleft>
-				<onright>202</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<font>font12</font>
-				<textcolor>FF000000</textcolor>
-				<aligny>center</aligny>
-				<align>center</align>
-				<label>$LOCALIZE[SCRIPT3010]</label>
-				<colordiffuse>FFFF0000</colordiffuse>
-				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
-				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
-			</control>
-			<control type="button" id="202">
-				<description>The Button</description>
-				<onleft>106</onleft>
-				<onright>201</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<posx>1174</posx>
-				<posy>31</posy>
-				<width>50</width>
-				<height>27</height>
-				<visible>true</visible>
-				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font12</font>
-				<align>left</align>
-				<textcolor>FF000000</textcolor>
-				<disabledcolor>20555555</disabledcolor>
-				<textoffsetx>4</textoffsetx>
-				<texturefocus>forum-browser-right-focus.png</texturefocus>
-				<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
-			</control>
+			
 			<control type="button" id="110">
 				<description>Close Button</description>
 				<posx>1230</posx>
 				<posy>15</posy>
-				<width>32</width>
+				<width>28</width>
 				<height>28</height>
 				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
 				<texturenofocus>forum-browser-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
-			</control>
-			<control type="image">
-				<description>page header tab icon</description>
-				<posx>10</posx>
-				<posy>4</posy>
-				<width>1260</width>
-				<height>80</height>
-				<texture>forum-browser-overlay.png</texture>
 			</control>
 
 			<control type="image" id="300">
@@ -219,7 +250,7 @@
 				<posx>10</posx>
 				<posy>90</posy>
 				<width>1245</width>
-				<height>626</height>
+				<height>620</height>
 				<onleft>202</onleft>
 				<onright>201</onright>
 				<onup>120</onup>
@@ -229,6 +260,14 @@
 				<scrolltime>200</scrolltime>
 				<preloaditems>2</preloaditems>
 				<itemlayout height="100">
+					<control type="image">
+						<posx>2</posx>
+						<posy>99</posy>
+						<width>200</width>
+						<height>1</height>
+						<texture>forum-browser-white-box.png</texture>
+						<colordiffuse>66000000</colordiffuse>
+					</control>
 					<control type="image">
 						<posx>200</posx>
 						<posy>0</posy>
@@ -255,7 +294,6 @@
 						<font>font18</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
-						<selectedcolor>white</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,)</visible>
@@ -336,16 +374,16 @@
 						<scroll>false</scroll>
 						<wrapmultiline>true</wrapmultiline>
 					</control>
-					<control type="image">
-						<posx>200</posx>
-						<posy>0</posy>
-						<width>1045</width>
-						<height>100</height>
-						<texture>forum-browser-overlay.png</texture>
-						<visible>true</visible>
-					</control>
 				</itemlayout>
 				<focusedlayout height="200">
+					<control type="image">
+						<posx>2</posx>
+						<posy>199</posy>
+						<width>200</width>
+						<height>1</height>
+						<texture>forum-browser-white-box.png</texture>
+						<colordiffuse>66000000</colordiffuse>
+					</control>
 					<control type="image">
 						<posx>200</posx>
 						<posy>0</posy>
@@ -406,7 +444,6 @@
 						<font>font18</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
-						<selectedcolor>white</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,)</visible>
@@ -432,7 +469,6 @@
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
-						<selectedcolor>FFAAAAAA</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(status)</info>
 					</control>
@@ -454,7 +490,6 @@
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF888888</textcolor>
-						<selectedcolor>green</selectedcolor>
 						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
@@ -467,7 +502,6 @@
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF999999</textcolor>
-						<selectedcolor>green</selectedcolor>
 						<align>right</align>
 						<info>ListItem.Property(date)</info>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
@@ -480,7 +514,6 @@
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>black</textcolor>
-						<selectedcolor>green</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>

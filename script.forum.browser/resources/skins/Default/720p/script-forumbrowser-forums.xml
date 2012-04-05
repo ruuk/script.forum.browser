@@ -79,16 +79,15 @@
 				<label>Loading...</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
-
 			<control type="button" id="105">
 				<description>Stop Button</description>
-				<posx>1045</posx>
-				<posy>45</posy>
-				<width>60</width>
-				<height>30</height>
-				<onleft>120</onleft>
-				<onright>120</onright>
-				<onup>200</onup>
+				<posx>1010</posx>
+				<posy>30</posy>
+				<width>130</width>
+				<height>60</height>
+				<onleft>105</onleft>
+				<onright>202</onright>
+				<onup>120</onup>
 				<ondown>120</ondown>
 				<font>font12</font>
 				<textcolor>FF000000</textcolor>
@@ -96,9 +95,10 @@
 				<align>center</align>
 				<label>$LOCALIZE[SCRIPT3010]</label>
 				<colordiffuse>FFFF0000</colordiffuse>
-				<texturefocus border="10">forum-browser-button-focus.png</texturefocus>
-				<texturenofocus border="10">forum-browser-button-nofocus.png</texturenofocus>
+				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 			</control>
+			
 			<control type="image" id="351">
 				<description>page header tab icon</description>
 				<posx>35</posx>
@@ -116,7 +116,7 @@
 					<posy>-5</posy>
 					<width>315</width>
 					<height>60</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
@@ -124,7 +124,7 @@
 					<posy>-5</posy>
 					<width>315</width>
 					<height>60</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
@@ -132,7 +132,7 @@
 					<posy>-5</posy>
 					<width>315</width>
 					<height>60</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
@@ -140,7 +140,7 @@
 					<posy>-5</posy>
 					<width>315</width>
 					<height>60</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="200">
@@ -158,7 +158,7 @@
 					<font>font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3003]</label>
-					<texturefocus border="20">forum-browser-black-box.png</texturefocus>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
@@ -180,7 +180,7 @@
 					<font>font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3004]</label>
-					<texturefocus border="20">forum-browser-black-box.png</texturefocus>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
@@ -202,7 +202,7 @@
 					<font>font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3009]</label>
-					<texturefocus border="20">forum-browser-black-box.png</texturefocus>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
@@ -224,7 +224,7 @@
 					<font>font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3005]</label>
-					<texturefocus border="20">forum-browser-black-box.png</texturefocus>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
@@ -234,14 +234,24 @@
       
 			<control type="button" id="110">
 				<description>Close Button</description>
-				<posx>1220</posx>
-				<posy>20</posy>
-				<width>32</width>
+				<posx>1230</posx>
+				<posy>15</posy>
+				<width>28</width>
 				<height>28</height>
 				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
 				<texturenofocus>forum-browser-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
+			</control>
+			
+			<control type="image" id="111">
+				<description>Logged In</description>
+				<posx>1205</posx>
+				<posy>19</posy>
+				<width>20</width>
+				<height>20</height>
+				<texture>forum-browser-logged-in.png</texture>
+				<colordiffuse>FF555555</colordiffuse>
 			</control>
       
 			<control type="label">
@@ -302,9 +312,9 @@
 				<scrolltime>200</scrolltime>
 				<itemlayout height="38">
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>990</width>
+						<width>980</width>
 						<height>38</height>
 						<font>font13_title</font>
 						<aligny>center</aligny>
@@ -314,9 +324,9 @@
 						<visible>StringCompare(ListItem.Genre,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>990</width>
+						<width>980</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
@@ -332,29 +342,28 @@
 						<posy>0</posy>
 						<width>1223</width>
 						<height>38</height>
-						<texture border="10">forum-browser-list-focus.png</texture>
-						<visible>Control.HasFocus(120)</visible>
+						<texture border="20">forum-browser-grey-boxr.png</texture>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>990</width>
+						<width>980</width>
 						<height>38</height>
 						<font>font13_title</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Genre,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>990</width>
+						<width>980</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FF333333</textcolor>
+						<textcolor>FFDDDDDD</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Genre,sub)</visible>

@@ -392,9 +392,13 @@ class TapatalkForumBrowser:
 		self.ERROR = sys.modules["__main__"].ERROR
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
+		self._loggedIn = False
 		
 	def getForumID(self):
 		return self.prefix + self.forum
+	
+	def isLoggedIn(self):
+		return self._loggedIn
 	
 	def resetBrowser(self): pass
 	
@@ -459,6 +463,7 @@ class TapatalkForumBrowser:
 					data = self.smilies[dup]
 				self.smilies[key] = data
 		self._url = self.urls.get('tapatalk_server','')
+		self.formats['quote'] = ''
 	
 	def reloadForumData(self,forum):
 		self.filters = {'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
@@ -494,9 +499,11 @@ class TapatalkForumBrowser:
 		self.LOG('LOGGING IN')
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.password))
 		if not result.get('result'):
-			self.LOG('LOGIN FAILED: ' + result.get('result_text'))
+			self.LOG('LOGIN FAILED: ' + str(result.get('result_text')))
+			self._loggedIn = False
 		else:
 			self.LOG('LOGGED IN')
+			self._loggedIn = True
 			return True
 		return False
 		
@@ -702,6 +709,8 @@ class TapatalkForumBrowser:
 		callback(40,self.lang(30106))
 		result = self.server.reply_post(post.fid,post.tid,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
 		callback(100,self.lang(30052))
+		status = result.get('result',False)
+		if not status: post.error = str(result.get('result_text'))
 		return result.get('result',False)
 		
 	def doPrivateMessage(self,to,title,message,callback=None):

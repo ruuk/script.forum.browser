@@ -1,6 +1,15 @@
 Forum Browser Changelog
 
-Current Version : 0.9.4
+Current Version : 0.9.5
+
+*** 0.9.5 ***
+
+Fixed a bug with character encoding errors
+Added dialog with the reason when when creating a new post fails
+Skin Redone
+Added logged in indicator on forums window
+Disabled settings which currently won't work (Because of Tapatalk api and skin changes)
+Added logging of version
 
 *** 0.9.4 ***
 

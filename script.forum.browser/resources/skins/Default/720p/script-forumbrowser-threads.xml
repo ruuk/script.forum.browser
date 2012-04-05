@@ -79,95 +79,100 @@
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
-			<control type="image">
-				<posx>940</posx>
-				<posy>9</posy>
-				<width>250</width>
-				<height>80</height>
-				<texture border="20">forum-browser-white-box.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
-			</control>
-			<control type="button" id="200">
-				<description>Previous</description>
-				<onleft>202</onleft>
-				<onright>105</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
+			<control type="group">
 				<posx>915</posx>
-				<posy>25</posy>
-				<width>60</width>
-				<height>40</height>
-				<visible>true</visible>
-				<font>font12</font>
-				<align>right</align>
-				<textcolor>FF000000</textcolor>
-				<disabledcolor>20555555</disabledcolor>
-				<texturefocus border="20">forum-browser-black-box.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-			</control>
-			<control type="button" id="202">
-				<description>Next</description>
-				<onleft>106</onleft>
-				<onright>200</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<posx>1135</posx>
-				<posy>25</posy>
-				<width>60</width>
-				<height>40</height>
-				<visible>true</visible>
-				<font>font12</font>
-				<align>left</align>
-				<textcolor>FF000000</textcolor>
-				<disabledcolor>20555555</disabledcolor>
-				<texturefocus border="20">forum-browser-black-box.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-			</control>
-			<control type="button" id="105">
-				<description>Page Button</description>
-				<posx>940</posx>
 				<posy>14</posy>
-				<width>230</width>
-				<height>60</height>
-				<onleft>200</onleft>
-				<onright>106</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<font>font12</font>
-				<aligny>center</aligny>
-				<align>center</align>
-				<texturefocus border="20">forum-browser-black-box.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-				<textcolor>black</textcolor>
-				<disabledcolor>60000000</disabledcolor>
-				<focusedcolor>white</focusedcolor>
-				<visible>!Control.IsVisible(106)</visible>
-			</control>
-			<control type="button" id="106">
-				<description>Stop Button</description>
-				<posx>940</posx>
-				<posy>14</posy>
-				<width>230</width>
-				<height>60</height>
-				<onleft>105</onleft>
-				<onright>202</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
-				<font>font12</font>
-				<textcolor>FF000000</textcolor>
-				<aligny>center</aligny>
-				<align>center</align>
-				<label>$LOCALIZE[SCRIPT3010]</label>
-				<colordiffuse>FFFF0000</colordiffuse>
-				<texturefocus border="20">forum-browser-black-box.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				<control type="image">
+					<description>Shadow</description>
+					<posx>25</posx>
+					<posy>-5</posy>
+					<width>250</width>
+					<height>80</height>
+					<texture border="20">forum-browser-white-box.png</texture>
+					<colordiffuse>AA000000</colordiffuse>
+				</control>
+				<control type="button" id="200">
+					<description>Previous</description>
+					<onleft>201</onleft>
+					<onright>105</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>-3</posx>
+					<posy>0</posy>
+					<width>48</width>
+					<height>60</height>
+					<visible>true</visible>
+					<font>font12</font>
+					<align>right</align>
+					<textcolor>FF000000</textcolor>
+					<disabledcolor>20555555</disabledcolor>
+					<texturefocus>forum-browser-left-focus.png</texturefocus>
+					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="202">
+					<description>Next</description>
+					<onleft>106</onleft>
+					<onright>201</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>234</posx>
+					<posy>0</posy>
+					<width>48</width>
+					<height>60</height>
+					<visible>true</visible>
+					<font>font12</font>
+					<align>left</align>
+					<textcolor>FF000000</textcolor>
+					<disabledcolor>20555555</disabledcolor>
+					<texturefocus>forum-browser-right-focus.png</texturefocus>
+					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="105">
+					<description>Page Button</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<onleft>200</onleft>
+					<onright>106</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<font>font12</font>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+					<textcolor>black</textcolor>
+					<disabledcolor>60000000</disabledcolor>
+					<focusedcolor>white</focusedcolor>
+					<visible>!Control.IsVisible(106)</visible>
+				</control>
+				<control type="button" id="106">
+					<description>Stop Button</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<onleft>105</onleft>
+					<onright>202</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<font>font12</font>
+					<textcolor>FF000000</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>$LOCALIZE[SCRIPT3010]</label>
+					<colordiffuse>FFFF0000</colordiffuse>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				</control>
 			</control>
 			
 			<control type="button" id="110">
 				<description>Close Button</description>
 				<posx>1230</posx>
 				<posy>15</posy>
-				<width>32</width>
+				<width>28</width>
 				<height>28</height>
 				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
 				<texturenofocus>forum-browser-close-button.png</texturenofocus>
@@ -273,9 +278,9 @@
 						<visible>StringCompare(ListItem.Genre,is_forum)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>175</width>
+						<width>165</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
@@ -286,13 +291,13 @@
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>175</width>
+						<width>165</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FF00DD00</textcolor>
+						<textcolor>FF007700</textcolor>
 						<selectedcolor>black</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
@@ -318,8 +323,7 @@
 						<posy>0</posy>
 						<width>1223</width>
 						<height>38</height>
-						<texture border="10">forum-browser-list-focus.png</texture>
-						<visible>Control.HasFocus(120)</visible>
+						<texture border="20">forum-browser-grey-boxr.png</texture>
 					</control>
 					<control type="image">
 						<posx>187</posx>
@@ -338,25 +342,25 @@
 						<visible>StringCompare(ListItem.Genre,is_forum)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>175</width>
+						<width>165</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
+						<posx>20</posx>
 						<posy>0</posy>
-						<width>175</width>
+						<width>165</width>
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FF002200</textcolor>
+						<textcolor>FF00BB00</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,me)</visible>
@@ -368,7 +372,7 @@
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FF224444</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Label2</info>
 						<visible>true</visible>
