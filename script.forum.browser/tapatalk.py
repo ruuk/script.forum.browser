@@ -4,6 +4,10 @@ import urllib, urllib2
 import iso8601
 #import xbmc #@UnresolvedImport
 
+DEBUG = sys.modules["__main__"].DEBUG
+LOG = sys.modules["__main__"].LOG
+ERROR = sys.modules["__main__"].ERROR
+
 def testForum(forum):
 	if forum.startswith('http://'):
 		url = forum
@@ -144,8 +148,12 @@ class CookieTransport(xmlrpclib.Transport):
 			response = h.getresponse(buffering=True)
 			
 			headers = {}
+			if DEBUG:
+				LOG('DEBUG: xmlrpclib response headers:')
 			for k,v in response.getheaders():
 				#Mobiquo_is_login: false
+				if DEBUG:
+					LOG('  %s=%s' % (k,v))
 				if k.lower() == 'mobiquo_is_login':
 					#print '%s=%s' % (k,v)
 					self._loggedIn = (v =='true')
@@ -380,7 +388,7 @@ class PageData:
 		if self.pageDisplay: return self.pageDisplay
 		if self.page is not None and self.totalPages is not None:
 			return 'Page %s of %s' % (self.page,self.totalPages)
-		
+	
 ######################################################################################
 # Forum Browser API for TapaTalk
 ######################################################################################
@@ -401,8 +409,6 @@ class TapatalkForumBrowser:
 		self.needsLogin = True
 		self.alwaysLogin = always_login
 		self.lang = sys.modules["__main__"].__language__
-		self.LOG = sys.modules["__main__"].LOG
-		self.ERROR = sys.modules["__main__"].ERROR
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self._loggedIn = False
@@ -506,8 +512,8 @@ class TapatalkForumBrowser:
 			
 	def getForumConfig(self):
 		self.forumConfig = self.server.get_config()
-		self.LOG('Forum Type: ' + self.getForumType())
-		self.LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
+		LOG('Forum Type: ' + self.getForumType())
+		LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
 		
 	def getForumType(self):
 		return self.forumConfig.get('version','')[:2]
@@ -527,13 +533,16 @@ class TapatalkForumBrowser:
 		self.alwaysLogin = always
 			
 	def login(self):
-		self.LOG('LOGGING IN')
+		LOG('LOGGING IN')
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.password))
 		if not result.get('result'):
-			self.LOG('LOGIN FAILED: ' + str(result.get('result_text','')))
+			LOG('LOGIN FAILED: ' + str(result.get('result_text','')))
 			self._loggedIn = False
 		else:
-			self.LOG('LOGGED IN: ' + str(result.get('result_text','')))
+			if DEBUG:
+				LOG('LOGGED IN: ' + str(result.get('result_text','')))
+			else:
+				LOG ('LOGGED IN')
 			self._loggedIn = True
 			return True
 		return False
@@ -551,7 +560,9 @@ class TapatalkForumBrowser:
 	def getPMCounts(self):
 		if not self.checkLogin(): return None
 		result = self.server.get_box_info()
-		if not result.get('result'): return None
+		if not result.get('result'):
+			LOG('Failed to get PM counts: ' + str(result.get('result_text')))
+			return None
 		unread = 0
 		total = 0
 		boxid = None
@@ -563,7 +574,7 @@ class TapatalkForumBrowser:
 		return {'unread':unread,'total':total,'boxid':boxid}
 		
 	def makeURL(self,url):
-		#self.LOG('AVATAR: ' + url)
+		#LOG('AVATAR: ' + url)
 		return url
 	
 	def createForumDict(self,data,sub=False):
@@ -580,7 +591,7 @@ class TapatalkForumBrowser:
 			try:
 				flist = self.server.get_forum()
 			except:
-				em = self.ERROR('ERROR GETTING FORUMS')
+				em = ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
 				if donecallback: donecallback(None,None,None)
 				return (None,None,None)
@@ -656,7 +667,7 @@ class TapatalkForumBrowser:
 			else:
 				threads,pd = self._getSubscriptions(callback,donecallback)
 		except:
-			em = self.ERROR('ERROR GETTING THREADS')
+			em = ERROR('ERROR GETTING THREADS')
 			callback(-1,'%s' % em)
 			if donecallback: donecallback(None,None)
 			return (None,None)
@@ -691,7 +702,7 @@ class TapatalkForumBrowser:
 				for p in posts: sreplies.append(ForumPost(p))
 				sreplies.reverse()
 			except:
-				em = self.ERROR('ERROR GETTING POSTS')
+				em = ERROR('ERROR GETTING POSTS')
 				callback(-1,'%s' % em)
 				if donecallback: donecallback(None,None)
 				return (None,None)
@@ -708,7 +719,7 @@ class TapatalkForumBrowser:
 		return (None,None)
 		
 	def hasPM(self):
-		return True
+		return not self.forumConfig.get('disable_pm','0') == '1'
 	
 	def getPrivateMessages(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
@@ -723,7 +734,7 @@ class TapatalkForumBrowser:
 			try:
 				messages = self.server.get_box(boxid,0,49)
 			except:
-				em = self.ERROR('ERROR GETTING PRIVATE MESSAGES')
+				em = ERROR('ERROR GETTING PRIVATE MESSAGES')
 				callback(-1,'%s' % em)
 				break
 			pms = []
@@ -763,7 +774,7 @@ class TapatalkForumBrowser:
 		status = result.get('result',False)
 		if not status:
 			post.error = str(result.get('result_text'))
-			self.LOG('Failed To Post: ' + post.error)
+			LOG('Failed To Post: ' + post.error)
 		return status
 		
 	def doPrivateMessage(self,to,title,message,callback=None):
@@ -787,9 +798,11 @@ class TapatalkForumBrowser:
 		
 	def deletePost(self,post):
 		if not self.checkLogin(): return False
-		result = self.server.m_delete_post(post.pid,2,xmlrpclib.Binary(''))
+		soft_hard = int(self.forumConfig.get('soft_delete','2'))
+		result = self.server.m_delete_post(post.pid,soft_hard,xmlrpclib.Binary('Not Given'))
 		if not result.get('result'):
 			post.error = str(result.get('result_text'))
+			LOG('Failed to delete post: %s (%s)' % (post.error,soft_hard == 1 and 'Soft' or 'Hard'))
 		return post
 			
 	def canDelete(self,user):

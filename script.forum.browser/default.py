@@ -1,7 +1,6 @@
 import urllib2, re, os, sys, time, urlparse, htmlentitydefs
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 import threading
-import tapatalk
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -22,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.7'
+__version__ = '0.9.8'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -69,6 +68,10 @@ def LOG(message):
 	print 'FORUMBROWSER: %s' % message
 
 LOG('Version: ' + __version__)
+DEBUG = __addon__.getSetting('debug') == 'true'
+if DEBUG: LOG('DEBUG LOGGING ON')
+
+import tapatalk
 
 ######################################################################################
 # Forum Browser Classes
@@ -2271,10 +2274,16 @@ class ThreadsWindow(PageWindow):
 		t.start()
 		
 	def doFillThreadList(self,threads,pageData):
-		if not threads:
+		if threads is None:
 			LOG('GET THREADS ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30161),__language__(30053))
 			return
+		
+		if not threads:
+			LOG('Empty Forum')
+			xbmcgui.Dialog().ok(__language__(30229),__language__(30230))
+			return
+		
 		self.empty = False
 		#xbmcgui.lock()
 		try:
@@ -2536,10 +2545,11 @@ class ForumsWindow(BaseWindow):
 		
 	def changeForum(self):
 		forum = askForum()
-		if not forum: return
+		if not forum: return False
 		self.stopThread()
-		global FB
-		FB = getForumBrowser(forum)
+		LOG('------------------ CHANGING FORUM FROM: %s TO: %s' % (FB.getForumID(),forum)) 
+		if not getForumBrowser(forum): return False
+		if not FB: return
 		#FB.resetBrowser()
 		#FB.reloadForumData(forum)
 		MC.resetRegex()
@@ -2894,7 +2904,11 @@ def doSettings():
 	elif idx == 4: removeForum()
 	elif idx == 5: setLogins()
 #	elif idx == 6: registerForum()
-	elif idx == 6: __addon__.openSettings()
+	elif idx == 6:
+		__addon__.openSettings()
+		global DEBUG
+		DEBUG = __addon__.getSetting('debug') == 'true'
+		tapatalk.DEBUG = DEBUG
 	
 def registerForum():
 	url = FB.getRegURL()
@@ -3250,11 +3264,17 @@ class Downloader:
 
 def getForumBrowser(forum=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
+	global FB
 	if forum.startswith('TT.'):
-		FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		try:
+			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		except:
+			err = ERROR('getForumBrowser(): Tapatalk')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
+			return False
 	else:
 		FB = ForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-	return FB
+	return True
 	
 ######################################################################################
 # Startup
@@ -3262,9 +3282,10 @@ def getForumBrowser(forum=None):
 if sys.argv[-1] == 'settings':
 	doSettings()
 else:
-	#THEME = 'Fullscreen'
+	FB = None
+	getForumBrowser()
+
 	TD = ThreadDownloader()
-	FB = getForumBrowser()
 	MC = MessageConverter()
 	
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
