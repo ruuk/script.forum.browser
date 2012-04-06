@@ -4,13 +4,17 @@ TODO:
   Handle nested quotes
   Editing a post
   
-Current Version : 0.9.9
+Current Version : 0.9.10
 
-*** 0.9.9 ***
+*** 0.9.10 ***
 
-Changed session cookie handling so it will hopefull work across python versions
+Fix in xmlrpc Transport for older python versions
+
+*** 0.9.10 ***
+
+Changed session cookie handling so it will hopefully work across python versions
 Added post count, activity and status to posts
-Changed online indicator to an icon
+Changed online indicator to an icon in posts
 
 *** 0.9.8 ***
 
