@@ -147,6 +147,23 @@
 					<focusedcolor>white</focusedcolor>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
+				<control type="image" id="300">
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<texture>-</texture>
+				</control>
+				<control type="image" id="310">
+					<description>Progress</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<colordiffuse>FF555555</colordiffuse>
+					<texture border="20">forum-browser-grey-boxr.png</texture>
+					<visible>Control.isVisible(106)</visible>
+				</control>
 				<control type="button" id="106">
 					<description>Stop Button</description>
 					<posx>25</posx>
@@ -164,7 +181,7 @@
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+					<texturenofocus border="20">forum-browser-white-trans-boxr.png</texturenofocus>
 				</control>
 			</control>
 			
@@ -208,28 +225,7 @@
 				<label>$INFO[Container(120).ListItem.Property(last)]</label>
 				<visible>StringCompare(Container(120).ListItem.Studio,me)</visible>
 			</control>
-
-			<control type="image" id="300">
-				<posx>14</posx>
-				<posy>86</posy>
-				<width>1252</width>
-				<height>2</height>
-				<texture>forum-browser-separator.png</texture>
-			</control>
-			<control type="image" id="310">
-				<posx>14</posx>
-				<posy>86</posy>
-				<width>1</width>
-				<height>2</height>
-				<texture>forum-browser-progress.png</texture>
-			</control>
-			<control type="image" id="301">
-				<posx>10</posx>
-				<posy>638</posy>
-				<width>1260</width>
-				<height>2</height>
-				<texture>forum-browser-separator.png</texture>
-			</control> 
+			
 			<control type="image">
 				<posx>5</posx>
 				<posy>79</posy>

@@ -2877,9 +2877,9 @@ def setLogins():
 	forumID = askForum()
 	if not forumID: return
 	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forumID.replace('.','_')))
-	if not user: return
+	if user is None: return
 	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forumID.replace('.','_')),True)
-	if not password: return
+	if password is None: return
 	__addon__.setSetting('login_user_' + forumID.replace('.','_'),user)
 	__addon__.setSetting('login_pass_' + forumID.replace('.','_'),password)
 	
@@ -3247,7 +3247,7 @@ class Downloader:
 		outfile.close()
 		urlObj.close()
 		return (target,ftype)
-	
+
 def getForumBrowser(forum=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
 	if forum.startswith('TT.'):

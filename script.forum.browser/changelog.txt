@@ -3,7 +3,11 @@ Forum Browser Changelog
 TODO:
   Handle nested quotes
   
-Current Version : 0.9.7
+Current Version : 0.9.8
+
+*** 0.9.8 ***
+
+Fixed/Changed progress bar and improved progress updating
 
 *** 0.9.7 ***
 

@@ -167,6 +167,23 @@
 					<focusedcolor>white</focusedcolor>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
+				<control type="image" id="300">
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<texture>-</texture>
+				</control>
+				<control type="image" id="310">
+					<description>Progress</description>
+					<posx>25</posx>
+					<posy>0</posy>
+					<width>230</width>
+					<height>60</height>
+					<colordiffuse>FF555555</colordiffuse>
+					<texture border="20">forum-browser-grey-boxr.png</texture>
+					<visible>Control.isVisible(106)</visible>
+				</control>
 				<control type="button" id="106">
 					<description>Stop Button</description>
 					<posx>25</posx>
@@ -198,21 +215,6 @@
 				<texturenofocus>forum-browser-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
-			</control>
-
-			<control type="image" id="300">
-				<posx>14</posx>
-				<posy>86</posy>
-				<width>1252</width>
-				<height>2</height>
-				<texture>forum-browser-separator.png</texture>
-			</control>
-			<control type="image" id="310">
-				<posx>14</posx>
-				<posy>86</posy>
-				<width>1</width>
-				<height>2</height>
-				<texture>forum-browser-progress.png</texture>
 			</control>
 
 			<control type="image" id="115">
@@ -407,7 +409,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>200</height>
-						<texture border="10">forum-browser-text-background-fade.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>StringCompare(ListItem.Genre,light)</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -416,7 +418,7 @@
 						<posy>0</posy>
 						<width>1045</width>
 						<height>200</height>
-						<texture border="10">forum-browser-text-background-fade.png</texture>
+						<texture border="10">forum-browser-text-background.png</texture>
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>FF000000</colordiffuse>
 					</control>

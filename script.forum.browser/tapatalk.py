@@ -530,10 +530,10 @@ class TapatalkForumBrowser:
 		self.LOG('LOGGING IN')
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.password))
 		if not result.get('result'):
-			self.LOG('LOGIN FAILED: ' + str(result.get('result_text')))
+			self.LOG('LOGIN FAILED: ' + str(result.get('result_text','')))
 			self._loggedIn = False
 		else:
-			self.LOG('LOGGED IN')
+			self.LOG('LOGGED IN: ' + str(result.get('result_text','')))
 			self._loggedIn = True
 			return True
 		return False
@@ -575,30 +575,32 @@ class TapatalkForumBrowser:
 		
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		
-		try:
-			flist = self.server.get_forum()
-		except:
-			em = self.ERROR('ERROR GETTING FORUMS')
-			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		
-		forums = []
-		for general in flist:
-			if not general.get('sub_only'): forums.append(self.createForumDict(general))
-			for forum in general.get('child',[]):
-				if not forum.get('sub_only'): forums.append(self.createForumDict(forum))
-				for sub in forum.get('child',[]):
-					if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
-		if not callback(80,self.lang(30103)):
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
-		pm_counts = self.getPMCounts()
-		callback(100,self.lang(30052))
-		if donecallback: donecallback(forums,logo,pm_counts)
-		else: return forums, logo, pm_counts
+		while True:
+			if not callback(20,self.lang(30102)): break
+			try:
+				flist = self.server.get_forum()
+			except:
+				em = self.ERROR('ERROR GETTING FORUMS')
+				callback(-1,'%s' % em)
+				if donecallback: donecallback(None,None,None)
+				return (None,None,None)
+			if not callback(40,self.lang(30103)): break
+			forums = []
+			for general in flist:
+				if not general.get('sub_only'): forums.append(self.createForumDict(general))
+				for forum in general.get('child',[]):
+					if not forum.get('sub_only'): forums.append(self.createForumDict(forum))
+					for sub in forum.get('child',[]):
+						if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
+			if not callback(80,self.lang(30102)): break
+			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
+			pm_counts = self.getPMCounts()
+			callback(100,self.lang(30052))
+			if donecallback: donecallback(forums,logo,pm_counts)
+			return forums, logo, pm_counts
+			
+		if donecallback: donecallback(None,None,None)
+		return (None,None,None)
 		
 	def createThreadDict(self,data,sticky=False):
 		data['threadid'] = data.get('topic_id','')
@@ -610,23 +612,39 @@ class TapatalkForumBrowser:
 		data['sticky'] = sticky
 		return data
 	
-	def _getThreads(self,forumid,topic_num):
-		announces = self.server.get_topic(forumid,0,49,'ANN').get('topics',[])
-		for a in announces: self.createThreadDict(a,True)
-		stickys = self.server.get_topic(forumid,0,49,'TOP').get('topics',[])
-		for s in stickys: self.createThreadDict(s,True)
-		topics = self.server.get_topic(forumid,topic_num,int(topic_num) + 19)
-		pd = PageData(topics,topic_num)
-		normal = topics.get('topics',[])
-		for n in normal: self.createThreadDict(n)
-		return announces + stickys + normal, pd
+	def _getThreads(self,forumid,topic_num,callback,donecallback):
+		if not callback: callback = self.fakeCallback
+		while True:
+			if not callback(10,self.lang(30102)): break
+			announces = self.server.get_topic(forumid,0,49,'ANN').get('topics',[])
+			if not callback(30,self.lang(30103)): break
+			for a in announces: self.createThreadDict(a,True)
+			if not callback(40,self.lang(30102)): break
+			stickys = self.server.get_topic(forumid,0,49,'TOP').get('topics',[])
+			if not callback(60,self.lang(30103)): break
+			for s in stickys: self.createThreadDict(s,True)
+			if not callback(70,self.lang(30102)): break
+			topics = self.server.get_topic(forumid,topic_num,int(topic_num) + 19)
+			if not callback(90,self.lang(30103)): break
+			pd = PageData(topics,topic_num)
+			normal = topics.get('topics',[])
+			for n in normal: self.createThreadDict(n)
+			return announces + stickys + normal, pd
+			
+		if donecallback:
+			donecallback(None,None)
+		return (None,None)
 	
-	def _getSubscriptions(self):
+	def _getSubscriptions(self,callback,donecallback):
+		callback(20,self.lang(30102))
 		sub = self.server.get_subscribed_topic()
 		pd = PageData({},0)
 		#if not sub.get('result'):
 		#	raise Exception(sub.get('result_text'))
 		normal = sub.get('topics',[])
+		if not callback(70,self.lang(30103)):
+			if donecallback: donecallback(None,None)
+			return (None,None)
 		for n in normal: self.createThreadDict(n)
 		return normal, pd
 	
@@ -634,9 +652,9 @@ class TapatalkForumBrowser:
 		if not callback: callback = self.fakeCallback
 		try:
 			if forumid:
-				threads,pd = self._getThreads(forumid,page or 0)
+				threads,pd = self._getThreads(forumid,page or 0,callback,donecallback)
 			else:
-				threads,pd = self._getSubscriptions()
+				threads,pd = self._getSubscriptions(callback,donecallback)
 		except:
 			em = self.ERROR('ERROR GETTING THREADS')
 			callback(-1,'%s' % em)
@@ -649,73 +667,77 @@ class TapatalkForumBrowser:
 		
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		try:
-			page = int(page)
-		except:
-			page = 0
-		if not callback: callback = self.fakeCallback
-		try:
-			sreplies = []
-			if pid:
-				test = self.server.get_thread_by_post(pid,20)
-				index = test.get('position')
-				start = int((index - 1) / 20) * 20
-				thread = self.server.get_thread(threadid,start,start + 19)
-			else:
-				thread = self.server.get_thread(threadid,page,page + 19)
-			posts = thread.get('posts')
-			if not posts:
-				callback(-1,'NO POSTS')
+		while True:
+			try:
+				page = int(page)
+			except:
+				page = 0
+			if not callback(20,self.lang(30102)): break
+			try:
+				sreplies = []
+				if pid:
+					test = self.server.get_thread_by_post(pid,20)
+					index = test.get('position')
+					start = int((index - 1) / 20) * 20
+					thread = self.server.get_thread(threadid,start,start + 19)
+				else:
+					thread = self.server.get_thread(threadid,page,page + 19)
+				posts = thread.get('posts')
+				if not posts:
+					callback(-1,'NO POSTS')
+					if donecallback: donecallback(None,None)
+					return (None,None)
+				if not callback(60,self.lang(30103)): break
+				for p in posts: sreplies.append(ForumPost(p))
+				sreplies.reverse()
+			except:
+				em = self.ERROR('ERROR GETTING POSTS')
+				callback(-1,'%s' % em)
 				if donecallback: donecallback(None,None)
 				return (None,None)
-			for p in posts: sreplies.append(ForumPost(p))
-			sreplies.reverse()
-		except:
-			em = self.ERROR('ERROR GETTING POSTS')
-			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None)
-			return (None,None)
-		
-		if not callback(80,self.lang(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
-		pd = PageData(thread,page or 0)
-		pd.tid = threadid
-		callback(100,self.lang(30052))
-		
-		if donecallback: donecallback(sreplies, pd)
-		else: return sreplies, pd
+			
+			if not callback(80,self.lang(30103)): break
+			pd = PageData(thread,page or 0)
+			pd.tid = threadid
+			callback(100,self.lang(30052))
+			
+			if donecallback: donecallback(sreplies, pd)
+			return sreplies, pd
+			
+		if donecallback: donecallback(None,None)
+		return (None,None)
 		
 	def hasPM(self):
 		return True
 	
 	def getPrivateMessages(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		pmInfo = self.getPMCounts()
-		boxid = pmInfo.get('boxid')
-		if not boxid:
-			if donecallback: donecallback(None,None)
-			return (None,None)
 		
-		try:
-			messages = self.server.get_box(boxid,0,49)
-		except:
-			em = self.ERROR('ERROR GETTING PRIVATE MESSAGES')
-			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None)
-			return (None,None)
-		if not callback(80,self.lang(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
-		pms = []
-		for p in messages.get('list',[]):
-			p['boxid'] = boxid
-			pms.append(ForumPost(p))
+		while True:
+			if not callback(20,self.lang(30102)): break
+			pmInfo = self.getPMCounts()
+			if not pmInfo: break
+			boxid = pmInfo.get('boxid')
+			if not boxid: break
+			if not callback(50,self.lang(30102)): break
+			try:
+				messages = self.server.get_box(boxid,0,49)
+			except:
+				em = self.ERROR('ERROR GETTING PRIVATE MESSAGES')
+				callback(-1,'%s' % em)
+				break
+			pms = []
+			if not callback(80,self.lang(30103)): break
+			for p in messages.get('list',[]):
+				p['boxid'] = boxid
+				pms.append(ForumPost(p))
+			
+			callback(100,self.lang(30052))
+			if donecallback: donecallback(pms,None)
+			return pms, None
 		
-		callback(100,self.lang(30052))
-		
-		if donecallback: donecallback(pms,None)
-		else: return pms, None
+		if donecallback: donecallback(None,None)
+		return (None,None)
 	
 	def hasSubscriptions(self):
 		return True
@@ -742,7 +764,7 @@ class TapatalkForumBrowser:
 		if not status:
 			post.error = str(result.get('result_text'))
 			self.LOG('Failed To Post: ' + post.error)
-		return result.get('result',False)
+		return status
 		
 	def doPrivateMessage(self,to,title,message,callback=None):
 #		user_name 		yes 	To support sending message to multiple recipients, the app constructs an array and insert user_name for each recipient as an element inside the array. 	3
