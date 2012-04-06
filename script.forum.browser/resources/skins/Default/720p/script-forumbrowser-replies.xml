@@ -272,11 +272,29 @@
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>AA000000</colordiffuse>
 					</control>
-					<control type="label">
+					<control type="image">
 						<posx>10</posx>
-						<posy>4</posy>
-						<width>175</width>
-						<height>40</height>
+						<posy>7</posy>
+						<width>20</width>
+						<height>20</height>
+						<texture>forum-browser-logged-in.png</texture>
+						<colordiffuse>FF333333</colordiffuse>
+						<visible>StringCompare(ListItem.Property(online),)</visible>
+					</control>
+					<control type="image">
+						<posx>10</posx>
+						<posy>7</posy>
+						<width>20</width>
+						<height>20</height>
+						<texture>forum-browser-logged-in.png</texture>
+						<colordiffuse>FF00FF00</colordiffuse>
+						<visible>StringCompare(ListItem.Property(online),online)</visible>
+					</control>
+					<control type="label">
+						<posx>35</posx>
+						<posy>8</posy>
+						<width>155</width>
+						<height>15</height>
 						<font>font18</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
@@ -285,17 +303,27 @@
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
-						<posy>4</posy>
-						<width>175</width>
-						<height>40</height>
+						<posx>35</posx>
+						<posy>8</posy>
+						<width>155</width>
+						<height>15</height>
 						<font>font18</font>
 						<aligny>center</aligny>
-						<textcolor>FF55FF55</textcolor>
-						<selectedcolor>FF55FF55</selectedcolor>
+						<textcolor>FFFF0000</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,me)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>30</posy>
+						<width>175</width>
+						<height>15</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<align>left</align>
+						<textcolor>FF00BB00</textcolor>
+						<info>ListItem.Property(activity)</info>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -312,12 +340,22 @@
 					<control type="image">
 						<posx>10</posx>
 						<posy>68</posy>
-						<width>20</width>
-						<height>20</height>
-						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]
-						</texture>
+						<width>27</width>
+						<height>27</height>
+						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
+					</control>
+					<control type="label">
+						<posx>42</posx>
+						<posy>68</posy>
+						<width>140</width>
+						<height>10</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF9999BB</textcolor>
+						<align>left</align>
+						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
 					</control>
 					<control type="label">
 						<posx>1220</posx>
@@ -422,11 +460,29 @@
 						<visible>StringCompare(ListItem.Genre,dark)</visible>
 						<colordiffuse>FF000000</colordiffuse>
 					</control>
-					<control type="label">
+					<control type="image">
 						<posx>10</posx>
-						<posy>4</posy>
-						<width>175</width>
-						<height>40</height>
+						<posy>7</posy>
+						<width>20</width>
+						<height>20</height>
+						<texture>forum-browser-logged-in.png</texture>
+						<colordiffuse>FF333333</colordiffuse>
+						<visible>StringCompare(ListItem.Property(online),)</visible>
+					</control>
+					<control type="image">
+						<posx>10</posx>
+						<posy>7</posy>
+						<width>20</width>
+						<height>20</height>
+						<texture>forum-browser-logged-in.png</texture>
+						<colordiffuse>FF00FF00</colordiffuse>
+						<visible>StringCompare(ListItem.Property(online),online)</visible>
+					</control>
+					<control type="label">
+						<posx>35</posx>
+						<posy>8</posy>
+						<width>155</width>
+						<height>15</height>
 						<font>font18</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
@@ -435,17 +491,27 @@
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="label">
-						<posx>10</posx>
-						<posy>4</posy>
-						<width>175</width>
-						<height>40</height>
+						<posx>35</posx>
+						<posy>8</posy>
+						<width>155</width>
+						<height>15</height>
 						<font>font18</font>
 						<aligny>center</aligny>
-						<textcolor>FF55FF55</textcolor>
-						<selectedcolor>FF55FF55</selectedcolor>
+						<textcolor>FFFF0000</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,me)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>30</posy>
+						<width>175</width>
+						<height>15</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<align>left</align>
+						<textcolor>FF00BB00</textcolor>
+						<info>ListItem.Property(activity)</info>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -458,13 +524,23 @@
 						<align>left</align>
 						<info>ListItem.Property(status)</info>
 					</control>
-					<control type="image">
+					<control type="label">
 						<posx>10</posx>
 						<posy>68</posy>
-						<width>128</width>
-						<height>128</height>
-						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]
-						</texture>
+						<width>120</width>
+						<height>10</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FF9999BB</textcolor>
+						<align>left</align>
+						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
+					</control>
+					<control type="image">
+						<posx>10</posx>
+						<posy>85</posy>
+						<width>108</width>
+						<height>108</height>
+						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 					</control>

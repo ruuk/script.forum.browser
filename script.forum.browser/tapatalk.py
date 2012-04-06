@@ -1,5 +1,5 @@
 import xmlrpclib, httplib, sys, re, time, os
-import cookielib
+import cookielib, socket, errno
 import urllib, urllib2
 import iso8601
 #import xbmc #@UnresolvedImport
@@ -129,6 +129,18 @@ class CookieTransport(xmlrpclib.Transport):
 	def loggedIn(self):
 		return self._loggedIn
 	
+	def request(self, host, handler, request_body, verbose=0):
+		#retry request once if cached connection has gone cold
+		for i in (0, 1):
+			try:
+				return self.single_request(host, handler, request_body, verbose)
+			except socket.error, e:
+				if i or e.errno not in (errno.ECONNRESET, errno.ECONNABORTED, errno.EPIPE):
+					raise
+			except httplib.BadStatusLine: #close after we sent request
+				if i:
+					raise
+
 	def single_request(self, host, handler, request_body, verbose=0):
 		# issue XML-RPC request
 
@@ -245,6 +257,10 @@ class ForumPost:
 		self.tid = ''
 		self.fid = ''
 		self.boxid = ''
+		self.status = ''
+		self.activity = ''
+		self.postCount = 0
+		self.userInfo = {}
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('post_id',''))
@@ -257,7 +273,7 @@ class ForumPost:
 			self.userId = pdict.get('post_author_id','')
 			self.userName = str(pdict.get('post_author_name') or 'UERROR')
 			self.avatar = pdict.get('icon_url','')
-			self.status = pdict.get('is_online','') and '[COLOR FF00AA00]Online[/COLOR]' or 'Offline'
+			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('post_title',''))
 			self.message = str(pdict.get('post_content',''))
 			self.signature = pdict.get('signature','') or '' #nothing
@@ -271,12 +287,18 @@ class ForumPost:
 			self.date = date
 			self.userName = str(pdict.get('msg_from') or 'UERROR')
 			self.avatar = pdict.get('icon_url','')
-			self.status = pdict.get('is_online','') and '[COLOR FF00AA00]Online[/COLOR]' or 'Offline'
+			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('msg_subject',''))
 			self.message = str(pdict.get('short_content',''))
 			self.boxid = pdict.get('boxid','')
 			self.signature = ''
 			
+	def setUserInfo(self,info):
+		self.userInfo = info
+		self.status = str(info.get('display_text',''))
+		self.activity = str(info.get('current_activity',''))
+		self.postCount = info.get('post_count',0)
+		
 	def setPostID(self,pid):
 		self.postId = pid
 		self.pid = pid
@@ -511,9 +533,12 @@ class TapatalkForumBrowser:
 		return True
 			
 	def getForumConfig(self):
-		self.forumConfig = self.server.get_config()
-		LOG('Forum Type: ' + self.getForumType())
-		LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
+		try:
+			self.forumConfig = self.server.get_config()
+			LOG('Forum Type: ' + self.getForumType())
+			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
+		except:
+			ERROR('Failed to get forum config')
 		
 	def getForumType(self):
 		return self.forumConfig.get('version','')[:2]
@@ -547,18 +572,18 @@ class TapatalkForumBrowser:
 			return True
 		return False
 		
-	def checkLogin(self,callback=None):
+	def checkLogin(self,callback=None,callback_percent=5):
 		if not self.user or not self.password: return False
 		if not callback: callback = self.fakeCallback
 		if self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
-			if not callback(5,self.lang(30100)): return False
+			if not callback(callback_percent,self.lang(30100)): return False
 			if not self.login():
 				return False
 		return True
 		
-	def getPMCounts(self):
-		if not self.checkLogin(): return None
+	def getPMCounts(self,callback_percent=5):
+		if not self.checkLogin(callback_percent=callback_percent): return None
 		result = self.server.get_box_info()
 		if not result.get('result'):
 			LOG('Failed to get PM counts: ' + str(result.get('result_text')))
@@ -603,15 +628,19 @@ class TapatalkForumBrowser:
 					if not forum.get('sub_only'): forums.append(self.createForumDict(forum))
 					for sub in forum.get('child',[]):
 						if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
-			if not callback(80,self.lang(30102)): break
+			if not callback(80,self.lang(30231)): break
 			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
-			pm_counts = self.getPMCounts()
+			try:
+				pm_counts = self.getPMCounts(80)
+			except:
+				ERROR('Failed to get PM Counts')
+				pm_counts = None
 			callback(100,self.lang(30052))
 			if donecallback: donecallback(forums,logo,pm_counts)
 			return forums, logo, pm_counts
 			
-		if donecallback: donecallback(None,None,None)
-		return (None,None,None)
+		if donecallback: donecallback(None,logo,None)
+		return None,logo,None
 		
 	def createThreadDict(self,data,sticky=False):
 		data['threadid'] = data.get('topic_id','')
@@ -699,7 +728,13 @@ class TapatalkForumBrowser:
 					if donecallback: donecallback(None,None)
 					return (None,None)
 				if not callback(60,self.lang(30103)): break
-				for p in posts: sreplies.append(ForumPost(p))
+				infos = {}
+				for p in posts:
+					fp = ForumPost(p)
+					if not fp.userName in infos:
+						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+					fp.setUserInfo(infos[fp.userName])
+					sreplies.append(fp)
 				sreplies.reverse()
 			except:
 				em = ERROR('ERROR GETTING POSTS')
@@ -726,7 +761,7 @@ class TapatalkForumBrowser:
 		
 		while True:
 			if not callback(20,self.lang(30102)): break
-			pmInfo = self.getPMCounts()
+			pmInfo = self.getPMCounts(20)
 			if not pmInfo: break
 			boxid = pmInfo.get('boxid')
 			if not boxid: break
@@ -739,9 +774,14 @@ class TapatalkForumBrowser:
 				break
 			pms = []
 			if not callback(80,self.lang(30103)): break
+			infos = {}
 			for p in messages.get('list',[]):
 				p['boxid'] = boxid
-				pms.append(ForumPost(p))
+				fp = ForumPost(p)
+				if not fp.userName in infos:
+					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+				fp.setUserInfo(infos[fp.userName])
+				pms.append(fp)
 			
 			callback(100,self.lang(30052))
 			if donecallback: donecallback(pms,None)

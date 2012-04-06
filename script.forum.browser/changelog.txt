@@ -4,12 +4,18 @@ TODO:
   Handle nested quotes
   Editing a post
   
-Current Version : 0.9.8
+Current Version : 0.9.9
+
+*** 0.9.9 ***
+
+Changed session cookie handling so it will hopefull work across python versions
+Added post count, activity and status to posts
+Changed online indicator to an icon
 
 *** 0.9.8 ***
 
 Fixed/Changed progress bar and improved progress updating
-Added 'Enable Debug Logging' option in settings which turns on more detailed loggin
+Added 'Enable Debug Logging' option in settings which turns on more detailed logging
 Empty forums now show a 'Empty Forum' dialog instead of the error dialog
 Fix handling of failed forum change
 Added some missing images

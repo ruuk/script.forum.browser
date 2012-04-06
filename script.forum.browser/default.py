@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.8'
+__version__ = '0.9.9'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -59,7 +59,7 @@ FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),
 if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
 
 def ERROR(message):
-	LOG(message)
+	LOG('ERROR: ' + message)
 	import traceback #@Reimport
 	traceback.print_exc()
 	return str(sys.exc_info()[1])
@@ -68,6 +68,7 @@ def LOG(message):
 	print 'FORUMBROWSER: %s' % message
 
 LOG('Version: ' + __version__)
+LOG('Python Version: ' + sys.version)
 DEBUG = __addon__.getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
 
@@ -136,6 +137,9 @@ class ForumPost:
 		self.avatarFinal = ''
 		self.tid = ''
 		self.fid = ''
+		self.online = None
+		self.activity = ''
+		self.postCount = None
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('postid',''))
@@ -2037,6 +2041,10 @@ class RepliesWindow(PageWindow):
 				item.setProperty('avatar',url)
 				item.setProperty('status',convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
+				item.setProperty('online',post.online and 'online' or '')
+				item.setProperty('postcount',str(post.postCount) or '?')
+				item.setProperty('activity',post.activity)
+				
 				item.setInfo('video',{'Genre':self.mode})
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
@@ -2470,6 +2478,7 @@ class ForumsWindow(BaseWindow):
 		
 	def doFillForumList(self,forums,logo,pm_counts):
 		self.endProgress()
+		if logo: self.getControl(250).setImage(logo)
 		if not forums:
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
 			self.setFocusId(202)
@@ -2479,7 +2488,6 @@ class ForumsWindow(BaseWindow):
 		try:
 			#xbmcgui.lock()
 			self.getControl(120).reset()
-			self.getControl(250).setImage(logo)
 			self.setPMCounts(pm_counts)
 			
 			for f in forums:
@@ -2637,6 +2645,7 @@ class MessageConverter:
 		self.resetRegex()
 		
 	def resetRegex(self):
+		if not FB: return 
 		self.lineFilter = re.compile('[\n\r\t]')
 		f = FB.filters.get('quote')
 		self.quoteFilter = f and re.compile(f) or None

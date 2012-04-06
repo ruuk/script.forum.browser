@@ -108,6 +108,8 @@
     <string id="30228">Enable Log Debugging</string>
     <string id="30229">Empty Forum</string>
     <string id="30230">There are no threads in this forum.</string>
+    <string id="30231">Checking Messages</string>
+    
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
@@ -120,6 +122,6 @@
     <string id="3008">Submit Post</string>
     <string id="3009">Messages</string>
     <string id="3010">STOP</string>
-    
-    
+    <string id="3011">Posts:</string>
+
 </strings>
