@@ -1,7 +1,7 @@
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib, socket, errno
 import urllib, urllib2
-import iso8601
+import iso8601, forumbrowser
 #import xbmc #@UnresolvedImport
 
 DEBUG = sys.modules["__main__"].DEBUG
@@ -49,7 +49,7 @@ class FBTTOnlineDatabase():
 			return None
 			
 	def addForum(self,name,url,logo='',desc=''):
-		print self.postData(do='add',name=name,url=url,desc=desc,logo=logo)
+		self.postData(do='add',name=name,url=url,desc=desc,logo=logo)
 		
 	def getForumList(self):
 		flist = self.postData(do='list')
@@ -83,7 +83,7 @@ class HTMLPageInfo:
 			o.close()
 		except:
 			self.isValid = False
-			print 'HTMLPageInfo: FAILED'
+			LOG('HTMLPageInfo: FAILED')
 		
 	def title(self,default=''):
 		try: return re.search('<title>(.*?)</title>',self.html).group(1) or ''
@@ -806,6 +806,9 @@ class TapatalkForumBrowser:
 	def fakeCallback(self,pct,message=''): return True
 	
 	def post(self,post,callback=None):
+		if post.isEdit:
+			return self.editPost(post)
+		LOG('Posting reply')
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False		
 		callback(40,self.lang(30106))
@@ -817,6 +820,24 @@ class TapatalkForumBrowser:
 			LOG('Failed To Post: ' + post.error)
 		return status
 		
+	def getPostForEdit(self,pid):
+		result = self.server.get_raw_post(pid)
+		if not result:
+			LOG('Could not get raw post for editing')
+			return None
+		pm = forumbrowser.PostMessage(pid,isEdit=True)
+		pm.setMessage(str(result.get('post_title','')),str(result.get('post_content','')))
+		return pm
+		
+	def editPost(self,pm):
+		LOG('Saving edited post')
+		result = self.server.save_raw_post(pm.pid,xmlrpclib.Binary(pm.title),xmlrpclib.Binary(pm.message))
+		return result.get('result',False)
+	
+	def canEditPost(self,user):
+		if user == self.user: return True
+		return False
+	
 	def doPrivateMessage(self,to,title,message,callback=None):
 #		user_name 		yes 	To support sending message to multiple recipients, the app constructs an array and insert user_name for each recipient as an element inside the array. 	3
 #		subject 	byte[] 	yes 		3

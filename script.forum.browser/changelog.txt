@@ -4,7 +4,14 @@ TODO:
   Handle nested quotes
   Editing a post
   
-Current Version : 0.9.10
+Current Version : 0.9.11
+
+*** 0.9.11 ***
+
+Fix for xmlrpclib for older python versions
+Minor skin adjustments in message view for links/images overlays
+Fix progress bar not showing on posts view
+Added the ability to edit your own posts
 
 *** 0.9.10 ***
 

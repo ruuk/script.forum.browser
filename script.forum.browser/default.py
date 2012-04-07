@@ -1,6 +1,7 @@
 import urllib2, re, os, sys, time, urlparse, htmlentitydefs
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 import threading
+import forumbrowser
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -21,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.10'
+__version__ = '0.9.11'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -286,38 +287,6 @@ class PageData:
 		if self.pageDisplay: return self.pageDisplay
 		if self.page and self.totalPages:
 			return 'Page %s of %s' % (self.page,self.totalPages)
-
-################################################################################
-# Action
-################################################################################
-class Action:
-	def __init__(self,action=''):
-		self.action = action
-		
-################################################################################
-# PostMessage
-################################################################################
-class PostMessage(Action):
-	def __init__(self,pid='',tid='',fid='',title='',message='',is_pm=False):
-		Action.__init__(self,'CHANGE')
-		self.pid = pid
-		self.tid = tid
-		self.fid = fid
-		self.title = title
-		self.message = message
-		self.quote = ''
-		self.quser = ''
-		self.to = ''
-		self.isPM = is_pm
-		self.error = ''
-		
-	def setQuote(self,user,quote):
-		self.quser = MC.tagFilter.sub('',user)
-		self.quote = quote
-		
-	def setMessage(self,title,message):
-		self.title = title
-		self.message = message
 		
 ######################################################################################
 # Forum Browser API
@@ -546,7 +515,6 @@ class ForumBrowser:
 		html = MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = self.getLogo(html)
-		print logo
 		pm_counts = self.getPMCounts(html)
 		callback(100,__language__(30052))
 		if donecallback: donecallback(forums,logo,pm_counts)
@@ -914,6 +882,12 @@ class ForumBrowser:
 	
 	def getQuoteFormat(self):
 		return None
+	
+	def getPostForEdit(self,pid,callback=None): return None
+		
+	def editPost(self,pm,callback=None): return None
+	
+	def canEditPost(self,user): return False
 
 ######################################################################################
 # Base Window Classes
@@ -1101,7 +1075,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
-		self.getControl(310).setVisible(True)
+		#self.getControl(310).setVisible(True)
 	
 	def setProgress(self,pct,message=''):
 		if pct<0:
@@ -1114,7 +1088,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 		return True
 		
 	def endProgress(self):
-		self.getControl(310).setVisible(False)
+		#self.getControl(310).setVisible(False)
 		self.getControl(104).setLabel(self._progMessageSave)
 	
 class PageWindow(BaseWindow):
@@ -1261,6 +1235,8 @@ class PostDialog(BaseWindow):
 					self.addQuote(line)
 			else:
 				for line in self.post.quote.split('\n'): self.addQuote(line)
+		elif self.post.isEdit:
+			for line in self.post.message.split('\n'): self.addQuote(line)
 				
 			self.updatePreview()
 		self.setTheme()
@@ -1322,12 +1298,12 @@ class PostDialog(BaseWindow):
 		self.post.setMessage(self.title,message)
 		self.posted = True
 		try:
-			if not self.post.isPM:
+			if self.post.isPM:
+				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
+			else:
 				if not FB.post(self.post,callback=self.dialogCallback):
 					self.posted = False
 					xbmcgui.Dialog().ok(__language__(30050),__language__(30227),self.post.error or '?')
-			else:
-				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
 		except:
 			self.prog.close()
 			self.posted = False
@@ -1843,7 +1819,7 @@ class MessageWindow(BaseWindow):
 		if link.isImage():
 			self.showImage(link.url)
 		elif link.isPost() or link.isThread():
-			self.action = PostMessage(tid=link.tid,pid=link.pid)
+			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
 			self.close()
 		else:
 			try:
@@ -1886,7 +1862,7 @@ class MessageWindow(BaseWindow):
 		elif idx == delete: self.deletePost()
 			
 	def deletePost(self):
-		post = PostMessage(self.post.pid,self.post.tid,self.post.fid)
+		post = forumbrowser.PostMessage(self.post.pid,self.post.tid,self.post.fid)
 		if not self.post.pid: return
 		prog = xbmcgui.DialogProgress()
 		prog.create(__language__(30149),__language__(30150))
@@ -1903,13 +1879,16 @@ class MessageWindow(BaseWindow):
 	def openPostDialog(self,quote=False):
 		openPostDialog(quote and self.post or None)
 
-def openPostDialog(post=None,pid='',tid='',fid=''):
-	pm = PostMessage(pid,tid,fid,is_pm=(tid == 'private_messages'))
-	if post: pm.setQuote(post.userName,post.messageAsQuote())
-	if tid == 'private_messages':
-		to = doKeyboard('Enter Receipient(s)')
-		if not to: return
-		pm.to = to
+def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
+	if editPM:
+		pm = editPM
+	else:
+		pm = forumbrowser.PostMessage(pid,tid,fid,is_pm=(tid == 'private_messages'))
+		if post: pm.setQuote(post.userName,post.messageAsQuote())
+		if tid == 'private_messages':
+			to = doKeyboard('Enter Receipient(s)')
+			if not to: return
+			pm.to = to
 	if __addon__.getSetting('use_text_editor') == 'true':
 		w = TextPostDialog(	"script-forumbrowser-post-text.xml" ,__addon__.getAddonInfo('path'),THEME,post=pm)
 	else:
@@ -2151,6 +2130,9 @@ class RepliesWindow(PageWindow):
 		if FB.canDelete(item.getLabel()):
 			delete = len(options)
 			options.append(__language__(30141))
+		if FB.canEditPost(item.getLabel()):
+			edit = len(options)
+			options.append(__language__(30232))
 		idx = xbmcgui.Dialog().select(__language__(30051),options)
 		if idx == 0:
 			self.stopThread()
@@ -2158,6 +2140,10 @@ class RepliesWindow(PageWindow):
 		elif idx == 1:
 			self.stopThread()
 			self.fillRepliesList(self.pageData.getPageNumber())
+		elif idx == edit:
+			pm = FB.getPostForEdit(post.postId)
+			if openPostDialog(editPM=pm):
+				self.fillRepliesList(self.pageData.getPageNumber())
 		elif idx == delete:
 			self.stopThread()
 			self.deletePost()
@@ -2174,7 +2160,7 @@ class RepliesWindow(PageWindow):
 			if self.tid == 'private_messages':
 				FB.deletePrivateMessageViaIndex(pid[2:])
 			else:
-				post = PostMessage(pid,self.tid,self.fid)
+				post = forumbrowser.PostMessage(pid,self.tid,self.fid)
 				post = FB.deletePost(post)
 				if post.error:
 					xbmcgui.Dialog().ok('Failed','Failed to delete post:',post.error)

@@ -201,7 +201,7 @@
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+					<texturenofocus border="20">forum-browser-white-trans-boxr.png</texturenofocus>
 				</control>
 			</control>
 			
