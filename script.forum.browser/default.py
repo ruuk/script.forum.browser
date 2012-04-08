@@ -1865,6 +1865,7 @@ class MessageWindow(BaseWindow):
 		elif idx == delete: self.deletePost()
 		elif idx == edit:
 			pm = FB.getPostForEdit(self.post.postId)
+			pm.tid = self.post.tid
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH')
 				self.close()
@@ -2150,6 +2151,7 @@ class RepliesWindow(PageWindow):
 			self.fillRepliesList(self.pageData.getPageNumber())
 		elif idx == edit:
 			pm = FB.getPostForEdit(post.postId)
+			pm.tid = self.tid
 			if openPostDialog(editPM=pm):
 				self.fillRepliesList(self.pageData.getPageNumber())
 		elif idx == delete:

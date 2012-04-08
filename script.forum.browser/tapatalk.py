@@ -7,6 +7,12 @@ import iso8601, forumbrowser
 DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
+__addon__ = sys.modules["__main__"].__addon__
+
+def checkVersion(version1, version2):
+	def normalize(v):
+		return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+	return cmp(normalize(version1), normalize(version2))
 
 def testForum(forum):
 	if forum.startswith('http://'):
@@ -554,12 +560,16 @@ class TapatalkForumBrowser:
 		try:
 			self.forumConfig = self.server.get_config()
 			LOG('Forum Type: ' + self.getForumType())
+			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
 		except:
 			ERROR('Failed to get forum config')
 		
 	def getForumType(self):
 		return self.forumConfig.get('version','')[:2]
+	
+	def getForumPluginVersion(self):
+		return self.forumConfig.get('version','').split('_')[-1]
 	
 	def getQuoteFormat(self):
 		forumType = self.getForumType()
@@ -828,7 +838,7 @@ class TapatalkForumBrowser:
 			return self.editPost(post)
 		LOG('Posting reply')
 		if not callback: callback = self.fakeCallback
-		if not self.checkLogin(callback=callback): return False		
+		if not self.checkLogin(callback=callback): return False
 		callback(40,self.lang(30106))
 		result = self.server.reply_post(post.fid,post.tid,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
 		callback(100,self.lang(30052))
@@ -847,11 +857,36 @@ class TapatalkForumBrowser:
 		pm.setMessage(str(result.get('post_title','')),str(result.get('post_content','')))
 		return pm
 		
+	def checkMyBBEditFix(self,pm):
+		if self.getForumType() == 'mb' and checkVersion('2.0.0',self.getForumPluginVersion()) > -1:
+			if __addon__.getSetting('do_mybb_edit_bug_fix'):
+				if pm.tid:
+					try:
+						sub = self.server.get_subscribed_topic()
+					except:
+						ERROR('Error getting subscribed threads in checkMyBBEditFix()')
+						return False
+					for s in sub.get('topics',[]):
+						if s.get('topic_id') == pm.tid:
+							return True
+		return False
+	
 	def editPost(self,pm):
 		LOG('Saving edited post')
+		fix = self.checkMyBBEditFix(pm)
 		result = self.server.save_raw_post(pm.pid,xmlrpclib.Binary(pm.title),xmlrpclib.Binary(pm.message))
+		if fix:
+			LOG('Using MyBB edit post bug fix')
+			self.subscribeToThread(pm.tid)
 		return result.get('result',False)
 	
+	def subscribeToThread(self,tid):
+		result = self.server.subscribe_topic(str(tid))
+		if not result.get('result',False):
+			LOG('Failed to subscribe to thread: ' + str(result.get('result_text')))
+			return False
+		return True
+		
 	def canEditPost(self,user):
 		if user == self.user: return True
 		return False

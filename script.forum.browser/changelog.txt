@@ -3,8 +3,14 @@ Forum Browser Changelog
 TODO:
   Handle nested quotes
   Editing a post
-  
-Current Version : 0.9.12
+
+Current Version : 0.9.13
+
+*** 0.9.13 ***
+
+Added an option in settings (enabled by default) to account for the bug in the Tapatalk MyBB plugin which unsubscribes you
+from the thread when you edit a post. The fix just checks the plugin version, checks whether you are subscribed to the thread,
+and if you are then it re-subscribes you to the thread after saving the post.
 
 *** 0.9.12 ***
 
