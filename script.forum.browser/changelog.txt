@@ -4,7 +4,12 @@ TODO:
   Handle nested quotes
   Editing a post
   
-Current Version : 0.9.11
+Current Version : 0.9.12
+
+*** 0.9.12 ***
+
+Man I hope this is the final fix for the xmlrpclib python version conflicts :)
+Added 'Edit' to message view context menu 
 
 *** 0.9.11 ***
 

@@ -125,6 +125,7 @@ class CookieTransport(xmlrpclib.Transport):
 		xmlrpclib.Transport.__init__(self)
 		self._loggedIn = False
 		self.jar = cookielib.CookieJar()
+		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2
 
 	def loggedIn(self):
 		return self._loggedIn
@@ -193,6 +194,23 @@ class CookieTransport(xmlrpclib.Transport):
 			response.status, response.reason,
 			response.msg,
 			)
+	
+	def send_content(self, connection, request_body):
+		connection.putheader("Content-Type", "text/xml")
+
+		#optionally encode the request
+		if (self.encode_threshold is not None and
+			self.encode_threshold < len(request_body) and
+			gzip):
+			connection.putheader("Content-Encoding", "gzip")
+			request_body = gzip_encode(request_body)
+
+		connection.putheader("Content-Length", str(len(request_body)))
+		if self.endheadersTakesOneArg:
+			connection.endheaders(request_body)
+		else:
+			connection.endheaders()
+			if request_body: connection.send(request_body)
 
 class PMLink:
 	def __init__(self,match=None):

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.11'
+__version__ = '0.9.12'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1857,9 +1857,17 @@ class MessageWindow(BaseWindow):
 		if FB.canDelete(self.post.cleanUserName()):
 			delete = len(options)
 			options.append(__language__(30141))
+		if FB.canEditPost(self.post.cleanUserName()):
+			edit = len(options)
+			options.append(__language__(30232))
 		idx = xbmcgui.Dialog().select(__language__(30051),options)
 		if idx == 0: self.openPostDialog(quote=True)
 		elif idx == delete: self.deletePost()
+		elif idx == edit:
+			pm = FB.getPostForEdit(self.post.postId)
+			if openPostDialog(editPM=pm):
+				self.action = forumbrowser.Action('REFRESH')
+				self.close()
 			
 	def deletePost(self):
 		post = forumbrowser.PostMessage(self.post.pid,self.post.tid,self.post.fid)
@@ -1873,7 +1881,7 @@ class MessageWindow(BaseWindow):
 			prog.close()
 			raise
 		prog.close()
-		self.action = Action('REFRESH')
+		self.action = forumbrowser.Action('REFRESH')
 		self.close()
 		
 	def openPostDialog(self,quote=False):
