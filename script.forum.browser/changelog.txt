@@ -15,6 +15,7 @@ Added password hashing for forums that require or support it
 Removed delete option from post view context menu when not users post
 Added keyboard mod options in settings which displays a more suitable keyboard when editing posts
 Improved some post display handling
+Added 'Enable SSL' option in settings which causes Forum Browser to connect with https
 
 *** 0.9.12 ***
 

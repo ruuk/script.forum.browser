@@ -557,7 +557,11 @@ class TapatalkForumBrowser:
 			self._url = 'http://%s/mobiquo/mobiquo.php' % forum
 		self.forum = forum
 		self.transport = CookieTransport()
-		self.server = xmlrpclib.ServerProxy(self._url,transport=self.transport)
+		url = self._url
+		if __addon__.getSetting('enable_ssl'):
+			LOG('Enabling SSL')
+			url = url.replace('http://','https://')
+		self.server = xmlrpclib.ServerProxy(url,transport=self.transport)
 		self.getForumConfig()
 		return True
 			
