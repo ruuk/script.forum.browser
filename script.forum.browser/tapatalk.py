@@ -338,22 +338,27 @@ class ForumPost:
 	def getShortMessage(self):
 		return self.getMessage(True)
 	
-	def getMessage(self,skip=False):
+	def getMessage(self,skip=False,raw=False):
 		if self.isShort and not skip:
 			m = self.FB.server.get_message(self.getID(),self.boxid)
 			self.message = str(m.get('text_body',self.message))
 			self.isShort = False
+		elif raw:
+			m = self.FB.server.get_raw_post(self.getID())
+			self.message = str(m.get('post_content',self.message))
 		return self.message + self.signature
 	
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage())
 		
-	def messageAsDisplay(self,short=False):
+	def messageAsDisplay(self,short=False,raw=False):
 		if short:
 			message = self.getShortMessage()
 		else:
-			message = self.getMessage()
+			message = self.getMessage(raw=raw)
 		message = message.replace('\n','[CR]')
+		message = re.sub('\[(/?)b\]',r'[\1B]',message)
+		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		if self.isPM:
 			return self.MC.parseCodes(message)
 		else:
@@ -562,6 +567,7 @@ class TapatalkForumBrowser:
 			LOG('Forum Type: ' + self.getForumType())
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
+			if DEBUG: print self.forumConfig
 		except:
 			ERROR('Failed to get forum config')
 		
@@ -573,7 +579,7 @@ class TapatalkForumBrowser:
 	
 	def getQuoteFormat(self):
 		forumType = self.getForumType()
-		return self.quoteFormats.get(forumType)
+		return self.quoteFormats.get(forumType,'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)')
 	
 	def getRegURL(self):
 		sub = self.forumConfig.get('reg_url','')
@@ -585,9 +591,23 @@ class TapatalkForumBrowser:
 		self.password = password
 		self.alwaysLogin = always
 			
+	def getPassword(self):
+		if self.forumConfig.get('support_md5') == '1':
+			import hashlib
+			if self.getForumType() == 'sm':
+				LOG('Sending sha1 hashed password')
+				m = hashlib.new('sha1')
+				m.update(self.password)
+				return m.hexdigest()
+			else:
+				LOG('Sending md5 hashed password')
+				m = hashlib.md5(self.password)
+				return m.hexdigest()
+		return self.password
+			
 	def login(self):
 		LOG('LOGGING IN')
-		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.password))
+		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.getPassword()))
 		if not result.get('result'):
 			LOG('LOGIN FAILED: ' + str(result.get('result_text','')))
 			self._loggedIn = False
@@ -920,5 +940,6 @@ class TapatalkForumBrowser:
 		return post
 			
 	def canDelete(self,user):
-		return True
+		if user == self.user: return True
+		return False
 	

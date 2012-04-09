@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.12'
+__version__ = '0.9.13'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -172,7 +172,7 @@ class ForumPost:
 	def messageAsText(self):
 		return messageToText(self.getMessage())
 		
-	def messageAsDisplay(self,short=False):
+	def messageAsDisplay(self,short=False,raw=False):
 		if self.isPM:
 			return MC.parseCodes(self.getMessage())
 		else:
@@ -1327,6 +1327,9 @@ class PostDialog(BaseWindow):
 		disp = self.display_base % self.getOutput()
 		qf = FB.getQuoteFormat()
 		if qf: disp = re.sub(qf,self.processQuote,disp)
+		disp = self.parseCodes(disp).replace('\n','[CR]')
+		disp = re.sub('\[(/?)b\]',r'[\1B]',disp)
+		disp = re.sub('\[(/?)i\]',r'[\1I]',disp)
 		self.getControl(122).reset()
 		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
 
@@ -1373,16 +1376,19 @@ class LinePostDialog(PostDialog):
 		
 	def displayLine(self,line):
 		return line	.replace('\n',' ')\
-					.replace('[/B]','[/B ]')\
-					.replace('[/I]','[/I ]')\
-					.replace('[/B]','[/B ]')\
-					.replace('[/COLOR]','[/COLOR ]')
-		
+					.replace('[/B]','[/b]')\
+					.replace('[/I]','[/i]')\
+					.replace('[/COLOR]','[/color]')
+	
+	def doKeyboard(self,caption,text):
+		if __addon__.getSetting('use_mod_keyboard') == 'true':
+			return doModKeyboard(caption,text)
+		else:
+			return doKeyboard(caption,text)
+			
 	def addLineSingle(self,before=False,update=True):
-		keyboard = xbmc.Keyboard('',__language__(30123))
-		keyboard.doModal()
-		if not keyboard.isConfirmed(): return False
-		line = keyboard.getText()
+		line = self.doKeyboard(__language__(30123),'')
+		if line == None: return False
 		if before:
 			clist = self.getControl(120)
 			idx = clist.getSelectedPosition()
@@ -1416,10 +1422,8 @@ class LinePostDialog(PostDialog):
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return
-		keyboard = xbmc.Keyboard(item.getProperty('text'),__language__(30124))
-		keyboard.doModal()
-		if not keyboard.isConfirmed(): return
-		line = keyboard.getText()
+		line = self.doKeyboard(__language__(30124),item.getLabel())
+		if line == None: return False
 		item.setProperty('text',line)
 		item.setLabel(self.displayLine(line))
 		self.updatePreview()
@@ -1737,7 +1741,7 @@ class MessageWindow(BaseWindow):
 #				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 #		else:
 #			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-		text = '%s[CR] [CR]' % self.post.messageAsDisplay()
+		text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
@@ -1854,6 +1858,7 @@ class MessageWindow(BaseWindow):
 	def doMenu(self):
 		options = [__language__(30134)]
 		delete = None
+		edit = None
 		if FB.canDelete(self.post.cleanUserName()):
 			delete = len(options)
 			options.append(__language__(30141))
@@ -2000,6 +2005,7 @@ class RepliesWindow(PageWindow):
 		
 	def doFillRepliesList(self,replies,pageData):
 		if not replies:
+			self.setFocusId(201)
 			if replies == None:
 				LOG('GET REPLIES ERROR')
 				xbmcgui.Dialog().ok(__language__(30050),__language__(30131),__language__(30053))
@@ -2134,6 +2140,7 @@ class RepliesWindow(PageWindow):
 	def doMenu(self):
 		options = [__language__(30134),__language__(30054)]
 		delete = None
+		edit = None
 		item = self.getControl(120).getSelectedItem()
 		post = self.posts.get(item.getProperty('post'))
 		if FB.canDelete(item.getLabel()):
@@ -2626,6 +2633,7 @@ class MessageConverter:
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I]'
 		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
+		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		
 		#static filters
 		self.imageFilter = re.compile('<img[^<>]+?src="(?P<url>http://.+?)"[^<>]+?/>')
@@ -2657,6 +2665,10 @@ class MessageConverter:
 		self.imageFilter = f and re.compile(f) or self.imageFilter
 		f = FB.filters.get('link')
 		self.linkFilter = f and re.compile(f) or self.linkFilter
+		f = FB.filters.get('link2')
+		self.linkFilter2 = f and re.compile(f) or self.linkFilter2
+		f = FB.getQuoteFormat()
+		self.quoteFilter2 = f and re.compile(f) or None
 		
 		#dynamic replacements
 		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR][CR]_________________________[CR]','utf8')
@@ -2672,6 +2684,7 @@ class MessageConverter:
 		html = self.lineFilter.sub('',html)
 		
 		if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
+		if self.quoteFilter2: html = self.quoteFilter2.sub(self.quoteConvert,html)
 		if self.codeFilter: html = self.codeFilter.sub(self.codeReplace,html)
 		if self.phpFilter: html = self.phpFilter.sub(self.phpReplace,html)
 		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
@@ -2680,6 +2693,7 @@ class MessageConverter:
 		self.imageCount = 0
 		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.linkFilter.sub(self.linkReplace,html)
+		html = self.linkFilter2.sub(self.link2Replace,html)
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
 		html = self.colorFilter.sub(self.convertColor,html)
@@ -2792,7 +2806,7 @@ class MessageConverter:
 		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',MC.htmlReplace,text)
 		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',MC.quoteImageReplace,text)
 		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',MC.linkReplace,text)
-		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',MC.linkReplace,text)
+		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',MC.link2Replace,text)
 		return text
 		
 ######################################################################################
@@ -2840,7 +2854,7 @@ def doKeyboard(prompt,default='',hidden=False):
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
 	keyboard.doModal()
-	if not keyboard.isConfirmed(): return ''
+	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
 
 def getForumPath(forumID):
@@ -3281,6 +3295,79 @@ def getForumBrowser(forum=None):
 		FB = ForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 	return True
 	
+def copyKeyboardModImages(skinPath):
+	dst = os.path.join(skinPath,'media','forum-browser-keyboard')
+	if os.path.exists(dst): return
+	os.makedirs(dst)
+	src = os.path.join(__addon__.getAddonInfo('path'),'keyboard','images')
+	import shutil
+	for f in os.listdir(src):
+		s = os.path.join(src,f)
+		d = os.path.join(dst,f)
+		if not os.path.exists(d): shutil.copy(s,d)
+
+def copyTree(source,target):
+	import shutil
+	shutil.copytree(source, target)
+		
+def doModKeyboard(prompt,default='',hidden=False):
+	restart = False
+	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
+	skinPath = xbmc.translatePath('special://skin')
+	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
+	currentSkin = os.path.basename(skinPath)
+	localSkinPath = os.path.join(localAddonsPath,currentSkin)
+	
+	if not os.path.exists(localSkinPath):
+		yesno = xbmcgui.Dialog().yesno('Keyboard Mod Install','Skin not installed in user path.','Click Yes to copy,','click No to Abort')
+		if not yesno: return
+		dialog = xbmcgui.DialogProgress()
+		dialog.create('Copying Files','Please wait...')
+		try:
+			
+			copyTree(skinPath,localSkinPath)
+		except:
+			err = ERROR('Failed to copy skin to user directory')
+			xbmcgui.Dialog().ok('Error',err,'Failed to copy files, aborting.')
+			return
+		finally:
+			dialog.close()
+		restart = True
+		xbmcgui.Dialog().ok('Success','Files copied.','XBMC needs to be restarted','for mod to take effect')
+	skinPath = localSkinPath
+	
+	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
+	if os.path.exists(dialogPath):
+		backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.SSbackup')
+	else:
+		dialogPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml')
+		backupPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml.SSbackup')
+	
+	sourcePath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','DialogKeyboard.xml')
+	
+	if DEBUG:
+		LOG('Local Addons Path: %s' % localAddonsPath)
+		LOG('Current skin: %s' % currentSkin)
+		LOG('Skin path: %s' % skinPath)
+		LOG('Target path: %s' % dialogPath)
+		LOG('Source path: %s' % sourcePath)
+	
+	copyKeyboardModImages(skinPath)
+	
+	if not os.path.exists(backupPath):
+		if DEBUG: LOG('Creating backup of original skin file: ' + backupPath)
+		open(backupPath,'w').write(open(dialogPath,'r').read())	
+	os.remove(dialogPath)
+	
+	open(dialogPath,'w').write(open(sourcePath,'r').read())
+	ret = doKeyboard(prompt,default,hidden)
+	
+	os.remove(dialogPath)
+	open(dialogPath,'w').write(open(backupPath,'r').read())
+	#Remove added files
+	os.remove(backupPath)
+	return ret
+			
 ######################################################################################
 # Startup
 ######################################################################################

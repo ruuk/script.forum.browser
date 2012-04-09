@@ -11,6 +11,10 @@ Current Version : 0.9.13
 Added an option in settings (enabled by default) to account for the bug in the Tapatalk MyBB plugin which unsubscribes you
 from the thread when you edit a post. The fix just checks the plugin version, checks whether you are subscribed to the thread,
 and if you are then it re-subscribes you to the thread after saving the post.
+Added password hashing for forums that require or support it
+Removed delete option from post view context menu when not users post
+Added keyboard mod options in settings which displays a more suitable keyboard when editing posts
+Improved some post display handling
 
 *** 0.9.12 ***
 
@@ -28,7 +32,7 @@ Added the ability to edit your own posts
 
 Fix in xmlrpc Transport for older python versions
 
-*** 0.9.10 ***
+*** 0.9.9 ***
 
 Changed session cookie handling so it will hopefully work across python versions
 Added post count, activity and status to posts
