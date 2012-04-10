@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.13'
+__version__ = '0.9.14'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -478,6 +478,7 @@ class ForumBrowser:
 		
 	def getPMCounts(self,html=''):
 		if not html: html = MC.lineFilter.sub('',self.lastHTML)
+		if not html: return None
 		pm_counts = None
 		ct = 0
 		while not pm_counts:
@@ -2525,6 +2526,7 @@ class ForumsWindow(BaseWindow):
 			
 	def setPMCounts(self,pm_counts=None):
 		disp = ''
+		if not pm_counts: pm_counts = FB.getPMCounts()
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
 		self.getControl(203).setLabel(__language__(3009) + disp)
 		self.setLoggedIn()
@@ -2612,10 +2614,15 @@ class ForumsWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
+		self.getControl(150).setLabel(FB.loginError)
 		
 	def openSettings(self):
 		mode = __addon__.getSetting('color_mode')
+		oldLogin = self.getUsername() + self.getPassword()
 		doSettings()
+		if not oldLogin == self.getUsername() + self.getPassword():
+			self.resetForum(False)
+			self.setPMCounts()
 		self.setLoggedIn()
 		self.resetForum(False)
 		if mode !=  __addon__.getSetting('color_mode'): self.fillForumList()
@@ -2666,7 +2673,7 @@ class MessageConverter:
 		f = FB.filters.get('link')
 		self.linkFilter = f and re.compile(f) or self.linkFilter
 		f = FB.filters.get('link2')
-		self.linkFilter2 = f and re.compile(f) or self.linkFilter2
+		self.linkFilter2 = f and re.compile(f) or None
 		f = FB.getQuoteFormat()
 		self.quoteFilter2 = f and re.compile(f) or None
 		
@@ -2693,7 +2700,7 @@ class MessageConverter:
 		self.imageCount = 0
 		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.linkFilter.sub(self.linkReplace,html)
-		html = self.linkFilter2.sub(self.link2Replace,html)
+		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
 		html = self.colorFilter.sub(self.convertColor,html)

@@ -1,5 +1,5 @@
 #Forum browser common
-
+import re
 
 ################################################################################
 # Action
@@ -25,9 +25,10 @@ class PostMessage(Action):
 		self.isPM = is_pm
 		self.isEdit = isEdit
 		self.error = ''
+		self.tagFilter = re.compile('<[^<>]+?>',re.S)
 		
 	def setQuote(self,user,quote):
-		self.quser = MC.tagFilter.sub('',user)
+		self.quser = self.tagFilter.sub('',user)
 		self.quote = quote
 		
 	def setMessage(self,title,message):

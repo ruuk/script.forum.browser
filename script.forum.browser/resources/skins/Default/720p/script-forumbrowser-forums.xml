@@ -81,7 +81,7 @@
 			</control>
 			<control type="image" id="300">
 				<posx>1010</posx>
-				<posy>30</posy>
+				<posy>35</posy>
 				<width>130</width>
 				<height>60</height>
 				<texture>-</texture>
@@ -89,7 +89,7 @@
 			<control type="image" id="310">
 				<description>Progress</description>
 				<posx>1010</posx>
-				<posy>30</posy>
+				<posy>35</posy>
 				<width>130</width>
 				<height>60</height>
 				<colordiffuse>FF555555</colordiffuse>
@@ -99,7 +99,7 @@
 			<control type="button" id="105">
 				<description>Stop Button</description>
 				<posx>1010</posx>
-				<posy>30</posy>
+				<posy>35</posy>
 				<width>130</width>
 				<height>60</height>
 				<onleft>105</onleft>
@@ -261,6 +261,17 @@
 				<onclick>PreviousMenu</onclick>
 			</control>
 			
+			<control type="label" id="150">
+				<description>Login Error</description>
+				<posx>1200</posx>
+				<posy>19</posy>
+				<width>400</width>
+				<height>10</height>
+				<font>font10</font>
+				<textcolor>black</textcolor>
+				<aligny>top</aligny>
+				<align>right</align>
+			</control>
 			<control type="image" id="111">
 				<description>Logged In</description>
 				<posx>1205</posx>

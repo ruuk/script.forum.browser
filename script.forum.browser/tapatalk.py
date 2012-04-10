@@ -463,6 +463,7 @@ class TapatalkForumBrowser:
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self._loggedIn = False
+		self.loginError = ''
 		
 	def getForumID(self):
 		return self.prefix + self.forum
@@ -613,13 +614,16 @@ class TapatalkForumBrowser:
 		LOG('LOGGING IN')
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.getPassword()))
 		if not result.get('result'):
-			LOG('LOGIN FAILED: ' + str(result.get('result_text','')))
+			error = str(result.get('result_text',''))
+			LOG('LOGIN FAILED: ' + error)
+			self.loginError = error
 			self._loggedIn = False
 		else:
 			if DEBUG:
 				LOG('LOGGED IN: ' + str(result.get('result_text','')))
 			else:
 				LOG ('LOGGED IN')
+			self.loginError = ''
 			self._loggedIn = True
 			return True
 		return False
@@ -635,6 +639,7 @@ class TapatalkForumBrowser:
 		return True
 		
 	def getPMCounts(self,callback_percent=5):
+		if not self.hasPM(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
 		result = self.server.get_box_info()
 		if not result.get('result'):
