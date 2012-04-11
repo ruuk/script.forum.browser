@@ -377,10 +377,15 @@ class ForumPost:
 		
 	def linkURLs(self):
 		return self.MC.linkFilter.finditer(self.getMessage(),re.S)
+	
+	def link2URLs(self):
+		if not self.MC.linkFilter2: return []
+		return self.MC.linkFilter2.finditer(self.getMessage(),re.S)
 		
 	def links(self):
 		links = []
 		for m in self.linkURLs(): links.append(PMLink(m))
+		for m in self.link2URLs(): links.append(PMLink(m))
 		return links
 		
 	def makeAvatarURL(self):
@@ -443,7 +448,7 @@ class PageData:
 ######################################################################################
 # Forum Browser API for TapaTalk
 ######################################################################################
-class TapatalkForumBrowser:
+class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
 						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
 						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)'
@@ -451,6 +456,7 @@ class TapatalkForumBrowser:
 	
 	PageData = PageData
 	def __init__(self,forum,always_login=False):
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
 		self.forum = forum[3:]
 		self.prefix = 'TT.'
 		self._url = ''
@@ -462,7 +468,6 @@ class TapatalkForumBrowser:
 		self.lang = sys.modules["__main__"].__language__
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
-		self._loggedIn = False
 		self.loginError = ''
 		
 	def getForumID(self):
@@ -471,8 +476,6 @@ class TapatalkForumBrowser:
 	def isLoggedIn(self):
 		#return self._loggedIn
 		return self.transport.loggedIn()
-	
-	def resetBrowser(self): pass
 	
 	def loadForumFile(self):
 		self.urls = {}

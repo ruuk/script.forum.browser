@@ -34,3 +34,22 @@ class PostMessage(Action):
 	def setMessage(self,title,message):
 		self.title = title
 		self.message = message
+		
+######################################################################################
+# Forum Browser API
+######################################################################################
+class ForumBrowser:
+	def __init__(self,forum,always_login=False):
+		self.forum = forum
+		self.prefix = ''
+		self._url = ''
+		self.transport = None
+		self.server = None
+		self.forumConfig = {}
+		self.needsLogin = True
+		self.alwaysLogin = always_login
+		self._loggedIn = False
+		self.loginError = ''
+		
+	def resetBrowser(self): pass
+		

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.14'
+__version__ = '0.9.15'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -291,9 +291,10 @@ class PageData:
 ######################################################################################
 # Forum Browser API
 ######################################################################################
-class ForumBrowser:
+class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	PageData = PageData
 	def __init__(self,forum,always_login=False):
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
 		self.forum = forum
 		self._url = ''
 		self.browser = None
@@ -303,13 +304,12 @@ class ForumBrowser:
 		self.lastHTML = ''
 		
 		self.reloadForumData(forum)
-		self._logggedIn = False
 		
 	def getForumID(self):
 		return self.forum
 	
 	def isLoggedIn(self):
-		return self._logggedIn
+		return self._loggedIn
 	
 	def resetBrowser(self):
 		self.browser = None
@@ -424,7 +424,9 @@ class ForumBrowser:
 		self.browser[self.forms['login_pass']] = self.password
 		response = self.browser.submit()
 		html = response.read()
-		if not self.forms.get('login_action','@%+#') in html: return True
+		if not self.forms.get('login_action','@%+#') in html:
+			self._loggedIn = True
+			return True
 		LOG('FAILED TO LOGIN')
 		return False
 		
@@ -435,10 +437,10 @@ class ForumBrowser:
 			self.needsLogin = False
 			if not callback(5,__language__(30100)): return False
 			if not self.login():
-				self._logggedIn = False
+				self._loggedIn = False
 				return False
 			else:
-				self._logggedIn = True
+				self._loggedIn = True
 		
 		return True
 		
@@ -3299,7 +3301,7 @@ def getForumBrowser(forum=None):
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
 			return False
 	else:
-		FB = ForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		FB = ScraperForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 	return True
 	
 def copyKeyboardModImages(skinPath):
