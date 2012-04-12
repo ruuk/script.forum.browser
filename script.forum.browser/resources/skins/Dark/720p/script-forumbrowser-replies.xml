@@ -14,7 +14,7 @@
 				<posy>0</posy>
 				<width>1280</width>
 				<height>720</height>
-				<texture border="40">forum-browser-panel-full.png</texture>
+				<texture border="40">forum-browser-dark-panel-full.png</texture>
 				<colordiffuse>FF222222</colordiffuse>
 			</control>
 
@@ -24,15 +24,16 @@
 				<posy>4</posy>
 				<width>1260</width>
 				<height>712</height>
-				<texture border="20">forum-browser-white-boxr.png</texture>
-				<colordiffuse>FF888888</colordiffuse>
+				<texture border="20">forum-browser-dark-grey-boxr.png</texture>
+				<colordiffuse>FFDDDDDD</colordiffuse>
 			</control>
 			<control type="image">
 				<posx>10</posx>
 				<posy>4</posy>
 				<width>1260</width>
 				<height>85</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<texture border="20">forum-browser-dark-white-box.png</texture>
+				<colordiffuse>FF888888</colordiffuse>
 			</control>
 			<control type="image" id="251">
 				<description>Smaller Back</description>
@@ -40,8 +41,7 @@
 				<posy>84</posy>
 				<width>1260</width>
 				<height>632</height>
-				<texture border="20">forum-browser-white-boxr.png</texture>
-				<colordiffuse>FF555555</colordiffuse>
+				<texture border="20">forum-browser-dark-black-box.png</texture>
 			</control>
 			<control type="label" id="103">
 				<description>textarea</description>
@@ -62,7 +62,7 @@
 				<posy>19</posy>
 				<width>155</width>
 				<height>60</height>
-				<texture border="30">forum-browser-white-box.png</texture>
+				<texture border="30">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="button" id="201">
@@ -80,9 +80,9 @@
 				<align>center</align>
 				<aligny>center</aligny>
 				<label>$LOCALIZE[SCRIPT3002]</label>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-				<textcolor>FF000000</textcolor>
+				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
+				<textcolor>white</textcolor>
 				<focusedcolor>white</focusedcolor>
 			</control>
 
@@ -108,7 +108,7 @@
 					<posy>-5</posy>
 					<width>250</width>
 					<height>80</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="20">forum-browser-dark-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="200">
@@ -124,10 +124,10 @@
 					<visible>true</visible>
 					<font>font12</font>
 					<align>right</align>
-					<textcolor>FF000000</textcolor>
+					<textcolor>white</textcolor>
 					<disabledcolor>20555555</disabledcolor>
-					<texturefocus>forum-browser-left-focus.png</texturefocus>
-					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
+					<texturefocus>forum-browser-dark-left-focus.png</texturefocus>
+					<texturenofocus>forum-browser-dark-left-nofocus.png</texturenofocus>
 				</control>
 				<control type="button" id="202">
 					<description>Next</description>
@@ -142,10 +142,10 @@
 					<visible>true</visible>
 					<font>font12</font>
 					<align>left</align>
-					<textcolor>FF000000</textcolor>
+					<textcolor>white</textcolor>
 					<disabledcolor>20555555</disabledcolor>
-					<texturefocus>forum-browser-right-focus.png</texturefocus>
-					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
+					<texturefocus>forum-browser-dark-right-focus.png</texturefocus>
+					<texturenofocus>forum-browser-dark-right-nofocus.png</texturenofocus>
 				</control>
 				<control type="button" id="105">
 					<description>Page Button</description>
@@ -160,9 +160,9 @@
 					<font>font12</font>
 					<aligny>center</aligny>
 					<align>center</align>
-					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
+					<textcolor>white</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<visible>!Control.IsVisible(106)</visible>
@@ -181,7 +181,7 @@
 					<width>230</width>
 					<height>60</height>
 					<colordiffuse>FF555555</colordiffuse>
-					<texture border="20">forum-browser-grey-boxr.png</texture>
+					<texture border="20">forum-browser-dark-grey-boxr.png</texture>
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="button" id="106">
@@ -200,8 +200,8 @@
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
-					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-trans-boxr.png</texturenofocus>
+					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-dark-white-trans-boxr.png</texturenofocus>
 				</control>
 			</control>
 			
@@ -214,8 +214,8 @@
 					<posy>0</posy>
 					<width>28</width>
 					<height>28</height>
-					<texturefocus>forum-browser-close-button-focus.png</texturefocus>
-					<texturenofocus>forum-browser-close-button.png</texturenofocus>
+					<texturefocus>forum-browser-dark-close-button-focus.png</texturefocus>
+					<texturenofocus>forum-browser-dark-close-button.png</texturenofocus>
 					<visible>system.getbool(input.enablemouse)</visible>
 					<onclick>PreviousMenu</onclick>
 				</control>
@@ -237,7 +237,7 @@
 					<posy>4</posy>
 					<width>20</width>
 					<height>20</height>
-					<texture>forum-browser-logged-in.png</texture>
+					<texture>forum-browser-dark-logged-in.png</texture>
 					<colordiffuse>FF555555</colordiffuse>
 				</control>
 			</control>
@@ -249,7 +249,7 @@
 				<width>1066</width>
 				<height>270</height>
 				<colordiffuse>BB000000</colordiffuse>
-				<texture>forum-browser-text-background.png</texture>
+				<texture>forum-browser-dark-text-background.png</texture>
 				<visible>false</visible>
 			</control>
 		</control>
@@ -276,8 +276,8 @@
 						<posy>0</posy>
 						<width>1235</width>
 						<height>101</height>
-						<texture>forum-browser-panel-full.png</texture>
-						<colordiffuse>77000000</colordiffuse>
+						<texture>forum-browser-dark-panel-full.png</texture>
+						<colordiffuse>44FFFFFF</colordiffuse>
 						<visible>StringCompare(ListItem.Director,me)</visible>
 					</control>
 					<control type="image">
@@ -285,8 +285,8 @@
 						<posy>0</posy>
 						<width>1235</width>
 						<height>101</height>
-						<texture>forum-browser-panel-full.png</texture>
-						<colordiffuse>44000000</colordiffuse>
+						<texture>forum-browser-dark-panel-full.png</texture>
+						<colordiffuse>11FFFFFF</colordiffuse>
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="image">
@@ -294,23 +294,23 @@
 						<posy>100</posy>
 						<width>200</width>
 						<height>1</height>
-						<texture>forum-browser-white-box.png</texture>
-						<colordiffuse>66000000</colordiffuse>
+						<texture>forum-browser-dark-white-box.png</texture>
+						<colordiffuse>66FFFFFF</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>200</posx>
 						<posy>0</posy>
 						<width>1030</width>
 						<height>101</height>
-						<texture border="10">forum-browser-text-background.png</texture>
-						<colordiffuse>FFBBBBBB</colordiffuse>
+						<texture border="10">forum-browser-dark-text-background.png</texture>
+						<colordiffuse>FF202020</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>10</posx>
 						<posy>7</posy>
 						<width>20</width>
 						<height>20</height>
-						<texture>forum-browser-logged-in.png</texture>
+						<texture>forum-browser-dark-logged-in.png</texture>
 						<colordiffuse>FF333333</colordiffuse>
 						<visible>StringCompare(ListItem.Property(online),)</visible>
 					</control>
@@ -319,7 +319,7 @@
 						<posy>7</posy>
 						<width>20</width>
 						<height>20</height>
-						<texture>forum-browser-logged-in.png</texture>
+						<texture>forum-browser-dark-logged-in.png</texture>
 						<colordiffuse>FF00FF00</colordiffuse>
 						<visible>StringCompare(ListItem.Property(online),online)</visible>
 					</control>
@@ -362,7 +362,7 @@
 						<posy>68</posy>
 						<width>27</width>
 						<height>27</height>
-						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+						<texture fallback="forum-browser-dark-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 					</control>
@@ -396,8 +396,7 @@
 						<height>80</height>
 						<font>font10</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
-						<selectedcolor>black</selectedcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
@@ -411,8 +410,8 @@
 						<posy>0</posy>
 						<width>1235</width>
 						<height>201</height>
-						<texture>forum-browser-panel-full.png</texture>
-						<colordiffuse>77000000</colordiffuse>
+						<texture>forum-browser-dark-panel-full.png</texture>
+						<colordiffuse>44FFFFFF</colordiffuse>
 						<visible>StringCompare(ListItem.Director,me)</visible>
 					</control>
 					<control type="image">
@@ -420,8 +419,8 @@
 						<posy>0</posy>
 						<width>1235</width>
 						<height>201</height>
-						<texture>forum-browser-panel-full.png</texture>
-						<colordiffuse>44000000</colordiffuse>
+						<texture>forum-browser-dark-panel-full.png</texture>
+						<colordiffuse>11FFFFFF</colordiffuse>
 						<visible>StringCompare(ListItem.Director,)</visible>
 					</control>
 					<control type="image">
@@ -429,15 +428,15 @@
 						<posy>200</posy>
 						<width>200</width>
 						<height>1</height>
-						<texture>forum-browser-white-box.png</texture>
-						<colordiffuse>66000000</colordiffuse>
+						<texture>forum-browser-dark-white-box.png</texture>
+						<colordiffuse>66FFFFFF</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>200</posx>
 						<posy>0</posy>
 						<width>1030</width>
 						<height>200</height>
-						<texture border="10">forum-browser-text-background-border.png</texture>
+						<texture border="10">forum-browser-dark-text-background-border.png</texture>
 						<visible>true</visible>
 					</control>
 					<control type="image">
@@ -445,7 +444,7 @@
 						<posy>147</posy>
 						<width>60</width>
 						<height>25</height>
-						<texture>forum-browser-triangle-outline.png</texture>
+						<texture>forum-browser-dark-triangle-outline.png</texture>
 						<visible>true</visible>
 					</control>
 					<control type="image">
@@ -453,23 +452,23 @@
 						<posy>147</posy>
 						<width>60</width>
 						<height>25</height>
-						<texture>forum-browser-triangle.png</texture>
-						<colordiffuse>FFFFFFFF</colordiffuse>
+						<texture>forum-browser-dark-triangle.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>200</posx>
 						<posy>0</posy>
 						<width>1030</width>
 						<height>200</height>
-						<texture border="10">forum-browser-text-background.png</texture>
-						<colordiffuse>FFFFFFFF</colordiffuse>
+						<texture border="10">forum-browser-dark-text-background.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>10</posx>
 						<posy>7</posy>
 						<width>20</width>
 						<height>20</height>
-						<texture>forum-browser-logged-in.png</texture>
+						<texture>forum-browser-dark-logged-in.png</texture>
 						<colordiffuse>FF333333</colordiffuse>
 						<visible>StringCompare(ListItem.Property(online),)</visible>
 					</control>
@@ -478,7 +477,7 @@
 						<posy>7</posy>
 						<width>20</width>
 						<height>20</height>
-						<texture>forum-browser-logged-in.png</texture>
+						<texture>forum-browser-dark-logged-in.png</texture>
 						<colordiffuse>FF00FF00</colordiffuse>
 						<visible>StringCompare(ListItem.Property(online),online)</visible>
 					</control>
@@ -531,7 +530,7 @@
 						<posy>85</posy>
 						<width>108</width>
 						<height>108</height>
-						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+						<texture fallback="forum-browser-dark-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 					</control>
@@ -553,7 +552,7 @@
 						<height>180</height>
 						<font>font10</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
@@ -570,8 +569,8 @@
 					<width>4</width>
 					<height>600</height>
 					<texturesliderbackground>-</texturesliderbackground>
-					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
-					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
+					<texturesliderbar border="1">forum-browser-dark-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus border="1">forum-browser-dark-panel-full.png</texturesliderbarfocus>
 					<textureslidernib>-</textureslidernib>
 					<textureslidernibfocus>-</textureslidernibfocus>
 					<orientation>vertical</orientation>

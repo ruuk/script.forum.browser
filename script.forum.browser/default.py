@@ -22,11 +22,13 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.18'
+__version__ = '0.9.19'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
 THEME = 'Default'
+if __addon__.getSetting('skin') == '1':
+	THEME = 'Dark'
 
 ACTION_MOVE_LEFT      = 1
 ACTION_MOVE_RIGHT     = 2
@@ -72,6 +74,7 @@ LOG('Version: ' + __version__)
 LOG('Python Version: ' + sys.version)
 DEBUG = __addon__.getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
+LOG('Skin: ' + THEME)
 
 import tapatalk
 
@@ -1905,7 +1908,7 @@ class MessageWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(150).setLabel(FB.loginError)
+		self.getControl(160).setLabel(FB.loginError)
 
 def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 	if editPM:
@@ -2054,7 +2057,6 @@ class RepliesWindow(PageWindow):
 				item.setProperty('postcount',str(post.postCount) or '?')
 				item.setProperty('activity',post.activity)
 				
-				item.setInfo('video',{'Genre':self.mode})
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
 			if select > -1: self.getControl(120).selectItem(int(select))
@@ -2231,7 +2233,7 @@ class RepliesWindow(PageWindow):
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(150).setLabel(FB.loginError)
+		self.getControl(160).setLabel(FB.loginError)
 
 ######################################################################################
 # Threads Window
@@ -2433,7 +2435,7 @@ class ThreadsWindow(PageWindow):
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(150).setLabel(FB.loginError)
+		self.getControl(160).setLabel(FB.loginError)
 
 ######################################################################################
 # Forums Window
@@ -2645,7 +2647,7 @@ class ForumsWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(150).setLabel(FB.loginError)
+		self.getControl(160).setLabel(FB.loginError)
 		
 	def openSettings(self):
 		mode = __addon__.getSetting('color_mode')
