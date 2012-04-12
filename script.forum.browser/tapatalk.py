@@ -132,6 +132,7 @@ class CookieTransport(xmlrpclib.Transport):
 		self._loggedIn = False
 		self.jar = cookielib.CookieJar()
 		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2
+		self.getresponseTakesOneArg = httplib.HTTPConnection.getresponse.func_code.co_argcount < 2
 
 	def loggedIn(self):
 		return self._loggedIn
@@ -164,7 +165,11 @@ class CookieTransport(xmlrpclib.Transport):
 			self.send_host(h, host)
 			self.send_user_agent(h)
 			self.send_content(h, request_body)
-			response = h.getresponse(buffering=True)
+			#For older python verions
+			if self.getresponseTakesOneArg:
+				response = h.getresponse()
+			else:
+				response = h.getresponse(buffering=True)
 			
 			headers = {}
 			if DEBUG:
@@ -212,6 +217,7 @@ class CookieTransport(xmlrpclib.Transport):
 			request_body = gzip_encode(request_body)
 
 		connection.putheader("Content-Length", str(len(request_body)))
+		#For older python verions
 		if self.endheadersTakesOneArg:
 			connection.endheaders()
 			if request_body: connection.send(request_body)

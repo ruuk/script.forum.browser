@@ -185,18 +185,43 @@
 				</control>
 			</control>
 			
-			<control type="button" id="110">
-				<description>Close Button</description>
-				<posx>1230</posx>
+			<control type="group">
+				<posx>1200</posx>
 				<posy>15</posy>
-				<width>28</width>
-				<height>28</height>
-				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
-				<texturenofocus>forum-browser-close-button.png</texturenofocus>
-				<visible>system.getbool(input.enablemouse)</visible>
-				<onclick>PreviousMenu</onclick>
+				<control type="button" id="110">
+					<description>Close Button</description>
+					<posx>30</posx>
+					<posy>0</posy>
+					<width>28</width>
+					<height>28</height>
+					<texturefocus>forum-browser-close-button-focus.png</texturefocus>
+					<texturenofocus>forum-browser-close-button.png</texturenofocus>
+					<visible>system.getbool(input.enablemouse)</visible>
+					<onclick>PreviousMenu</onclick>
+				</control>
+			
+				<control type="label" id="150">
+					<description>Login Error</description>
+					<posx>0</posx>
+					<posy>4</posy>
+					<width>400</width>
+					<height>10</height>
+					<font>font10</font>
+					<textcolor>black</textcolor>
+					<aligny>top</aligny>
+					<align>right</align>
+				</control>
+				<control type="image" id="111">
+					<description>Logged In</description>
+					<posx>5</posx>
+					<posy>4</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-logged-in.png</texture>
+					<colordiffuse>FF555555</colordiffuse>
+				</control>
 			</control>
-      
+			
 			<control type="label">
 				<description>textarea</description>
 				<posx>44</posx>

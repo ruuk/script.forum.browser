@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.16'
+__version__ = '0.9.17'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1734,9 +1734,13 @@ class MessageWindow(BaseWindow):
 		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]'
 		self.imageReplace = 'IMG #%s'
 		self.action = None
+		self.started = False
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
+		if self.started: return
+		self.started = True
+		self.setLoggedIn()
 #		if __addon__.getSetting('use_forum_colors') == 'true':
 #			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
 #				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
@@ -1895,6 +1899,13 @@ class MessageWindow(BaseWindow):
 		
 	def openPostDialog(self,quote=False):
 		openPostDialog(quote and self.post or None)
+		
+	def setLoggedIn(self):
+		if FB.isLoggedIn():
+			self.getControl(111).setColorDiffuse('FF00FF00')
+		else:
+			self.getControl(111).setColorDiffuse('FF555555')
+		self.getControl(150).setLabel(FB.loginError)
 
 def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 	if editPM:
@@ -1940,6 +1951,7 @@ class RepliesWindow(PageWindow):
 	def onInit(self):
 		if self.started: return
 		self.started = True
+		self.setLoggedIn()
 		self.setupPage(None)
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
@@ -2059,6 +2071,7 @@ class RepliesWindow(PageWindow):
 			title_fg = FB.theme.get('title_fg','FF000000')
 			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
 		self.pid = ''
+		self.setLoggedIn()
 		#self.getAvatars()
 		
 #	def getAvatars(self):
@@ -2212,6 +2225,13 @@ class RepliesWindow(PageWindow):
 	def gotoPage(self,page):
 		self.stopThread()
 		self.fillRepliesList(page)
+		
+	def setLoggedIn(self):
+		if FB.isLoggedIn():
+			self.getControl(111).setColorDiffuse('FF00FF00')
+		else:
+			self.getControl(111).setColorDiffuse('FF555555')
+		self.getControl(150).setLabel(FB.loginError)
 
 ######################################################################################
 # Threads Window
@@ -2232,6 +2252,7 @@ class ThreadsWindow(PageWindow):
 	def onInit(self):
 		if self.started: return
 		self.started = True
+		self.setLoggedIn()
 		self.setupPage(None)
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
@@ -2274,6 +2295,7 @@ class ThreadsWindow(PageWindow):
 			#xbmcgui.unlock()
 			raise
 		#xbmcgui.unlock()
+		self.setLoggedIn()
 	
 	def errorCallback(self,error):
 		xbmcgui.Dialog().ok(__language__(30050),__language__(30161),error.message)
@@ -2405,6 +2427,13 @@ class ThreadsWindow(PageWindow):
 	def gotoPage(self,page):
 		self.stopThread()
 		self.fillThreadList(page)
+		
+	def setLoggedIn(self):
+		if FB.isLoggedIn():
+			self.getControl(111).setColorDiffuse('FF00FF00')
+		else:
+			self.getControl(111).setColorDiffuse('FF555555')
+		self.getControl(150).setLabel(FB.loginError)
 
 ######################################################################################
 # Forums Window

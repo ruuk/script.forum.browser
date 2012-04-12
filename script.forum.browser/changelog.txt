@@ -2,9 +2,13 @@ Forum Browser Changelog
 
 TODO:
   Handle nested quotes
-  Editing a post
 
-Current Version : 0.9.16
+Current Version : 0.9.17
+
+*** 0.9.17 ***
+
+Carried logged in indicator through to all views
+Fixed another bug in the code for handling older python versions in xmlrpclib
 
 *** 0.9.16 ***
 
