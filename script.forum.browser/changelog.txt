@@ -2,8 +2,16 @@ Forum Browser Changelog
 
 TODO:
   Handle nested quotes
+  Forum Subscriptions
+  Dark skin
+  Add join date to posts
+  Make a million dollars
 
-Current Version : 0.9.17
+Current Version : 0.9.18
+
+*** 0.9.18 ***
+
+Removed red highliting of name for posts by user - instead darken the backround of the post
 
 *** 0.9.17 ***
 
