@@ -4,7 +4,12 @@ TODO:
   Handle nested quotes
   Editing a post
 
-Current Version : 0.9.15
+Current Version : 0.9.16
+
+*** 0.9.16 ***
+
+Fixed a bug in the code for handling older python versions in xmlrpclib
+Fixed a bug when forums failed to get data
 
 *** 0.9.15 ***
 

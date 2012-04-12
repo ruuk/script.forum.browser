@@ -213,10 +213,11 @@ class CookieTransport(xmlrpclib.Transport):
 
 		connection.putheader("Content-Length", str(len(request_body)))
 		if self.endheadersTakesOneArg:
-			connection.endheaders(request_body)
-		else:
 			connection.endheaders()
 			if request_body: connection.send(request_body)
+		else:
+			connection.endheaders(request_body)
+			
 
 class PMLink:
 	def __init__(self,match=None):
@@ -671,6 +672,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
+		logo = None
 		while True:
 			if not callback(20,self.lang(30102)): break
 			try:
