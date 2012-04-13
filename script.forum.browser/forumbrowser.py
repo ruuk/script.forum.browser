@@ -33,19 +33,15 @@ class HTMLPageInfo:
 	def __init__(self,url):
 		self.url = url
 		
-		base = url.rsplit('/',1)[0]
-		if base.endswith(':/'):
-			self.base = url
-		else:
-			self.base = base
-		self.base += '/'
+		self.base = url
+		if not self.base.endswith('/'): self.base += '/'
 		
 		base2 = 'http://' + url.rsplit('://',1)[-1].split('/',1)[0]
 		self.base2 = base2
 		self.base2 += '/'
 		
-		self._getHTML()
 		self.isValid = True
+		self._getHTML()
 		
 	def _getHTML(self):
 		try:
@@ -87,7 +83,7 @@ class HTMLPageInfo:
 		images = self._images(self.html, self.base)
 		images += self._images(self.html2, self.base2)
 		return images
-	
+		
 	def _images(self,html,base):
 		urlList = re.findall('<img[^>]*?src="([^"]+?)"[^>]*?>',html) #Image tags
 		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',html) #Meta tag images
@@ -96,8 +92,10 @@ class HTMLPageInfo:
 			if u in final: continue
 			if u.startswith('http'):
 				final.append(u)
+			elif u.startswith('./'):
+				final.append(base + u[2:])
 			elif u.startswith('.'):
-				pass
+				final.append(base + u[1:])
 			elif u.startswith('/'):
 				pass
 			else:

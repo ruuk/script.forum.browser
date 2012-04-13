@@ -48,7 +48,7 @@ class ForumrunnerClient():
 			try:
 				return self._callMethod(method,**args)
 			except:
-				LOG('ForumrunnerClient.%s()' % method)
+				LOG('Failed: ForumrunnerClient.%s()' % method)
 				raise
 	
 		handler.method = method

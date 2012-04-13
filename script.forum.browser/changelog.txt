@@ -8,7 +8,11 @@ TODO:
   When deleting line in post editor, select next line instead of dropping to bottom
   Make a million dollars
 
-Current Version : 0.9.20
+Current Version : 0.9.21
+
+*** 0.9.21 ***
+
+Improved/fixed extracting of images from page when adding a forum
 
 *** 0.9.20 ***
 
@@ -17,6 +21,7 @@ Added '(requires restart)' next to skin setting description
 Threads with new/unread posts are now bold
 Improved finding of forums and finding of description/images
 Added (WORK IN PROGRESS) Forumrunner support
+Added subscribe option in posts list
 
 *** 0.9.19 ***
 

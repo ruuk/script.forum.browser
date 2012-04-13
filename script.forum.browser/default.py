@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.20'
+__version__ = '0.9.21'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2993,12 +2993,14 @@ def addTapatalkForum():
 		if url:
 			ftype = 'TT'
 			label = 'Tapatalk'
+			pageURL = url.split('/mobiquo',1)[0]
 		else:
 			import forumrunner
 			url = forumrunner.testForum(forum)
 			if url:
 				ftype = 'FR'
 				label = 'Forumrunner'
+				pageURL = url.split('/forumrunner',1)[0]
 		
 		if not url:
 			xbmcgui.Dialog().ok('Failed','Forum not found or not compatible')
@@ -3006,7 +3008,6 @@ def addTapatalkForum():
 		
 		xbmcgui.Dialog().ok('Found','Forum %s found' % forum,'Type: ' + label,url)
 		forum = url.split('http://',1)[-1].split('/',1)[0]
-		pageURL = url.split('/mobiquo',1)[0]
 		dialog.update(20,'Getting Description And Images')
 		info = forumbrowser.HTMLPageInfo(pageURL)
 		title = ''
