@@ -15,6 +15,7 @@ def checkVersion(version1, version2):
 	return cmp(normalize(version1), normalize(version2))
 
 def testForum(forum):
+	url3 = None
 	if forum.startswith('http://'):
 		url = forum
 		if not forum.endswith('/'): forum += '/'
@@ -24,6 +25,7 @@ def testForum(forum):
 		if forum.endswith('/'): forum = forum[:-1]
 		url = 'http://%s/mobiquo/mobiquo.php' % forum
 		url2 = None
+		if '/' in forum: url3 = 'http://%s/mobiquo/mobiquo.php' % forum.split('/',1)[0]
 	
 	try:
 		server = xmlrpclib.ServerProxy(url,transport=CookieTransport())
@@ -38,83 +40,15 @@ def testForum(forum):
 		return url2
 	except:
 		return None
+	if not url3: return None
+	try:
+		server = xmlrpclib.ServerProxy(url3,transport=CookieTransport())
+		server.get_config()
+		return url3
+	except:
+		return None
 	return None
-
-class FBTTOnlineDatabase():
-	def __init__(self):
-		self.url = 'http://xbmc.2ndmind.net/forumbrowser/tapatalk.php'
-	
-	def postData(self,**data):
-		enc = urllib.urlencode(data)
-		try:
-			result = urllib2.urlopen(self.url,enc).read()
-			return result
-		except:
-			raise
-			#sys.modules["__main__"].ERROR('TTOnlineDatabase.postData()')
-			return None
 			
-	def addForum(self,name,url,logo='',desc=''):
-		self.postData(do='add',name=name,url=url,desc=desc,logo=logo)
-		
-	def getForumList(self):
-		flist = self.postData(do='list')
-		if not flist: return None
-		flist = flist.split('\n')
-		final = []
-		for f in flist:
-			if f:
-				name, rest = f.split('=',1)
-				url,desc,logo = rest.split('\r',2)
-				final.append({'name':name,'url':url,'desc':desc,'logo':logo})
-		return final
-	
-class HTMLPageInfo:
-	def __init__(self,url):
-		self.url = url
-		base = url.rsplit('/',1)[0]
-		if base.endswith(':/'):
-			self.base = url
-		else:
-			self.base = base
-		self.base += '/'
-		self._getHTML()
-		self.isValid = True
-		
-	def _getHTML(self):
-		try:
-			opener = urllib2.build_opener()
-			o = opener.open(urllib2.Request(self.url,None,{'User-Agent':'Wget/1.12'}))
-			self.html = o.read()
-			o.close()
-		except:
-			self.isValid = False
-			LOG('HTMLPageInfo: FAILED')
-		
-	def title(self,default=''):
-		try: return re.search('<title>(.*?)</title>',self.html).group(1) or ''
-		except: return default
-		
-	def description(self,default=''):
-		try: return re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html).group(1)
-		except: return default
-		
-	def images(self):
-		urlList = re.findall('<img[^>]*?src="([^"]+?)"[^>]*?>',self.html) #Image tags
-		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',self.html) #Meta tag images
-		final = []
-		for u in urlList + urlList2:
-			if u in final: continue
-			if u.startswith('http'):
-				final.append(u)
-			elif u.startswith('.'):
-				pass
-			elif u.startswith('/'):
-				pass
-			else:
-				final.append(self.base + u)
-		return final
-		
 class CookieResponse:
 	def __init__(self,response,url):
 		self.response = response
@@ -476,74 +410,18 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self.loginError = ''
-		
-	def getForumID(self):
-		return self.prefix + self.forum
 	
 	def isLoggedIn(self):
 		#return self._loggedIn
 		return self.transport.loggedIn()
 	
 	def loadForumFile(self):
-		self.urls = {}
-		self.filters = {}
-		self.theme = {}
-		self.forms = {}
-		self.formats = {}
-		self.smilies = {}
 		forum = self.getForumID()
-		self.needsLogin = True
 		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)
 		if not os.path.exists(fname):
 			fname = os.path.join(sys.modules["__main__"].FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
-			
-		f = open(fname,'r')
-		data = f.read()
-		f.close()
-		for line in data.splitlines():
-			line = line.strip()
-			if not line: continue
-			if line.startswith('#'): continue
-			dtype , rest = line.split(':',1)
-			if dtype == 'import':
-				self.loadForumData(rest)
-			elif dtype == 'url':
-				key,url = rest.split('=',1)
-				if url.startswith('=='):
-					dup = url.split('=')[-1]
-					url = self.urls[dup]
-				self.urls[key] = url
-			elif dtype == 'filter':
-				key,regex = rest.split('=',1)
-				if regex.startswith('=='):
-					dup = regex.split('=')[-1]
-					regex = self.filters[dup]
-				self.filters[key] = regex
-			elif dtype == 'theme':
-				key,color = rest.split('=',1)
-				if color.startswith('=='):
-					dup = color.split('=')[-1]
-					color = self.theme[dup]
-				self.theme[key] = color
-			elif dtype == 'form':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.forms[dup]
-				self.forms[key] = data
-			elif dtype == 'format':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.formats[dup]
-				self.formats[key] = data
-			elif dtype == 'smilies':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.smilies[dup]
-				self.smilies[key] = data
+		self.loadForumData(fname)
 		self._url = self.urls.get('tapatalk_server','')
 		self.formats['quote'] = ''
 	
@@ -558,11 +436,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'}
 		
-		if not self.loadForumData(forum):
+		if not self.setupClient(forum):
 			self.forum = 'forum.xbmc.org'
-			self.loadForumData(self.forum)
+			self.setupClient(self.forum)
 		
-	def loadForumData(self,forum):
+	def setupClient(self,forum):
 		self.needsLogin = True
 		if not self._url:
 			self._url = 'http://%s/mobiquo/mobiquo.php' % forum
@@ -600,11 +478,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		sub = self.forumConfig.get('reg_url','')
 		if not sub: return ''
 		return self._url.split('mobiquo/',1)[0] + sub
-	
-	def setLogin(self,user,password,always=False):
-		self.user = user
-		self.password = password
-		self.alwaysLogin = always
 			
 	def getPassword(self):
 		if self.forumConfig.get('support_md5') == '1':
@@ -962,4 +835,16 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def canDelete(self,user):
 		if user == self.user: return True
 		return False
+	
+	def canSubscribeThread(self,tid):
+		return True
+	
+	def subscribeThread(self,tid):
+		result = self.server.subscribe_topic(tid)
+		if result.get('result'):
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to subscribe to thread: ' + text)
+			return text
 	

@@ -6,7 +6,7 @@
     <string id="30002">Reverse Sort Posts</string>
     <string id="30003">Language</string>
     <string id="30004">Always Login If Possible</string>
-    <string id="30005">Skin</string>
+    <string id="30005">Skin (changes require a restart)</string>
     <string id="30006">Use Text Editor (Experimental)</string>
     <string id="30007">Use Forum Colors</string>
     
@@ -99,7 +99,7 @@
     
     <string id="30220">Waiting...</string>
     <string id="30221">Waiting for thread to stop...</string>
-    <string id="30222">Add Tapatalk Enabled Forum</string>
+    <string id="30222">Add A Forum</string>
     <string id="30223">Add Current Forum To Favorites</string>
     <string id="30224">Remove Forum</string>
     <string id="30225">Remove A Forum From Favorites</string>
@@ -113,6 +113,7 @@
     <string id="30233">Enable MyBB edit post bug re-subscribe fix</string>
     <string id="30234">Use keyboard mod when writing posts</string>
     <string id="30235">Enable SSL connections (https)</string>
+    <string id="30236">Subscribe To Thread</string>
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>

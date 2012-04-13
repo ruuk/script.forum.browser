@@ -3,11 +3,20 @@ Forum Browser Changelog
 TODO:
   Handle nested quotes
   Forum Subscriptions
-  Dark skin
   Add join date to posts
+  Ability to subscribe to thread and forums
+  When deleting line in post editor, select next line instead of dropping to bottom
   Make a million dollars
 
-Current Version : 0.9.19
+Current Version : 0.9.20
+
+*** 0.9.20 ***
+
+Added confirmation dialog when adding forums to online database
+Added '(requires restart)' next to skin setting description
+Threads with new/unread posts are now bold
+Improved finding of forums and finding of description/images
+Added (WORK IN PROGRESS) Forumrunner support
 
 *** 0.9.19 ***
 
