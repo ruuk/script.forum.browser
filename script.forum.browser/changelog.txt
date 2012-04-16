@@ -8,7 +8,14 @@ TODO:
   When deleting line in post editor, select next line instead of dropping to bottom
   Make a million dollars
 
-Current Version : 0.9.22
+Current Version : 0.9.23
+
+*** 0.9.23 ***
+
+Fixed the skin for the image viewer window
+Carried loading image to threads and posts windows
+Fixed a few issues with the Dark skin
+Possibly fixed a scraping forum issue with encoding
 
 *** 0.9.22 ***
 

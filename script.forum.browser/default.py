@@ -1169,20 +1169,9 @@ class ImagesDialog(BaseWindow):
 		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
-		self.setTheme()
 		self.getControl(200).setEnabled(len(self.images) > 1)
 		self.getControl(202).setEnabled(len(self.images) > 1)
 		self.showImage()
-		
-	def setTheme(self):
-		if __addon__.getSetting('use_forum_colors') == 'false': return
-		#xbmcgui.lock()
-		try:
-			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
-		except:
-			#xbmcgui.unlock()
-			raise
-		#xbmcgui.unlock()
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2855,7 +2844,8 @@ def calculatePage(low,high,total):
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
 def convertHTMLCodes(html):
-	if not isinstance(html,unicode): html = unicode(html,'utf8')
+	if not isinstance(html,unicode):
+		html = unicode(html,'utf8','replace')
 	try:
 		html = re.sub('&#(\d{1,5});',cUConvert,html)
 		html = re.sub('&(\w+?);',cTConvert,html)

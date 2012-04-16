@@ -15,7 +15,7 @@
 				<posy>0</posy>
 				<width>800</width>
 				<height>620</height>
-				<texture border="20">forum-browser-black-box.png</texture>
+				<texture border="20">forum-browser-dark-black-box.png</texture>
 			</control>
 			<control type="label" id="300">
 				<posx>50</posx>
@@ -53,7 +53,7 @@
 						<posy>0</posy>
 						<width>770</width>
 						<height>200</height>
-						<texture border="20">forum-browser-black-box.png</texture>
+						<texture border="20">forum-browser-dark-black-box.png</texture>
 					</control>
 					<control type="image">
 						<posx>30</posx>

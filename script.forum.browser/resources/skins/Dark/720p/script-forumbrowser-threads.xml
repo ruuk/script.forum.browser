@@ -147,6 +147,15 @@
 					<focusedcolor>white</focusedcolor>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
+				<control type="image">
+					<description>Loading</description>
+					<posx>-17</posx>
+					<posy>14</posy>
+					<width>32</width>
+					<height>32</height>
+					<texture>forum-browser-dark-loading2.gif</texture>
+					<visible>Control.isVisible(106)</visible>
+				</control>
 				<control type="image" id="300">
 					<posx>25</posx>
 					<posy>0</posy>

@@ -14,7 +14,7 @@
 				<posy>0</posy>
 				<width>1110</width>
 				<height>720</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<texture border="20">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image" id="101">
@@ -22,7 +22,7 @@
 				<posy>0</posy>
 				<width>1090</width>
 				<height>700</height>
-				<texture border="20">forum-browser-white-boxr.png</texture>
+				<texture border="20">forum-browser-dark-dark-white-boxr.png</texture>
 				<colordiffuse>FF222222</colordiffuse>
 			</control>
              
@@ -32,7 +32,7 @@
 				<posy>4</posy>
 				<width>1057</width>
 				<height>670</height>
-				<texture border="20">forum-browser-white-boxr.png</texture>
+				<texture border="20">forum-browser-dark-white-boxr.png</texture>
 				<colordiffuse>FF888888</colordiffuse>
 			</control>
 			<control type="image">
@@ -40,7 +40,7 @@
 				<posy>4</posy>
 				<width>1057</width>
 				<height>120</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<texture border="20">forum-browser-dark-white-box.png</texture>
 			</control>
 			
 			<control type="label" id="103">
@@ -62,8 +62,8 @@
 				<posy>15</posy>
 				<width>28</width>
 				<height>28</height>
-				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
-				<texturenofocus>forum-browser-close-button.png</texturenofocus>
+				<texturefocus>forum-browser-dark-close-button-focus.png</texturefocus>
+				<texturenofocus>forum-browser-dark-close-button.png</texturenofocus>
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
 			</control>
@@ -73,7 +73,7 @@
 				<posy>35</posy>
 				<width>770</width>
 				<height>60</height>
-				<texture border="30">forum-browser-white-box.png</texture>
+				<texture border="30">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="button" id="104">
@@ -88,8 +88,8 @@
 				<height>40</height>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-dark-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<font>font18</font>
@@ -103,7 +103,7 @@
 				<posy>122</posy>
 				<width>1057</width>
 				<height>297</height>
-				<texture border="20">forum-browser-white-boxr.png</texture>
+				<texture border="20">forum-browser-dark-white-boxr.png</texture>
 				<colordiffuse>FF444444</colordiffuse>
 			</control>
 			
@@ -112,7 +112,7 @@
 				<posy>392</posy>
 				<width>350</width>
 				<height>60</height>
-				<texture border="30">forum-browser-white-box.png</texture>
+				<texture border="30">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image">
@@ -120,7 +120,7 @@
 				<posy>392</posy>
 				<width>350</width>
 				<height>60</height>
-				<texture border="30">forum-browser-white-box.png</texture>
+				<texture border="30">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image">
@@ -128,7 +128,7 @@
 				<posy>392</posy>
 				<width>350</width>
 				<height>60</height>
-				<texture border="30">forum-browser-white-box.png</texture>
+				<texture border="30">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="button" id="200">
@@ -145,8 +145,8 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 				<font>font18</font>
 				<align>center</align>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-dark-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<disabledcolor>80555555</disabledcolor>
@@ -167,8 +167,8 @@
 				<font>font18</font>
 				<align>center</align>
 				<label>$LOCALIZE[SCRIPT3007]</label>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-dark-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<disabledcolor>80FFFFFF</disabledcolor>
@@ -187,8 +187,8 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 				<font>font18</font>
 				<align>center</align>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-dark-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<disabledcolor>80555555</disabledcolor>
@@ -220,8 +220,8 @@
 				<onup>202</onup>
 				<ondown>104</ondown>
 				<texturesliderbackground>-</texturesliderbackground>
-				<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
-				<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
+				<texturesliderbar border="1">forum-browser-dark-panel-full.png</texturesliderbar>
+				<texturesliderbarfocus border="1">forum-browser-dark-panel-full.png</texturesliderbarfocus>
 				<textureslidernib>-</textureslidernib>
 				<textureslidernibfocus>-</textureslidernibfocus>
 				<orientation>vertical</orientation>
@@ -262,7 +262,7 @@
 						<posy>0</posy>
 						<width>1020</width>
 						<height>38</height>
-						<texture border="20">forum-browser-grey-boxr.png</texture>
+						<texture border="20">forum-browser-dark-grey-boxr.png</texture>
 					</control>
 					<control type="label">
 						<posx>20</posx>
@@ -288,8 +288,8 @@
 					<width>4</width>
 					<height>255</height>
 					<texturesliderbackground>-</texturesliderbackground>
-					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
-					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
+					<texturesliderbar border="1">forum-browser-dark-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus border="1">forum-browser-dark-panel-full.png</texturesliderbarfocus>
 					<textureslidernib>-</textureslidernib>
 					<textureslidernibfocus>-</textureslidernibfocus>
 					<orientation>vertical</orientation>

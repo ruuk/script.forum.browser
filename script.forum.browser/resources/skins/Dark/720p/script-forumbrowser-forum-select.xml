@@ -16,7 +16,7 @@
 				<posy>20</posy>
 				<width>610</width>
 				<height>630</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<texture border="20">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image">
@@ -24,7 +24,7 @@
 				<posy>0</posy>
 				<width>600</width>
 				<height>620</height>
-				<texture border="20">forum-browser-black-box.png</texture>
+				<texture border="20">forum-browser-dark-black-box.png</texture>
 			</control>
 			<control type="label" id="300">
 				<posx>50</posx>
@@ -53,14 +53,14 @@
 						<posy>0</posy>
 						<width>200</width>
 						<height>100</height>
-						<texture>forum-browser-white-box.png</texture>
+						<texture>forum-browser-dark-white-box.png</texture>
 					</control>
 					<control type="image">
 						<posx>0</posx>
 						<posy>100</posy>
 						<width>570</width>
 						<height>1</height>
-						<texture>forum-browser-white-box.png</texture>
+						<texture>forum-browser-dark-white-box.png</texture>
 						<visible>StringCompare(ListItem.Property(SEPARATOR),SEPARATOR)</visible>
 					</control>
 					<control type="image">
@@ -68,7 +68,7 @@
 						<posy>15</posy>
 						<width>170</width>
 						<height>70</height>
-						<texture diffuse="forum-browser-white-box.png">$INFO[ListItem.Thumb]</texture>
+						<texture diffuse="forum-browser-dark-white-box.png">$INFO[ListItem.Thumb]</texture>
 						<aspectratio scalediffuse="false">keep</aspectratio>
 					</control>
 					<control type="label">
@@ -89,21 +89,21 @@
 						<posy>0</posy>
 						<width>570</width>
 						<height>100</height>
-						<texture border="20">forum-browser-black-box.png</texture>
+						<texture border="20">forum-browser-dark-black-box.png</texture>
 					</control>
 					<control type="image">
 						<posx>20</posx>
 						<posy>0</posy>
 						<width>200</width>
 						<height>100</height>
-						<texture>forum-browser-white-box.png</texture>
+						<texture>forum-browser-dark-white-box.png</texture>
 					</control>
 					<control type="image">
 						<posx>0</posx>
 						<posy>100</posy>
 						<width>570</width>
 						<height>1</height>
-						<texture>forum-browser-white-box.png</texture>
+						<texture>forum-browser-dark-white-box.png</texture>
 						<visible>StringCompare(ListItem.Property(SEPARATOR),SEPARATOR)</visible>
 					</control>
 					<control type="image">
@@ -111,7 +111,7 @@
 						<posy>15</posy>
 						<width>170</width>
 						<height>70</height>
-						<texture diffuse="forum-browser-white-box.png">$INFO[ListItem.Thumb]</texture>
+						<texture diffuse="forum-browser-dark-white-box.png">$INFO[ListItem.Thumb]</texture>
 						<aspectratio scalediffuse="false">keep</aspectratio>
 					</control>
 					<control type="label">
@@ -136,7 +136,7 @@
 				<posy>20</posy>
 				<width>470</width>
 				<height>430</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<texture border="20">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image">
@@ -144,7 +144,7 @@
 				<posy>0</posy>
 				<width>460</width>
 				<height>420</height>
-				<texture border="20">forum-browser-black-box.png</texture>
+				<texture border="20">forum-browser-dark-black-box.png</texture>
 			</control>
 			<control type="textbox" id="310">
 				<posx>20</posx>
