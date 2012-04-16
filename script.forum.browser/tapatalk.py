@@ -225,6 +225,7 @@ class ForumPost:
 		self.status = ''
 		self.activity = ''
 		self.postCount = 0
+		self.postNumber = 0
 		self.userInfo = {}
 			
 	def setVals(self,pdict):
@@ -390,12 +391,9 @@ class PageData:
 # Forum Browser API for TapaTalk
 ######################################################################################
 class TapatalkForumBrowser(forumbrowser.ForumBrowser):
-	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
-						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
-						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)'
-					}
 	
 	PageData = PageData
+	
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
 		self.forum = forum[3:]
@@ -426,16 +424,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.formats['quote'] = ''
 	
 	def reloadForumData(self,forum):
-		self.filters = {'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
-						'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
-						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
-						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
-						'image':'\[IMG\](?P<url>.+?)\[/IMG\](?is)',
-						'link':'\[url=(?P<url>[^\]]+?)\](?P<text>.+?)\[/url\](?is)',
-						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
-						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
-						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'}
-		
 		if not self.setupClient(forum):
 			self.forum = 'forum.xbmc.org'
 			self.setupClient(self.forum)
@@ -469,10 +457,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def getForumPluginVersion(self):
 		return self.forumConfig.get('version','').split('_')[-1]
-	
-	def getQuoteFormat(self):
-		forumType = self.getForumType()
-		return self.quoteFormats.get(forumType,'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)')
 	
 	def getRegURL(self):
 		sub = self.forumConfig.get('reg_url','')
@@ -670,12 +654,15 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					return (None,None)
 				if not callback(60,self.lang(30103)): break
 				infos = {}
+				ct = page + 1
 				for p in posts:
 					fp = ForumPost(p)
+					fp.postNumber = ct
 					if not fp.userName in infos:
 						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
 					fp.setUserInfo(infos[fp.userName])
 					sreplies.append(fp)
+					ct += 1
 				sreplies.reverse()
 			except:
 				em = ERROR('ERROR GETTING POSTS')
@@ -743,8 +730,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getURL(self,name):
 		return self._url + self.urls.get(name,'')
-		
-	def fakeCallback(self,pct,message=''): return True
 	
 	def post(self,post,callback=None):
 		if post.isEdit:

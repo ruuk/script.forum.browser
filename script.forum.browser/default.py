@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.21'
+__version__ = '0.9.22'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -144,6 +144,7 @@ class ForumPost:
 		self.online = None
 		self.activity = ''
 		self.postCount = None
+		self.postNumber = 0
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('postid',''))
@@ -2018,8 +2019,8 @@ class RepliesWindow(PageWindow):
 		
 	def setMessageProperty(self,post,item,short=False):
 		title = post.title or ''
-		title = u'[B]%s[/B][CR]' % title.decode('utf8','replace')
-		item.setProperty('message',self.desc_base % (title + post.messageAsDisplay(short)))
+		item.setProperty('title',title)
+		item.setProperty('message',post.messageAsDisplay(short))
 		
 	def doFillRepliesList(self,replies,pageData):
 		if not replies:
@@ -2056,6 +2057,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('online',post.online and 'online' or '')
 				item.setProperty('postcount',str(post.postCount) or '?')
 				item.setProperty('activity',post.activity)
+				item.setProperty('postnumber',str(post.postNumber))
 				
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
@@ -2067,11 +2069,8 @@ class RepliesWindow(PageWindow):
 			raise
 		#xbmcgui.unlock()
 		if select > -1: self.postSelected(itemindex=select)
-		if __addon__.getSetting('use_forum_colors') == 'false':
-			self.getControl(104).setLabel(self.topic)
-		else:
-			title_fg = FB.theme.get('title_fg','FF000000')
-			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
+		
+		self.getControl(104).setLabel(self.topic)
 		self.pid = ''
 		self.setLoggedIn()
 		#self.getAvatars()
@@ -2534,6 +2533,7 @@ class ForumsWindow(BaseWindow):
 			#xbmcgui.unlock()
 			ERROR('FILL FORUMS ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
+			self.setFocusId(202)
 		#xbmcgui.unlock()
 		self.setLoggedIn()
 			
@@ -2645,6 +2645,7 @@ class ForumsWindow(BaseWindow):
 ######################################################################################
 class MessageConverter:
 	def __init__(self):
+		self._currentFilter = None
 		self.resetOrdered(False)
 		
 		#static replacements

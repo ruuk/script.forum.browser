@@ -276,6 +276,7 @@ class ForumPost:
 		self.activity = ''
 		self.online = False
 		self.postCount = 0
+		self.postNumber = 0
 		self.joinDate = ''
 		self.userInfo = {}
 		if pdict: self.setVals(pdict)
@@ -338,6 +339,16 @@ class ForumPost:
 # Forum Browser API
 ######################################################################################
 class ForumBrowser:
+	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
+						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
+						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)'
+					}
+	
+	quoteReplace = 	{	'mb':"[quote='!USER!' pid='!POSTID!' dateline='!DATE!']!QUOTE![/quote]",
+						'xf':'[quote="!USER!, post: !POSTID!, member: !USERID!"]!QUOTE![/quote]',
+						'vb':'[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]'
+					}
+	
 	def __init__(self,forum,always_login=False):
 		self.forum = forum
 		self.prefix = ''
@@ -363,7 +374,16 @@ class ForumBrowser:
 		
 	def loadForumData(self,fname):
 		self.urls = {}
-		self.filters = {}
+		self.filters = {'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
+						'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
+						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
+						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
+						'image':'\[img\](?P<url>[^\[]+)\[/img\](?is)',
+						'link':'\[url=(?P<url>[^\]]+?)\](?P<text>.+?)\[/url\](?is)',
+						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
+						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
+						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'}
+		
 		self.theme = {}
 		self.forms = {}
 		self.formats = {}
@@ -416,6 +436,16 @@ class ForumBrowser:
 					data = self.smilies[dup]
 				self.smilies[key] = data
 	
+	def getForumType(self): return ''
+
+	def getQuoteFormat(self):
+		forumType = self.getForumType()
+		return self.quoteFormats.get(forumType,'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)')
+	
+	def getQuoteReplace(self):
+		forumType = self.getForumType()
+		return self.quoteReplace.get(forumType,'[QUOTE]!QUOTE![/QUOTE]')
+	
 	def isLoggedIn(self): return False
 	
 	def setLogin(self,user,password,always=False):
@@ -425,7 +455,6 @@ class ForumBrowser:
 		
 	def makeURL(self,url): return url
 		
-	def getQuoteFormat(self): return '\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)'
 	
 	def getPMCounts(self,pct=0): return None
 	
@@ -446,6 +475,8 @@ class ForumBrowser:
 	def canSubscribeThread(self,tid): return False
 	
 	def canEditPost(self,user): return False
+	
+	def fakeCallback(self,pct,message=''): return True
 	
 	
 		

@@ -96,6 +96,15 @@
 				<texture border="20">forum-browser-grey-boxr.png</texture>
 				<visible>Control.isVisible(105)</visible>
 			</control>
+			<control type="image">
+				<description>Loading</description>
+				<posx>968</posx>
+				<posy>49</posy>
+				<width>32</width>
+				<height>32</height>
+				<texture>forum-browser-loading.gif</texture>
+				<visible>Control.isVisible(105)</visible>
+			</control>
 			<control type="button" id="105">
 				<description>Stop Button</description>
 				<posx>1010</posx>
@@ -263,7 +272,6 @@
 					<visible>system.getbool(input.enablemouse)</visible>
 					<onclick>PreviousMenu</onclick>
 				</control>
-			
 				<control type="label" id="160">
 					<description>Login Error</description>
 					<posx>0</posx>

@@ -4,11 +4,18 @@ TODO:
   Handle nested quotes
   Forum Subscriptions
   Add join date to posts
-  Ability to subscribe to thread and forums
+  Ability to subscribe to threads and forums
   When deleting line in post editor, select next line instead of dropping to bottom
   Make a million dollars
 
-Current Version : 0.9.21
+Current Version : 0.9.22
+
+*** 0.9.22 ***
+
+Another focus fix on forum errors
+Added loading icon on forums view (will extend to other views later)
+Added post numbers to posts
+Forumrunner - Added: Login, view subscriptions, subscribe to thread, post reply, edit post, view private messages and other improvements
 
 *** 0.9.21 ***
 

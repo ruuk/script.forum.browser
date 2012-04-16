@@ -378,30 +378,56 @@
 						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
 					</control>
 					<control type="label">
-						<posx>1205</posx>
-						<posy>10</posy>
+						<posx>210</posx>
+						<posy>7</posy>
 						<width>585</width>
 						<height>15</height>
 						<font>font10</font>
 						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
+					</control>
+					<control type="image">
+						<posx>200</posx>
+						<posy>25</posy>
+						<width>1030</width>
+						<height>1</height>
+						<texture>forum-browser-white-box.png</texture>
+						<colordiffuse>44FFFFFF</colordiffuse>
+					</control>
+					<control type="label">
+						<posx>1145</posx>
+						<posy>7</posy>
+						<width>525</width>
+						<height>15</height>
+						<font>font10</font>
+						<aligny>center</aligny>
 						<textcolor>FF888888</textcolor>
-						<selectedcolor>green</selectedcolor>
 						<align>right</align>
 						<info>ListItem.Property(date)</info>
 					</control>
-					<control type="textbox">
-						<posx>210</posx>
-						<posy>5</posy>
-						<width>1010</width>
-						<height>80</height>
+					<control type="label">
+						<posx>1220</posx>
+						<posy>7</posy>
+						<width>75</width>
+						<height>15</height>
 						<font>font10</font>
 						<aligny>center</aligny>
+						<textcolor>FFBBBBBB</textcolor>
+						<align>right</align>
+						<label>&#35;$INFO[ListItem.Property(postnumber)]</label>
+					</control>
+					<control type="textbox">
+						<posx>210</posx>
+						<posy>25</posy>
+						<width>1010</width>
+						<height>65</height>
+						<font>font10</font>
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
-						<scroll>false</scroll>
-						<wrapmultiline>true</wrapmultiline>
 					</control>
 				</itemlayout>
 				<focusedlayout height="200">
@@ -535,9 +561,28 @@
 						<visible>true</visible>
 					</control>
 					<control type="label">
-						<posx>1205</posx>
-						<posy>10</posy>
+						<posx>210</posx>
+						<posy>7</posy>
 						<width>585</width>
+						<height>15</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
+					</control>
+					<control type="image">
+						<posx>200</posx>
+						<posy>25</posy>
+						<width>1030</width>
+						<height>1</height>
+						<texture>forum-browser-white-box.png</texture>
+						<colordiffuse>44FFFFFF</colordiffuse>
+					</control>
+					<control type="label">
+						<posx>1145</posx>
+						<posy>7</posy>
+						<width>525</width>
 						<height>15</height>
 						<font>font10</font>
 						<aligny>center</aligny>
@@ -545,13 +590,23 @@
 						<align>right</align>
 						<info>ListItem.Property(date)</info>
 					</control>
-					<control type="textbox">
-						<posx>210</posx>
-						<posy>5</posy>
-						<width>1010</width>
-						<height>180</height>
+					<control type="label">
+						<posx>1220</posx>
+						<posy>7</posy>
+						<width>75</width>
+						<height>15</height>
 						<font>font10</font>
 						<aligny>center</aligny>
+						<textcolor>FFBBBBBB</textcolor>
+						<align>right</align>
+						<label>&#35;$INFO[ListItem.Property(postnumber)]</label>
+					</control>
+					<control type="textbox">
+						<posx>210</posx>
+						<posy>25</posy>
+						<width>1010</width>
+						<height>165</height>
+						<font>font10</font>
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
