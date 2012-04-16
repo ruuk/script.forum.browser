@@ -8,7 +8,13 @@ TODO:
   When deleting line in post editor, select next line instead of dropping to bottom
   Make a million dollars
 
-Current Version : 0.9.23
+Current Version : 0.9.24
+
+*** 0.9.24 ***
+
+Fix for scraper forums failing to load definitions
+Hide postcount display when no data available
+Hide next/prev buttons while loading
 
 *** 0.9.23 ***
 

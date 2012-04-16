@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.22'
+__version__ = '0.9.24'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -326,16 +326,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.formats = {}
 		self.smilies = {}
 		
-		if not self.loadForumData(forum):
-			self.forum = 'forum.xbmc.org'
-			self.loadForumData(self.forum)
+		if not self.loadForumData(forum): raise Exception('Forum Load Failure')
+			#self.forum = 'forum.xbmc.org'
+			#self.loadForumData(self.forum)
 		
 	def loadForumData(self,forum):
 		self.needsLogin = True
-		fname = os.path.join(FORUMS_PATH,forum)
-		if not os.path.exists(fname):
-			fname = os.path.join(FORUMS_STATIC_PATH,forum)
-			if not os.path.exists(fname): return False
+		fname = os.path.join(FORUMS_STATIC_PATH,forum)
+		if not os.path.exists(fname): return False
 		f = open(fname,'r')
 		data = f.read()
 		f.close()
@@ -2044,7 +2042,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('status',convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
 				item.setProperty('online',post.online and 'online' or '')
-				item.setProperty('postcount',str(post.postCount) or '?')
+				item.setProperty('postcount',post.postCount and str(post.postCount) or '')
 				item.setProperty('activity',post.activity)
 				item.setProperty('postnumber',str(post.postNumber))
 				
