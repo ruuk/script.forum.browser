@@ -342,7 +342,7 @@
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FFBBBBBB</textcolor>
+						<textcolor>FFCCCCCC</textcolor>
 						<align>left</align>
 						<info>ListItem.Label2</info>
 						<visible>StringCompare(ListItem.property(unread),)</visible>
@@ -415,7 +415,7 @@
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>FFBBBBBB</textcolor>
+						<textcolor>FFCCCCCC</textcolor>
 						<align>left</align>
 						<info>ListItem.Label2</info>
 						<visible>StringCompare(ListItem.property(unread),)</visible>

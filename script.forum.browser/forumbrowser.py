@@ -344,6 +344,11 @@ class ForumBrowser:
 						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)'
 					}
 	
+	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='(?P<user>[^']*?)'(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
+							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
+							'vb':'(?i)\[quote(?:\=(?P<user>\w+)(?:;\d+)*)?\]'
+						}
+	
 	quoteReplace = 	{	'mb':"[quote='!USER!' pid='!POSTID!' dateline='!DATE!']!QUOTE![/quote]",
 						'xf':'[quote="!USER!, post: !POSTID!, member: !USERID!"]!QUOTE![/quote]',
 						'vb':'[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]'
@@ -441,6 +446,10 @@ class ForumBrowser:
 	def getQuoteFormat(self):
 		forumType = self.getForumType()
 		return self.quoteFormats.get(forumType,'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)')
+	
+	def getQuoteStartFormat(self):
+		forumType = self.getForumType()
+		return self.quoteStartFormats.get(forumType,'\[QUOTE[^\]]*?\]')
 	
 	def getQuoteReplace(self):
 		forumType = self.getForumType()

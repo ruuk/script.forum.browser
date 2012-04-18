@@ -416,7 +416,7 @@
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Label2</info>
 						<visible>StringCompare(ListItem.property(unread),)</visible>
@@ -428,7 +428,7 @@
 						<height>38</height>
 						<font>font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>white</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label2][/B]</label>
 						<visible>StringCompare(ListItem.property(unread),unread)</visible>

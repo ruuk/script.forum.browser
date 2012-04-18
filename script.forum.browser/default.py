@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.25'
+__version__ = '0.9.26'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1927,7 +1927,8 @@ class MessageWindow(BaseWindow):
 		self.close()
 		
 	def openPostDialog(self,quote=False):
-		openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid)
+		if openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid):
+			self.action = forumbrowser.Action('REFRESH')
 		
 	def setLoggedIn(self):
 		if FB.isLoggedIn():
@@ -2638,7 +2639,7 @@ class ForumsWindow(BaseWindow):
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			pass
-		elif action == ACTION_PARENT_DIR:
+		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
 			if not self.preClose(): return
@@ -2681,7 +2682,10 @@ class MessageConverter:
 		self._currentFilter = None
 		self.resetOrdered(False)
 		
+		
 		#static replacements
+		self.quoteStartReplace = ('[CR]_____________________________________________[CR]'+__language__(30180)+' [B]%s[/B][CR][I]').encode('utf8')
+		self.quoteEndReplace = ('[/I][CR]_____________________________________________[CR][CR]').encode('utf8')
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
@@ -2724,6 +2728,9 @@ class MessageConverter:
 		f = FB.getQuoteFormat()
 		self.quoteFilter2 = f and re.compile(f) or None
 		
+		self.quoteStartFilter = re.compile(FB.getQuoteStartFormat())
+		self.quoteEndFilter = re.compile('\[\/QUOTE\](?i)')
+		
 		#dynamic replacements
 		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR][CR]_________________________[CR]','utf8')
 		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR][CR]_________________________[CR]','utf8')
@@ -2737,8 +2744,13 @@ class MessageConverter:
 	def messageToDisplay(self,html):
 		html = self.lineFilter.sub('',html)
 		
-		if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
-		if self.quoteFilter2: html = self.quoteFilter2.sub(self.quoteConvert,html)
+		
+		#html = self.quoteStartFilter.sub(self.quoteConvert,html)
+		#html = self.quoteEndFilter.sub(self.quoteEndReplace,html)
+		html = self.formatQuotes(html)
+		
+		#if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
+		#if self.quoteFilter2: html = self.quoteFilter2.sub(self.quoteConvert,html)
 		if self.codeFilter: html = self.codeFilter.sub(self.codeReplace,html)
 		if self.phpFilter: html = self.phpFilter.sub(self.phpReplace,html)
 		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
@@ -2762,12 +2774,43 @@ class MessageConverter:
 		html = html.replace('</table>','[CR][CR]')
 		html = html.replace('</div></div>','[CR]') #to get rid of excessive new lines
 		html = html.replace('</div>','[CR]')
+		html = html.replace('[hr]','[CR][B]_____________________________________________________________________________________[/B][CR]')
 		html = self.tagFilter.sub('',html)
 		html = self.removeNested(html,'\[/?B\]','[B]')
 		html = self.removeNested(html,'\[/?I\]','[I]')
 		html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
 		return convertHTMLCodes(html)
 
+	def formatQuotes(self,html):
+		ct = 0
+		ms = True
+		me = True
+		while ms or me:
+			ms = self.quoteStartFilter.search(html)
+			me = self.quoteEndFilter.search(html)
+			if ms:
+				if me and ms.start() > me.start():
+					rep = self.quoteEndReplace
+					if ct == 1: rep += '[/COLOR]'
+					html = self.quoteEndFilter.sub(rep,html,1)
+					ct -= 1
+				else:
+					gd = ms.groupdict()
+					rep = self.quoteStartReplace % (gd.get('user') or '')
+					if ct == 0: rep = '[COLOR FF5555AA]' + rep
+					html = self.quoteStartFilter.sub(rep,html,1)
+					ct += 1
+			elif me:
+				rep = self.quoteEndReplace
+				if ct == 1: rep += '[/COLOR]'
+				html = self.quoteEndFilter.sub(rep,html,1)
+				ct -= 1
+		return html
+			
+	def quoteConvert2(self,m):
+		gd = m.groupdict()
+		return self.quoteStartReplace % (gd.get('user') or '')
+		
 	def removeNested(self,html,regex,starttag):
 		self.nStart = starttag
 		self.nCounter = 0
@@ -2818,12 +2861,8 @@ class MessageConverter:
 		
 	def quoteConvert(self,m):
 		gd = m.groupdict()
-		quote = self.imageFilter.sub(self.quoteImageReplace,gd.get('quote',''))
-		if gd.get('user'):
-			ret = self.quoteReplace % (gd.get('user',''),quote)
-		else:
-			ret = self.aQuoteReplace % quote
-		return self.quoteFilter.sub(self.quoteConvert,ret)
+		#quote = self.imageFilter.sub(self.quoteImageReplace,gd.get('quote',''))
+		return self.quoteStartReplace % (gd.get('user') or '')
 			
 	def processIndent(self,m):
 		return '    ' + re.sub('\n','\n    ',m.group(1)) + '\n'

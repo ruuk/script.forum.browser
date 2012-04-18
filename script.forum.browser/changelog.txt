@@ -1,16 +1,24 @@
 Forum Browser Changelog
 
 TODO:
-  Handle nested quotes
   Forum Subscriptions
   Add join date to posts
-  Ability to subscribe to threads and forums
+  Unsubscribe threads/forums
   When deleting line in post editor, select next line instead of dropping to bottom
   Improve the database and database management
   Encrypt login data
+  Handle exit ask with remote
   Make a million dollars
 
-Current Version : 0.9.25
+Current Version : 0.9.26
+
+*** 0.9.26 ***
+
+Handling for nested quotes
+Quotes are now colored
+Selected thread text fixed to white in light skin
+Lightened unread thread text slightly
+Fixed (I hope) responding to remote back button (for asking to exit)
 
 *** 0.9.25 ***
 
