@@ -187,7 +187,7 @@
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
-					<disabledcolor>60000000</disabledcolor>
+					<disabledcolor>50FFFFFF</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
       
@@ -209,7 +209,7 @@
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
-					<disabledcolor>60000000</disabledcolor>
+					<disabledcolor>50FFFFFF</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
       
@@ -231,7 +231,7 @@
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
-					<disabledcolor>60000000</disabledcolor>
+					<disabledcolor>50FFFFFF</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
       
@@ -253,7 +253,7 @@
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
-					<disabledcolor>60000000</disabledcolor>
+					<disabledcolor>50FFFFFF</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
 			</control>

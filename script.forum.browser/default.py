@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.24'
+__version__ = '0.9.25'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1201,7 +1201,45 @@ class ImagesDialog(BaseWindow):
 			self.nextImage()
 		elif action == ACTION_PREV_ITEM:
 			self.prevImage()
+		elif action == ACTION_CONTEXT_MENU:
+			self.doMenu()
 		BaseWindow.onAction(self,action)
+		
+	def doMenu(self):
+		d = ChoiceMenu('Options')
+		d.addItem('save', 'Save Image')
+		result = d.getResult()
+		if not result: return
+		if result == 'save':
+			self.saveImage()
+			
+	def saveImage(self):
+		#browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
+		source = self.images[self.index]
+		filename = doKeyboard('Enter Filename', os.path.basename(source))
+		if filename == None: return
+		default = __addon__.getSetting('last_download_path') or ''
+		result = xbmcgui.Dialog().browse(3,'Select Directory','files','',False,True,default)
+		__addon__.setSetting('last_download_path',result)
+		if not os.path.exists(source): return
+		target = os.path.join(result,filename)
+		ct = 1
+		original = filename
+		while os.path.exists(target):
+			fname, ext = os.path.splitext(original)
+			filename = fname + '_' + str(ct) + ext
+			ct+=1
+			if os.path.exists(os.path.join(result,filename)): continue
+			yes = xbmcgui.Dialog().yesno('File Exists','File exists!','Save as:',filename + '?','Enter New','Yes')
+			if not yes:
+				ct = 0
+				filename = doKeyboard('Enter Filename', filename)
+				original = filename
+				if filename == None: return
+			target = os.path.join(result,filename)
+		import shutil
+		shutil.copy(source, target)
+		xbmcgui.Dialog().ok('Finished','File Saved Successfully: ',os.path.basename(target))
 		
 ######################################################################################
 # Post Dialog
@@ -1889,7 +1927,7 @@ class MessageWindow(BaseWindow):
 		self.close()
 		
 	def openPostDialog(self,quote=False):
-		openPostDialog(quote and self.post or None)
+		openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid)
 		
 	def setLoggedIn(self):
 		if FB.isLoggedIn():
@@ -2320,8 +2358,9 @@ class ThreadsWindow(PageWindow):
 			reply_count = str(tdict.get('reply_number','0') or '0')
 			if starter == self.me: starterbase = self.highBase
 			else: starterbase = self.textBase
-			title = (tdict.get('new_post') and self.newBase or self.textBase) % title
+			#title = (tdict.get('new_post') and self.newBase or self.textBase) % title
 			item = xbmcgui.ListItem(label=starterbase % starter,label2=title)
+			if tdict.get('new_post'): item.setProperty('unread','unread')
 			item.setInfo('video',{"Genre":sticky})
 			item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
 			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
@@ -2358,6 +2397,7 @@ class ThreadsWindow(PageWindow):
 				
 	def openRepliesWindow(self):
 		item = self.getControl(120).getSelectedItem()
+		item.setProperty('unread','')
 		tid = item.getProperty('id')
 		fid = item.getProperty('fid') or self.fid
 		lastid = item.getProperty('lastid')
@@ -2600,7 +2640,13 @@ class ForumsWindow(BaseWindow):
 			pass
 		elif action == ACTION_PARENT_DIR:
 			action = ACTION_PREVIOUS_MENU
+		if action == ACTION_PREVIOUS_MENU:
+			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
+		
+	def preClose(self):
+		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
+		return xbmcgui.Dialog().yesno('Really Exit?','Really exit?')
 		
 	def resetForum(self,hidelogo=True):
 		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
@@ -3142,7 +3188,15 @@ class ChoiceMenu():
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True
 	
-	def getResult(self): pass
+	def getChoiceIndex(self):
+		options = []
+		for i in self.items: options.append(i.get('disp'))
+		return xbmcgui.Dialog().select(self.caption,options)
+	
+	def getResult(self):
+		idx = self.getChoiceIndex()
+		if idx < 0: return None
+		return self.items[idx]['id']
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml'):
@@ -3255,8 +3309,8 @@ class Downloader:
 				self.display = 'File %s of %s' % (i+1,self.total)
 				self.prog.update(int((i/float(self.total))*100),self.message,self.display)
 				fname = os.path.join(targetdir,str(i) + ext)
+				fname, ftype = self.getUrlFile(url,fname,callback=self.progCallback)
 				file_list.append(fname)
-				self.getUrlFile(url,fname,callback=self.progCallback)
 		except:
 			ERROR('DOWNLOAD URLS ERROR')
 			self.prog.close()
@@ -3301,6 +3355,13 @@ class Downloader:
 		urlObj = urllib2.urlopen(url)
 		size = int(urlObj.info().get("content-length",-1))
 		ftype = urlObj.info().get("content-type",'')
+		ext = None
+		if '/' in ftype: ext = '.' + ftype.split('/')[-1].replace('jpeg','jpg')
+		if ext:
+			fname, x = os.path.splitext(target)
+			target = fname + ext
+		#print urlObj.info()
+		#Content-Disposition: attachment; filename=FILENAME
 		outfile = open(target, 'wb')
 		read = 0
 		bs = 1024 * 8
@@ -3309,7 +3370,7 @@ class Downloader:
 			if block == "": break
 			read += len(block)
 			outfile.write(block)
-			if not callback(read, size): raise Exception
+			if not callback(read, size): raise Exception('Download Canceled')
 		outfile.close()
 		urlObj.close()
 		return (target,ftype)

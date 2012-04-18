@@ -2,6 +2,7 @@
 <settings>
   <category label="30000">
     <setting id="always_login" type="bool" label="30004" default="false" />
+    <setting id="ask_close_on_exit" type="bool" label="30237" default="false" />
     <setting id="open_thread_to_newest" type="bool" label="30001" default="true" />
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
     <setting id="use_mod_keyboard" type="bool" label="30234" default="false" />

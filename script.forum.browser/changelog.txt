@@ -6,9 +6,18 @@ TODO:
   Add join date to posts
   Ability to subscribe to threads and forums
   When deleting line in post editor, select next line instead of dropping to bottom
+  Improve the database and database management
+  Encrypt login data
   Make a million dollars
 
-Current Version : 0.9.24
+Current Version : 0.9.25
+
+*** 0.9.25 ***
+
+Fixed posting from fullscreen message view
+Added ability to save images in posts
+Added option to ask if you really want to quit
+Clear bold (unread) from threads when clicked
 
 *** 0.9.24 ***
 
