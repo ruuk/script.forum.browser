@@ -1,5 +1,14 @@
 #Forum browser common
-import re, urllib, urllib2
+import sys, re, urllib, urllib2
+
+def LOG(message):
+	print 'FORUMBROWSER: %s' % message
+
+def ERROR(message):
+	LOG('ERROR: ' + message)
+	import traceback #@Reimport
+	traceback.print_exc()
+	return str(sys.exc_info()[1])
 
 class FBOnlineDatabase():
 	def __init__(self):
@@ -122,7 +131,7 @@ class PMLink:
 		
 		if match:
 			self.url = match.group('url')
-			text = match.group('text')
+			self.text = match.group('text')
 		self.processURL()
 			
 	def processURL(self):
@@ -365,6 +374,7 @@ class ForumBrowser:
 		self.alwaysLogin = always_login
 		self._loggedIn = False
 		self.loginError = ''
+		self.SSL = False
 		self.urls = {}
 		self.filters = {}
 		self.theme = {}
@@ -471,6 +481,8 @@ class ForumBrowser:
 	
 	def subscribeThread(self,tid): return False
 	
+	def unSubscribeThread(self,tid): return False
+	
 	def canSubscribeForum(self,fid): return False
 	
 	def subscribeForum(self,tid): return False
@@ -480,9 +492,7 @@ class ForumBrowser:
 	def hasSubscriptions(self): return False
 	
 	def canDelete(self,user): return False
-	
-	def canSubscribeThread(self,tid): return False
-	
+		
 	def canEditPost(self,user): return False
 	
 	def fakeCallback(self,pct,message=''): return True

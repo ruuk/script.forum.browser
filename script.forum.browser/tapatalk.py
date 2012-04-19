@@ -1,6 +1,6 @@
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib, socket, errno
-import urllib, urllib2
+import urllib2
 import iso8601, forumbrowser
 #import xbmc #@UnresolvedImport
 
@@ -27,26 +27,14 @@ def testForum(forum):
 		url2 = None
 		if '/' in forum: url3 = 'http://%s/mobiquo/mobiquo.php' % forum.split('/',1)[0]
 	
-	try:
-		server = xmlrpclib.ServerProxy(url,transport=CookieTransport())
-		server.get_config()
-		return url
-	except:
-		return None
-	if not url2: return None
-	try:
-		server = xmlrpclib.ServerProxy(url2,transport=CookieTransport())
-		server.get_config()
-		return url2
-	except:
-		return None
-	if not url3: return None
-	try:
-		server = xmlrpclib.ServerProxy(url3,transport=CookieTransport())
-		server.get_config()
-		return url3
-	except:
-		return None
+	for u in (url,url2,url3):
+		if not u: continue
+		try:
+			server = xmlrpclib.ServerProxy(u,transport=CookieTransport())
+			server.get_config()
+			return u
+		except:
+			continue
 	return None
 			
 class CookieResponse:
@@ -65,8 +53,13 @@ class CookieTransport(xmlrpclib.Transport):
 		xmlrpclib.Transport.__init__(self)
 		self._loggedIn = False
 		self.jar = cookielib.CookieJar()
-		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2
-		self.getresponseTakesOneArg = httplib.HTTPConnection.getresponse.func_code.co_argcount < 2
+		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2 #@UndefinedVariable
+		self.getresponseTakesOneArg = httplib.HTTPConnection.getresponse.func_code.co_argcount < 2 #@UndefinedVariable
+		try:
+			import gzip
+		except ImportError:
+			gzip = None
+		self.gzip = gzip
 
 	def loggedIn(self):
 		return self._loggedIn
@@ -134,11 +127,7 @@ class CookieTransport(xmlrpclib.Transport):
 		if (response.getheader("content-length", 0)):
 			response.read()
 			
-		raise httplib.ProtocolError(
-			host + handler,
-			response.status, response.reason,
-			response.msg,
-			)
+		raise httplib.HTTPException(response.reason)
 	
 	def send_content(self, connection, request_body):
 		connection.putheader("Content-Type", "text/xml")
@@ -146,9 +135,10 @@ class CookieTransport(xmlrpclib.Transport):
 		#optionally encode the request
 		if (self.encode_threshold is not None and
 			self.encode_threshold < len(request_body) and
-			gzip):
+			self.gzip):
+			import gzip
 			connection.putheader("Content-Encoding", "gzip")
-			request_body = gzip_encode(request_body)
+			request_body = self.gzip_encode(request_body,gzip)
 
 		connection.putheader("Content-Length", str(len(request_body)))
 		#For older python verions
@@ -157,6 +147,22 @@ class CookieTransport(xmlrpclib.Transport):
 			if request_body: connection.send(request_body)
 		else:
 			connection.endheaders(request_body)
+			
+	def gzip_encode(self,data,gzip):
+		import StringIO
+		"""data -> gzip encoded data
+	
+		Encode data using the gzip content encoding as described in RFC 1952
+		"""
+		if not gzip:
+			raise NotImplementedError
+		f = StringIO.StringIO()
+		gzf = gzip.GzipFile(mode="wb", fileobj=f, compresslevel=1)
+		gzf.write(data)
+		gzf.close()
+		encoded = f.getvalue()
+		f.close()
+		return encoded
 			
 
 class PMLink:
@@ -172,7 +178,7 @@ class PMLink:
 		
 		if match:
 			self.url = match.group('url')
-			text = match.group('text')
+			self.text = match.group('text')
 		self.processURL()
 			
 	def processURL(self):
@@ -438,6 +444,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if __addon__.getSetting('enable_ssl'):
 			LOG('Enabling SSL')
 			url = url.replace('http://','https://')
+			self.SSL = True
 		self.server = xmlrpclib.ServerProxy(url,transport=self.transport)
 		self.getForumConfig()
 		return True
@@ -572,6 +579,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		data['starter'] = str(data.get('topic_author_name',self.user))
 		data['title'] = str(data.get('topic_title',''))
 		data['short_content'] = str(data.get('short_content',''))
+		data['subscribed'] = data.get('is_subscribed',False)
 		#data['lastposter'] = 
 		#data['forumid'] = 
 		data['sticky'] = sticky
@@ -831,5 +839,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			text = result.get('result_text')
 			LOG('Failed to subscribe to thread: ' + text)
+			return text
+		
+	def unSubscribeThread(self,tid):
+		result = self.server.unsubscribe_topic(tid)
+		if result.get('result'):
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to unsubscribe from thread: ' + text)
 			return text
 	

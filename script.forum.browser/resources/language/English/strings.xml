@@ -116,6 +116,11 @@
     <string id="30236">Subscribe To Thread</string>
     <string id="30237">Confirm exit on quit</string>
     
+    <string id="30238">Password Encryption Type</string>
+    <string id="30239">Encryption Key File (Optional)</string>
+    
+    <string id="30240">Unsubscribe From Thread</string>
+    
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
     <string id="3002">Post Reply</string>

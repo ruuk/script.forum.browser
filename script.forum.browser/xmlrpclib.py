@@ -522,14 +522,14 @@ if not _bool_is_builtin:
 
 try:
     # optional xmlrpclib accelerator
-    import _xmlrpclib
+    import _xmlrpclib #@UnresolvedImport
     FastParser = _xmlrpclib.Parser
     FastUnmarshaller = _xmlrpclib.Unmarshaller
 except (AttributeError, ImportError):
     FastParser = FastUnmarshaller = None
 
 try:
-    import _xmlrpclib
+    import _xmlrpclib #@UnresolvedImport
     FastMarshaller = _xmlrpclib.Marshaller
 except (AttributeError, ImportError):
     FastMarshaller = None

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.26'
+__version__ = '0.9.27'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -76,6 +76,7 @@ DEBUG = __addon__.getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
 LOG('Skin: ' + THEME)
 
+from crypto import passmanager
 import tapatalk
 
 ######################################################################################
@@ -407,7 +408,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						data = response.get_data()
 						response.set_data(re.sub('<![^>]*?>','',data))
 					return response
-		  
+
 			self.browser.add_handler(SanitizeHandler())
 		response = self.browser.open(self.getURL('login'))
 		html = response.read()
@@ -1258,12 +1259,12 @@ class PostDialog(BaseWindow):
 	def onInit(self):
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.post.quote:
-			format = FB.formats.get('quote')
+			qformat = FB.formats.get('quote')
 			pid = self.post.pid
-			if format:
+			if qformat:
 				#This won't work with other formats, need to do this better TODO
-				if not pid or pid.startswith('PM'): format = format.replace(';!POSTID!','')
-				for line in format.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
+				if not pid or pid.startswith('PM'): qformat = qformat.replace(';!POSTID!','')
+				for line in qformat.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
 					self.addQuote(line)
 			else:
 				for line in self.post.quote.split('\n'): self.addQuote(line)
@@ -1450,6 +1451,8 @@ class LinePostDialog(PostDialog):
 		llist.reset()
 		for line in lines: self.addLine(line)
 		self.updatePreview()
+		if pos > llist.size(): pos = llist.size()
+		llist.selectItem(pos)
 	
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
@@ -1520,7 +1523,6 @@ class TextPostDialog(PostDialog):
 				self.backspace()
 				return True
 			#elif aid == 18:
-			#	print 'test'
 			#	char = '\\'
 			#	xbmc.executebuiltin('Action(fullscreen)')
 			elif aid == 122:
@@ -1730,8 +1732,8 @@ class TextPostDialog(PostDialog):
 		if upPrev: self.updatePreview()
 		
 	def getWrapped(self):
-		buffer = self.buffer[0:self.cursorPos]+'\r'+self.buffer[self.cursorPos:]
-		lines = buffer.split('\n')
+		buff = self.buffer[0:self.cursorPos]+'\r'+self.buffer[self.cursorPos:]
+		lines = buff.split('\n')
 		wrapped = []
 		for line in lines:
 			wrapped += self.splitLine(line)
@@ -1968,6 +1970,7 @@ class RepliesWindow(PageWindow):
 		self.pid = ''
 		self.topic = kwargs.get('topic','')
 		self.lastid = kwargs.get('lastid','')
+		self.threadItem = kwargs.get('item')
 		self.parent = kwargs.get('parent')
 		#self._firstPage = __language__(30113)
 		self._newestPage = __language__(30112)
@@ -2099,37 +2102,6 @@ class RepliesWindow(PageWindow):
 		self.getControl(104).setLabel(self.topic)
 		self.pid = ''
 		self.setLoggedIn()
-		#self.getAvatars()
-		
-#	def getAvatars(self):
-#		urls = {}
-#		for post in self.posts.values():
-#			url = FB.makeURL(post.avatar)
-#			if url: urls[url] = 1
-#		targetdir = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'avatars'))
-#		TD.startDownload(targetdir,urls.keys(),ext='.jpg',callback=self.getAvatarsCallback)
-#		
-#	def getAvatarsCallback(self,file_dict):
-#		self.runInMain(self.updateAvatars,file_dict)
-#		
-#	def updateAvatars(self,file_dict):
-#		clist = self.getControl(120)
-#		for idx in range(0,clist.size()):
-#			item = clist.getListItem(idx)
-#			post = self.posts[item.getProperty('post')]
-#			fname = file_dict.get(FB.makeURL(post.avatar))
-#			if fname:
-#				fname = xbmc.translatePath(fname)
-#				item.setProperty('avatar',fname)
-#				post.avatarFinal = fname
-#		focus = self.getFocusId()
-#		#xbmcgui.lock()
-#		if focus == 120:
-#			self.setFocusId(105)
-#		else:
-#			self.setFocusId(120)
-#		self.setFocusId(focus)
-#		#xbmcgui.unlock()
 			
 	def makeLinksArray(self,miter):
 		if not miter: return []
@@ -2181,41 +2153,40 @@ class RepliesWindow(PageWindow):
 		PageWindow.onAction(self,action)
 	
 	def doMenu(self):
-		options = [__language__(30134),__language__(30054)]
-		delete = None
-		edit = None
 		item = self.getControl(120).getSelectedItem()
 		post = self.posts.get(item.getProperty('post'))
+		d = ChoiceMenu(__language__(30051))
+		d.addItem('quote',__language__(30134))
+		d.addItem('refresh',__language__(30054))
 		if FB.canDelete(item.getLabel()):
-			delete = len(options)
-			options.append(__language__(30141))
+			d.addItem('delete',__language__(30141))
 		if FB.canEditPost(item.getLabel()):
-			edit = len(options)
-			options.append(__language__(30232))
-		if FB.canSubscribeThread(self.tid):
-			subscribe = len(options)
-			options.append(__language__(30236))
-		idx = xbmcgui.Dialog().select(__language__(30051),options)
-		if idx == 0:
+			d.addItem('edit',__language__(30232))
+		if self.threadItem and self.threadItem.getProperty('subscribed'):
+			d.addItem('unsubscribe',__language__(30240))
+		else:
+			if FB.canSubscribeThread(self.tid):
+				d.addItem('subscribe',__language__(30236))
+		result = d.getResult()
+		if not result: return
+		if result == 'quote':
 			self.stopThread()
 			self.openPostDialog(post)
-		elif idx == 1:
+		elif result == 'refresh':
 			self.stopThread()
 			self.fillRepliesList(self.pageData.getPageNumber())
-		elif idx == edit:
+		elif result == 'edit':
 			pm = FB.getPostForEdit(post.postId)
 			pm.tid = self.tid
 			if openPostDialog(editPM=pm):
 				self.fillRepliesList(self.pageData.getPageNumber())
-		elif idx == delete:
+		elif result == 'delete':
 			self.stopThread()
 			self.deletePost()
-		elif idx == subscribe:
-			result = FB.subscribeThread(self.tid)
-			if result == True:
-				xbmcgui.Dialog().ok('Success','Subscribed to thread.')
-			else:
-				xbmcgui.Dialog().ok('Failed','Failed to subscribed to thread:',str(result))
+		elif result == 'subscribe':
+			if subscribeThread(self.tid): self.threadItem.setProperty('subscribed','subscribed')
+		elif result == 'unsubscribe':
+			if unSubscribeThread(self.tid): self.threadItem.setProperty('subscribed','')
 		if self.empty: self.fillRepliesList()
 			
 	def deletePost(self):
@@ -2242,14 +2213,12 @@ class RepliesWindow(PageWindow):
 	def openPostDialog(self,post=None):
 		if post:
 			item = self.getControl(120).getSelectedItem()
-			user = item.getLabel()
 		else:
 			if self.tid == 'private_messages':
 				item = None
 			else:
 				if not self.getControl(120).size(): return
 				item = self.getControl(120).getListItem(0)
-			user=''
 		#if not item.getProperty('post'): item = self.getControl(120).getListItem(1)
 		if item:
 			pid = item.getProperty('post')
@@ -2269,6 +2238,22 @@ class RepliesWindow(PageWindow):
 			self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 
+def subscribeThread(tid):
+	result = FB.subscribeThread(tid)
+	if result == True:
+		xbmcgui.Dialog().ok('Success','Subscribed to thread.')
+	else:
+		xbmcgui.Dialog().ok('Failed','Failed to subscribed to thread:',str(result))
+	return result
+		
+def unSubscribeThread(tid):
+	result = FB.unSubscribeThread(tid)
+	if result == True:
+		xbmcgui.Dialog().ok('Success','Unsubscribed from thread.')
+	else:
+		xbmcgui.Dialog().ok('Failed','Failed to unsubscribed from thread:',str(result))
+	return result
+				
 ######################################################################################
 # Threads Window
 ######################################################################################
@@ -2375,11 +2360,11 @@ class ThreadsWindow(PageWindow):
 			item.setProperty("lastid",tdict.get('lastid',''))
 			item.setProperty('title',title)
 			item.setProperty('reply_count',reply_count)
+			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
 			self.getControl(120).addItem(item)
 			self.setFocusId(120)
 			
 	def addForums(self,forums):
-		print 'TEST'
 		for f in forums:
 			fdict = f.groupdict()
 			fid = fdict.get('forumid','')
@@ -2411,7 +2396,7 @@ class ThreadsWindow(PageWindow):
 			self.fillThreadList()
 			self.setFocus(self.getControl(120))
 		else:
-			w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,reply_count=reply_count,parent=self)
+			w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,reply_count=reply_count,item=item,parent=self)
 			w.doModal()
 			del w
 
@@ -2430,8 +2415,25 @@ class ThreadsWindow(PageWindow):
 	
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
-			pass
+			self.doMenu()
 		PageWindow.onAction(self,action)
+		
+	def doMenu(self):
+		if self.getFocusId() != 120: return
+		item = self.getControl(120).getSelectedItem()
+		d = ChoiceMenu('Options')
+		if item.getProperty('subscribed'):
+			d.addItem('unsubscribe', __language__(30240))
+		else:
+			if FB.canSubscribeThread(item.getProperty('id')):
+				d.addItem('subscribe', __language__(30236))
+		
+		result = d.getResult()
+		if not result: return
+		if result == 'subscribe':
+			if subscribeThread(item.getProperty('id')): item.setProperty('subscribed','subscribed')
+		elif result == 'unsubscribe':
+			if unSubscribeThread(item.getProperty('id')): item.setProperty('subscribed','')
 		
 	def gotoPage(self,page):
 		self.stopThread()
@@ -2463,7 +2465,9 @@ class ForumsWindow(BaseWindow):
 		return __addon__.getSetting('login_user_' + FB.getForumID().replace('.','_'))
 		
 	def getPassword(self):
-		return __addon__.getSetting('login_pass_' + FB.getForumID().replace('.','_'))
+		key = 'login_pass_' + FB.getForumID().replace('.','_')
+		return passmanager.getPassword(key, self.getUsername())
+		#return __addon__.getSetting('login_pass_' + FB.getForumID().replace('.','_'))
 		
 	def hasLogin(self):
 		return self.getUsername() != '' and self.getPassword() != ''
@@ -2472,6 +2476,7 @@ class ForumsWindow(BaseWindow):
 		self.setLoggedIn() #So every time we return to the window we check
 		if self.started: return
 		self.started = True
+		self.getControl(112).setVisible(False)
 		self.setStopControl(self.getControl(105))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.resetForum()
@@ -2535,7 +2540,6 @@ class ForumsWindow(BaseWindow):
 			self.setPMCounts(pm_counts)
 			
 			for f in forums:
-				#print f.group(0)
 				if hasattr(f,'groupdict'):
 					fdict = f.groupdict()
 				else:
@@ -2662,6 +2666,7 @@ class ForumsWindow(BaseWindow):
 		else:
 			self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
+		self.getControl(112).setVisible(FB.SSL)
 		
 	def openSettings(self):
 		mode = __addon__.getSetting('color_mode')
@@ -2692,7 +2697,7 @@ class MessageConverter:
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
 		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		
+		self.hrReplace = ('[CR][B]_____________________________________________________________________________________[/B][CR]').encode('utf8')
 		#static filters
 		self.imageFilter = re.compile('<img[^>]+src="(?P<url>http://[^"]+)"[^>]*/>')
 		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
@@ -2744,7 +2749,7 @@ class MessageConverter:
 	def messageToDisplay(self,html):
 		html = self.lineFilter.sub('',html)
 		
-		
+		html = re.sub('[_]{10,}',self.hrReplace,html) #convert the pre-converted [hr]
 		#html = self.quoteStartFilter.sub(self.quoteConvert,html)
 		#html = self.quoteEndFilter.sub(self.quoteEndReplace,html)
 		html = self.formatQuotes(html)
@@ -2774,7 +2779,7 @@ class MessageConverter:
 		html = html.replace('</table>','[CR][CR]')
 		html = html.replace('</div></div>','[CR]') #to get rid of excessive new lines
 		html = html.replace('</div>','[CR]')
-		html = html.replace('[hr]','[CR][B]_____________________________________________________________________________________[/B][CR]')
+		html = html.replace('[hr]',self.hrReplace)
 		html = self.tagFilter.sub('',html)
 		html = self.removeNested(html,'\[/?B\]','[B]')
 		html = self.removeNested(html,'\[/?I\]','[I]')
@@ -2791,18 +2796,20 @@ class MessageConverter:
 			if ms:
 				if me and ms.start() > me.start():
 					rep = self.quoteEndReplace
-					if ct == 1: rep += '[/COLOR]'
+					if ct == 1 or ct == 2: rep += '[/COLOR]'
 					html = self.quoteEndFilter.sub(rep,html,1)
 					ct -= 1
 				else:
 					gd = ms.groupdict()
 					rep = self.quoteStartReplace % (gd.get('user') or '')
 					if ct == 0: rep = '[COLOR FF5555AA]' + rep
+					elif ct == 1: rep = '[/COLOR][COLOR FF55AA55]' + rep
 					html = self.quoteStartFilter.sub(rep,html,1)
 					ct += 1
 			elif me:
 				rep = self.quoteEndReplace
 				if ct == 1: rep += '[/COLOR]'
+				elif ct == 2:  rep += '[/COLOR][COLOR FF5555AA]'
 				html = self.quoteEndFilter.sub(rep,html,1)
 				ct -= 1
 		return html
@@ -2970,8 +2977,6 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum'):
 		for f in favs:
 			if f in rest: rest.pop(rest.index(f))
 		favs.append('')
-	flist = []
-	flist_disp = []
 	if just_favs:
 		if not favs: return None
 		whole = favs[:-1]
@@ -3005,7 +3010,8 @@ def setLogins():
 	password = doKeyboard(__language__(30202),__addon__.getSetting('login_pass_' + forumID.replace('.','_')),True)
 	if password is None: return
 	__addon__.setSetting('login_user_' + forumID.replace('.','_'),user)
-	__addon__.setSetting('login_pass_' + forumID.replace('.','_'),password)
+	key = 'login_pass_' + forumID.replace('.','_')
+	passmanager.savePassword(key, user, password)
 	
 def doSettings():
 	dialog = xbmcgui.Dialog()
@@ -3084,7 +3090,6 @@ def addTapatalkForum():
 		forum = url.split('http://',1)[-1].split('/',1)[0]
 		dialog.update(20,'Getting Description And Images')
 		info = forumbrowser.HTMLPageInfo(pageURL)
-		title = ''
 		images = []
 		if info.isValid:
 			tmp_desc = info.description(info.title(''))
@@ -3188,7 +3193,6 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
-		items = []
 		clist = self.getControl(120)
 		clist.reset()
 		for i in self.items:
@@ -3348,7 +3352,7 @@ class Downloader:
 				self.display = 'File %s of %s' % (i+1,self.total)
 				self.prog.update(int((i/float(self.total))*100),self.message,self.display)
 				fname = os.path.join(targetdir,str(i) + ext)
-				fname, ftype = self.getUrlFile(url,fname,callback=self.progCallback)
+				fname, ftype = self.getUrlFile(url,fname,callback=self.progCallback) #@UnusedVariable
 				file_list.append(fname)
 		except:
 			ERROR('DOWNLOAD URLS ERROR')
@@ -3397,7 +3401,7 @@ class Downloader:
 		ext = None
 		if '/' in ftype: ext = '.' + ftype.split('/')[-1].replace('jpeg','jpg')
 		if ext:
-			fname, x = os.path.splitext(target)
+			fname, x = os.path.splitext(target) #@UnusedVariable
 			target = fname + ext
 		#print urlObj.info()
 		#Content-Disposition: attachment; filename=FILENAME
@@ -3452,7 +3456,7 @@ def copyTree(source,target):
 	shutil.copytree(source, target)
 		
 def doModKeyboard(prompt,default='',hidden=False):
-	restart = False
+	#restart = False
 	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
 	skinPath = xbmc.translatePath('special://skin')
 	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
@@ -3473,7 +3477,7 @@ def doModKeyboard(prompt,default='',hidden=False):
 			return
 		finally:
 			dialog.close()
-		restart = True
+		#restart = True
 		xbmcgui.Dialog().ok('Success','Files copied.','XBMC needs to be restarted','for mod to take effect')
 	skinPath = localSkinPath
 	
@@ -3508,13 +3512,36 @@ def doModKeyboard(prompt,default='',hidden=False):
 	#Remove added files
 	os.remove(backupPath)
 	return ret
-			
+
+def getForumList():
+	ft = os.listdir(FORUMS_STATIC_PATH)
+	ft2 = os.listdir(FORUMS_PATH)
+	flist = []
+	for f in ft + ft2:
+		if not f.startswith('.'):
+			if not f in flist: flist.append(f)
+	return flist
+
+def checkPasswordEncryption():
+	if __addon__.getSetting('passwords_encrypted') == 'true': return
+	__addon__.setSetting('passwords_encrypted','true')
+	flist = getForumList()
+	for f in flist:
+		key = 'login_pass_' + f.replace('.','_')
+		user = __addon__.getSetting('login_user_' + f.replace('.','_'))
+		if not user: continue
+		password = __addon__.getSetting(key)
+		if not password: continue
+		LOG('Encrypting password for: ' + f)
+		passmanager.savePassword(key, user, password)
+	
 ######################################################################################
 # Startup
 ######################################################################################
 if sys.argv[-1] == 'settings':
 	doSettings()
 else:
+	checkPasswordEncryption()
 	FB = None
 	getForumBrowser()
 

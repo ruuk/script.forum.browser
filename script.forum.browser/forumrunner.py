@@ -1,4 +1,4 @@
-import forumbrowser, json, urllib2, urllib, sys, os,re, time, cookielib, codecs
+import forumbrowser, json, urllib2, urllib, sys, os,re, time, codecs
 
 DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
@@ -18,19 +18,14 @@ def testForum(forum):
 		url2 = None
 		if '/' in forum: url3 = 'http://%s/forumrunner/request.php' % forum.split('/',1)[0]
 	
-	try:
-		client = ForumrunnerClient(url)
-		result = client.version()
-		if result.get('version'): return url
-	except:
-		return None
-	if not url2: return None
-	try:
-		client = ForumrunnerClient(url2)
-		result = client.version()
-		if result.get('version'): return url2
-	except:
-		return None
+	for u in (url,url2,url3):
+		if not u: continue
+		try:
+			client = ForumrunnerClient(u)
+			result = client.version()
+			if result.get('version'): return u
+		except:
+			continue
 	return None
 
 class FRCFail:
@@ -154,13 +149,19 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not self._url:
 			self._url = 'http://%s/forumrunner/request.php' % self.forum
 		url = self._url
-		#if __addon__.getSetting('enable_ssl'):
-		#	LOG('Enabling SSL')
-		#	url = url.replace('http://','https://')
+		if __addon__.getSetting('enable_ssl'):
+			LOG('Enabling SSL')
+			url = url.replace('http://','https://')
 		self.client = ForumrunnerClient(url)
-		
-		result = self.client.version()
-		
+		try:
+			result = self.client.version()
+			self.SSL = True
+		except urllib2.URLError:
+			LOG('Falling back to normal http')
+			self.client = ForumrunnerClient(self._url)
+			result = self.client.version()
+			self.SSL = False
+			
 		self.platform = result.get('platform')
 		self.charset = result.get('charset')
 		
@@ -428,7 +429,6 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				break
 			pms = []
 			if not callback(80,self.lang(30103)): break
-			infos = {}
 			for p in messages.get('pms',[]):
 				fp = ForumPost(p)
 				fp.online = fp.userName in oDict

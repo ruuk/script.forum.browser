@@ -272,6 +272,14 @@
 					<visible>system.getbool(input.enablemouse)</visible>
 					<onclick>PreviousMenu</onclick>
 				</control>
+				<control type="image" id="112">
+					<description>Secure</description>
+					<posx>36</posx>
+					<posy>38</posy>
+					<width>16</width>
+					<height>16</height>
+					<texture>forum-browser-secure.png</texture>
+				</control>
 				<control type="label" id="160">
 					<description>Login Error</description>
 					<posx>0</posx>

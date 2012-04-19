@@ -7,6 +7,8 @@
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
     <setting id="use_mod_keyboard" type="bool" label="30234" default="false" />
     <setting id="enable_ssl" type="bool" label="30235" default="false" />
+    <setting id="crypto_type" subsetting="true" type="enum" label="30238" values="AES|Triple DES|AES & Triple DES" default="2" />
+    <setting label="30239" type="file" id="crypto_key_file"  subsetting="true" default="" />
     <setting id="debug" type="bool" label="30228" default="false" />
     <setting id="do_mybb_edit_bug_fix" type="bool" label="30233" default="true" />
     <setting id="skin" type="enum" label="30005" lvalues="30010|30011|30012" default="0" />

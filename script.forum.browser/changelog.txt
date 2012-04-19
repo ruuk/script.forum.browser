@@ -1,23 +1,43 @@
 Forum Browser Changelog
 
 TODO:
-  Forum Subscriptions
+  Forum Subscriptions / Subscribe/Unsubscribe forums
   Add join date to posts
-  Unsubscribe threads/forums
-  When deleting line in post editor, select next line instead of dropping to bottom
+  Help window (forum browser user guide)
+  confirmation dialogs for add to favs/remove from favs
+  confirmation dialogs for forum added to local m/c,forum removed from local m/c
+  option to add a forum to online database once happy with it
+  smiley faces
+  view video links
+  fanart
+  option maybe to open forum browser straight on your subscriptions page/list
+  
   Improve the database and database management
-  Encrypt login data
-  Handle exit ask with remote
+  Fallback to non SSL on SSL fail on tapatalk?
+  Adjustable text size
+  signature maybe with future tapatalk plugin update
+  reputation maybe with future tapatalk plugin update
+  Logo url from field in forum config data?
   Make a million dollars
+Bugs:
+  vw vortex forum is not showing full screen post (permissions issues)
 
-Current Version : 0.9.26
+Current Version : 0.9.27
+
+*** 0.9.27 ***
+
+Passwords now stored encrypted
+Added unsubscribe from thread to context menu (now both subscribe and unsubscribe show in the context menu on the threads list and replies window)
+Added secure icon for SSL connections
+Added fallback to normal HTTP for forumrunner when SSL fails
+Quotes within a quote are now green
 
 *** 0.9.26 ***
 
 Handling for nested quotes
 Quotes are now colored
 Selected thread text fixed to white in light skin
-Lightened unread thread text slightly
+Lightened unread thread text slightly in dark skin
 Fixed (I hope) responding to remote back button (for asking to exit)
 
 *** 0.9.25 ***
