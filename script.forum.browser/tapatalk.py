@@ -15,11 +15,12 @@ def checkVersion(version1, version2):
 	return cmp(normalize(version1), normalize(version2))
 
 def testForum(forum):
+	url2 = None
 	url3 = None
 	if forum.startswith('http://'):
 		url = forum
-		if not forum.endswith('/'): forum += '/'
-		url2 = forum + 'mobiquo/mobiquo.php'
+		if not forum.endswith('/') and not forum.endswith('.php'): forum += '/'
+		if not forum.endswith('.php/'): url2 = forum + 'mobiquo/mobiquo.php'
 	else:
 		if forum.startswith('/'): forum = forum[1:]
 		if forum.endswith('/'): forum = forum[:-1]
@@ -212,27 +213,11 @@ class PMLink:
 ################################################################################
 # ForumPost
 ################################################################################
-class ForumPost:
+class ForumPost(forumbrowser.ForumPost):
 	def __init__(self,pdict=None):
+		forumbrowser.ForumPost.__init__(self, pdict)
 		self.MC = sys.modules["__main__"].MC
 		self.FB = sys.modules["__main__"].FB
-		self.isShort = False
-		self.isPM = False
-		if pdict:
-			self.setVals(pdict)
-		else:
-			self.postId,self.date,self.userId,self.userName,self.avatar,self.status,self.title,self.message,self.signature = ('','','','ERROR','','','ERROR','','')
-			self.pid = ''
-		self.translated = ''
-		self.avatarFinal = ''
-		self.tid = ''
-		self.fid = ''
-		self.boxid = ''
-		self.status = ''
-		self.activity = ''
-		self.postCount = 0
-		self.postNumber = 0
-		self.userInfo = {}
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('post_id',''))
@@ -270,6 +255,11 @@ class ForumPost:
 		self.status = str(info.get('display_text',''))
 		self.activity = str(info.get('current_activity',''))
 		self.postCount = info.get('post_count',0)
+		date = str(info.get('reg_time',''))
+		if date:
+			date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
+			date = time.strftime('%b %d, %Y',iso8601.parse_date(date).timetuple())
+		self.joinDate = date
 		
 	def setPostID(self,pid):
 		self.postId = pid
@@ -291,7 +281,7 @@ class ForumPost:
 			m = self.FB.server.get_message(self.getID(),self.boxid)
 			self.message = str(m.get('text_body',self.message))
 			self.isShort = False
-		elif raw:
+		elif raw and self.userName == self.FB.user:
 			m = self.FB.server.get_raw_post(self.getID())
 			self.message = str(m.get('post_content',self.message))
 		return self.message + self.signature
@@ -580,7 +570,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		data['title'] = str(data.get('topic_title',''))
 		data['short_content'] = str(data.get('short_content',''))
 		data['subscribed'] = data.get('is_subscribed',False)
-		#data['lastposter'] = 
+		data['lastposter'] = str(data.get('last_reply_user',''))
 		#data['forumid'] = 
 		data['sticky'] = sticky
 		return data
@@ -672,9 +662,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					sreplies.append(fp)
 					ct += 1
 				sreplies.reverse()
+			except xmlrpclib.Fault, e:
+				LOG('ERROR GETTING POSTS: ' + e.faultString)
+				raise forumbrowser.Error(e.faultString)
 			except:
 				em = ERROR('ERROR GETTING POSTS')
-				callback(-1,'%s' % em)
+				callback(-1,em)
 				if donecallback: donecallback(None,None)
 				return (None,None)
 			

@@ -1,6 +1,6 @@
 #forum.dvhk.pl
 #DVHK Forums
-import:TT.forum.xbmc.org
+import:.forum.xbmc.org
 url:logo=http://forum.dvhk.pl/disturbed/misc/dis_hdr_logo.jpg
 # The URLs
 url:base=http://forum.dvhk.pl/

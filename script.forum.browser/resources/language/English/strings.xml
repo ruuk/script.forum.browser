@@ -9,6 +9,8 @@
     <string id="30005">Skin (changes require a restart)</string>
     <string id="30006">Use Text Editor (Experimental)</string>
     <string id="30007">Use Forum Colors</string>
+    <string id="30008">Advanced</string>
+    <string id="30009">Automatically Open To Thread Subscriptions</string>
     
     <string id="30010">Default</string>
     <string id="30011">Dark</string>
@@ -120,6 +122,7 @@
     <string id="30239">Encryption Key File (Optional)</string>
     
     <string id="30240">Unsubscribe From Thread</string>
+    <string id="30241">Add Current Forum To Online Database</string>
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
@@ -133,5 +136,6 @@
     <string id="3009">Messages</string>
     <string id="3010">STOP</string>
     <string id="3011">Posts:</string>
+    <string id="3012">Join:</string>
 
 </strings>

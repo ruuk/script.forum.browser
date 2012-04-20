@@ -10,6 +10,8 @@ def ERROR(message):
 	traceback.print_exc()
 	return str(sys.exc_info()[1])
 
+class Error(Exception): pass
+
 class FBOnlineDatabase():
 	def __init__(self):
 		self.url = 'http://xbmc.2ndmind.net/forumbrowser/tapatalk.php'
@@ -363,6 +365,52 @@ class ForumBrowser:
 						'vb':'[QUOTE=!USER!;!POSTID!]!QUOTE![/QUOTE]'
 					}
 	
+	#Order is importand because some a substrings of others. Also some include \r so the replacement is not re-replaced. We clean those out at the end
+	smilies = [ (':devil:','[COLOR FFAA0000]>:\r)[/COLOR]'),
+				(':angel:','O:\r)'),
+				(':;):',';\r)'),
+				(':-/',':-/'),
+				(';)',';\r)'),
+				(':D',':\rD'),
+				(':P',':P'),
+				(':p',':P'),
+				(':o',':o'),
+				(':~',':~'),
+				(':grin:',':\rD'),
+				(':blush:',':">'),
+				(':laugh:',':\r))'),
+				(':angry:','X{'),
+				(':rofl:','*ROFL*'),
+				(':huh:','*HUH*'),
+				(':sleepy:','*SLEEPY*'),
+				(':cool:','B)'),
+				(':rolleyes:','*ROLLEYES*'),
+				(':nod:','*NOD*'),
+				(':sniffle:','*SNIFFLE*'),
+				(':confused:','%)'),
+				(':mad:','>:\r('),
+				(':yawn:','*YAWN*'),
+				(':struggle:','*STRUGGLE*'),
+				(':shame:','*SHAME*'),
+				(':eek:','*EEK*'),
+				(':rotfl:','*ROFL*'),
+				(':bulgy-eyes:','*BULGY EYES*'),
+				(':at-wits-end:','*AT WITS END*'),
+				(':oo:','>oo<'),
+				(':stare:','*STARE*'),
+				(':sad:',':('),
+				(':no:','*NO*'),
+				('???','???'),
+				(':shocked:',':O'),
+				(':love:','[COLOR FFAA0000]<3[/COLOR]'),
+				(':shy:','*SHY*'),
+				(':nerd:',':-B'),
+				(':(',':('),
+				(':)',':)'),
+				(':s',':s'),
+				('\r','')
+				]
+	
 	def __init__(self,forum,always_login=False):
 		self.forum = forum
 		self.prefix = ''
@@ -380,8 +428,20 @@ class ForumBrowser:
 		self.theme = {}
 		self.forms = {}
 		self.formats = {}
-		self.smilies = {}
+		self.prepareSmileyList()
 	
+	def prepareSmileyList(self):
+		class SmiliesList(list):
+			def get(self,key,default=None): return default
+			
+		new = SmiliesList()
+		for f,r in self.smilies:
+			if '[/COLOR]' in r:
+				new.append((f,r))
+			else:
+				new.append((f,'[COLOR FF999900]'+r+'[/COLOR]'))
+		self.smilies = new
+			
 	def getForumID(self):
 		return self.prefix + self.forum
 	
@@ -402,7 +462,6 @@ class ForumBrowser:
 		self.theme = {}
 		self.forms = {}
 		self.formats = {}
-		self.smilies = {}
 		
 		f = open(fname,'r')
 		data = f.read()

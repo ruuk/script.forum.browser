@@ -2,15 +2,8 @@ Forum Browser Changelog
 
 TODO:
   Forum Subscriptions / Subscribe/Unsubscribe forums
-  Add join date to posts
   Help window (forum browser user guide)
-  confirmation dialogs for add to favs/remove from favs
-  confirmation dialogs for forum added to local m/c,forum removed from local m/c
-  option to add a forum to online database once happy with it
-  smiley faces
   view video links
-  fanart
-  option maybe to open forum browser straight on your subscriptions page/list
   
   Improve the database and database management
   Fallback to non SSL on SSL fail on tapatalk?
@@ -19,10 +12,25 @@ TODO:
   reputation maybe with future tapatalk plugin update
   Logo url from field in forum config data?
   Make a million dollars
-Bugs:
-  vw vortex forum is not showing full screen post (permissions issues)
 
-Current Version : 0.9.27
+Current Version : 0.9.28
+
+*** 0.9.28 ***
+
+Fix bug when trying to view posts from other users on some forums (ie vwvortex)
+Handle smilies
+Change preview color on post editor to white (or black) for better visibility
+Dialogs on add/remove favorites
+Dialogs on add/remove forum
+Dialogs on set/clear logins
+Fixed some bugs when clearing passwords
+Added option to add a current forum to online database
+Fixed bug when adding forum with full URL
+Added fanart.jpg (Just whipped this up. If someone wants to, please create something that is acutally good :) )
+Added option to automatically open thread subscriptions window
+Added join date to posts view
+Added post numbers to full screen message view
+Hide post counts when no count available
 
 *** 0.9.27 ***
 

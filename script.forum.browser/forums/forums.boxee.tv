@@ -1,6 +1,6 @@
 #forums.boxee.tv
 #Boxee Forums
-import:TT.forum.xbmc.org
+import:.forum.xbmc.org
 url:logo=http://www.boxee.tv/htdocs/images/home/logo.png
 # The URLs
 url:base=http://forums.boxee.tv/

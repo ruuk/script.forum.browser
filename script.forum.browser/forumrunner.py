@@ -7,10 +7,11 @@ __addon__ = sys.modules["__main__"].__addon__
 
 def testForum(forum):
 	url3 = None
+	url2 = None
 	if forum.startswith('http://'):
 		url = forum
 		if not forum.endswith('/'): forum += '/'
-		url2 = forum + 'forumrunner/request.php'
+		if not forum.endswith('.php/'): url2 = forum + 'forumrunner/request.php'
 	else:
 		if forum.startswith('/'): forum = forum[1:]
 		if forum.endswith('/'): forum = forum[:-1]

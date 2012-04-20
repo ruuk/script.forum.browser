@@ -318,7 +318,7 @@
 					</control>
 					<control type="image">
 						<posx>10</posx>
-						<posy>7</posy>
+						<posy>6</posy>
 						<width>20</width>
 						<height>20</height>
 						<texture>forum-browser-logged-in.png</texture>
@@ -327,7 +327,7 @@
 					</control>
 					<control type="image">
 						<posx>10</posx>
-						<posy>7</posy>
+						<posy>6</posy>
 						<width>20</width>
 						<height>20</height>
 						<texture>forum-browser-logged-in.png</texture>
@@ -349,7 +349,7 @@
 						<posx>10</posx>
 						<posy>30</posy>
 						<width>175</width>
-						<height>15</height>
+						<height>10</height>
 						<font>font10</font>
 						<aligny>center</aligny>
 						<align>left</align>
@@ -358,9 +358,9 @@
 					</control>
 					<control type="label">
 						<posx>10</posx>
-						<posy>40</posy>
+						<posy>47</posy>
 						<width>175</width>
-						<height>30</height>
+						<height>10</height>
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
@@ -379,7 +379,7 @@
 					</control>
 					<control type="label">
 						<posx>42</posx>
-						<posy>68</posy>
+						<posy>64</posy>
 						<width>140</width>
 						<height>10</height>
 						<font>font10</font>
@@ -388,6 +388,18 @@
 						<align>left</align>
 						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
 						<visible>!StringCompare(ListItem.Property(postcount),)</visible>
+					</control>
+					<control type="label">
+						<posx>42</posx>
+						<posy>81</posy>
+						<width>140</width>
+						<height>10</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FFAAAAAA</textcolor>
+						<align>left</align>
+						<label>$LOCALIZE[SCRIPT3012] $INFO[ListItem.Property(joindate)]</label>
+						<visible>!StringCompare(ListItem.Property(joindate),)</visible>
 					</control>
 					<control type="label">
 						<posx>210</posx>
@@ -429,6 +441,7 @@
 						<textcolor>FF444444</textcolor>
 						<align>right</align>
 						<label>&#35;$INFO[ListItem.Property(postnumber)]</label>
+						<visible>!StringCompare(ListItem.Property(postnumber),)</visible>
 					</control>
 					<control type="textbox">
 						<posx>210</posx>
@@ -505,7 +518,7 @@
 					</control>
 					<control type="image">
 						<posx>10</posx>
-						<posy>7</posy>
+						<posy>6</posy>
 						<width>20</width>
 						<height>20</height>
 						<texture>forum-browser-logged-in.png</texture>
@@ -514,7 +527,7 @@
 					</control>
 					<control type="image">
 						<posx>10</posx>
-						<posy>7</posy>
+						<posy>6</posy>
 						<width>20</width>
 						<height>20</height>
 						<texture>forum-browser-logged-in.png</texture>
@@ -536,7 +549,7 @@
 						<posx>10</posx>
 						<posy>30</posy>
 						<width>175</width>
-						<height>15</height>
+						<height>10</height>
 						<font>font10</font>
 						<aligny>center</aligny>
 						<align>left</align>
@@ -545,9 +558,9 @@
 					</control>
 					<control type="label">
 						<posx>10</posx>
-						<posy>40</posy>
+						<posy>47</posy>
 						<width>175</width>
-						<height>30</height>
+						<height>10</height>
 						<font>font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
@@ -556,8 +569,8 @@
 					</control>
 					<control type="label">
 						<posx>10</posx>
-						<posy>68</posy>
-						<width>120</width>
+						<posy>64</posy>
+						<width>140</width>
 						<height>10</height>
 						<font>font10</font>
 						<aligny>center</aligny>
@@ -566,11 +579,23 @@
 						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
 						<visible>!StringCompare(ListItem.Property(postcount),)</visible>
 					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>81</posy>
+						<width>140</width>
+						<height>10</height>
+						<font>font10</font>
+						<aligny>center</aligny>
+						<textcolor>FFAAAAAA</textcolor>
+						<align>left</align>
+						<label>$LOCALIZE[SCRIPT3012] $INFO[ListItem.Property(joindate)]</label>
+						<visible>!StringCompare(ListItem.Property(joindate),)</visible>
+					</control>
 					<control type="image">
 						<posx>10</posx>
-						<posy>85</posy>
-						<width>108</width>
-						<height>108</height>
+						<posy>103</posy>
+						<width>90</width>
+						<height>90</height>
 						<texture fallback="forum-browser-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
@@ -615,6 +640,7 @@
 						<textcolor>FF444444</textcolor>
 						<align>right</align>
 						<label>&#35;$INFO[ListItem.Property(postnumber)]</label>
+						<visible>!StringCompare(ListItem.Property(postnumber),)</visible>
 					</control>
 					<control type="textbox">
 						<posx>210</posx>

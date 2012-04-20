@@ -33,6 +33,13 @@
 				<width>1057</width>
 				<height>670</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
+			</control>
+			<control type="image">
+				<posx>20</posx>
+				<posy>4</posy>
+				<width>1057</width>
+				<height>300</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
 				<colordiffuse>FF888888</colordiffuse>
 			</control>
 			<control type="image">
