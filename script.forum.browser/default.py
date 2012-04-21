@@ -2645,8 +2645,8 @@ class MessageConverter:
 		
 		
 		#static replacements
-		self.quoteStartReplace = ('[CR]_____________________________________________[CR]'+__language__(30180)+' [B]%s[/B][CR][I]').encode('utf8')
-		self.quoteEndReplace = ('[/I][CR]_____________________________________________[CR][CR]').encode('utf8')
+		self.quoteStartReplace = u'[CR]\u250f'+u'\u2501'*44+u'[CR]'+__language__(30180)+u' [B]%s[/B][CR]'
+		self.quoteEndReplace = u'[CR]\u2517'+u'\u2501'*44+u'[CR][CR]'
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
@@ -2753,20 +2753,34 @@ class MessageConverter:
 			if ms:
 				if me and ms.start() > me.start():
 					rep = self.quoteEndReplace
-					if ct == 1 or ct == 2: rep += '[/COLOR]'
+					if ct == 1:
+						rep += '[/COLOR]'
+					elif ct > 1:
+						if not ct % 2:
+							rep += '[/COLOR][COLOR FF5555AA]'
+						else:
+							rep += '[/COLOR][COLOR FF55AA55]'
 					html = self.quoteEndFilter.sub(rep,html,1)
 					ct -= 1
 				else:
 					gd = ms.groupdict()
 					rep = self.quoteStartReplace % (gd.get('user') or '')
 					if ct == 0: rep = '[COLOR FF5555AA]' + rep
-					elif ct == 1: rep = '[/COLOR][COLOR FF55AA55]' + rep
+					elif ct > 0:
+						if ct % 2:
+							rep = '[/COLOR][COLOR FF55AA55]' + rep
+						else:
+							rep = '[/COLOR][COLOR FF5555AA]' + rep
 					html = self.quoteStartFilter.sub(rep,html,1)
 					ct += 1
 			elif me:
 				rep = self.quoteEndReplace
 				if ct == 1: rep += '[/COLOR]'
-				elif ct == 2:  rep += '[/COLOR][COLOR FF5555AA]'
+				elif ct > 1:
+					if not ct % 2:
+						rep += '[/COLOR][COLOR FF5555AA]'
+					else:
+						rep += '[/COLOR][COLOR FF55AA55]'
 				html = self.quoteEndFilter.sub(rep,html,1)
 				ct -= 1
 		return html

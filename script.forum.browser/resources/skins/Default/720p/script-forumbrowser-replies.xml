@@ -647,7 +647,7 @@
 						<posy>25</posy>
 						<width>1010</width>
 						<height>165</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<textcolor>black</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>

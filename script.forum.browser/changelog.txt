@@ -13,20 +13,26 @@ TODO:
   Logo url from field in forum config data?
   Make a million dollars
 
-Current Version : 0.9.28
+Current Version : 0.9.29
+
+*** 0.9.29 ***
+
+Added custom font with smilies in an accessible region
+Changed quote delimiters and removed italics
+Nested quotes now alternate color infinitely
 
 *** 0.9.28 ***
 
 Fix bug when trying to view posts from other users on some forums (ie vwvortex)
 Handle smilies
-Change preview color on post editor to white (or black) for better visibility
+Change preview color on post editor to white/black for better visibility
 Dialogs on add/remove favorites
 Dialogs on add/remove forum
 Dialogs on set/clear logins
 Fixed some bugs when clearing passwords
 Added option to add a current forum to online database
 Fixed bug when adding forum with full URL
-Added fanart.jpg (Just whipped this up. If someone wants to, please create something that is acutally good :) )
+Added fanart.jpg (Just whipped this up. If someone wants to, please create something that is actually good :) )
 Added option to automatically open thread subscriptions window
 Added join date to posts view
 Added post numbers to full screen message view
