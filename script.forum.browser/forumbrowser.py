@@ -366,51 +366,51 @@ class ForumBrowser:
 					}
 	
 	#Order is importand because some a substrings of others. Also some include \r so the replacement is not re-replaced. We clean those out at the end
-	smilies = [ (':devil:',u'[COLOR FFAA0000]\u2461[/COLOR]','>:\r)'),
-				(':angel:',u'\u2460','O:\r)'),
-				(':;):',u'\u2464',';\r)'),
-				(':-/',u'\u246e',':-)'),
-				(';)',u'\u2464',';\r)'),
-				(':D',u'\u2463',':\rD'),
-				(':P',u'\u2465',':\rP'),
-				(':p',u'\u2465',':\rP'),
-				(':o',u'\u2469',':\ro'),
-				(':~',u'\u246a',':~'),
-				(':grin:',u'\u2463',':\rD'),
-				(':blush:',u'[COLOR FFFF9999]\u246d[/COLOR]',':")'),
-				(':laugh:',u'\u2470',':\r))'),
-				(':angry:',u'\u2466','>:\r{'),
-				(':rofl:',u'\u2467','*ROFL*'),
-				(':huh:',u'\u2473','*HUH?*'),
-				(':sleepy:',u'\u2468','*SLEEPY*'),
-				(':cool:',u'\u2462','B)'),
-				(':rolleyes:','*ROLLEYES*','*ROLLEYES*'),
-				(':nod:','*NOD*','*NOD*'),
-				(':sniffle:',u'\u246a',':\rs'),
-				(':confused:','%)','%)'),
-				(':mad:',u'\u2466','>:\r{'),
-				(':yawn:','*YAWN*','*YAWN*'),
-				(':struggle:','*STRUGGLE*','*STRUGGLE*'),
-				(':shame:',u'\u246c','*SHAME*'),
-				(':eek:',u'[COLOR FF00AA00]\u2472[/COLOR]','8o'),
-				(':rotfl:',u'\u2467','*ROFL*'),
-				(':bulgy-eyes:',u'\u246f','Oo'),
-				(':at-wits-end:',u'[COLOR FFAA0000]\u2466[/COLOR]','[COLOR FFAA0000]>:{[/COLOR]'),
-				(':oo:','>oo<','>oo<'),
-				(':stare:','*STARE*','*STARE*'),
-				(':sad:',u'\u2639',':\r('),
-				(':no:','*NO*','*NO*'),
-				('???',u'\u2473','???'),
-				(':shocked:',u'\u2469','*SHOCKED*'),
-				(':love:',u'\u2471','[COLOR FFAA0000]<3[/COLOR]'),
-				('<3',u'[COLOR FFAA0000]\u2665[/COLOR]','[COLOR FFAA0000]<3[/COLOR]'),
-				(':shy:','*SHY*','*SHY*'),
-				(':nerd:',u'\u2474',':-B'),
-				(':(',u'\u2639',':\r('),
-				(':)',u'\u263a',':\r)'),
-				(':s',u'\u2463',':\rs'),
-				('\r','','')
-				]
+	smiliesDefs = [	(':devil:',u'[COLOR FFAA0000]\u2461[/COLOR]','>:\r)'),
+					(':angel:',u'\u2460','O:\r)'),
+					(':;):',u'\u2464',';\r)'),
+					(':-/',u'\u246e',':-)'),
+					(';)',u'\u2464',';\r)'),
+					(':D',u'\u2463',':\rD'),
+					(':P',u'\u2465',':\rP'),
+					(':p',u'\u2465',':\rP'),
+					(':o',u'\u2469',':\ro'),
+					(':~',u'\u246a',':~'),
+					(':grin:',u'\u2463',':\rD'),
+					(':blush:',u'[COLOR FFFF9999]\u246d[/COLOR]',':")'),
+					(':laugh:',u'\u2470',':\r))'),
+					(':angry:',u'\u2466','>:\r{'),
+					(':rofl:',u'\u2467','*ROFL*'),
+					(':huh:',u'\u2473','*HUH?*'),
+					(':sleepy:',u'\u2468','*SLEEPY*'),
+					(':cool:',u'\u2462','B)'),
+					(':rolleyes:','*ROLLEYES*','*ROLLEYES*'),
+					(':nod:','*NOD*','*NOD*'),
+					(':sniffle:',u'\u246a',':\rs'),
+					(':confused:','%)','%)'),
+					(':mad:',u'\u2466','>:\r{'),
+					(':yawn:','*YAWN*','*YAWN*'),
+					(':struggle:','*STRUGGLE*','*STRUGGLE*'),
+					(':shame:',u'\u246c','*SHAME*'),
+					(':eek:',u'[COLOR FF00AA00]\u2472[/COLOR]','8o'),
+					(':rotfl:',u'\u2467','*ROFL*'),
+					(':bulgy-eyes:',u'\u246f','Oo'),
+					(':at-wits-end:',u'[COLOR FFAA0000]\u2466[/COLOR]','[COLOR FFAA0000]>:{[/COLOR]'),
+					(':oo:','>oo<','>oo<'),
+					(':stare:','*STARE*','*STARE*'),
+					(':sad:',u'\u2639',':\r('),
+					(':no:','*NO*','*NO*'),
+					('???',u'\u2473','???'),
+					(':shocked:',u'\u2469','*SHOCKED*'),
+					(':love:',u'\u2471','[COLOR FFAA0000]<3[/COLOR]'),
+					('<3',u'[COLOR FFAA0000]\u2665[/COLOR]','[COLOR FFAA0000]<3[/COLOR]'),
+					(':shy:','*SHY*','*SHY*'),
+					(':nerd:',u'\u2474',':-B'),
+					(':(',u'\u2639',':\r('),
+					(':)',u'\u263a',':\r)'),
+					(':s',u'\u2463',':\rs'),
+					('\r','','')
+					]
 	
 	def __init__(self,forum,always_login=False):
 		self.forum = forum
@@ -429,26 +429,8 @@ class ForumBrowser:
 		self.theme = {}
 		self.forms = {}
 		self.formats = {}
-		self.prepareSmileyList()
-	
-	def prepareSmileyList(self):
-		class SmiliesList(list):
-			def get(self,key,default=None): return default
-			
-		new = SmiliesList()
-		if True:
-			for f,r,x in self.smilies: #@UnusedVariable
-				if '[/COLOR]' in r:
-					new.append((f,r))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
-		else:
-			for f,r,x in self.smilies: #@UnusedVariable
-				if '[/COLOR]' in x:
-					new.append((f,x))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
-		self.smilies = new
+		self.altQuoteStartFilter = '\r\r\r\r\r\r'
+		self.smilies = {}
 			
 	def getForumID(self):
 		return self.prefix + self.forum

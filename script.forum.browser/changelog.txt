@@ -17,9 +17,10 @@ Current Version : 0.9.29
 
 *** 0.9.29 ***
 
-Added custom font with smilies in an accessible region
 Changed quote delimiters and removed italics
 Nested quotes now alternate color infinitely
+Skin mod install option now includes font modification 
+Improved quote decorations
 
 *** 0.9.28 ***
 

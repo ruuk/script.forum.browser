@@ -1,6 +1,6 @@
 import urllib2, re, os, sys, time, urlparse, htmlentitydefs
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
-import threading
+import threading, textwrap
 import forumbrowser
 
 try:
@@ -1407,7 +1407,7 @@ class LinePostDialog(PostDialog):
 					.replace('[/COLOR]','[/color]')
 	
 	def doKeyboard(self,caption,text):
-		if __addon__.getSetting('use_mod_keyboard') == 'true':
+		if __addon__.getSetting('use_skin_mods') == 'true':
 			return doModKeyboard(caption,text)
 		else:
 			return doKeyboard(caption,text)
@@ -2642,11 +2642,10 @@ class MessageConverter:
 	def __init__(self):
 		self._currentFilter = None
 		self.resetOrdered(False)
-		
+		self.textwrap = textwrap.TextWrapper(80)
 		
 		#static replacements
-		self.quoteStartReplace = u'[CR]\u250f'+u'\u2501'*44+u'[CR]'+__language__(30180)+u' [B]%s[/B][CR]'
-		self.quoteEndReplace = u'[CR]\u2517'+u'\u2501'*44+u'[CR][CR]'
+		
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
@@ -2666,9 +2665,40 @@ class MessageConverter:
 		self.colorFilter2 = re.compile('<span.*?style=".*?color: ?(.+?)".*?>(.+?)</span>')
 		self.tagFilter = re.compile('<[^<>]+?>',re.S)
 		self.resetRegex()
+	
+	def prepareSmileyList(self):
+		class SmiliesList(list):
+			def get(self,key,default=None): return default
+			
+		new = SmiliesList()
+		if __addon__.getSetting('use_skin_mods') == 'true':
+			for f,r,x in FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in r:
+					new.append((f,r))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
+		else:
+			for f,r,x in FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in x:
+					new.append((f,x))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
+		FB.smilies = new
 		
 	def resetRegex(self):
-		if not FB: return 
+		if not FB: return
+		
+		self.prepareSmileyList()
+		
+		if __addon__.getSetting('use_skin_mods') == 'true':
+			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
+			self.quoteVert = u'\u2502'
+		else:
+			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
+			self.quoteVert = u'|' 
+
 		self.lineFilter = re.compile('[\n\r\t]')
 		f = FB.filters.get('quote')
 		self.quoteFilter = f and re.compile(f) or None
@@ -2690,6 +2720,7 @@ class MessageConverter:
 		self.quoteFilter2 = f and re.compile(f) or None
 		
 		self.quoteStartFilter = re.compile(FB.getQuoteStartFormat())
+		self.altQuoteStartFilter = re.compile(FB.altQuoteStartFilter)
 		self.quoteEndFilter = re.compile('\[\/QUOTE\](?i)')
 		
 		#dynamic replacements
@@ -2743,10 +2774,11 @@ class MessageConverter:
 		html = self.processSmilies(html)
 		return convertHTMLCodes(html)
 
-	def formatQuotes(self,html):
+	def formatQuotesOld(self,html):
 		ct = 0
 		ms = True
 		me = True
+		#2503
 		while ms or me:
 			ms = self.quoteStartFilter.search(html)
 			me = self.quoteEndFilter.search(html)
@@ -2785,6 +2817,70 @@ class MessageConverter:
 				ct -= 1
 		return html
 			
+	def formatQuotes(self,html):
+		ct = 0
+		ms = None
+		me = None
+		vertL = []
+		html = html.replace('[CR]','\n')
+		lines = html.splitlines()
+		out = ''
+		justStarted = False
+		oddVert = u'[COLOR FF55AA55]%s[/COLOR]' % self.quoteVert
+		evenVert = u'[COLOR FF5555AA]%s[/COLOR]' % self.quoteVert
+		
+		for line in lines:
+			if ct < 0: ct = 0
+			ms = self.quoteStartFilter.search(line)
+			startFilter = self.quoteStartFilter
+			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
+			if ms:
+				alts = self.altQuoteStartFilter.search(line)
+				if alts:
+					ms = alts
+					startFilter = self.altQuoteStartFilter
+				justStarted = True
+				oldVert = ''.join(vertL)
+				gd = ms.groupdict()
+				rep = self.quoteStartReplace % (gd.get('user') or '')
+				if ct == 0:
+					rep = '[COLOR FF5555AA]' + rep
+					vertL.append(evenVert)
+				elif ct > 0:
+					if ct % 2:
+						rep = '[/COLOR][COLOR FF55AA55]' + rep
+						vertL.append(oddVert)
+					else:
+						rep = '[/COLOR][COLOR FF5555AA]' + rep
+						vertL.append(evenVert)
+				vert = ''.join(vertL)
+				out += oldVert + startFilter.sub(rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct += 1
+			elif me:
+				rep = self.quoteEndReplace
+				if ct == 1: rep += '[/COLOR]'
+				elif ct > 1:
+					if not ct % 2:
+						rep += '[/COLOR][COLOR FF5555AA]'
+					else:
+						rep += '[/COLOR][COLOR FF55AA55]'
+				oldVert = ''.join(vertL)
+				if vertL: vertL.pop()
+				vert = ''.join(vertL)
+				out += oldVert + self.quoteEndFilter.sub('[CR]' + rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct -= 1
+			elif ct:
+				if justStarted:
+					out += vert + '[CR]'
+				wlines = self.textwrap.wrap(line)
+				for l in wlines:
+					out += vert + l + '[CR]'
+			else:
+				out += line + '[CR]'
+			if not ms:
+				justStarted = False
+		return out
+	
 	def quoteConvert2(self,m):
 		gd = m.groupdict()
 		return self.quoteStartReplace % (gd.get('user') or '')
@@ -3023,6 +3119,7 @@ def doSettings():
 		global DEBUG
 		DEBUG = __addon__.getSetting('debug') == 'true'
 		tapatalk.DEBUG = DEBUG
+		MC.resetRegex()
 	
 def registerForum():
 	url = FB.getRegURL()
@@ -3462,13 +3559,31 @@ def copyKeyboardModImages(skinPath):
 	for f in os.listdir(src):
 		s = os.path.join(src,f)
 		d = os.path.join(dst,f)
-		if not os.path.exists(d): shutil.copy(s,d)
+		if not os.path.exists(d) and not f.startswith('.'): shutil.copy(s,d)
 
+def copyFont(sourceFontPath,skinPath):
+	dst = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
+	if os.path.exists(dst): return
+	import shutil
+	shutil.copy(sourceFontPath,dst)
+	
 def copyTree(source,target):
 	import shutil
 	shutil.copytree(source, target)
 		
-def doModKeyboard(prompt,default='',hidden=False):
+def checkForSkinMods():
+	if __addon__.getSetting('use_skin_mods') != 'true': return			
+	skinPath = xbmc.translatePath('special://skin')
+	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
+	if os.path.exists(font): return
+	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires XBMC restart to take effect.)','Install now?')
+	if not yes:
+		__addon__.setSetting('user_skin_mods','false')	
+		return
+	LOG('Installing Skin Mods')
+	doModKeyboard('',no_keyboard=True)
+
+def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	#restart = False
 	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
 	skinPath = xbmc.translatePath('special://skin')
@@ -3477,7 +3592,7 @@ def doModKeyboard(prompt,default='',hidden=False):
 	localSkinPath = os.path.join(localAddonsPath,currentSkin)
 	
 	if not os.path.exists(localSkinPath):
-		yesno = xbmcgui.Dialog().yesno('Keyboard Mod Install','Skin not installed in user path.','Click Yes to copy,','click No to Abort')
+		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
 		dialog.create('Copying Files','Please wait...')
@@ -3495,13 +3610,18 @@ def doModKeyboard(prompt,default='',hidden=False):
 	skinPath = localSkinPath
 	
 	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
-	if os.path.exists(dialogPath):
-		backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.SSbackup')
-	else:
-		dialogPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml')
-		backupPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml.SSbackup')
-	
+	backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
+	fontPath = os.path.join(skinPath,'720p','Font.xml')
+	fontBackupPath = os.path.join(skinPath,'720p','Font.xml.FBbackup')
+	if not os.path.exists(dialogPath):
+		dialogPath = dialogPath.replace('720p','1080i')
+		backupPath = backupPath.replace('720p','1080i')
+		fontPath = fontPath.replace('720p','1080i')
+		fontBackupPath = fontBackupPath.replace('720p','1080i')
+		
 	sourcePath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','DialogKeyboard.xml')
+	sourceFontXMLPath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','Font.xml')
+	sourceFontPath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','ForumBrowser-DejaVuSans.ttf')
 	
 	if DEBUG:
 		LOG('Local Addons Path: %s' % localAddonsPath)
@@ -3511,10 +3631,21 @@ def doModKeyboard(prompt,default='',hidden=False):
 		LOG('Source path: %s' % sourcePath)
 	
 	copyKeyboardModImages(skinPath)
+	copyFont(sourceFontPath,skinPath)
 	
 	if not os.path.exists(backupPath):
 		if DEBUG: LOG('Creating backup of original skin file: ' + backupPath)
-		open(backupPath,'w').write(open(dialogPath,'r').read())	
+		open(backupPath,'w').write(open(dialogPath,'r').read())
+		
+	if not os.path.exists(fontBackupPath):
+		if DEBUG: LOG('Creating backup and replacing original skin file: ' + fontBackupPath)
+		open(fontBackupPath,'w').write(open(fontPath,'r').read())
+		original = open(fontPath,'r').read()
+		modded = original.replace('<font>',open(sourceFontXMLPath,'r').read() + '<font>',1)
+		open(fontPath,'w').write(modded)
+	
+	if no_keyboard: return
+	
 	os.remove(dialogPath)
 	
 	open(dialogPath,'w').write(open(sourcePath,'r').read())
@@ -3554,6 +3685,7 @@ def checkPasswordEncryption():
 if sys.argv[-1] == 'settings':
 	doSettings()
 else:
+	checkForSkinMods()
 	checkPasswordEncryption()
 	FB = None
 	getForumBrowser()

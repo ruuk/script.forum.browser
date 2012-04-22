@@ -404,6 +404,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self.loginError = ''
+		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?) \w+:'
 	
 	def isLoggedIn(self):
 		#return self._loggedIn

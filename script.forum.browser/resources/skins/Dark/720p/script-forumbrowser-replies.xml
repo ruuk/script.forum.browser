@@ -237,7 +237,7 @@
 					<posy>4</posy>
 					<width>400</width>
 					<height>10</height>
-					<font>font10</font>
+					<font>ForumBrowser-font10</font>
 					<textcolor>black</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
@@ -350,7 +350,7 @@
 						<posy>30</posy>
 						<width>175</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<align>left</align>
 						<textcolor>FF00BB00</textcolor>
@@ -361,7 +361,7 @@
 						<posy>47</posy>
 						<width>175</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<selectedcolor>FFAAAAAA</selectedcolor>
@@ -382,7 +382,7 @@
 						<posy>64</posy>
 						<width>140</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
@@ -394,7 +394,7 @@
 						<posy>81</posy>
 						<width>140</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
@@ -406,7 +406,7 @@
 						<posy>7</posy>
 						<width>585</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -425,7 +425,7 @@
 						<posy>7</posy>
 						<width>525</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF888888</textcolor>
 						<align>right</align>
@@ -436,7 +436,7 @@
 						<posy>7</posy>
 						<width>75</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFBBBBBB</textcolor>
 						<align>right</align>
@@ -448,7 +448,7 @@
 						<posy>25</posy>
 						<width>1010</width>
 						<height>65</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
@@ -548,7 +548,7 @@
 						<posy>30</posy>
 						<width>175</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<align>left</align>
 						<textcolor>FF00BB00</textcolor>
@@ -559,7 +559,7 @@
 						<posy>47</posy>
 						<width>175</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
@@ -570,7 +570,7 @@
 						<posy>64</posy>
 						<width>140</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
@@ -582,7 +582,7 @@
 						<posy>81</posy>
 						<width>140</width>
 						<height>10</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
@@ -603,7 +603,7 @@
 						<posy>7</posy>
 						<width>585</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -622,7 +622,7 @@
 						<posy>7</posy>
 						<width>525</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FF888888</textcolor>
 						<align>right</align>
@@ -633,7 +633,7 @@
 						<posy>7</posy>
 						<width>75</width>
 						<height>15</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
 						<textcolor>FFBBBBBB</textcolor>
 						<align>right</align>
@@ -645,7 +645,7 @@
 						<posy>25</posy>
 						<width>1010</width>
 						<height>165</height>
-						<font>font10</font>
+						<font>ForumBrowser-font10</font>
 						<textcolor>white</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>

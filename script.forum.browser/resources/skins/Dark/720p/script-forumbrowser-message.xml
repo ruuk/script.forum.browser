@@ -134,7 +134,7 @@
 				<height>606</height>
 				<pagecontrol>123</pagecontrol>
 				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font18</font>
+				<font>ForumBrowser-font13</font>
 				<scroll>true</scroll>
 				<textcolor>white</textcolor>
 				<visible>true</visible>
