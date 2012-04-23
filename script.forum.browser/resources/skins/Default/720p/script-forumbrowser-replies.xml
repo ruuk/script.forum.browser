@@ -49,11 +49,11 @@
 				<posy>22</posy>
 				<width>100</width>
 				<height>40</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Posts</label>
+				<label>[B]Posts[/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			
@@ -92,7 +92,7 @@
 				<posy>14</posy>
 				<width>600</width>
 				<height>60</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>

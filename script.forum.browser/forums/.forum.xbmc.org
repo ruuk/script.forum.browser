@@ -74,6 +74,8 @@ filter:thread_topic=<meta name="keywords" content="(?P<topic>.+?),
 filter:thread_id=href="showthread.php?[^<>]*?t=(?P<threadid>\d+)
 #filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>\w+)</strong>)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>.+?)(?:</div>)?</td>.*?</table>
 filter:quote=<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>.+?)</strong>(?:</div><div style="font-style:italic)?)?(?:<a href="showthread.php\?.*?p=(?P<postid>\d+)#\w+\d+"\s.+?<div style="font-style:italic)?">(?P<quote>(?!<div>).+?)(?:</div>)?</td>.*?</table>
+filter:quote_start=(?is)<div class="smallfont" style="margin-bottom:2px">Quote:</div><table.*?><tr><td.*?(?:inset"><div>Originally Posted by <strong>(?P<user>.+?)</strong>(?:</div><div style="font-style:italic)?)?(?:<a href="showthread.php\?[^>]*?p=(?P<postid>\d+)#\w+\d+"[^>]*?)?">
+filter:quote_end=</table>
 # valid match names are threadid, forumid, title, starter and lastposter
 filter:subscriptions===threads
 filter:code=<div class.+?>Code:</div><pre.+?>(?P<code>.+?)</pre>

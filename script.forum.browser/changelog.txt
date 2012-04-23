@@ -21,6 +21,7 @@ Changed quote delimiters and removed italics
 Nested quotes now alternate color infinitely
 Skin mod install option now includes font modification 
 Improved quote decorations
+Fix focus issues when forums list is empty
 
 *** 0.9.28 ***
 

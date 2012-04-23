@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.28'
+__version__ = '0.9.29'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -78,6 +78,16 @@ LOG('Skin: ' + THEME)
 
 from crypto import passmanager
 import tapatalk
+
+def getSetting(key,default=None):
+	setting = __addon__.getSetting(key)
+	if not setting: return default
+	if isinstance(default,bool):
+		return setting == 'true'
+	elif isinstance(default,int):
+		return int(float(setting))
+	
+	return setting
 
 ######################################################################################
 # Forum Browser Classes
@@ -881,6 +891,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def editPost(self,pm,callback=None): return None
 	
 	def canEditPost(self,user): return False
+	
+	def getQuoteStartFormat(self):
+		return self.filters.get('quote_start','[QUOTE]')
+	
+	def getQuoteReplace(self):
+		return self.filters.get('quote_end','[/QUOTE]')
 
 ######################################################################################
 # Base Window Classes
@@ -1780,11 +1796,11 @@ class MessageWindow(BaseWindow):
 		self.getLinks()
 
 	def setTheme(self):
-		self.getControl(103).setLabel(self.post.cleanUserName() or '')
+		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
 		title = ''
 		if self.post.postNumber: title = '#' + str(self.post.postNumber) + ' '
 		title += self.post.title or ''
-		self.getControl(104).setLabel(title)
+		self.getControl(104).setLabel('[B]%s[/B]' % title)
 		self.getControl(105).setLabel(self.post.date or '')
 		
 	def getLinks(self):
@@ -1971,8 +1987,8 @@ class RepliesWindow(PageWindow):
 	
 	def setTheme(self):
 		mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
-		self.getControl(103).setLabel(mtype)
-		self.getControl(104).setLabel(self.topic)
+		self.getControl(103).setLabel('[B]%s[/B]' % mtype)
+		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		return
 		if __addon__.getSetting('use_forum_colors') == 'false': return
 		#xbmcgui.lock()
@@ -2075,7 +2091,7 @@ class RepliesWindow(PageWindow):
 		#xbmcgui.unlock()
 		if select > -1: self.postSelected(itemindex=select)
 		
-		self.getControl(104).setLabel(self.topic)
+		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		self.pid = ''
 		self.setLoggedIn()
 			
@@ -2095,8 +2111,7 @@ class RepliesWindow(PageWindow):
 		post = self.posts.get(item.getProperty('post'))
 		post.tid = self.tid
 		post.fid = self.fid
-		w = MessageWindow("script-forumbrowser-message.xml" ,__addon__.getAddonInfo('path'),THEME,post=post,parent=self)
-		w.doModal()
+		w = openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,parent=self)
 		self.setMessageProperty(post,item)
 		self.setFocusId(120)
 		if w.action:
@@ -2374,9 +2389,7 @@ class ThreadsWindow(PageWindow):
 			self.fillThreadList()
 			self.setFocus(self.getControl(120))
 		else:
-			w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid=tid,fid=fid,lastid=lastid,topic=topic,reply_count=reply_count,item=item,parent=self)
-			w.doModal()
-			del w
+			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid=tid,fid=fid,lastid=lastid,topic=topic,reply_count=reply_count,item=item,parent=self)
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2488,7 +2501,7 @@ class ForumsWindow(BaseWindow):
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
 			self.setFocusId(202)
 			return
-		self.empty = False
+		self.empty = True
 		
 		try:
 			#xbmcgui.lock()
@@ -2496,6 +2509,7 @@ class ForumsWindow(BaseWindow):
 			self.setPMCounts(pm_counts)
 			
 			for f in forums:
+				self.empty = False
 				if hasattr(f,'groupdict'):
 					fdict = f.groupdict()
 				else:
@@ -2522,6 +2536,7 @@ class ForumsWindow(BaseWindow):
 			ERROR('FILL FORUMS ERROR')
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30174))
 			self.setFocusId(202)
+		if self.empty: self.setFocusId(202)
 		#xbmcgui.unlock()
 		self.setLoggedIn()
 			
@@ -2533,9 +2548,7 @@ class ForumsWindow(BaseWindow):
 		self.setLoggedIn()
 		
 	def openPMWindow(self):
-		w = RepliesWindow("script-forumbrowser-replies.xml" , __addon__.getAddonInfo('path'),THEME,tid='private_messages',topic=__language__(30176),parent=self)
-		w.doModal()
-		del w
+		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=__language__(30176),parent=self)
 		self.setPMCounts(FB.getPMCounts())
 		
 	def openThreadsWindow(self):
@@ -2634,6 +2647,23 @@ class ForumsWindow(BaseWindow):
 		self.setLoggedIn()
 		self.resetForum(False)
 		if mode !=  __addon__.getSetting('color_mode'): self.fillForumList()
+
+def openWindow(windowClass,xmlFilename,return_window=False,*args,**kwargs):
+	theme = THEME
+	path = __addon__.getAddonInfo('path')
+	if not getSetting('use_skin_mods',True):
+		theme = 'Current'
+		src = os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)
+		path = __addon__.getAddonInfo('profile')
+		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
+		if not os.path.exists(skin): os.makedirs(skin)
+		xml = open(src,'r').read()
+		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
+	w = windowClass(xmlFilename,path,theme,*args,**kwargs)
+	w.doModal()
+	if return_window: return w
+	del w
+	return None
 
 ######################################################################################
 # Message Converter
@@ -2823,6 +2853,7 @@ class MessageConverter:
 		me = None
 		vertL = []
 		html = html.replace('[CR]','\n')
+		#html = html.replace('<br />','\n')
 		lines = html.splitlines()
 		out = ''
 		justStarted = False
@@ -3120,6 +3151,7 @@ def doSettings():
 		DEBUG = __addon__.getSetting('debug') == 'true'
 		tapatalk.DEBUG = DEBUG
 		MC.resetRegex()
+		checkForSkinMods()
 	
 def registerForum():
 	url = FB.getRegURL()
@@ -3554,7 +3586,7 @@ def copyKeyboardModImages(skinPath):
 	dst = os.path.join(skinPath,'media','forum-browser-keyboard')
 	if os.path.exists(dst): return
 	os.makedirs(dst)
-	src = os.path.join(__addon__.getAddonInfo('path'),'keyboard','images')
+	src = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'keyboard','images')
 	import shutil
 	for f in os.listdir(src):
 		s = os.path.join(src,f)
@@ -3585,6 +3617,7 @@ def checkForSkinMods():
 
 def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	#restart = False
+	fbPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
 	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
 	skinPath = xbmc.translatePath('special://skin')
 	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
@@ -3609,6 +3642,10 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 		xbmcgui.Dialog().ok('Success','Files copied.','XBMC needs to be restarted','for mod to take effect')
 	skinPath = localSkinPath
 	
+	sourcePath = os.path.join(fbPath,'keyboard','DialogKeyboard.xml')
+	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.xml')
+	sourceFontPath = os.path.join(fbPath,'keyboard','ForumBrowser-DejaVuSans.ttf')
+	
 	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
 	backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
 	fontPath = os.path.join(skinPath,'720p','Font.xml')
@@ -3618,10 +3655,7 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 		backupPath = backupPath.replace('720p','1080i')
 		fontPath = fontPath.replace('720p','1080i')
 		fontBackupPath = fontBackupPath.replace('720p','1080i')
-		
-	sourcePath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','DialogKeyboard.xml')
-	sourceFontXMLPath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','Font.xml')
-	sourceFontPath = os.path.join(__addon__.getAddonInfo('path'),'keyboard','ForumBrowser-DejaVuSans.ttf')
+		sourceFontXMLPath = sourceFontXMLPath.replace('720p','1080i')
 	
 	if DEBUG:
 		LOG('Local Addons Path: %s' % localAddonsPath)
