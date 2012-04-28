@@ -20,7 +20,11 @@ TODO:
   Smiley dialog
   Make a million dollars
 
-Current Version : 0.9.30
+Current Version : 0.9.31
+
+*** 0.9.31 ***
+
+Remove testing code
 
 *** 0.9.30 ***
 
@@ -29,7 +33,7 @@ Fixed issue with images not showing up in the images list
 Fix encoding issues with application/json error (forumrunner)
 Remove included XBMC4XBox scraper definition (now tapatalk enabled)
 Fix some encoding errors with smilies
-Added quote parsiing for Phpbb forums
+Added quote parsing for Phpbb forums
 Fixed boxee forums with new parsing method (mostly)
 
 *** 0.9.29 ***

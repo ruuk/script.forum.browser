@@ -670,7 +670,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		res = self.browser.open(url)
 		#print res.info()
 		html = res.read()
-		open('/home/ruuk/test2.text','w').write(html)
+		#open('/home/ruuk/test2.text','w').write(html)
 		if self.forms.get('login_action','@%+#') in html:
 			callback(5,__language__(30100))
 			if not self.login(): return False
@@ -704,7 +704,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
 			res = self.browser.submit(name=self.forms.get('post_submit_name'),label=self.forms.get('post_submit_value'))
-			open('/home/ruuk/test2.text','w').write(res.read())
+			#open('/home/ruuk/test2.text','w').write(res.read())
 			callback(100,__language__(30052))
 		except:
 			ERROR('FORM ERROR')

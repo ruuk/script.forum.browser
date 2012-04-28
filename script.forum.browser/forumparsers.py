@@ -76,7 +76,7 @@ class BaseParser(HTMLParser.HTMLParser):
 		data = self.commentRE.sub('',data)
 		data = self.tagRE.sub(self.cleanTag,data)
 		data = re.sub(r"(&)([\w\d]+;)(?=[^<]*?<)",r'%\2',data)
-		open('/home/ruuk/test.text','w').write(data)
+		#open('/home/ruuk/test.text','w').write(data)
 		HTMLParser.HTMLParser.feed(self,data)
 	
 	def revertCodes(self,data):
