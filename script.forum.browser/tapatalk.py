@@ -308,7 +308,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return str(qp.get('post_content',''))
 		
 	def imageURLs(self):
-		return self.MC.imageFilter.findall(self.getMessage(),re.S)
+		return self.MC.imageFilter.findall(self.getMessage())
 		
 	def linkImageURLs(self):
 		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)

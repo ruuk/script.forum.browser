@@ -67,10 +67,10 @@ class ForumrunnerClient():
 		#url = '&'.join((url,urllib.urlencode(args)))
 		encArgs = urllib.urlencode(args)
 		obj = self.opener.open(url,encArgs)
-		encoding = obj.info().get('content-type').split('charset=')[-1]
-		obj = codecs.EncodedFile(obj, encoding)
 		if DEBUG: LOG('Response Headers: ' + str(obj.info()))
-		data = obj.read()
+		encoding = obj.info().get('content-type').split('charset=')[-1]
+		if '/' in encoding: encoding = 'utf8'
+		data = unicode(obj.read(),encoding)
 		pyobj = None
 		try:
 			pyobj = json.loads(data)

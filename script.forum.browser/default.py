@@ -1,6 +1,6 @@
-import urllib2, re, os, sys, time, urlparse, htmlentitydefs
+import urllib2, re, os, sys, time, urlparse
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
-import threading, textwrap
+import threading
 import forumbrowser
 
 try:
@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.29'
+__version__ = '0.9.30'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -54,8 +54,6 @@ ACTION_CONTEXT_MENU   = 117
 #Actually it's show codec info but I'm using in a threaded callback
 ACTION_RUN_IN_MAIN = 27
 
-TITLE_FORMAT = '[COLOR %s]%s[/COLOR]'
-
 MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums'))
@@ -76,6 +74,11 @@ DEBUG = __addon__.getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
 LOG('Skin: ' + THEME)
 
+FB = None
+MC = None
+FBMODULE = None
+
+import texttransform
 from crypto import passmanager
 import tapatalk
 
@@ -88,815 +91,6 @@ def getSetting(key,default=None):
 		return int(float(setting))
 	
 	return setting
-
-######################################################################################
-# Forum Browser Classes
-######################################################################################
-class PMLink:
-	def __init__(self,match=None):
-		self.url = ''
-		self.text = ''
-		self.pid = ''
-		self.tid = ''
-		self.fid = ''
-		self._isImage = False
-		
-		if match:
-			self.url = match.group('url')
-			text = match.group('text')
-			self.text = MC.tagFilter.sub('',text).strip()
-		self.processURL()
-			
-	def processURL(self):
-		if not self.url: return
-		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
-		if self._isImage: return
-		pm = re.search(FB.filters.get('post_link','@`%#@>-'),self.url)
-		tm = re.search(FB.filters.get('thread_link','@`%#@>-'),self.url)
-		if pm:
-			d = pm.groupdict()
-			self.pid = d.get('postid','')
-			self.tid = d.get('threadid','')
-		elif tm:
-			d = tm.groupdict()
-			self.tid = d.get('threadid','')
-			
-	def urlShow(self):
-		if self.isPost(): return 'Post ID: %s' % self.pid
-		elif self.isThread(): return 'Thread ID: %s' % self.tid
-		return self.url
-		
-	def isImage(self):
-		return self._isImage
-		
-	def isPost(self):
-		return self.pid and True or False
-		
-	def isThread(self):
-		return self.tid and not self.pid
-		
-################################################################################
-# ForumPost
-################################################################################
-class ForumPost(forumbrowser.ForumPost):
-	def __init__(self,pmatch=None,pdict=None):
-		if pmatch:
-			pdict = pmatch.groupdict()
-		forumbrowser.ForumPost.__init__(self, pdict)
-			
-	def setVals(self,pdict):
-		self.setPostID(pdict.get('postid',''))
-		self.date = pdict.get('date','')
-		self.userId = pdict.get('userid','')
-		self.userName = pdict.get('user') or pdict.get('guest') or 'UERROR'
-		self.avatar = pdict.get('avatar','')
-		self.status = pdict.get('status','')
-		self.title = pdict.get('title','')
-		self.message = pdict.get('message','')
-		self.signature = pdict.get('signature','') or ''
-		self.isPM = self.postId.startswith('PM')
-			
-	def setPostID(self,pid):
-		self.postId = pid
-		self.pid = pid
-		self.isPM = pid.startswith('PM')
-	
-	def getID(self):
-		if self.pid.sartswith('PM'): return self.pid[2:]
-		return self.pid
-		
-	def cleanUserName(self):
-		return MC.tagFilter.sub('',self.userName)
-	
-	def getMessage(self):
-		return self.message + self.signature
-	
-	def messageAsText(self):
-		return messageToText(self.getMessage())
-		
-	def messageAsDisplay(self,short=False,raw=False):
-		if self.isPM:
-			return MC.parseCodes(self.getMessage())
-		else:
-			return MC.messageToDisplay(self.getMessage())
-		
-	def messageAsQuote(self):
-		return MC.messageAsQuote(self.message)
-		
-	def imageURLs(self):
-		return MC.imageFilter.findall(self.getMessage(),re.S)
-		
-	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
-		
-	def linkURLs(self):
-		return MC.linkFilter.finditer(self.getMessage(),re.S)
-		
-	def links(self):
-		links = []
-		for m in self.linkURLs(): links.append(PMLink(m))
-		return links
-		
-	def makeAvatarURL(self):
-		base = FB.urls.get('avatar')
-		if base and not self.avatar:
-			self.avatar = base.replace('!USERID!',self.userId)
-		return self.avatar
-	
-			
-################################################################################
-# PageData
-################################################################################
-class PageData:
-	def __init__(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items=''):
-		self.next = False
-		self.prev = False
-		self.page = '1'
-		self.totalPages = '1'
-		self.pageDisplay = ''
-		self.urlMode = 'PAGE'
-		self.nextStart = '0'
-		self.prevStart = '0'
-		self.topic = ''
-		self.tid = ''
-		self.pageType = page_type
-		self.isReplies = False
-		self.totalitems = total_items
-		
-		if page_match:
-			pdict = page_match.groupdict()
-			self.page = pdict.get('page','1')
-			self.totalPages = pdict.get('total','1')
-			self.pageDisplay = pdict.get('display','')
-		if next_match:
-			ndict = next_match.groupdict()
-			page = ndict.get('page')
-			start = ndict.get('start')
-			if page:
-				self.next = True
-				self.urlMode = 'PAGE'
-			elif start:
-				self.next = True
-				self.nextStart = start
-				self.urlMode = 'START'
-		if prev_match:
-			pdict = prev_match.groupdict()
-			page = pdict.get('page')
-			start = pdict.get('start')
-			if page:
-				self.prev = True
-				self.urlMode = 'PAGE'
-			elif start:
-				self.prev = True
-				self.prevStart = start
-				self.urlMode = 'START'
-	
-	def getPageNumber(self,page=None):
-		if page == None: page = self.page
-		if self.urlMode != 'PAGE':
-			per_page = FB.formats.get('%s_per_page' % self.pageType)
-			if per_page:
-				try:
-					if int(page) < 0: page = 9999
-					page = str((int(page) - 1) * int(per_page))
-				except:
-					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
-		return page
-		
-	def setThreadData(self,topic,threadid):
-		self.topic = topic
-		self.tid = threadid
-				
-	def getNextPage(self):
-		if self.urlMode == 'PAGE':
-			try:
-				return str(int(self.page) + 1)
-			except:
-				return '1'
-		else:
-			return self.nextStart
-			
-	def getPrevPage(self):
-		if self.urlMode == 'PAGE':
-			try:
-				return str(int(self.page) - 1)
-			except:
-				return '1'
-		else:
-			return self.prevStart
-				
-	def getPageDisplay(self):
-		if self.pageDisplay: return self.pageDisplay
-		if self.page and self.totalPages:
-			return 'Page %s of %s' % (self.page,self.totalPages)
-		
-######################################################################################
-# Forum Browser API
-######################################################################################
-class ScraperForumBrowser(forumbrowser.ForumBrowser):
-	PageData = PageData
-	def __init__(self,forum,always_login=False):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
-		self.forum = forum
-		self._url = ''
-		self.browser = None
-		self.mechanize = None
-		self.needsLogin = True
-		self.alwaysLogin = always_login
-		self.lastHTML = ''
-		
-		self.reloadForumData(forum)
-		
-	def getForumID(self):
-		return self.forum
-	
-	def isLoggedIn(self):
-		return self._loggedIn
-	
-	def resetBrowser(self):
-		self.browser = None
-		
-	def reloadForumData(self,forum):
-		self.urls = {}
-		self.filters = {}
-		self.theme = {}
-		self.forms = {}
-		self.formats = {}
-		self.smilies = {}
-		
-		if not self.loadForumData(forum): raise Exception('Forum Load Failure')
-			#self.forum = 'forum.xbmc.org'
-			#self.loadForumData(self.forum)
-		
-	def loadForumData(self,forum):
-		self.needsLogin = True
-		fname = os.path.join(FORUMS_STATIC_PATH,forum)
-		if not os.path.exists(fname): return False
-		f = open(fname,'r')
-		data = f.read()
-		f.close()
-		for line in data.splitlines():
-			line = line.strip()
-			if not line: continue
-			if line.startswith('#'): continue
-			dtype , rest = line.split(':',1)
-			if dtype == 'import':
-				self.loadForumData(rest)
-			elif dtype == 'url':
-				key,url = rest.split('=',1)
-				if url.startswith('=='):
-					dup = url.split('=')[-1]
-					url = self.urls[dup]
-				self.urls[key] = url
-			elif dtype == 'filter':
-				key,regex = rest.split('=',1)
-				if regex.startswith('=='):
-					dup = regex.split('=')[-1]
-					regex = self.filters[dup]
-				self.filters[key] = regex
-			elif dtype == 'theme':
-				key,color = rest.split('=',1)
-				if color.startswith('=='):
-					dup = color.split('=')[-1]
-					color = self.theme[dup]
-				self.theme[key] = color
-			elif dtype == 'form':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.forms[dup]
-				self.forms[key] = data
-			elif dtype == 'format':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.formats[dup]
-				self.formats[key] = data
-			elif dtype == 'smilies':
-				key,data = rest.split('=',1)
-				if data.startswith('=='):
-					dup = data.split('=')[-1]
-					data = self.smilies[dup]
-				self.smilies[key] = data
-		self._url = self.urls.get('base','')
-		self.forum = forum
-		return True
-			
-		
-	def setLogin(self,user,password,always=False):
-		self.user = user
-		self.password = password
-		self.alwaysLogin = always
-			
-	def login(self):
-		LOG('LOGGING IN')
-		if not self.mechanize:
-			from webviewer import mechanize #@UnresolvedImport
-			self.mechanize = mechanize
-		if not self.browser:
-			self.browser = self.mechanize.Browser()
-			class SanitizeHandler(mechanize.BaseHandler):
-				def http_response(self, request, response):
-					if not hasattr(response, "seek"):
-						response = mechanize.response_seek_wrapper(response)
-					#if	HTML   used   get   it though  a	robust  Parser	like  BeautifulSoup
-			
-					if response.info().dict.has_key('content-type') and ('html' in response.info().dict['content-type']):
-						data = response.get_data()
-						response.set_data(re.sub('<![^>]*?>','',data))
-					return response
-
-			self.browser.add_handler(SanitizeHandler())
-		response = self.browser.open(self.getURL('login'))
-		html = response.read()
-		try:
-			self.browser.select_form(predicate=self.predicateLogin)
-		except:
-			ERROR('LOGIN FORM SELECT ERROR')
-			LOG('TRYING ALTERNATE METHOD')
-			form = self.getForm(html,self.forms.get('login_action'))
-			if form:
-				self.browser.form = form
-			else:
-				LOG('FAILED')
-				return False
-		self.browser[self.forms['login_user']] = self.user
-		self.browser[self.forms['login_pass']] = self.password
-		response = self.browser.submit()
-		html = response.read()
-		if not self.forms.get('login_action','@%+#') in html:
-			self._loggedIn = True
-			return True
-		LOG('FAILED TO LOGIN')
-		return False
-		
-	def checkLogin(self,callback=None):
-		#raise Exception('TEST')
-		if not callback: callback = self.fakeCallback
-		if not self.browser or self.needsLogin:
-			self.needsLogin = False
-			if not callback(5,__language__(30100)): return False
-			if not self.login():
-				self._loggedIn = False
-				return False
-			else:
-				self._loggedIn = True
-		
-		return True
-		
-	def browserReadURL(self,url,callback):
-		if not callback(30,__language__(30101)): return ''
-		response = self.browser.open(url)
-		if not callback(60,__language__(30102)): return ''
-		return response.read()
-		
-	def readURL(self,url,callback=None,force_login=False,is_html=True):
-		if not url:
-			LOG('ERROR - EMPTY URL IN readURL()')
-			return ''
-		if not callback: callback = self.fakeCallback
-		if self.formats.get('login_required') == 'True' or force_login or (self.alwaysLogin and self.password):
-			if not self.checkLogin(callback=callback): return ''
-			data = self.browserReadURL(url,callback)
-			if self.forms.get('login_action','@%+#') in data:
-				self.login()
-				data = self.browserReadURL(url,callback)
-		else:
-			if not callback(5,__language__(30101)): return ''
-			req = urllib2.urlopen(url)
-			if not callback(50,__language__(30102)): return ''
-			data = req.read()
-			req.close()
-		if is_html: self.lastHTML = data
-		return data
-		
-	def makeURL(self,phppart):
-		if not phppart: return ''
-		if phppart.startswith('http://'):
-			url = phppart
-		else:
-			url = self._url + phppart
-		return url.replace('&amp;','&').replace('/./','/')
-		
-	def getPMCounts(self,html=''):
-		if not html: html = MC.lineFilter.sub('',self.lastHTML)
-		if not html: return None
-		pm_counts = None
-		ct = 0
-		while not pm_counts:
-			ct += 1
-			if self.filters.get('pm_counts%s' % ct):
-				pm_counts = re.search(self.filters.get('pm_counts%s' % ct),html)
-			else:
-				break
-		if pm_counts: return pm_counts.groupdict()
-		return None
-		
-	def getLogo(self,html):
-		logo = self.urls.get('logo')
-		if logo: return logo
-		try:
-			if self.filters.get('logo'): logo = re.findall(self.filters['logo'],html)[0]
-		except:
-			ERROR("ERROR GETTING LOGO IMAGE")
-		if logo: return self.makeURL(logo)
-		return  'http://%s/favicon.ico' % self.forum
-		
-	def getForums(self,callback=None,donecallback=None):
-		if not callback: callback = self.fakeCallback
-		try:
-			html = self.readURL(self.getURL('forums'),callback=callback)
-		except:
-			em = ERROR('ERROR GETTING FORUMS')
-			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		#open('/home/ruuk/test3.html','w').write(html)
-		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		html = MC.lineFilter.sub('',html)
-		forums = re.finditer(self.filters['forums'],html)
-		logo = self.getLogo(html)
-		pm_counts = self.getPMCounts(html)
-		callback(100,__language__(30052))
-		if donecallback: donecallback(forums,logo,pm_counts)
-		else: return forums, logo, pm_counts
-		
-	def getThreads(self,forumid,page='',callback=None,donecallback=None):
-		if not callback: callback = self.fakeCallback
-		url = self.getPageUrl(page,'threads',fid=forumid)
-		html = self.readURL(url,callback=callback)
-		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
-		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
-		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
-		if self.formats.get('forums_in_threads','False') == 'True':
-			forums = re.finditer(self.filters['forums'],html)
-			threads = (forums,threads)
-		callback(100,__language__(30052))
-		pd = self.getPageData(html,page,page_type='threads')
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
-		
-	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
-		if not callback: callback = self.fakeCallback
-		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
-		html = self.readURL(url,callback=callback)
-		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
-		html = MC.lineFilter.sub('',html)
-		replies = re.findall(self.filters['replies'],html)
-		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
-		if not threadid:
-			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)
-			threadid = threadid and threadid.group(1) or ''
-		topic = topic and topic.group(1) or ''
-		sreplies = []
-		for r in replies:
-			try:
-				post = ForumPost(re.search(self.filters['post'],MC.lineFilter.sub('',r)))
-				sreplies.append(post)
-			except:
-				post = ForumPost()
-				sreplies.append(post)
-		pd = self.getPageData(html,page,page_type='replies')
-		pd.setThreadData(topic,threadid)
-		callback(100,__language__(30052))
-		
-		if donecallback: donecallback(sreplies, pd)
-		else: return sreplies, pd
-		
-	def hasPM(self):
-		return bool(self.urls.get('private_messages_xml') or self.urls.get('private_messages_csv'))
-	
-	def getPrivateMessages(self,callback=None,donecallback=None):
-		if not callback: callback = self.fakeCallback
-		#if not self.checkLogin(callback=callback): return None, None
-		pms = None
-		if self.urls.get('private_messages_xml'):
-			xml = self.readURL(self.getURL('private_messages_xml'),callback=callback,force_login=True,is_html=False)
-			if not xml or not callback(80,__language__(30103)):
-				if donecallback:
-					donecallback(None,None)
-					return
-				else:
-					return (None,None)
-			folders = re.search(self.filters.get('pm_xml_folders'),xml,re.S)
-			if not folders:
-				if donecallback:
-					donecallback([],None)
-					return
-				else:
-					return (None,None)
-			messages = re.finditer(self.filters.get('pm_xml_messages'),folders.group('inbox'),re.S)
-			pms = []
-			for m in messages:
-				p = ForumPost(m)
-				p.setPostID('PM%s' % len(pms))
-				p.message = re.sub('[\t\r]','',p.message)
-				p.makeAvatarURL()
-				pms.append(p)
-				
-		elif self.urls.get('private_messages_csv'):
-			csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
-			if not csvstring or not callback(80,__language__(30103)):
-				if donecallback:
-					donecallback(None,None)
-					return
-				else:
-					return (None,None)
-			columns = self.formats.get('pm_csv_columns').split(',')
-			import csv
-			cdata = csv.DictReader(csvstring.splitlines()[1:],fieldnames=columns)
-			pms = []
-			folder = self.formats.get('pm_csv_folder')
-			for d in cdata:
-				if folder and folder == d.get('folder'):
-					p = ForumPost(pdict=d)
-					p.setPostID('PM%s' % len(pms))
-					pms.append(p)
-		callback(100,__language__(30052))
-		
-		if donecallback: donecallback(pms,None)
-		else: return pms, None
-	
-	def hasSubscriptions(self):
-		return bool(self.urls.get('subscriptions'))
-	
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
-		if not callback: callback = self.fakeCallback
-		#if not self.checkLogin(callback=callback): return None
-		url = self.getPageUrl(page,'subscriptions')
-		html = self.readURL(url,callback=callback,force_login=True)
-		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
-		threads = re.finditer(self.filters['subscriptions'],MC.lineFilter.sub('',html))
-		callback(100,__language__(30052))
-		pd = self.getPageData(html,page,page_type='threads')
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
-		
-	def getPageData(self,html,page,page_type=''):
-		next_page = re.search(self.filters['next'],html,re.S)
-		prev_page= None
-		if page != '1':
-			prev_page = re.search(self.filters['prev'],html,re.S)
-		page_disp = re.search(self.filters['page'],html)
-		return PageData(page_disp,next_page,prev_page,page_type=page_type)
-		
-	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
-		if sub == 'replies' and page and int(page) < 0:
-			gnp = self.urls.get('gotonewpost','')
-			page = self.URLSubs(gnp,pid=lastid)
-		else:
-			if page:
-				try:
-					if int(page) < 0: page = '9999'
-				except:
-					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
-				page = '&%s=%s' % (self.urls.get('page_arg',''),page)
-		sub = self.URLSubs(self.urls[sub],pid=pid,tid=tid,fid=fid)
-		return self._url + sub + page
-		
-	def getURL(self,name):
-		return self._url + self.urls.get(name,'')
-		
-	def predicateLogin(self,formobj):
-		return self.forms.get('login_action','@%+#') in formobj.action
-		
-	def getForm(self,html,action,name=None):
-		if not action: return None
-		try:
-			forms = self.mechanize.ParseString(''.join(re.findall('<form\saction="%s.+?</form>' % re.escape(action),html,re.S)),self._url)
-			if name:
-				for f in forms:
-					if f.name == name:
-						return f
-			for f in forms:
-				if action in f.action:
-					return f
-			LOG('NO FORM 2')
-		except:
-			ERROR('PARSE ERROR')
-			
-	def URLSubs(self,url,pid='',tid='',fid='',post=None):
-		if post:
-			url = url.replace('!POSTID!',post.pid).replace('!THREADID!',post.tid).replace('!FORUMID!',post.fid)
-		else:
-			url = url.replace('!POSTID!',pid).replace('!THREADID!',tid).replace('!FORUMID!',fid)
-		#removes empty vars
-		return re.sub('(?:\w+=&)|(?:\w+=$)','',url)
-		
-	def postURL(self,post):
-		return self.URLSubs(self.getURL('newpost'),post=post)
-	
-	def predicatePost(self,formobj):
-		return self.forms.get('post_action','@%+#') in formobj.action
-		
-	def fakeCallback(self,pct,message=''): return True
-	
-	def post(self,post,callback=None):
-		if not callback: callback = self.fakeCallback
-		if not self.checkLogin(callback=callback): return False
-		url = self.postURL(post)
-		res = self.browser.open(url)
-		html = res.read()
-		if self.forms.get('login_action','@%+#') in html:
-			callback(5,__language__(30100))
-			if not self.login(): return False
-			res = self.browser.open(url)
-			html = res.read()
-		callback(40,__language__(30105))
-		selected = False
-		try:
-			if self.forms.get('post_name'):
-				self.browser.select_form(self.forms.get('post_name'))
-				LOG('FORM SELECTED BY NAME')
-			else:
-				self.browser.select_form(predicate=self.predicatePost)
-				LOG('FORM SELECTED BY ACTION')
-			selected = True
-		except:
-			ERROR('NO FORM 1')
-			
-		if not selected:
-			form = self.getForm(html,self.forms.get('post_action',''),self.forms.get('post_name',''))
-			if form:
-				self.browser.form = form
-			else:
-				return False
-		try:
-			if post.title: self.browser[self.forms['post_title']] = post.title
-			self.browser[self.forms['post_message']] = post.message
-			self.setControls('post_controls%s')
-			wait = int(self.forms.get('post_submit_wait',0))
-			if wait: callback(60,__language__(30107) % wait)
-			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
-			callback(80,__language__(30106))
-			res = self.browser.submit(name=self.forms.get('post_submit_name'),label=self.forms.get('post_submit_value'))
-			callback(100,__language__(30052))
-		except:
-			ERROR('FORM ERROR')
-			return False
-			
-		return True
-		
-	def doPrivateMessage(self,to,title,message,callback=None):
-		self.doForm(	self.urls.get('pm_new_message'),
-						self.forms.get('pm_name'),
-						self.forms.get('pm_action'),
-						{self.forms.get('pm_recipient'):to,self.forms.get('pm_title'):title,self.forms.get('pm_message'):message},
-						callback=callback)
-			
-	def deletePrivateMessageViaIndex(self,pmidx,callback=None):
-		html = self.readURL(self.urls.get('private_messages_inbox'),callback=callback,force_login=True)
-		if not html: return
-		pmid_list = re.findall(self.filters.get('pm_pmid_list'),html,re.S)
-		try:
-			pmid_list.reverse()
-			pmid = pmid_list[int(pmidx)]
-		except:
-			ERROR('DELETE PM VIA INDEX ERROR')
-			return
-			
-		self.doForm(	self.urls.get('private_messages_delete').replace('!PMID!',pmid),
-						self.forms.get('pm_delete_name'),
-						self.forms.get('pm_delete_action'),
-						controls='pm_delete_control%s',
-						callback=callback)
-						
-	def doForm(self,url,form_name=None,action_match=None,field_dict={},controls=None,submit_name=None,submit_value=None,wait='1',callback=None):
-		if not callback: callback = self.fakeCallback
-		if not self.checkLogin(callback=callback): return False
-		res = self.browser.open(url)
-		html = res.read()
-		if self.forms.get('login_action','@%+#') in html:
-			callback(5,__language__(30100))
-			if not self.login(): return False
-			res = self.browser.open(url)
-			html = res.read()
-		callback(40,__language__(30105))
-		selected = False
-		try:
-			if form_name:
-				self.browser.select_form(form_name)
-				LOG('FORM SELECTED BY NAME')
-			else:
-				predicate = lambda formobj: action_match in formobj.action
-				self.browser.select_form(predicate=predicate)
-				LOG('FORM SELECTED BY ACTION')
-			selected = True
-		except:
-			ERROR('NO FORM 1')
-			
-		if not selected:
-			form = self.getForm(html,action_match,form_name)
-			if form:
-				self.browser.form = form
-			else:
-				return False
-		try:
-			for k in field_dict.keys():
-				if field_dict[k]: self.browser[k] = field_dict[k]
-			self.setControls(controls)
-			wait = int(wait)
-			if wait: callback(60,__language__(30107) % wait)
-			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
-			callback(80,__language__(30106))
-			res = self.browser.submit(name=submit_name,label=submit_value)
-			callback(100,__language__(30052))
-		except:
-			ERROR('FORM ERROR')
-			return False
-			
-		return True
-		
-	def predicateDeletePost(self,formobj):
-		if self.forms.get('delete_action','@%+#') in formobj.action: return True
-		return False
-		
-	def deletePost(self,post):
-		post.error = 'Failed'
-		if not self.checkLogin(): return post
-		res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
-		html = res.read()
-		
-		if self.forms.get('login_action','@%+#') in html:
-			if not self.login(): return post
-			res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
-			html = res.read()
-			
-		selected = False
-		try:
-			self.browser.select_form(predicate=self.predicateDeletePost)
-			selected = True
-		except:
-			ERROR('DELETE NO FORM 1')
-			
-		if not selected:
-			form = self.getForm(html,self.forms.get('delete_action',''),self.forms.get('delete_name',''))
-			if form:
-				self.browser.form = form
-			else:
-				LOG('DELETE NO FORM 2')
-				return post
-		
-		try:
-			#self.browser.find_control(name="deletepost").value = ["delete"]
-			self.setControls('delete_control%s')
-			#self.browser["reason"] = reason[:50]
-			self.browser.submit()
-		except:
-			ERROR('DELETE NO CONTROL')
-			return post
-		post.error = ''
-		return post
-		#<a href="editpost.php?do=editpost&amp;p=631488" name="vB::QuickEdit::631488">
-	
-	def setControls(self,control_string):
-		if not control_string: return
-		x=1
-		#limit to 50 because while loops scare me :)
-		while x<50:
-			control = self.forms.get(control_string % x)
-			if not control: return
-			ctype,rest = control.split(':',1)
-			ftype,rest = rest.split('.',1)
-			name,value = rest.split('=')
-			control = self.browser.find_control(**{ftype:name})
-			if ctype == 'radio':
-				control.value = [value]
-			elif ctype == 'checkbox':
-				control.items[0].selected = value == 'True'
-			x+=1
-			
-	def canDelete(self,user):
-		return self.user == user and self.urls.get('deletepost')
-	
-	def getQuoteFormat(self):
-		return None
-	
-	def getPostForEdit(self,pid,callback=None): return None
-		
-	def editPost(self,pm,callback=None): return None
-	
-	def canEditPost(self,user): return False
-	
-	def getQuoteStartFormat(self):
-		return self.filters.get('quote_start','[QUOTE]')
-	
-	def getQuoteReplace(self):
-		return self.filters.get('quote_end','[/QUOTE]')
 
 ######################################################################################
 # Base Window Classes
@@ -1154,6 +348,7 @@ class PageWindow(BaseWindow):
 		if pageData:
 			self.pageData = pageData
 		else:
+			from scraperbrowser import PageData
 			pageData = PageData()
 		self.getControl(200).setVisible(pageData.prev)
 		self.getControl(202).setVisible(pageData.next)
@@ -1283,24 +478,6 @@ class PostDialog(BaseWindow):
 	def setTheme(self):
 		self.getControl(103).setLabel('Post Reply')
 		self.getControl(104).setLabel(__language__(30120))
-		return
-		if __addon__.getSetting('use_forum_colors') == 'false': return
-		#xbmcgui.lock()
-		try:
-			title_bg = FB.theme.get('title_bg','FFFFFFFF')
-			title_fg = FB.theme.get('title_fg','FF000000')
-			self.getControl(251).setColorDiffuse(title_bg) #title bg
-			self.getControl(300).setColorDiffuse(title_bg) #sep
-			self.getControl(301).setColorDiffuse(title_bg) #sep
-			self.getControl(302).setColorDiffuse(title_bg) #sep
-			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
-			self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,'Post Reply'))
-			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,__language__(30120)))
-		except:
-			#xbmcgui.unlock()
-			raise
-		#xbmcgui.unlock()
 		
 	def onClick( self, controlID ):
 		if BaseWindow.onClick(self, controlID): return
@@ -1321,8 +498,7 @@ class PostDialog(BaseWindow):
 		keyboard.doModal()
 		if not keyboard.isConfirmed(): return
 		title = keyboard.getText()
-		title_fg = FB.theme.get('title_fg','FF000000')
-		self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,title))
+		self.getControl(104).setLabel(title)
 		self.title = title
 	
 	def dialogCallback(self,pct,message):
@@ -1364,7 +540,7 @@ class PostDialog(BaseWindow):
 	
 	def updatePreview(self):
 		disp = self.display_base % self.getOutput()
-		if isinstance(FB,ScraperForumBrowser):
+		if FB.browserType == 'ScraperForumBrowser':
 			qf = FB.getQuoteFormat()
 			if qf: disp = re.sub(qf,self.processQuote,disp)
 			disp = self.parseCodes(disp).replace('\n','[CR]')
@@ -1969,7 +1145,6 @@ class RepliesWindow(PageWindow):
 		self.posts = {}
 		self.empty = True
 		self.desc_base = u'[CR]%s[CR] [CR]'
-		self.mode = 'light'
 		self.started = False
 	
 	def onInit(self):
@@ -1989,31 +1164,6 @@ class RepliesWindow(PageWindow):
 		mtype = self.tid == "private_messages" and __language__(30151) or __language__(30130)
 		self.getControl(103).setLabel('[B]%s[/B]' % mtype)
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
-		return
-		if __addon__.getSetting('use_forum_colors') == 'false': return
-		#xbmcgui.lock()
-		try:
-			title_bg = FB.theme.get('title_bg','FFFFFFFF')
-			title_fg = FB.theme.get('title_fg','FF000000')
-			self.getControl(251).setColorDiffuse(title_bg) #title bg
-			self.getControl(300).setColorDiffuse(title_bg) #sep
-			self.getControl(301).setColorDiffuse(title_bg) #sep
-			self.getControl(302).setColorDiffuse(title_bg) #sep
-			self.getControl(101).setColorDiffuse(FB.theme.get('window_bg','FF222222')) #panel bg
-			#self.getControl(351).setColorDiffuse(FB.theme.get('desc_bg',title_bg)) #desc bg
-			self.getControl(103).setLabel(TITLE_FORMAT % (title_fg,mtype))
-			self.getControl(104).setLabel(TITLE_FORMAT % (title_fg,self.topic))
-			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
-				self.mode = 'dark'
-				self.desc_base = '[CR][COLOR FFFFFFFF]%s[/COLOR][CR] [CR]'
-			else:
-				self.mode = 'light'
-				self.desc_base = '[CR][COLOR FF000000]%s[/COLOR][CR] [CR]'
-			if self.tid == 'private_messages': self.getControl(201).setLabel('Send Message')
-		except:
-			#xbmcgui.unlock()
-			raise
-		#xbmcgui.unlock()
 		
 	def showThread(self,nopage=False):
 		if nopage:
@@ -2072,7 +1222,7 @@ class RepliesWindow(PageWindow):
 				self.setMessageProperty(post,item,True)
 				item.setProperty('post',post.postId)
 				item.setProperty('avatar',url)
-				item.setProperty('status',convertHTMLCodes(post.status))
+				item.setProperty('status',texttransform.convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
 				item.setProperty('online',post.online and 'online' or '')
 				item.setProperty('postcount',post.postCount and str(post.postCount) or '')
@@ -2328,7 +1478,7 @@ class ThreadsWindow(PageWindow):
 			tid = tdict.get('threadid','')
 			starter = tdict.get('starter','Unknown')
 			title = tdict.get('title','')
-			title = convertHTMLCodes(MC.tagFilter.sub('',title))
+			title = texttransform.convertHTMLCodes(MC.tagFilter.sub('',title))
 			last = tdict.get('lastposter','')
 			fid = tdict.get('forumid','')
 			sticky = tdict.get('sticky') and 'sticky' or ''
@@ -2346,9 +1496,9 @@ class ThreadsWindow(PageWindow):
 			if last:
 				last = self.desc_base % last
 				short = tdict.get('short_content','')
-				if short: last += '[CR]' + re.sub('<[^>]+?>','',convertHTMLCodes(short))[:100]
+				if short: last += '[CR]' + re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(short))[:100]
 			else:
-				last = re.sub('<[^>]+?>','',convertHTMLCodes(tdict.get('short_content','')))
+				last = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(tdict.get('short_content','')))
 			item.setProperty("last",last)
 			item.setProperty("lastid",tdict.get('lastid',''))
 			item.setProperty('title',title)
@@ -2364,10 +1514,10 @@ class ThreadsWindow(PageWindow):
 			title = fdict.get('title',__language__(30050))
 			desc = fdict.get('description') or __language__(30172)
 			text = self.textBase
-			title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
+			title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
 			item = xbmcgui.ListItem(label=self.textBase % __language__(30164),label2=text % title)
 			item.setInfo('video',{"Genre":'is_forum'})
-			item.setProperty("last",self.forum_desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
+			item.setProperty("last",self.forum_desc_base % texttransform.convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
 			item.setProperty("title",title)
 			item.setProperty("id",fid)
 			item.setProperty("fid",fid)
@@ -2523,10 +1673,10 @@ class ForumsWindow(BaseWindow):
 					desc = __language__(30173)
 				else:
 					text = self.textBase
-				title = convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
+				title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
 				item = xbmcgui.ListItem(label=text % title)
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
-				item.setProperty("description",self.desc_base % convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
+				item.setProperty("description",self.desc_base % texttransform.convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
 				item.setProperty("id",fid)
 				self.getControl(120).addItem(item)
@@ -2577,9 +1727,6 @@ class ForumsWindow(BaseWindow):
 		LOG('------------------ CHANGING FORUM FROM: %s TO: %s' % (FB.getForumID(),forum)) 
 		if not getForumBrowser(forum): return False
 		if not FB: return
-		#FB.resetBrowser()
-		#FB.reloadForumData(forum)
-		MC.resetRegex()
 		self.resetForum()
 		self.fillForumList()
 		__addon__.setSetting('last_forum',FB.getForumID())
@@ -2665,395 +1812,7 @@ def openWindow(windowClass,xmlFilename,return_window=False,*args,**kwargs):
 	del w
 	return None
 
-######################################################################################
-# Message Converter
-######################################################################################
-class MessageConverter:
-	def __init__(self):
-		self._currentFilter = None
-		self.resetOrdered(False)
-		self.textwrap = textwrap.TextWrapper(80)
-		
-		#static replacements
-		
-		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
-		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
-		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
-		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
-		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.hrReplace = ('[CR][B]_____________________________________________________________________________________[/B][CR]').encode('utf8')
-		#static filters
-		self.imageFilter = re.compile('<img[^>]+src="(?P<url>http://[^"]+)"[^>]*/>')
-		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
-		self.ulFilter = re.compile('<ul>(.+?)</ul>')
-		#<span style="text-decoration: underline">Underline</span>
-		self.olFilter = re.compile('<ol.+?>(.+?)</ol>')
-		self.brFilter = re.compile('<br[ /]{0,2}>')
-		self.blockQuoteFilter = re.compile('<blockquote>(.+?)</blockquote>',re.S)
-		self.colorFilter = re.compile('<font color="(.+?)">(.+?)</font>')
-		self.colorFilter2 = re.compile('<span.*?style=".*?color: ?(.+?)".*?>(.+?)</span>')
-		self.tagFilter = re.compile('<[^<>]+?>',re.S)
-		self.resetRegex()
-	
-	def prepareSmileyList(self):
-		class SmiliesList(list):
-			def get(self,key,default=None): return default
-			
-		new = SmiliesList()
-		if __addon__.getSetting('use_skin_mods') == 'true':
-			for f,r,x in FB.smiliesDefs: #@UnusedVariable
-				if '[/COLOR]' in r:
-					new.append((f,r))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
-		else:
-			for f,r,x in FB.smiliesDefs: #@UnusedVariable
-				if '[/COLOR]' in x:
-					new.append((f,x))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
-		FB.smilies = new
-		
-	def resetRegex(self):
-		if not FB: return
-		
-		self.prepareSmileyList()
-		
-		if __addon__.getSetting('use_skin_mods') == 'true':
-			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
-			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
-			self.quoteVert = u'\u2502'
-		else:
-			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
-			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
-			self.quoteVert = u'|' 
 
-		self.lineFilter = re.compile('[\n\r\t]')
-		f = FB.filters.get('quote')
-		self.quoteFilter = f and re.compile(f) or None
-		f = FB.filters.get('code')
-		self.codeFilter = f and re.compile(f) or None
-		f = FB.filters.get('php')
-		self.phpFilter = f and re.compile(f) or None
-		f = FB.filters.get('html')
-		self.htmlFilter = f and re.compile(f) or None
-		f = FB.smilies.get('regex')
-		self.smileyFilter = f and re.compile(f) or None
-		f = FB.filters.get('image')
-		self.imageFilter = f and re.compile(f) or self.imageFilter
-		f = FB.filters.get('link')
-		self.linkFilter = f and re.compile(f) or self.linkFilter
-		f = FB.filters.get('link2')
-		self.linkFilter2 = f and re.compile(f) or None
-		f = FB.getQuoteFormat()
-		self.quoteFilter2 = f and re.compile(f) or None
-		
-		self.quoteStartFilter = re.compile(FB.getQuoteStartFormat())
-		self.altQuoteStartFilter = re.compile(FB.altQuoteStartFilter)
-		self.quoteEndFilter = re.compile('\[\/QUOTE\](?i)')
-		
-		#dynamic replacements
-		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR][CR]_________________________[CR]','utf8')
-		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR][CR]_________________________[CR]','utf8')
-		self.htmlReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30185)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR][CR]_________________________[CR]','utf8')
-		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
-		
-	def resetOrdered(self,ordered):
-		self.ordered = ordered
-		self.ordered_count = 0
-		
-	def messageToDisplay(self,html):
-		html = self.lineFilter.sub('',html)
-		
-		html = re.sub('[_]{10,}',self.hrReplace,html) #convert the pre-converted [hr]
-		#html = self.quoteStartFilter.sub(self.quoteConvert,html)
-		#html = self.quoteEndFilter.sub(self.quoteEndReplace,html)
-		html = self.formatQuotes(html)
-		
-		#if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
-		#if self.quoteFilter2: html = self.quoteFilter2.sub(self.quoteConvert,html)
-		if self.codeFilter: html = self.codeFilter.sub(self.codeReplace,html)
-		if self.phpFilter: html = self.phpFilter.sub(self.phpReplace,html)
-		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
-		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
-		
-		self.imageCount = 0
-		html = self.imageFilter.sub(self.imageConvert,html)
-		html = self.linkFilter.sub(self.linkReplace,html)
-		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
-		html = self.ulFilter.sub(self.processBulletedList,html)
-		html = self.olFilter.sub(self.processOrderedList,html)
-		html = self.colorFilter.sub(self.convertColor,html)
-		html = self.colorFilter2.sub(self.convertColor,html)
-		html = self.brFilter.sub('[CR]',html)
-		html = self.blockQuoteFilter.sub(self.processIndent,html)
-		html = html.replace('<b>','[B]').replace('</b>','[/B]')
-		html = html.replace('<i>','[I]').replace('</i>','[/I]')
-		html = html.replace('<u>','_').replace('</u>','_')
-		html = html.replace('<strong>','[B]').replace('</strong>','[/B]')
-		html = html.replace('<em>','[I]').replace('</em>','[/I]')
-		html = html.replace('</table>','[CR][CR]')
-		html = html.replace('</div></div>','[CR]') #to get rid of excessive new lines
-		html = html.replace('</div>','[CR]')
-		html = html.replace('[hr]',self.hrReplace)
-		html = self.tagFilter.sub('',html)
-		html = self.removeNested(html,'\[/?B\]','[B]')
-		html = self.removeNested(html,'\[/?I\]','[I]')
-		html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
-		html = self.processSmilies(html)
-		return convertHTMLCodes(html)
-
-	def formatQuotesOld(self,html):
-		ct = 0
-		ms = True
-		me = True
-		#2503
-		while ms or me:
-			ms = self.quoteStartFilter.search(html)
-			me = self.quoteEndFilter.search(html)
-			if ms:
-				if me and ms.start() > me.start():
-					rep = self.quoteEndReplace
-					if ct == 1:
-						rep += '[/COLOR]'
-					elif ct > 1:
-						if not ct % 2:
-							rep += '[/COLOR][COLOR FF5555AA]'
-						else:
-							rep += '[/COLOR][COLOR FF55AA55]'
-					html = self.quoteEndFilter.sub(rep,html,1)
-					ct -= 1
-				else:
-					gd = ms.groupdict()
-					rep = self.quoteStartReplace % (gd.get('user') or '')
-					if ct == 0: rep = '[COLOR FF5555AA]' + rep
-					elif ct > 0:
-						if ct % 2:
-							rep = '[/COLOR][COLOR FF55AA55]' + rep
-						else:
-							rep = '[/COLOR][COLOR FF5555AA]' + rep
-					html = self.quoteStartFilter.sub(rep,html,1)
-					ct += 1
-			elif me:
-				rep = self.quoteEndReplace
-				if ct == 1: rep += '[/COLOR]'
-				elif ct > 1:
-					if not ct % 2:
-						rep += '[/COLOR][COLOR FF5555AA]'
-					else:
-						rep += '[/COLOR][COLOR FF55AA55]'
-				html = self.quoteEndFilter.sub(rep,html,1)
-				ct -= 1
-		return html
-			
-	def formatQuotes(self,html):
-		ct = 0
-		ms = None
-		me = None
-		vertL = []
-		html = html.replace('[CR]','\n')
-		#html = html.replace('<br />','\n')
-		lines = html.splitlines()
-		out = ''
-		justStarted = False
-		oddVert = u'[COLOR FF55AA55]%s[/COLOR]' % self.quoteVert
-		evenVert = u'[COLOR FF5555AA]%s[/COLOR]' % self.quoteVert
-		
-		for line in lines:
-			if ct < 0: ct = 0
-			ms = self.quoteStartFilter.search(line)
-			startFilter = self.quoteStartFilter
-			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
-			if ms:
-				alts = self.altQuoteStartFilter.search(line)
-				if alts:
-					ms = alts
-					startFilter = self.altQuoteStartFilter
-				justStarted = True
-				oldVert = ''.join(vertL)
-				gd = ms.groupdict()
-				rep = self.quoteStartReplace % (gd.get('user') or '')
-				if ct == 0:
-					rep = '[COLOR FF5555AA]' + rep
-					vertL.append(evenVert)
-				elif ct > 0:
-					if ct % 2:
-						rep = '[/COLOR][COLOR FF55AA55]' + rep
-						vertL.append(oddVert)
-					else:
-						rep = '[/COLOR][COLOR FF5555AA]' + rep
-						vertL.append(evenVert)
-				vert = ''.join(vertL)
-				out += oldVert + startFilter.sub(rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
-				ct += 1
-			elif me:
-				rep = self.quoteEndReplace
-				if ct == 1: rep += '[/COLOR]'
-				elif ct > 1:
-					if not ct % 2:
-						rep += '[/COLOR][COLOR FF5555AA]'
-					else:
-						rep += '[/COLOR][COLOR FF55AA55]'
-				oldVert = ''.join(vertL)
-				if vertL: vertL.pop()
-				vert = ''.join(vertL)
-				out += oldVert + self.quoteEndFilter.sub('[CR]' + rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
-				ct -= 1
-			elif ct:
-				if justStarted:
-					out += vert + '[CR]'
-				wlines = self.textwrap.wrap(line)
-				for l in wlines:
-					out += vert + l + '[CR]'
-			else:
-				out += line + '[CR]'
-			if not ms:
-				justStarted = False
-		return out
-	
-	def quoteConvert2(self,m):
-		gd = m.groupdict()
-		return self.quoteStartReplace % (gd.get('user') or '')
-		
-	def removeNested(self,html,regex,starttag):
-		self.nStart = starttag
-		self.nCounter = 0
-		return re.sub(regex,self.nestedSub,html)
-		
-	def nestedSub(self,m):
-		tag = m.group(0)
-		if tag == self.nStart:
-			self.nCounter += 1
-			if self.nCounter == 1: return tag
-		else:
-			self.nCounter -= 1
-			if self.nCounter < 0: self.nCounter = 0
-			if self.nCounter == 0: return tag
-		return ''
-		
-	def messageAsQuote(self,html):
-		html = self.lineFilter.sub('',html)
-		if self.quoteFilter: html = self.quoteFilter.sub('',html)
-		if self.codeFilter: html = self.codeFilter.sub('[CODE]\g<code>[/CODE]',html)
-		if self.phpFilter: html = self.phpFilter.sub('[PHP]\g<php>[/PHP]',html)
-		if self.htmlFilter: html = self.htmlFilter.sub('[HTML]\g<html>[/HTML]',html)
-		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
-		html = self.linkFilter.sub('[URL="\g<url>"]\g<text>[/URL]',html)
-		html = self.imageFilter.sub('[IMG]\g<url>[/IMG]',html)
-		html = self.colorFilter.sub(self.convertColor,html)
-		html = self.colorFilter2.sub(self.convertColor,html)
-		html = html.replace('<b>','[B]').replace('</b>','[/B]')
-		html = html.replace('<i>','[I]').replace('</i>','[/I]')
-		html = html.replace('<u>','[U]').replace('</u>','[/U]')
-		html = html.replace('<strong>','[B]').replace('</strong>','[/B]')
-		html = html.replace('<em>','[I]').replace('</em>','[/I]')
-		html = re.sub('<br[^<>]*?>','\n',html)
-		html = html.replace('</table>','\n\n')
-		html = html.replace('</div>','\n')
-		html = re.sub('<[^<>]+?>','',html)
-		return convertHTMLCodes(html).strip()
-		
-	def imageConvert(self,m):
-		self.imageCount += 1
-		return self.imageReplace % (self.imageCount,m.group('url'))
-		
-	def processSmilies(self,text):
-		if self.smileyFilter: return text
-		for f,r in FB.smilies: text = text.replace(f,r)
-		return text
-
-	def smileyRawConvert(self,m):
-		return FB.smilies.get(m.group('smiley'),'')
-		
-	def smileyConvert(self,m):
-		return self.smileyReplace % FB.smilies.get(m.group('smiley'),'')
-		
-	def quoteConvert(self,m):
-		gd = m.groupdict()
-		#quote = self.imageFilter.sub(self.quoteImageReplace,gd.get('quote',''))
-		return self.quoteStartReplace % (gd.get('user') or '')
-			
-	def processIndent(self,m):
-		return '    ' + re.sub('\n','\n    ',m.group(1)) + '\n'
-		
-	def convertColor(self,m):
-		if m.group(1).startswith('#'):
-			color = 'FF' + m.group(1)[1:].upper()
-		else:
-			color = m.group(1).lower()
-		return '[COLOR %s]%s[/COLOR]' % (color,m.group(2))
-
-	def processBulletedList(self,m):
-		self.resetOrdered(False)
-		return self.processList(m.group(1))
-		
-	def processOrderedList(self,m):
-		self.resetOrdered(True)
-		return self.processList(m.group(1))
-			
-	def processList(self,html):
-		return re.sub('<li>(.+?)</li>',self.processItem,html) + '\n'
-
-	def processItem(self,m):
-		self.ordered_count += 1
-		if self.ordered: bullet = str(self.ordered_count) + '.'
-		else: bullet = '*'
-		return  '%s %s\n' % (bullet,m.group(1))
-		
-	def parseCodes(self,text):
-		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',MC.quoteConvert,text)
-		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',MC.quoteConvert,text)
-		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',MC.codeReplace,text)
-		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',MC.phpReplace,text)
-		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',MC.htmlReplace,text)
-		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',MC.quoteImageReplace,text)
-		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',MC.linkReplace,text)
-		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',MC.link2Replace,text)
-		return text
-		
-######################################################################################
-# Functions
-######################################################################################
-
-def subTags(m): return '[%s]' % m.group(1).upper()
-
-#def translateDisplay(message):
-#	pre = re.sub('\[(/?(?:(?:COLOR(?: \w+)?)|CR|B|I))\]',r'<\1>',message).replace('> ','><space>').replace(' <','<space><')
-#	message = TR.translate(pre,FB.formats.get('language','en'),getLanguage(),newline='<CR>',format='html')
-#	message = convertHTMLCodes(message)
-#	message = message.replace('> ','>').replace(' <','<').replace('<space>',' ')
-#	message = re.sub('<(/?COLOR(?: \w+)?)>',r'[\1]',message)
-#	message = re.sub('<([^<>]+?)>',subTags,message)
-#	return message
-		
-def calculatePage(low,high,total):
-	low = int(low.replace(',',''))
-	high = int(high.replace(',',''))
-	total = int(total.replace(',',''))
-	if high == total: return -1
-	return str(int(round(float(high)/((high-low)+1))))
-	
-def cUConvert(m): return unichr(int(m.group(1)))
-def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
-def convertHTMLCodes(html):
-	if not isinstance(html,unicode):
-		html = unicode(html,'utf8','replace')
-	try:
-		html = re.sub('&#(\d{1,5});',cUConvert,html)
-		html = re.sub('&(\w+?);',cTConvert,html)
-	except:
-		pass
-	return html
-				
-def messageToText(html):
-	html = MC.lineFilter.sub('',html)
-	html = re.sub('<br[^>]*?>','\n',html)
-	html = html.replace('</table>','\n\n')
-	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
-	html = html.replace('</div>','\n')
-	html = re.sub('<[^>]*?>','',html)
-	return convertHTMLCodes(html).strip()
 	
 def doKeyboard(prompt,default='',hidden=False):
 	keyboard = xbmc.Keyboard(default,prompt)
@@ -3065,7 +1824,9 @@ def doKeyboard(prompt,default='',hidden=False):
 def getForumPath(forumID):
 	path = os.path.join(FORUMS_PATH,forumID)
 	if os.path.exists(path): return path
-	return os.path.join(FORUMS_STATIC_PATH,forumID)
+	path = os.path.join(FORUMS_STATIC_PATH,forumID)
+	if os.path.exists(path): return path
+	return None
 	
 def askForum(just_added=False,just_favs=False,caption='Choose Forum'):
 	favs = getFavorites()
@@ -3093,7 +1854,9 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum'):
 			if not f:
 				menu.addSep()
 				continue
-			ff = open(getForumPath(f),'r')
+			path = getForumPath(f)
+			if not path: continue
+			ff = open(path,'r')
 			name = ff.readline().strip('\n')[1:]
 			desc = '[CR]' + ff.readline().strip('\n')[1:]
 			line = ff.readline()
@@ -3233,7 +1996,7 @@ def addTapatalkForum(current=False):
 		images = []
 		if info.isValid:
 			tmp_desc = info.description(info.title(''))
-			tmp_desc = convertHTMLCodes(tmp_desc).strip()
+			tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
 			images = info.images()
 		dialog.update(30,'Enter Description')
 		desc = doKeyboard('Enter Description',default=tmp_desc)
@@ -3559,28 +2322,6 @@ class Downloader:
 		outfile.close()
 		urlObj.close()
 		return (target,ftype)
-
-def getForumBrowser(forum=None):
-	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
-	global FB
-	if forum.startswith('TT.'):
-		try:
-			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-		except:
-			err = ERROR('getForumBrowser(): Tapatalk')
-			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
-			return False
-	elif forum.startswith('FR.'):
-		try:
-			import forumrunner
-			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-		except:
-			err = ERROR('getForumBrowser(): Forumrunner')
-			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
-			return False
-	else:
-		FB = ScraperForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-	return True
 	
 def copyKeyboardModImages(skinPath):
 	dst = os.path.join(skinPath,'media','forum-browser-keyboard')
@@ -3713,6 +2454,37 @@ def checkPasswordEncryption():
 		LOG('Encrypting password for: ' + f)
 		passmanager.savePassword(key, user, password)
 	
+def getForumBrowser(forum=None):
+	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
+	global FB
+	global FBMODULE
+	global MC
+	if forum.startswith('TT.'):
+		try:
+			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		except:
+			err = ERROR('getForumBrowser(): Tapatalk')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
+			return False
+		FBMODULE = tapatalk
+	elif forum.startswith('FR.'):
+		try:
+			import forumrunner
+			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		except:
+			err = ERROR('getForumBrowser(): Forumrunner')
+			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),err)
+			return False
+		FBMODULE = forumrunner
+	else:
+		import parserbrowser
+		FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		FBMODULE = parserbrowser.scraperbrowser
+	MC = texttransform.MessageConverter(FB)
+	FBMODULE.MC = MC
+	FBMODULE.FB = FB
+	return True
+
 ######################################################################################
 # Startup
 ######################################################################################
@@ -3721,11 +2493,10 @@ if sys.argv[-1] == 'settings':
 else:
 	checkForSkinMods()
 	checkPasswordEncryption()
-	FB = None
+	
 	getForumBrowser()
 
 	TD = ThreadDownloader()
-	MC = MessageConverter()
 	
 	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
 	w.doModal()

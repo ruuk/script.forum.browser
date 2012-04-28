@@ -171,8 +171,8 @@
 					<posy>0</posy>
 					<width>230</width>
 					<height>60</height>
-					<colordiffuse>FF555555</colordiffuse>
-					<texture border="20">forum-browser-dark-grey-boxr.png</texture>
+					<colordiffuse>FFAAAAAA</colordiffuse>
+					<texture border="20">forum-browser-dark-white-boxr.png</texture>
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="button" id="106">

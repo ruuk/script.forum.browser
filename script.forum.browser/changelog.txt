@@ -4,16 +4,33 @@ TODO:
   Forum Subscriptions / Subscribe/Unsubscribe forums
   Help window (forum browser user guide)
   view video links
+  If I remove a local forum, and re-add it to my m/c from the online data base, the online database graphic had gone blank.
+  Arrows on the image viewer - remove or make useful
+  Add icon for forum type on view
   
   Improve the database and database management
+  Skip forward on remote causes XBMC dialog
   Fallback to non SSL on SSL fail on tapatalk?
   Adjustable text size
   signature maybe with future tapatalk plugin update
   reputation maybe with future tapatalk plugin update
   Logo url from field in forum config data?
+  Add missing smilies for Phpbb (and others)
+  Add missing quote formats for other forum systems
+  Smiley dialog
   Make a million dollars
 
-Current Version : 0.9.29
+Current Version : 0.9.30
+
+*** 0.9.30 ***
+
+Fixed hard to see progress bars on dark skin
+Fixed issue with images not showing up in the images list
+Fix encoding issues with application/json error (forumrunner)
+Remove included XBMC4XBox scraper definition (now tapatalk enabled)
+Fix some encoding errors with smilies
+Added quote parsiing for Phpbb forums
+Fixed boxee forums with new parsing method (mostly)
 
 *** 0.9.29 ***
 
