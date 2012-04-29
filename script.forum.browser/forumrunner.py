@@ -131,7 +131,7 @@ class ForumPost(forumbrowser.ForumPost):
 	
 	
 class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
-	
+	browserType = 'forumrunner'
 	PageData = forumbrowser.PageData
 	
 	def __init__(self,forum,always_login=False):

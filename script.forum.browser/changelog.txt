@@ -1,13 +1,14 @@
 Forum Browser Changelog
 
 TODO:
-  Forum Subscriptions / Subscribe/Unsubscribe forums
+ Short Term:
   Help window (forum browser user guide)
-  view video links
-  If I remove a local forum, and re-add it to my m/c from the online data base, the online database graphic had gone blank.
-  Arrows on the image viewer - remove or make useful
-  Add icon for forum type on view
+  Check reverse posts behavior
+  Option to save logos to disk
+  Use animations for activity icon
   
+ Long Term:
+  View video links
   Improve the database and database management
   Skip forward on remote causes XBMC dialog
   Fallback to non SSL on SSL fail on tapatalk?
@@ -18,9 +19,23 @@ TODO:
   Add missing smilies for Phpbb (and others)
   Add missing quote formats for other forum systems
   Smiley dialog
+  Tapatalk: Use charset from get_config
+  Find forum mobiquo.php path from tapatalk.js path in html page
+  Search function
   Make a million dollars
 
-Current Version : 0.9.31
+Current Version : 0.9.32
+
+*** 0.9.32 ***
+
+Added subscribed forums to the subscriptions view (tapatalk only so far)
+Added ability to subscribe to/unsubscribe from forums from the context menu on the forums and threads windows
+Image viewer now lets you navigate through all images in the post with the arrow buttons
+Removed local dvhk.pl (now tapatalk enabled, though it doesn't seem to work well)
+Local hidden forums now show logo in the 'Add From Online Database' menu
+Tapatalk: Now detects whether guest access is allowed, and asks if you want to set login info if not
+Added icon for forum type on forums view (ie tapatalk, forumrunner or native)
+Set logins now auto-selects the current forum
 
 *** 0.9.31 ***
 

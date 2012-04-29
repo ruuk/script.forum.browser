@@ -43,11 +43,19 @@
 				<height>125</height>
 				<texture border="20">forum-browser-white-box.png</texture>
 			</control>
-			<control type="image" id="250">
-				<description>page header tab icon</description>
+			<control type="image" id="249">
+				<description>Type Logo</description>
 				<posx>40</posx>
+				<posy>32</posy>
+				<width>64</width>
+				<height>64</height>
+			</control>
+			
+			<control type="image" id="250">
+				<description>Forum Logo</description>
+				<posx>110</posx>
 				<posy>25</posy>
-				<width>340</width>
+				<width>270</width>
 				<height>81</height>
 				<aspectratio align="left">keep</aspectratio>
 			</control>

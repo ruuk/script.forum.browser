@@ -152,7 +152,6 @@
 				<width>420</width>
 				<height>380</height>
 				<font>font20</font>
-				<aligny>center</aligny>
 				<textcolor>white</textcolor>
 				<align>center</align>
 				<info>Container(120).ListItem.Label2</info>

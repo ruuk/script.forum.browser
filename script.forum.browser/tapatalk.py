@@ -387,7 +387,7 @@ class PageData:
 # Forum Browser API for TapaTalk
 ######################################################################################
 class TapatalkForumBrowser(forumbrowser.ForumBrowser):
-	
+	browserType = 'tapatalk'
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False):
@@ -450,6 +450,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			ERROR('Failed to get forum config')
 		
+	def guestOK(self):
+		return self.forumConfig.get('guest_okay',True)
+	
 	def getForumType(self):
 		return self.forumConfig.get('version','')[:2]
 	
@@ -528,6 +531,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		data['forumid'] = data.get('forum_id')
 		data['title'] = str(data.get('forum_name'))
 		data['description'] = str(data.get('description'))
+		data['subscribed'] = data.get('is_subscribed',False)
 		data['subforum'] = sub
 		return data
 		
@@ -564,7 +568,37 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 		if donecallback: donecallback(None,logo,None)
 		return None,logo,None
+	
+	def getSubscribedForums(self,callback=None,donecallback=None):
+		if not callback: callback = self.fakeCallback
+		while True:
+			if not callback(20,self.lang(30102)): break
+			try:
+				flist = self.server.get_subscribed_forum()
+			except:
+				em = ERROR('ERROR GETTING FORUM SUBSCRIPTIONS')
+				callback(-1,'%s' % em)
+				if donecallback: donecallback(None,None,None)
+				return (None,None,None)
+			if not callback(40,self.lang(30103)): break
+			forums = []
+			for f in flist.get('forums',[]):
+				f = self.createForumDict(f)
+				f['subscribed'] = True
+				forums.append(f)
+			if not callback(80,self.lang(30231)): break
+			if donecallback: donecallback(forums)
+			return forums
+			
+		if donecallback: donecallback(None)
+		return None
 		
+	def isForumSubscribed(self,fid):
+		forums = self.getSubscribedForums(None, None)
+		for f in forums:
+			if f.get('forumid') == fid: return True
+		return False
+	
 	def createThreadDict(self,data,sticky=False):
 		data['threadid'] = data.get('topic_id','')
 		data['starter'] = str(data.get('topic_author_name',self.user))
@@ -723,9 +757,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def hasSubscriptions(self):
 		return True
 	
+	def hasForumSubscriptions(self):
+		return True
+	
 	def getSubscriptions(self,page='',callback=None,donecallback=None):
 		if not self.checkLogin(callback=callback): return (None,None)
-		return self.getThreads(None, page, callback, donecallback)
+		threads = self.getThreads(None, page, callback, None)
+		if self.hasForumSubscriptions():
+			forums = self.getSubscribedForums(callback, None)
+			donecallback((forums,threads[0]),threads[1])
+			return (forums,threads[0]),threads[1]
+		else:
+			donecallback(threads[0],threads[1])
+			return threads
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
 		return ''
@@ -842,5 +886,23 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			text = result.get('result_text')
 			LOG('Failed to unsubscribe from thread: ' + text)
+			return text
+	
+	def subscribeForum(self,fid):
+		result = self.server.subscribe_forum(fid)
+		if result.get('result'):
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to subscribe to forum: ' + text)
+			return text
+		
+	def unSubscribeForum(self,fid):
+		result = self.server.unsubscribe_forum(fid)
+		if result.get('result'):
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to unsubscribe from forum: ' + text)
 			return text
 	

@@ -534,12 +534,16 @@ class ForumBrowser:
 	
 	def subscribeThread(self,tid): return False
 	
+	def subscribeForum(self,fid): return False
+	
 	def unSubscribeThread(self,tid): return False
+	
+	def unSubscribeForum(self,fid): return False
 	
 	def canSubscribeForum(self,fid): return False
 	
-	def subscribeForum(self,tid): return False
-	
+	def isForumSubscribed(self,fid): return None
+		
 	def hasPM(self): return False
 	
 	def hasSubscriptions(self): return False
@@ -549,6 +553,8 @@ class ForumBrowser:
 	def canEditPost(self,user): return False
 	
 	def fakeCallback(self,pct,message=''): return True
+	
+	def guestOK(self): return True
 	
 	
 		

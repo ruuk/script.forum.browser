@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.31'
+__version__ = '0.9.32'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -415,10 +415,23 @@ class ImagesDialog(BaseWindow):
 		if result == 'save':
 			self.saveImage()
 			
+	def downloadImage(self,url):
+		base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
+		if not os.path.exists(base): os.makedirs(base)
+		clearDirFiles(base)
+		return Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
+		
 	def saveImage(self):
 		#browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
 		source = self.images[self.index]
-		filename = doKeyboard('Enter Filename', os.path.basename(source))
+		firstfname = os.path.basename(source)
+		if source.startswith('http'):
+			result = self.downloadImage(source)
+			if not result:
+				xbmcgui.Dialog().ok('Failed','Failed to download file.')
+				return
+			source = result[0]
+		filename = doKeyboard('Enter Filename', firstfname)
 		if filename == None: return
 		default = __addon__.getSetting('last_download_path') or ''
 		result = xbmcgui.Dialog().browse(3,'Select Directory','files','',False,True,default)
@@ -1046,11 +1059,15 @@ class MessageWindow(BaseWindow):
 #			xbmcgui.Dialog().ok(__language__(30052),__language__(30146),fname,__language__(30147) % ftype)
 		
 	def showImage(self,url):
-		base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
-		if not os.path.exists(base): os.makedirs(base)
-		clearDirFiles(base)
-		image_files = Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
-		if not image_files: return
+		#base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
+		#if not os.path.exists(base): os.makedirs(base)
+		#clearDirFiles(base)
+		#image_files = Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
+		#if not image_files: return
+		image_files = self.post.imageURLs()
+		if url in image_files:
+			image_files.pop(image_files.index(url))
+			image_files.insert(0,url)
 		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
 		w.doModal()
 		del w
@@ -1394,6 +1411,22 @@ def unSubscribeThread(tid):
 	else:
 		xbmcgui.Dialog().ok('Failed','Failed to unsubscribed from thread:',str(result))
 	return result
+
+def subscribeForum(fid):
+	result = FB.subscribeForum(fid)
+	if result == True:
+		xbmcgui.Dialog().ok('Success','Subscribed to forum.')
+	else:
+		xbmcgui.Dialog().ok('Failed','Failed to subscribed to forum:',str(result))
+	return result
+
+def unSubscribeForum(fid):
+	result = FB.unSubscribeForum(fid)
+	if result == True:
+		xbmcgui.Dialog().ok('Success','Unsubscribed from forum.')
+	else:
+		xbmcgui.Dialog().ok('Failed','Failed to unsubscribed from forum:',str(result))
+	return result
 				
 ######################################################################################
 # Threads Window
@@ -1403,6 +1436,7 @@ class ThreadsWindow(PageWindow):
 		self.fid = kwargs.get('fid','')
 		self.topic = kwargs.get('topic','')
 		self.parent = kwargs.get('parent')
+		self.forumItem = kwargs.get('item')
 		self.me = self.parent.getUsername() or '?'
 		self.empty = True
 		self.textBase = '%s'
@@ -1509,7 +1543,10 @@ class ThreadsWindow(PageWindow):
 			
 	def addForums(self,forums):
 		for f in forums:
-			fdict = f.groupdict()
+			if hasattr(f,'groupdict'):
+				fdict = f.groupdict()
+			else:
+				fdict = f
 			fid = fdict.get('forumid','')
 			title = fdict.get('title',__language__(30050))
 			desc = fdict.get('description') or __language__(30172)
@@ -1522,6 +1559,8 @@ class ThreadsWindow(PageWindow):
 			item.setProperty("id",fid)
 			item.setProperty("fid",fid)
 			item.setProperty("is_forum",'True')
+			if fdict.get('new_post'): item.setProperty('unread','unread')
+			item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 			self.getControl(120).addItem(item)
 				
 	def openRepliesWindow(self):
@@ -1564,17 +1603,43 @@ class ThreadsWindow(PageWindow):
 		item = self.getControl(120).getSelectedItem()
 		d = ChoiceMenu('Options')
 		if item.getProperty('subscribed'):
-			d.addItem('unsubscribe', __language__(30240))
+			if item.getProperty("is_forum") == 'True':
+				d.addItem('unsubscribeforum', __language__(30242))
+			else:
+				d.addItem('unsubscribe', __language__(30240))
 		else:
 			if FB.canSubscribeThread(item.getProperty('id')):
-				d.addItem('subscribe', __language__(30236))
-		
+				if item.getProperty("is_forum") == 'True':
+					d.addItem('subscribeforum', __language__(30243))
+				else:
+					d.addItem('subscribe', __language__(30236))
+		if self.fid != 'subscriptions':
+			if self.forumItem:
+				sub = False
+				if self.forumItem.getProperty('subscribed'): #If this is set, we don't need to make a call
+					sub = True
+				else:
+					sub = FB.isForumSubscribed(self.fid) #can't trust the unset value so we have to check
+				if not sub is None:
+					if sub:
+						d.addItem('unsubscribecurrentforum', __language__(30242))
+					else:
+						d.addItem('subscribecurrentforum', __language__(30243))
 		result = d.getResult()
 		if not result: return
 		if result == 'subscribe':
 			if subscribeThread(item.getProperty('id')): item.setProperty('subscribed','subscribed')
+		elif result == 'subscribeforum':
+			if subscribeForum(item.getProperty('id')): item.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribe':
 			if unSubscribeThread(item.getProperty('id')): item.setProperty('subscribed','')
+		elif result == 'unsubscribeforum':
+			if unSubscribeForum(item.getProperty('id')): item.setProperty('subscribed','')
+		elif result == 'subscribecurrentforum':
+			if subscribeForum(self.fid): self.forumItem.setProperty('subscribed','subscribed')
+		elif result == 'unsubscribecurrentforum':
+			if unSubscribeForum(self.fid): self.forumItem.setProperty('subscribed','')
+		
 		
 	def gotoPage(self,page):
 		self.stopThread()
@@ -1646,7 +1711,7 @@ class ForumsWindow(BaseWindow):
 		
 	def doFillForumList(self,forums,logo,pm_counts):
 		self.endProgress()
-		if logo: self.getControl(250).setImage(logo)
+		self.setLogo(logo)
 		if not forums:
 			xbmcgui.Dialog().ok(__language__(30050),__language__(30171),__language__(30053),'Bad Page Data')
 			self.setFocusId(202)
@@ -1679,6 +1744,8 @@ class ForumsWindow(BaseWindow):
 				item.setProperty("description",self.desc_base % texttransform.convertHTMLCodes(MC.tagFilter.sub('',MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
 				item.setProperty("id",fid)
+				if fdict.get('new_post'): item.setProperty('unread','unread')
+				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
 		except:
@@ -1689,6 +1756,20 @@ class ForumsWindow(BaseWindow):
 		if self.empty: self.setFocusId(202)
 		#xbmcgui.unlock()
 		self.setLoggedIn()
+		if not FB.guestOK() and not FB.isLoggedIn():
+			yes = xbmcgui.Dialog().yesno('Login Required','This forum does not allow guest access.','Login required.','Set login info now?')
+			if yes:
+				setLogins(FB.getForumID())
+				self.resetForum()
+				self.fillForumList()
+		
+	def setLogo(self,logo):
+		if logo: self.getControl(250).setImage(logo)
+		if 'ForumBrowser' in FB.browserType:
+			image = 'forum-browser-logo-128.png'
+		else:
+			image = 'forum-browser-%s.png' % FB.browserType or ''
+		self.getControl(249).setImage(image)
 			
 	def setPMCounts(self,pm_counts=None):
 		disp = ''
@@ -1706,7 +1787,7 @@ class ForumsWindow(BaseWindow):
 		if not item: return False
 		fid = item.getProperty('id')
 		topic = item.getProperty('topic')
-		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
+		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self,item=item)
 		w.doModal()
 		del w
 		self.setPMCounts(FB.getPMCounts())
@@ -1758,13 +1839,34 @@ class ForumsWindow(BaseWindow):
 	
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
-			pass
+			self.doMenu()
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
 			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
 		
+	def doMenu(self):
+		if self.getFocusId() != 120: return
+		item = self.getControl(120).getSelectedItem()
+		fid = item.getProperty('id')
+		d = ChoiceMenu('Options')
+		sub = False
+		if item.getProperty('subscribed'): #If this is set, we don't need to make a call
+			sub = True
+		else:
+			sub = FB.isForumSubscribed(fid) #can't trust the unset value so we have to check
+		if not sub is None:
+			if sub:
+				d.addItem('unsubscribecurrentforum', __language__(30242))
+			else:
+				d.addItem('subscribecurrentforum', __language__(30243))
+		result = d.getResult()
+		if result == 'subscribecurrentforum':
+			if subscribeForum(fid): item.setProperty('subscribed','subscribed')
+		elif result == 'unsubscribecurrentforum':
+			if unSubscribeForum(fid): item.setProperty('subscribed','')
+			
 	def preClose(self):
 		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
 		return xbmcgui.Dialog().yesno('Really Exit?','Really exit?')
@@ -1828,7 +1930,7 @@ def getForumPath(forumID):
 	if os.path.exists(path): return path
 	return None
 	
-def askForum(just_added=False,just_favs=False,caption='Choose Forum'):
+def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=None):
 	favs = getFavorites()
 	ft = os.listdir(FORUMS_STATIC_PATH)
 	hidden = getHiddenForums()
@@ -1858,18 +1960,18 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum'):
 			if not path: continue
 			ff = open(path,'r')
 			name = ff.readline().strip('\n')[1:]
-			desc = '[CR]' + ff.readline().strip('\n')[1:]
+			desc = ff.readline().strip('\n')[1:]
 			line = ff.readline()
 			if not 'url:logo=' in line: line = ff.readline()
 			if not 'url:logo=' in line: line = ff.readline()
 			logo = line.strip('\n').split('=')[-1]
 			ff.close()
 			menu.addItem(f, name,logo,desc)
-	forum = menu.getResult('script-forumbrowser-forum-select.xml')
+	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
 	return forum
 
-def setLogins():
-	forumID = askForum()
+def setLogins(forumID=None,force_ask=False):
+	if not forumID or force_ask: forumID = askForum(forumID=forumID)
 	if not forumID: return
 	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forumID.replace('.','_')))
 	if user is None: return
@@ -1906,7 +2008,7 @@ def doSettings():
 	elif result == 'addforum': addTapatalkForum()
 	elif result == 'addonline': addForumFromOnline()
 	elif result == 'removeforum': removeForum()
-	elif result == 'setlogins': setLogins()
+	elif result == 'setlogins': setLogins(FB.getForumID(),True)
 #	elif result == 'register': registerForum()
 	elif result == 'settings':
 		__addon__.openSettings()
@@ -2021,11 +2123,22 @@ def addForumFromOnline():
 	flist = odb.getForumList()
 	menu = ImageChoiceMenu('Choose Forum')
 	for f in flist:
-		menu.addItem(f, f.get('name'), f.get('logo'), '[CR]' + f.get('desc'))
+		menu.addItem(f, f.get('name'), f.get('logo'), f.get('desc'))
 	for f in getHiddenForums():
+		path = getForumPath(f)
+		if not path: continue
+		ff = open(path,'r')
+		name = ff.readline().strip('\n')[1:]
+		desc = ff.readline().strip('\n')[1:]
+		line = ff.readline()
+		if not 'url:logo=' in line: line = ff.readline()
+		if not 'url:logo=' in line: line = ff.readline()
+		logo = line.strip('\n').split('=')[-1]
+		ff.close()
 		name = f
 		if f.startswith('TT.') or f.startswith('FR.'): name = f[3:]
-		menu.addItem(f,name,'','[CR]Hidden (Built-in)')
+		menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc)
+		
 	f = menu.getResult('script-forumbrowser-forum-select.xml')
 	if not f: return
 	if not isinstance(f,dict):
@@ -2095,6 +2208,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.result = None
 		self.items = kwargs.get('items')
 		self.caption = kwargs.get('caption')
+		self.select = kwargs.get('select')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
@@ -2107,6 +2221,13 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 			
 		self.getControl(300).setLabel(self.caption)
 		self.setFocus(clist)
+		if self.select:
+			idx=0
+			for i in self.items:
+				if i['id'] == self.select:
+					clist.selectItem(idx)
+					break
+				idx+=1
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
@@ -2147,8 +2268,8 @@ class ChoiceMenu():
 		return self.items[idx]['id']
 		
 class ImageChoiceMenu(ChoiceMenu):
-	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml'):
-		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',items=self.items,caption=self.caption)
+	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None):
+		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',items=self.items,caption=self.caption,select=select)
 		w.doModal()
 		result = w.result
 		del w
