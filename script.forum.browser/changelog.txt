@@ -2,9 +2,8 @@ Forum Browser Changelog
 
 TODO:
  Short Term:
-  Help window (forum browser user guide)
+  Finish help windows
   Check reverse posts behavior
-  Option to save logos to disk
   Use animations for activity icon
   
  Long Term:
@@ -24,14 +23,25 @@ TODO:
   Search function
   Make a million dollars
 
-Current Version : 0.9.32
+Current Version : 0.9.33
+
+*** 0.9.33 ***
+
+On startup error, fix focus and hide activity icon
+Improved message dialogs (can show longer messages)
+Changed 'Setting' button to 'Options'
+New options menu with icons and descriptions
+Fixed default quote matching so forums that do not have them defined will still show quoting decently
+Added help option with forums window help which includes an option to view the changelog
+Added option in settings to cache logos locally to disk
+Subforums now display indented
 
 *** 0.9.32 ***
 
 Added subscribed forums to the subscriptions view (tapatalk only so far)
 Added ability to subscribe to/unsubscribe from forums from the context menu on the forums and threads windows
 Image viewer now lets you navigate through all images in the post with the arrow buttons
-Removed local dvhk.pl (now tapatalk enabled, though it doesn't seem to work well)
+Removed local dvhk.pl (now tapatalk enabled)
 Local hidden forums now show logo in the 'Add From Online Database' menu
 Tapatalk: Now detects whether guest access is allowed, and asks if you want to set login info if not
 Added icon for forum type on forums view (ie tapatalk, forumrunner or native)

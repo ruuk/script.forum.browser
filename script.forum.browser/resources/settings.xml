@@ -8,6 +8,7 @@
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
     <setting id="use_skin_mods" type="bool" label="30234" default="true" />
     <setting id="enable_ssl" type="bool" label="30235" default="false" />
+    <setting id="save_logos" type="bool" label="30245" default="false" />
     <setting id="skin" type="enum" label="30005" lvalues="30010|30011|30012" default="0" />
   </category>
   <category label="30008">

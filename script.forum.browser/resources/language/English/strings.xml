@@ -103,7 +103,7 @@
     <string id="30221">Waiting for thread to stop...</string>
     <string id="30222">Add A Forum</string>
     <string id="30223">Add Current Forum To Favorites</string>
-    <string id="30224">Remove Forum</string>
+    <string id="30224">Remove A Forum</string>
     <string id="30225">Remove A Forum From Favorites</string>
     <string id="30226">Add A Forum From The Online Database</string>
     <string id="30227">Posting A Reply Failed:</string>
@@ -127,10 +127,14 @@
     <string id="30242">Unsubscribe From Forum</string>
     <string id="30243">Subscribe To Forum</string>
     
+    <string id="30244">Help</string>
+    
+    <string id="30245">Cache Logos Images Locally</string>
+    
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
     <string id="3002">Post Reply</string>
-    <string id="3003">Settings</string>
+    <string id="3003">Options</string>
     <string id="3004">Subscriptions</string>
     <string id="3005">Change Forum</string>
     <string id="3006">Add Line</string>
@@ -140,5 +144,6 @@
     <string id="3010">STOP</string>
     <string id="3011">Posts:</string>
     <string id="3012">Join:</string>
+    <string id="3013">OK</string>
 
 </strings>

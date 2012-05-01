@@ -45,7 +45,7 @@
 			</control>
 			<control type="image" id="249">
 				<description>Type Logo</description>
-				<posx>40</posx>
+				<posx>35</posx>
 				<posy>32</posy>
 				<width>64</width>
 				<height>64</height>
@@ -374,7 +374,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFBBBBBB</textcolor>
 						<align>left</align>
-						<info>ListItem.Label</info>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
 						<visible>StringCompare(ListItem.Genre,sub)</visible>
 					</control>
 				</itemlayout>
@@ -416,7 +416,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFDDDDDD</textcolor>
 						<align>left</align>
-						<info>ListItem.Label</info>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
 						<visible>StringCompare(ListItem.Genre,sub)</visible>
 					</control>
 				</focusedlayout>

@@ -512,7 +512,7 @@ class ForumBrowser:
 	
 	def getQuoteStartFormat(self):
 		forumType = self.getForumType()
-		return self.quoteStartFormats.get(forumType,'\[QUOTE[^\]]*?\]')
+		return self.quoteStartFormats.get(forumType,'\[quote[^\]]*?\](?i)')
 	
 	def getQuoteReplace(self):
 		forumType = self.getForumType()
