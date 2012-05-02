@@ -10,6 +10,7 @@
     <setting id="enable_ssl" type="bool" label="30235" default="false" />
     <setting id="save_logos" type="bool" label="30245" default="false" />
     <setting id="skin" type="enum" label="30005" lvalues="30010|30011|30012" default="0" />
+    <setting label="30244" type="action" action="RunScript(script.forum.browser,settingshelp)"/>
   </category>
   <category label="30008">
   	<setting id="crypto_type" type="enum" label="30238" values="AES|Triple DES|AES & Triple DES" default="2" />

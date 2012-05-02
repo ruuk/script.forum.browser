@@ -10,7 +10,7 @@
     <string id="30006">Use Text Editor (Experimental)</string>
     <string id="30007">Use Forum Colors</string>
     <string id="30008">Advanced</string>
-    <string id="30009">Automatically Open To Thread Subscriptions</string>
+    <string id="30009">Automatically Open Subscriptions</string>
     
     <string id="30010">Default</string>
     <string id="30011">Dark</string>
@@ -83,6 +83,8 @@
     <string id="30174">Error filling forum list.</string>
     <string id="30175">Subscriptions</string>
     <string id="30176">Private Messages</string>
+    <string id="30177">Send PM</string>
+    <string id="30178">Send Message</string>
     
     <string id="30180">Quote:</string>
     <string id="30181">Originally posted by:</string>
@@ -129,7 +131,7 @@
     
     <string id="30244">Help</string>
     
-    <string id="30245">Cache Logos Images Locally</string>
+    <string id="30245">Cache Logo Images Locally</string>
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>

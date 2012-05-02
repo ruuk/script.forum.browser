@@ -623,7 +623,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				except:
 					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 				page = '&%s=%s' % (self.urls.get('page_arg',''),page)
-		sub = self.URLSubs(self.urls[sub],pid=pid,tid=tid,fid=fid)
+		sub = self.URLSubs(self.urls.get(sub,''),pid=pid,tid=tid,fid=fid)
 		return self._url + sub + page
 		
 	def getURL(self,name):

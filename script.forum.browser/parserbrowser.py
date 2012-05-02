@@ -115,6 +115,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			else:
 				return (None,None)
 		replies = self.postParser.getList(html)
+		replies.reverse()
 		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		if not threadid:
 			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)

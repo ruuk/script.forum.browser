@@ -38,7 +38,7 @@ class MessageConverter:
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
 		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.hrReplace = ('[CR][B]_____________________________________________________________________________________[/B][CR]').encode('utf8')
+		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
 		#static filters
 		self.imageFilter = re.compile('<img[^>]+src="(?P<url>http://[^"]+)"[^>]*/>')
 		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
@@ -80,10 +80,12 @@ class MessageConverter:
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
 			self.quoteVert = u'\u2502'
+			self.hrReplace = u'[B]'+u'\u2500'*300+u'[/B]'
 		else:
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
-			self.quoteVert = u'|' 
+			self.quoteVert = u'|'
+			self.hrReplace = u'[B]'+u'_'*300+u'[/B]'
 
 		self.lineFilter = re.compile('[\n\r\t]')
 		f = FB.filters.get('quote')
@@ -121,13 +123,13 @@ class MessageConverter:
 		self.ordered_count = 0
 		
 	def messageToDisplay(self,html):
-		html = self.lineFilter.sub('',html)
-		
+		#html = self.lineFilter.sub('',html)
+		html = re.sub('[_]{10,}',r'\n\g<0>\n',html)
+		html = html.replace('[hr]','\n[hr]\n')
+		html = self.formatQuotes(html)
 		html = re.sub('[_]{10,}',self.hrReplace,html) #convert the pre-converted [hr]
 		#html = self.quoteStartFilter.sub(self.quoteConvert,html)
 		#html = self.quoteEndFilter.sub(self.quoteEndReplace,html)
-		html = self.formatQuotes(html)
-		
 		#if self.quoteFilter: html = self.quoteFilter.sub(self.quoteConvert,html)
 		#if self.quoteFilter2: html = self.quoteFilter2.sub(self.quoteConvert,html)
 		if self.codeFilter: html = self.codeFilter.sub(self.codeReplace,html)
@@ -205,6 +207,7 @@ class MessageConverter:
 		return html
 			
 	def formatQuotes(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8')
 		ct = 0
 		ms = None
 		me = None
@@ -212,6 +215,7 @@ class MessageConverter:
 		html = html.replace('[CR]','\n')
 		html = html.replace('<br />','\n')
 		html = self.quoteEndOnLineFilter.sub('\n[/quote]',html)
+		html = re.sub(self.quoteStartFilter.pattern + '(?!\n)','\g<0>\n',html)
 		lines = html.splitlines()
 		out = ''
 		justStarted = False
@@ -261,6 +265,8 @@ class MessageConverter:
 			elif ct:
 				if justStarted:
 					out += vert + '[CR]'
+				line = self.linkFilter.sub(r'\g<text> [B](Link)[/B]',line)
+				if self.linkFilter2: line = self.linkFilter2.sub('[B](LINK)[/B]',line)
 				wlines = self.textwrap.wrap(line)
 				for l in wlines:
 					out += vert + l + '[CR]'

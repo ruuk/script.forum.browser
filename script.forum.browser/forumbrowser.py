@@ -357,7 +357,7 @@ class ForumBrowser:
 						'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?P<quote>.+?)\[/quote\](?is)'
 					}
 	
-	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='(?P<user>[^']*?)'(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
+	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
 							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
 							'vb':'(?i)\[quote(?:\=(?P<user>\w+)(?:;\d+)*)?\]',
 							'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?is)'

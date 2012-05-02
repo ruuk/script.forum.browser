@@ -2,9 +2,8 @@ Forum Browser Changelog
 
 TODO:
  Short Term:
-  Finish help windows
-  Check reverse posts behavior
-  Use animations for activity icon
+  Clean up message converting for speed
+  Finish custom font usage
   
  Long Term:
   View video links
@@ -23,7 +22,23 @@ TODO:
   Search function
   Make a million dollars
 
-Current Version : 0.9.33
+Current Version : 0.9.34
+
+*** 0.9.34 ***
+
+Fix encoding error when formatting quotes
+Reverse boxee replies order to match the rest
+Use skin animation for activity indicator in dark skin
+Added help for threads window, subscriptions window, posts window, full message view window, message editor window and addon settings
+Now when 'Open Thread At Newest Post' is enabled, it will jump to the newest post. Previously it just opened to the page containing the post.
+Applied skin mod font to post editor
+Fixed some quote handling issues
+When selecting buttons on posts view, selected post now loses highlight to better show where the focus is
+Fixed a bug that caused multiple refreshes of the posts view (and perhaps others). This bug was also causing triple error messages.
+Fixed a bug that caused the wrong page to be displayed after following a post link form the post view
+Button in Private Messages window now says 'Send PM' instead of 'Post Reply'
+Moving off list in Message Editor now removes highlight to better show where the focus is
+Message editor no longer shows 'Add Line Before' and 'Delete' when there are no lines in the editor
 
 *** 0.9.33 ***
 

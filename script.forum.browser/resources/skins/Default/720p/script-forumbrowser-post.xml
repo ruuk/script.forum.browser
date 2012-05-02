@@ -56,11 +56,11 @@
 				<posy>30</posy>
 				<width>218</width>
 				<height>60</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Post Reply</label>
+				<label>[B]Post Reply[/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			<control type="button" id="110">
@@ -99,7 +99,7 @@
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
-				<font>font18</font>
+				<font>ForumBrowser-font13</font>
 				<align>center</align>
 				<label>Set Title</label>
 			</control>
@@ -150,7 +150,7 @@
 				<height>40</height>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font18</font>
+				<font>ForumBrowser-font13</font>
 				<align>center</align>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
@@ -171,7 +171,7 @@
 				<height>40</height>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font18</font>
+				<font>ForumBrowser-font13</font>
 				<align>center</align>
 				<label>$LOCALIZE[SCRIPT3007]</label>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
@@ -192,7 +192,7 @@
 				<height>40</height>
 				<visible>true</visible>
 				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>font18</font>
+				<font>ForumBrowser-font13</font>
 				<align>center</align>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
@@ -212,7 +212,7 @@
 				<description>My first text box control</description>
 				<visible>true</visible>
 				<colordiffuse>FFFF0000</colordiffuse>
-				<font>font12</font>
+				<font>ForumBrowser-font12</font>
 				<textcolor>FF000000</textcolor>
 			</control>
 
@@ -255,7 +255,7 @@
 						<posy>0</posy>
 						<width>980</width>
 						<height>38</height>
-						<font>font18</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<selectedcolor>green</selectedcolor>
@@ -270,13 +270,23 @@
 						<width>1020</width>
 						<height>38</height>
 						<texture border="20">forum-browser-grey-boxr.png</texture>
+						<visible>!Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1020</width>
+						<height>38</height>
+						<texture border="20">forum-browser-white-boxr.png</texture>
+						<colordiffuse>FF222222</colordiffuse>
+						<visible>Control.HasFocus(120)</visible>
 					</control>
 					<control type="label">
 						<posx>20</posx>
 						<posy>0</posy>
 						<width>980</width>
 						<height>38</height>
-						<font>font18</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<selectedcolor>green</selectedcolor>

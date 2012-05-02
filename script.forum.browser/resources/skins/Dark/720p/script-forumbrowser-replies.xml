@@ -174,7 +174,8 @@
 					<posy>14</posy>
 					<width>32</width>
 					<height>32</height>
-					<texture>forum-browser-dark-loading2.gif</texture>
+					<texture>forum-browser-dark-loading3.png</texture>
+					<animation effect="rotate" end="-3600" center="-1,30" time="20000" loop="true" condition="Control.IsVisible(106)">Conditional</animation>
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="image" id="300">
@@ -504,6 +505,16 @@
 						<height>25</height>
 						<texture>forum-browser-dark-triangle.png</texture>
 						<colordiffuse>FF000000</colordiffuse>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>144</posx>
+						<posy>147</posy>
+						<width>60</width>
+						<height>25</height>
+						<texture>forum-browser-dark-triangle.png</texture>
+						<colordiffuse>FF202020</colordiffuse>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>200</posx>
@@ -512,6 +523,16 @@
 						<height>200</height>
 						<texture border="10">forum-browser-dark-text-background.png</texture>
 						<colordiffuse>FF000000</colordiffuse>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>200</posx>
+						<posy>0</posy>
+						<width>1030</width>
+						<height>200</height>
+						<texture border="10">forum-browser-dark-text-background.png</texture>
+						<colordiffuse>FF202020</colordiffuse>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>10</posx>

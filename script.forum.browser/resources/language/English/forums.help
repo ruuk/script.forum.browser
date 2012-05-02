@@ -1,4 +1,4 @@
-#Options Help
+Forums Window Help
 @item:options=Options Button
 Opens the options menu.
 
@@ -30,7 +30,7 @@ A lock icon will appear if the current connection is using SSL.
 
 A close button will be visible if mouse support is enabled in XBMC.
 @item:list=Forums List
-Select a forum to view.
+The list of forums. Click on a forum to open the threads window.
 
 Subforums are in indented, in italics and a dimmer color.
 The forum description (if available) is shown below the forums list.

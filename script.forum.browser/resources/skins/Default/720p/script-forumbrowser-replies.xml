@@ -508,6 +508,16 @@
 						<height>25</height>
 						<texture>forum-browser-triangle.png</texture>
 						<colordiffuse>FFFFFFFF</colordiffuse>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>144</posx>
+						<posy>147</posy>
+						<width>60</width>
+						<height>25</height>
+						<texture>forum-browser-triangle.png</texture>
+						<colordiffuse>FFBBBBBB</colordiffuse>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>200</posx>
@@ -516,6 +526,16 @@
 						<height>200</height>
 						<texture border="10">forum-browser-text-background.png</texture>
 						<colordiffuse>FFFFFFFF</colordiffuse>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>200</posx>
+						<posy>0</posy>
+						<width>1030</width>
+						<height>200</height>
+						<texture border="10">forum-browser-text-background.png</texture>
+						<colordiffuse>FFBBBBBB</colordiffuse>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>10</posx>

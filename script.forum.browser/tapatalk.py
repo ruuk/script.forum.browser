@@ -530,7 +530,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def createForumDict(self,data,sub=False):
 		data['forumid'] = data.get('forum_id')
 		data['title'] = str(data.get('forum_name'))
-		data['description'] = str(data.get('description'))
+		data['description'] = str(data.get('description',''))
 		data['subscribed'] = data.get('is_subscribed',False)
 		data['subforum'] = sub
 		return data
@@ -677,6 +677,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					test = self.server.get_thread_by_post(pid,20)
 					index = test.get('position')
 					start = int((index - 1) / 20) * 20
+					page = start
 					thread = self.server.get_thread(threadid,start,start + 19)
 				else:
 					thread = self.server.get_thread(threadid,page,page + 19)
