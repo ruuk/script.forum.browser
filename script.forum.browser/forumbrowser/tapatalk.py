@@ -1,13 +1,15 @@
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib, socket, errno
 import urllib2
-import iso8601, forumbrowser
+import iso8601, forumbrowser, texttransform, textwrap
+from forumbrowser import FBData
 #import xbmc #@UnresolvedImport
 
 DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 __addon__ = sys.modules["__main__"].__addon__
+__language__ = sys.modules["__main__"].__language__
 
 def checkVersion(version1, version2):
 	def normalize(v):
@@ -164,60 +166,204 @@ class CookieTransport(xmlrpclib.Transport):
 		encoded = f.getvalue()
 		f.close()
 		return encoded
-			
 
-class PMLink:
-	def __init__(self,match=None):
-		self.FB = sys.modules["__main__"].FB
-		self.MC = sys.modules["__main__"].MC
-		self.url = ''
-		self.text = ''
-		self.pid = ''
-		self.tid = ''
-		self.fid = ''
-		self._isImage = False
-		
-		if match:
-			self.url = match.group('url')
-			self.text = match.group('text')
-		self.processURL()
-			
-	def processURL(self):
-		if not self.url: return
-		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
-		if self._isImage: return
-		pm = re.search(self.FB.filters.get('post_link','@`%#@>-'),self.url)
-		tm = re.search(self.FB.filters.get('thread_link','@`%#@>-'),self.url)
-		if pm:
-			d = pm.groupdict()
-			self.pid = d.get('postid','')
-			self.tid = d.get('threadid','')
-		elif tm:
-			d = tm.groupdict()
-			self.tid = d.get('threadid','')
-			
-	def urlShow(self):
-		if self.isPost(): return 'Post ID: %s' % self.pid
-		elif self.isThread(): return 'Thread ID: %s' % self.tid
-		return self.url
-		
-	def isImage(self):
-		return self._isImage
-		
-	def isPost(self):
-		return self.pid and True or False
-		
-	def isThread(self):
-		return self.tid and not self.pid
+######################################################################################
+# Message Converter
+######################################################################################
+class TTMessageConverter(texttransform.MessageConverter):
+	def __init__(self,fb):
+		self.FB = fb
+		self._currentFilter = None
+		self.textwrap = textwrap.TextWrapper(80)
+		self.textwrap.replace_whitespace = False
+		self.boldFilter = re.compile('\[(/?)b\]')
+		self.italicsFilter = re.compile('\[(/?)i\]')
+		self.setReplaces()
+		self.resetRegex()
 	
+	def prepareSmileyList(self):
+		class SmiliesList(list):
+			def get(self,key,default=None): return default
+			
+		new = SmiliesList()
+		if __addon__.getSetting('use_skin_mods') == 'true':
+			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in r:
+					new.append((f,r))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
+		else:
+			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in x:
+					new.append((f,x))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
+		self.FB.smilies = new
+		
+	def resetRegex(self):		
+		self.prepareSmileyList()
+
+		self.lineFilter = re.compile('[\n\r\t]')
+		f = self.FB.filters.get('code')
+		self.codeFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('php')
+		self.phpFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('html')
+		self.htmlFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('image')
+		self.imageFilter = f and re.compile(f) or self.imageFilter
+		f = self.FB.filters.get('link')
+		self.linkFilter = f and re.compile(f) or self.linkFilter
+		f = self.FB.filters.get('link2')
+		self.linkFilter2 = f and re.compile(f) or None
+		f = self.FB.filters.get('color_start')
+		self.colorStart = f and re.compile(f) or None
+		f = self.FB.getQuoteFormat()
+		self.quoteFilter2 = f and re.compile(f) or None
+		
+		self.quoteStartFilter = re.compile(self.FB.getQuoteStartFormat())
+		self.altQuoteStartFilter = re.compile(self.FB.altQuoteStartFilter)
+		self.quoteEndFilter = re.compile('\[\/quote\](?i)')
+		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
+		self.fakeHrFilter = re.compile('[_]{10,}')
+		
+	def messageToDisplay(self,html):
+		html = self.fakeHrFilter.sub(r'\n\g<0>\n',html)
+		html = html.replace('[hr]','\n[hr]\n')
+		html = self.formatQuotes(html)
+		html = self.fakeHrFilter.sub(self.hrReplace,html) #convert the pre-converted [hr]
+		
+		html = self.boldFilter.sub(r'[\1B]',html)
+		html = self.italicsFilter.sub(r'[\1I]',html)
+		
+		if self.codeFilter: html = self.codeFilter.sub(self.codeConvert,html)
+		if self.phpFilter: html = self.phpFilter.sub(self.phpConvert,html)
+		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
+		if self.colorStart: html = self.colorStart.sub(r'[COLOR FF\1]',html)
+		html = html.replace('[/color]','[/COLOR]')
+		
+		self.imageCount = 0
+		html = self.imageFilter.sub(self.imageConvert,html)
+		html = self.linkFilter.sub(self.linkReplace,html)
+		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
+		html = html.replace('[hr]',self.hrReplace)
+		html = self.removeNested(html,'\[/?B\]','[B]')
+		html = self.removeNested(html,'\[/?I\]','[I]')
+		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
+		html = self.processSmilies(html)
+		return texttransform.convertHTMLCodes(html)
+			
+	def formatQuotes(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8')
+		ct = 0
+		ms = None
+		me = None
+		vertL = []
+		html = html.replace('[CR]','\n')
+		html = html.replace('<br />','\n')
+		html = self.quoteEndOnLineFilter.sub('\n[/quote]',html)
+		html = self.altQuoteStartFilter.sub(r"[quote='\1']",html)
+		html = re.sub(self.quoteStartFilter.pattern + '(?!\n)','\g<0>\n',html)
+		lines = html.splitlines()
+		out = ''
+		justStarted = False
+		oddVert = u'[COLOR FF55AA55]%s[/COLOR]' % self.quoteVert
+		evenVert = u'[COLOR FF5555AA]%s[/COLOR]' % self.quoteVert
+		
+		for line in lines:
+			if ct < 0: ct = 0
+			ms = self.quoteStartFilter.search(line)
+			startFilter = self.quoteStartFilter
+			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
+			if ms:
+				justStarted = True
+				oldVert = ''.join(vertL)
+				gd = ms.groupdict()
+				rep = self.quoteStartReplace % (gd.get('user') or '')
+				if ct == 0:
+					rep = '[COLOR FF5555AA]' + rep
+					vertL.append(evenVert)
+				elif ct > 0:
+					if ct % 2:
+						rep = '[/COLOR][COLOR FF55AA55]' + rep
+						vertL.append(oddVert)
+					else:
+						rep = '[/COLOR][COLOR FF5555AA]' + rep
+						vertL.append(evenVert)
+				vert = ''.join(vertL)
+				out += oldVert + startFilter.sub(rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct += 1
+			elif me:
+				rep = self.quoteEndReplace
+				if ct == 1: rep += '[/COLOR]'
+				elif ct > 1:
+					if not ct % 2:
+						rep += '[/COLOR][COLOR FF5555AA]'
+					else:
+						rep += '[/COLOR][COLOR FF55AA55]'
+				oldVert = ''.join(vertL)
+				if vertL: vertL.pop()
+				vert = ''.join(vertL)
+				out += oldVert + self.quoteEndFilter.sub('[CR]' + rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct -= 1
+			elif ct:
+				if justStarted:
+					out += vert + '[CR]'
+				line = self.linkFilter.sub(r'\g<text> [B](Link)[/B]',line)
+				line = line.replace('[code]','__________\nCODE:\n').replace('[/code]','\n__________')
+				line = line.replace('[php]','__________\nPHP:\n').replace('[/php]','\n__________')
+				if self.linkFilter2: line = self.linkFilter2.sub('[B](LINK)[/B]',line)
+				wlines = self.textwrap.fill(line).splitlines()
+				for l in wlines:
+					out += vert + l + '[CR]'
+			else:
+				out += line + '[CR]'
+			if not ms:
+				justStarted = False
+		return out
+	
+	def removeNested(self,html,regex,starttag):
+		self.nStart = starttag
+		self.nCounter = 0
+		return re.sub(regex,self.nestedSub,html)
+		
+	def nestedSub(self,m):
+		tag = m.group(0)
+		if tag == self.nStart:
+			self.nCounter += 1
+			if self.nCounter == 1: return tag
+		else:
+			self.nCounter -= 1
+			if self.nCounter < 0: self.nCounter = 0
+			if self.nCounter == 0: return tag
+		return ''
+	
+	def imageConvert(self,m):
+		self.imageCount += 1
+		return self.imageReplace % (self.imageCount,m.group('url'))
+		
+	def processSmilies(self,text):
+		if not isinstance(text,unicode): text = unicode(text,'utf8')
+		for f,r in self.FB.smilies: text = text.replace(f,r)
+		return text
+		
+	def parseCodes(self,text):
+		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',self.quoteConvert,text)
+		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',self.quoteConvert,text)
+		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',self.codeReplace,text)
+		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',self.phpReplace,text)
+		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',self.htmlReplace,text)
+		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',self.quoteImageReplace,text)
+		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',self.linkReplace,text)
+		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',self.link2Replace,text)
+		return text
+				
 ################################################################################
 # ForumPost
 ################################################################################
 class ForumPost(forumbrowser.ForumPost):
-	def __init__(self,pdict=None):
-		forumbrowser.ForumPost.__init__(self, pdict)
-		self.MC = sys.modules["__main__"].MC
-		self.FB = sys.modules["__main__"].FB
+	def __init__(self,fb,pdict=None):
+		forumbrowser.ForumPost.__init__(self,fb,pdict)
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('post_id',''))
@@ -295,8 +441,6 @@ class ForumPost(forumbrowser.ForumPost):
 		else:
 			message = self.getMessage(raw=raw)
 		message = message.replace('\n','[CR]')
-		message = re.sub('\[(/?)b\]',r'[\1B]',message)
-		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		if self.isPM:
 			return self.MC.parseCodes(message)
 		else:
@@ -322,8 +466,8 @@ class ForumPost(forumbrowser.ForumPost):
 		
 	def links(self):
 		links = []
-		for m in self.linkURLs(): links.append(PMLink(m))
-		for m in self.link2URLs(): links.append(PMLink(m))
+		for m in self.linkURLs(): links.append(self.FB.getPMLink(m))
+		for m in self.link2URLs(): links.append(self.FB.getPMLink(m))
 		return links
 		
 	def makeAvatarURL(self):
@@ -336,13 +480,14 @@ class ForumPost(forumbrowser.ForumPost):
 # PageData
 ################################################################################
 class PageData:
-	def __init__(self,data={},current=0,per_page=20,total_items=0):
+	def __init__(self,fb,data={},current=0,per_page=20,total_items=0):
+		self.fake = not bool(data)
 		self.prev = current > 0
 		self.current = current
 		self.page = int((current + 1) / per_page) + 1
 		self.perPage = per_page
 		self.isReplies = data.get('total_post_num') and True or False
-		self.totalitems = data.get('total_topic_num',data.get('total_post_num',total_items + 1))
+		self.totalitems = data.get('total_topic_num',data.get('total_post_num',total_items+1))
 		self.next = current + per_page < self.totalitems
 		self.totalPages = int(self.totalitems / per_page)
 		self.totalPages += (self.totalitems % per_page) and 1 or 0 
@@ -366,6 +511,8 @@ class PageData:
 				#ret = self.totalitems - self.perPage
 				#if ret < 0: ret = 0
 				#return ret
+				if self.fake:
+					return -1
 				page = self.totalPages
 			else:
 				return 0
@@ -388,10 +535,11 @@ class PageData:
 ######################################################################################
 class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'tapatalk'
+	ForumPost = ForumPost
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login,TTMessageConverter)
 		self.forum = forum[3:]
 		self.prefix = 'TT.'
 		self._url = ''
@@ -405,6 +553,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.reloadForumData(self.forum)
 		self.loginError = ''
 		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?) \w+:'
+		self.initialize()
 	
 	def isLoggedIn(self):
 		#return self._loggedIn
@@ -446,7 +595,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Forum Type: ' + self.getForumType())
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
-			if DEBUG: print self.forumConfig
+			if DEBUG: LOG(self.forumConfig)
 		except:
 			ERROR('Failed to get forum config')
 		
@@ -540,13 +689,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		logo = None
 		while True:
 			if not callback(20,self.lang(30102)): break
+			
 			try:
 				flist = self.server.get_forum()
 			except:
 				em = ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
-				if donecallback: donecallback(None,None,None)
-				return (None,None,None)
+				return self.finish(FBData(error=em),donecallback)
+			
 			if not callback(40,self.lang(30103)): break
 			forums = []
 			for general in flist:
@@ -563,11 +713,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				ERROR('Failed to get PM Counts')
 				pm_counts = None
 			callback(100,self.lang(30052))
-			if donecallback: donecallback(forums,logo,pm_counts)
-			return forums, logo, pm_counts
 			
-		if donecallback: donecallback(None,logo,None)
-		return None,logo,None
+			return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
+			
+		return self.finish(FBData(extra={'logo':logo},error='CANCEL'),donecallback)
 	
 	def getSubscribedForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
@@ -578,8 +727,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING FORUM SUBSCRIPTIONS')
 				callback(-1,'%s' % em)
-				if donecallback: donecallback(None,None,None)
-				return (None,None,None)
+				return self.finish(FBData(error=em),donecallback)
+			
 			if not callback(40,self.lang(30103)): break
 			forums = []
 			for f in flist.get('forums',[]):
@@ -587,15 +736,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				f['subscribed'] = True
 				forums.append(f)
 			if not callback(80,self.lang(30231)): break
-			if donecallback: donecallback(forums)
-			return forums
 			
-		if donecallback: donecallback(None)
-		return None
+			return self.finish(FBData(forums),donecallback)
+			
+		return self.finish(FBData(error='CANCEL'),donecallback)
 		
 	def isForumSubscribed(self,fid):
 		forums = self.getSubscribedForums(None, None)
-		for f in forums:
+		for f in forums.data:
 			if f.get('forumid') == fid: return True
 		return False
 	
@@ -624,7 +772,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(70,self.lang(30102)): break
 			topics = self.server.get_topic(forumid,topic_num,int(topic_num) + 19)
 			if not callback(90,self.lang(30103)): break
-			pd = PageData(topics,topic_num)
+			pd = self.getPageData(topics,topic_num)
 			normal = topics.get('topics',[])
 			for n in normal: self.createThreadDict(n)
 			return announces + stickys + normal, pd
@@ -636,7 +784,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def _getSubscriptions(self,callback,donecallback):
 		callback(20,self.lang(30102))
 		sub = self.server.get_subscribed_topic()
-		pd = PageData({},0)
+		pd = self.getPageData({},0)
 		#if not sub.get('result'):
 		#	raise Exception(sub.get('result_text'))
 		normal = sub.get('topics',[])
@@ -656,12 +804,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			em = ERROR('ERROR GETTING THREADS')
 			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None)
-			return (None,None)
+			return self.finish(FBData(error='em'))
 		
 		callback(100,self.lang(30052))
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
+		return self.finish(FBData(threads,pd),donecallback)
 		
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
@@ -680,17 +826,23 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					page = start
 					thread = self.server.get_thread(threadid,start,start + 19)
 				else:
-					thread = self.server.get_thread(threadid,page,page + 19)
+					thread = None
+					if page < 0:
+						test = self.server.get_thread(threadid,0,19)
+						page = self.getPageData(test,0).getPageNumber(-1)
+						if page == 0: thread = test
+					if not thread: thread = self.server.get_thread(threadid,page,page + 19)
+					
+					
 				posts = thread.get('posts')
 				if not posts:
 					callback(-1,'NO POSTS')
-					if donecallback: donecallback(None,None)
-					return (None,None)
+					return self.finish(FBData(error='NO POSTS'),donecallback)
 				if not callback(60,self.lang(30103)): break
 				infos = {}
 				ct = page + 1
 				for p in posts:
-					fp = ForumPost(p)
+					fp = self.getForumPost(p)
 					fp.postNumber = ct
 					if not fp.userName in infos:
 						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
@@ -704,19 +856,15 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING POSTS')
 				callback(-1,em)
-				if donecallback: donecallback(None,None)
-				return (None,None)
+				return self.finish(FBData(error=em),donecallback)
 			
 			if not callback(80,self.lang(30103)): break
-			pd = PageData(thread,page or 0)
+			pd = self.getPageData(thread,page or 0)
 			pd.tid = threadid
 			callback(100,self.lang(30052))
+			return self.finish(FBData(sreplies,pd),donecallback)
 			
-			if donecallback: donecallback(sreplies, pd)
-			return sreplies, pd
-			
-		if donecallback: donecallback(None,None)
-		return (None,None)
+		return self.finish(FBData(error='CANCEL'),donecallback)
 		
 	def hasPM(self):
 		return not self.forumConfig.get('disable_pm','0') == '1'
@@ -736,24 +884,22 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING PRIVATE MESSAGES')
 				callback(-1,'%s' % em)
-				break
+				return self.finish(FBData(error=em),donecallback)
 			pms = []
 			if not callback(80,self.lang(30103)): break
 			infos = {}
 			for p in messages.get('list',[]):
 				p['boxid'] = boxid
-				fp = ForumPost(p)
+				fp = self.getForumPost(p)
 				if not fp.userName in infos:
 					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
 				fp.setUserInfo(infos[fp.userName])
 				pms.append(fp)
 			
 			callback(100,self.lang(30052))
-			if donecallback: donecallback(pms,None)
-			return pms, None
+			return self.finish(FBData(pms),donecallback)
 		
-		if donecallback: donecallback(None,None)
-		return (None,None)
+		return self.finish(FBData(error='CANCEL'),donecallback)
 	
 	def hasSubscriptions(self):
 		return True
@@ -766,11 +912,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():
 			forums = self.getSubscribedForums(callback, None)
-			donecallback((forums,threads[0]),threads[1])
-			return (forums,threads[0]),threads[1]
+			return self.finish(FBData(threads.data,threads.pageData,extra={'forums':forums.data}),donecallback)
 		else:
-			donecallback(threads[0],threads[1])
-			return threads
+			return self.finish(FBData(threads.data,threads.pageData),donecallback)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
 		return ''
@@ -906,4 +1050,3 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			text = result.get('result_text')
 			LOG('Failed to unsubscribe from forum: ' + text)
 			return text
-	

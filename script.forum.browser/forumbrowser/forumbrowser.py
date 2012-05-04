@@ -1,5 +1,5 @@
 #Forum browser common
-import sys, re, urllib, urllib2
+import sys, re, urllib, urllib2, texttransform
 
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -12,6 +12,28 @@ def ERROR(message):
 
 class Error(Exception): pass
 
+class FBData:
+	def __init__(self,data=None,pagedata=None,extra={},error=None):
+		self.data = data
+		self.pageData = pagedata
+		self.extra = extra
+		self.error = error
+	
+	def __getitem__(self,key):
+		return self.extra.get(key)
+	
+	def getExtra(self,key,default=None):
+		return self.extra.get(key,default)
+	
+	def setExtra(self,key,value):
+		self.extra[key] = value
+			
+	def setError(self,message):
+		self.error = message
+		
+	def __nonzero__(self):
+		return not self.error
+	
 class FBOnlineDatabase():
 	def __init__(self):
 		self.url = 'http://xbmc.2ndmind.net/forumbrowser/tapatalk.php'
@@ -121,27 +143,28 @@ class Action:
 		self.action = action
 
 class PMLink:
-	def __init__(self,match=None,post_filter=None,thread_filter=None):
+	def __init__(self,fb,match=None):
+		self.FB = fb
+		self.MC = fb.MC
 		self.url = ''
 		self.text = ''
 		self.pid = ''
 		self.tid = ''
 		self.fid = ''
 		self._isImage = False
-		self.postFilter = post_filter
-		self.threadFilter = thread_filter
 		
 		if match:
 			self.url = match.group('url')
-			self.text = match.group('text')
+			text = match.group('text')
+			self.text = self.MC.tagFilter.sub('',text).strip()
 		self.processURL()
 			
 	def processURL(self):
 		if not self.url: return
 		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
 		if self._isImage: return
-		pm = self.postFilter and re.search(self.postFilter,self.url) or None
-		tm = self.threadFilter and re.search(self.threadFilter,self.url) or None
+		pm = re.search(self.FB.filters.get('post_link','@`%#@>-'),self.url)
+		tm = re.search(self.FB.filters.get('thread_link','@`%#@>-'),self.url)
 		if pm:
 			d = pm.groupdict()
 			self.pid = d.get('postid','')
@@ -195,7 +218,7 @@ class PostMessage(Action):
 # PageData
 ################################################################################
 class PageData:
-	def __init__(self,page=1,current=0,per_page=20,total_items=0,current_total=0,is_replies=False):
+	def __init__(self,fb,page=1,current=0,per_page=20,total_items=0,current_total=0,is_replies=False):
 		self.current = current
 		
 		self.totalitems = total_items
@@ -265,7 +288,9 @@ class PageData:
 # ForumPost
 ################################################################################
 class ForumPost:
-	def __init__(self,pdict=None):
+	def __init__(self,fb,pdict=None):
+		self.FB = fb
+		self.MC = fb.MC
 		self.isShort = False
 		self.isPM = False
 		self.postId = ''
@@ -338,8 +363,8 @@ class ForumPost:
 		
 	def links(self):
 		links = []
-		for m in self.linkURLs(): links.append(PMLink(m))
-		for m in self.link2URLs(): links.append(PMLink(m))
+		for m in self.linkURLs(): links.append(self.FB.getPMLink(m))
+		for m in self.link2URLs(): links.append(self.FB.getPMLink(m))
 		return links
 		
 	def makeAvatarURL(self): return self.avatar
@@ -351,6 +376,9 @@ class ForumPost:
 ######################################################################################
 class ForumBrowser:
 	browserType = 'ForumBrowser'
+	ForumPost = ForumPost
+	PMLink = PMLink
+	PageData = PageData
 	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
 						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
 						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',
@@ -416,7 +444,8 @@ class ForumBrowser:
 					('\r',u'',u'')
 					]
 	
-	def __init__(self,forum,always_login=False):
+	def __init__(self,forum,always_login=False,message_converter=None):
+		if not message_converter: message_converter = texttransform.MessageConverter
 		self.forum = forum
 		self.prefix = ''
 		self._url = ''
@@ -435,7 +464,29 @@ class ForumBrowser:
 		self.formats = {}
 		self.altQuoteStartFilter = '\r\r\r\r\r\r'
 		self.smilies = {}
-			
+		self.MC = None
+		self.messageConvertorClass=message_converter
+		
+	def initialize(self):
+		self.MC = self.messageConvertorClass(self)
+	
+	def finish(self,data,callback):
+		if callback: callback(data)
+		return data
+	
+	def getForumPost(self,pdict=None):
+		return self.ForumPost(self,pdict=pdict)
+		
+	def getPMLink(self,match=None):
+		return self.PMLink(self,match)
+	
+	def getPageData(self,*args,**kwargs):
+		is_replies = kwargs.get('is_replies')
+		if 'is_replies' in kwargs: del kwargs['is_replies']
+		pd = self.PageData(self,*args,**kwargs)
+		if not pd.isReplies: pd.isReplies = is_replies
+		return pd
+	
 	def getForumID(self):
 		return self.prefix + self.forum
 	
@@ -451,7 +502,8 @@ class ForumBrowser:
 						'link':'\[url=(?P<url>[^\]]+?)\](?P<text>.+?)\[/url\](?is)',
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
-						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'}
+						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
+						'color_start':'\[color=?#?(?P<color>\w+)\]'}
 		
 		self.theme = {}
 		self.forms = {}
@@ -555,6 +607,8 @@ class ForumBrowser:
 	def fakeCallback(self,pct,message=''): return True
 	
 	def guestOK(self): return True
+	
+	def getAnnouncement(self,aid): return None
 	
 	
 		

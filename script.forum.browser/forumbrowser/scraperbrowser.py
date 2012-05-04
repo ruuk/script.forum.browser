@@ -1,5 +1,6 @@
 import sys, re, time, os, urllib2
 import forumbrowser, texttransform
+from forumbrowser import FBData
 
 import locale
 loc = locale.getdefaultlocale()
@@ -13,72 +14,18 @@ __addon__ = sys.modules["__main__"].__addon__
 __language__ = sys.modules["__main__"].__language__
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 
-FB = sys.modules["__main__"].FB
-MC = sys.modules["__main__"].MC
-				
-def messageToText(html):
-	html = MC.lineFilter.sub('',html)
-	html = re.sub('<br[^>]*?>','\n',html)
-	html = html.replace('</table>','\n\n')
-	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
-	html = html.replace('</div>','\n')
-	html = re.sub('<[^>]*?>','',html)
-	return texttransform.convertHTMLCodes(html).strip()
-
 ######################################################################################
 # Forum Browser Classes
 ######################################################################################
-class PMLink:
-	def __init__(self,match=None):
-		self.url = ''
-		self.text = ''
-		self.pid = ''
-		self.tid = ''
-		self.fid = ''
-		self._isImage = False
-		
-		if match:
-			self.url = match.group('url')
-			text = match.group('text')
-			self.text = MC.tagFilter.sub('',text).strip()
-		self.processURL()
-			
-	def processURL(self):
-		if not self.url: return
-		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
-		if self._isImage: return
-		pm = re.search(FB.filters.get('post_link','@`%#@>-'),self.url)
-		tm = re.search(FB.filters.get('thread_link','@`%#@>-'),self.url)
-		if pm:
-			d = pm.groupdict()
-			self.pid = d.get('postid','')
-			self.tid = d.get('threadid','')
-		elif tm:
-			d = tm.groupdict()
-			self.tid = d.get('threadid','')
-			
-	def urlShow(self):
-		if self.isPost(): return 'Post ID: %s' % self.pid
-		elif self.isThread(): return 'Thread ID: %s' % self.tid
-		return self.url
-		
-	def isImage(self):
-		return self._isImage
-		
-	def isPost(self):
-		return self.pid and True or False
-		
-	def isThread(self):
-		return self.tid and not self.pid
 		
 ################################################################################
 # ForumPost
 ################################################################################
 class ForumPost(forumbrowser.ForumPost):
-	def __init__(self,pmatch=None,pdict=None):
+	def __init__(self,fb,pmatch=None,pdict=None):
 		if pmatch:
 			pdict = pmatch.groupdict()
-		forumbrowser.ForumPost.__init__(self, pdict)
+		forumbrowser.ForumPost.__init__(self, fb, pdict)
 			
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('postid',''))
@@ -95,7 +42,16 @@ class ForumPost(forumbrowser.ForumPost):
 		self.postCount = pdict.get('postcount') or None
 		self.joinDate = pdict.get('joindate') or ''
 		self.isPM = self.postId.startswith('PM')
-			
+	
+	def messageToText(self,html):
+		html = self.MC.lineFilter.sub('',html)
+		html = re.sub('<br[^>]*?>','\n',html)
+		html = html.replace('</table>','\n\n')
+		html = html.replace('</div></div>','\n') #to get rid of excessive new lines
+		html = html.replace('</div>','\n')
+		html = re.sub('<[^>]*?>','',html)
+		return texttransform.convertHTMLCodes(html).strip()
+	
 	def setPostID(self,pid):
 		self.postId = pid
 		self.pid = pid
@@ -106,42 +62,42 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.pid
 		
 	def cleanUserName(self):
-		return MC.tagFilter.sub('',self.userName)
+		return self.MC.tagFilter.sub('',self.userName)
 	
 	def getMessage(self):
 		return self.message + self.signature
 	
 	def messageAsText(self):
-		return messageToText(self.getMessage())
+		return self.messageToText(self.getMessage())
 		
 	def messageAsDisplay(self,short=False,raw=False):
 		if self.isPM:
-			message =  MC.parseCodes(self.getMessage())
+			message =  self.MC.parseCodes(self.getMessage())
 		else:
-			message = MC.messageToDisplay(self.getMessage())
+			message = self.MC.messageToDisplay(self.getMessage())
 		message = re.sub('\[(/?)b\]',r'[\1B]',message)
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		return message
 		
 	def messageAsQuote(self):
-		return MC.messageAsQuote(self.message)
+		return self.MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
-		return MC.imageFilter.findall(self.getMessage(),re.S)
+		return self.MC.imageFilter.findall(self.getMessage(),re.S)
 		
 	def linkImageURLs(self):
 		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
 		
 	def linkURLs(self):
-		return MC.linkFilter.finditer(self.getMessage(),re.S)
+		return self.MC.linkFilter.finditer(self.getMessage(),re.S)
 		
 	def links(self):
 		links = []
-		for m in self.linkURLs(): links.append(PMLink(m))
+		for m in self.linkURLs(): links.append(self.FB.getPMLink(m))
 		return links
 		
 	def makeAvatarURL(self):
-		base = FB.urls.get('avatar')
+		base = self.FB.urls.get('avatar')
 		if base and not self.avatar:
 			self.avatar = base.replace('!USERID!',self.userId)
 		return self.avatar
@@ -151,7 +107,9 @@ class ForumPost(forumbrowser.ForumPost):
 # PageData
 ################################################################################
 class PageData:
-	def __init__(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items=''):
+	def __init__(self,fb,page_match=None,next_match=None,prev_match=None,page_type='',total_items=''):
+		self.FB = fb
+		self.MC = fb.MC
 		self.next = False
 		self.prev = False
 		self.page = '1'
@@ -197,7 +155,7 @@ class PageData:
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
 		if self.urlMode != 'PAGE':
-			per_page = FB.formats.get('%s_per_page' % self.pageType)
+			per_page = self.FB.formats.get('%s_per_page' % self.pageType)
 			if per_page:
 				try:
 					if int(page) < 0: page = 9999
@@ -239,8 +197,9 @@ class PageData:
 class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'ScraperForumBrowser'
 	PageData = PageData
+	ForumPost = ForumPost
 	def __init__(self,forum,always_login=False):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login, texttransform.MessageConverter)
 		self.forum = forum
 		self._url = ''
 		self.browser = None
@@ -250,6 +209,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.lastHTML = ''
 		
 		self.reloadForumData(forum)
+		self.initialize()
 		
 	def getForumID(self):
 		return self.forum
@@ -437,7 +397,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return url.replace('&amp;','&').replace('/./','/')
 		
 	def getPMCounts(self,html=''):
-		if not html: html = MC.lineFilter.sub('',self.lastHTML)
+		if not html: html = self.MC.lineFilter.sub('',self.lastHTML)
 		if not html: return None
 		pm_counts = None
 		ct = 0
@@ -467,48 +427,41 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			em = ERROR('ERROR GETTING FORUMS')
 			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		#open('/home/ruuk/test3.html','w').write(html)
+			return self.finish(FBData(error=em),donecallback)
+		
 		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
-		html = MC.lineFilter.sub('',html)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
+		
+		html = self.MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = self.getLogo(html)
 		pm_counts = self.getPMCounts(html)
 		callback(100,__language__(30052))
-		if donecallback: donecallback(forums,logo,pm_counts)
-		else: return forums, logo, pm_counts
+		
+		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 		
 	def getThreads(self,forumid,page='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
 		html = self.readURL(url,callback=callback)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
-		threads = re.finditer(self.filters['threads'],MC.lineFilter.sub('',html))
+		threads = re.finditer(self.filters['threads'],self.MC.lineFilter.sub('',html))
 		if self.formats.get('forums_in_threads','False') == 'True':
 			forums = re.finditer(self.filters['forums'],html)
 			threads = (forums,threads)
 		callback(100,__language__(30052))
-		pd = self.getPageData(html,page,page_type='threads')
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
+		pd = self.getPageInfo(html,page,page_type='threads')
+		return self.finish(FBData(threads,pd),donecallback)
 		
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
 		html = self.readURL(url,callback=callback)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
-		html = MC.lineFilter.sub('',html)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
+		html = self.MC.lineFilter.sub('',html)
 		replies = re.findall(self.filters['replies'],html)
 		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		if not threadid:
@@ -518,17 +471,16 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		sreplies = []
 		for r in replies:
 			try:
-				post = ForumPost(re.search(self.filters['post'],MC.lineFilter.sub('',r)))
+				post = ForumPost(re.search(self.filters['post'],self.MC.lineFilter.sub('',r)))
 				sreplies.append(post)
 			except:
 				post = ForumPost()
 				sreplies.append(post)
-		pd = self.getPageData(html,page,page_type='replies')
+		pd = self.getPageInfo(html,page,page_type='replies')
 		pd.setThreadData(topic,threadid)
 		callback(100,__language__(30052))
 		
-		if donecallback: donecallback(sreplies, pd)
-		else: return sreplies, pd
+		return self.finish(FBData(sreplies,pd),donecallback)
 		
 	def hasPM(self):
 		return bool(self.urls.get('private_messages_xml') or self.urls.get('private_messages_csv'))
@@ -540,22 +492,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if self.urls.get('private_messages_xml'):
 			xml = self.readURL(self.getURL('private_messages_xml'),callback=callback,force_login=True,is_html=False)
 			if not xml or not callback(80,__language__(30103)):
-				if donecallback:
-					donecallback(None,None)
-					return
-				else:
-					return (None,None)
+				return self.finish(FBData(error=xml and 'CANCEL' or 'NO MESSAGES'),donecallback)
 			folders = re.search(self.filters.get('pm_xml_folders'),xml,re.S)
 			if not folders:
-				if donecallback:
-					donecallback([],None)
-					return
-				else:
-					return (None,None)
+				return self.finish(FBData(error='Unable to get folders'),donecallback)
 			messages = re.finditer(self.filters.get('pm_xml_messages'),folders.group('inbox'),re.S)
 			pms = []
 			for m in messages:
-				p = ForumPost(m)
+				p = self.getForumPost(m.groupdict())
 				p.setPostID('PM%s' % len(pms))
 				p.message = re.sub('[\t\r]','',p.message)
 				p.makeAvatarURL()
@@ -564,11 +508,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		elif self.urls.get('private_messages_csv'):
 			csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
 			if not csvstring or not callback(80,__language__(30103)):
-				if donecallback:
-					donecallback(None,None)
-					return
-				else:
-					return (None,None)
+				return self.finish(FBData(error=csvstring and 'CANCEL' or 'NO MESSAGES'),donecallback)
 			columns = self.formats.get('pm_csv_columns').split(',')
 			import csv
 			cdata = csv.DictReader(csvstring.splitlines()[1:],fieldnames=columns)
@@ -576,14 +516,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			folder = self.formats.get('pm_csv_folder')
 			for d in cdata:
 				if folder and folder == d.get('folder'):
-					p = ForumPost(pdict=d)
+					p = self.getForumPost(pdict=d)
 					p.setPostID('PM%s' % len(pms))
 					pms.append(p)
 		callback(100,__language__(30052))
 		
-		if donecallback: donecallback(pms,None)
-		else: return pms, None
-	
+		return self.finish(FBData(pms),donecallback)
+			
 	def hasSubscriptions(self):
 		return bool(self.urls.get('subscriptions'))
 	
@@ -593,24 +532,19 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		url = self.getPageUrl(page,'subscriptions')
 		html = self.readURL(url,callback=callback,force_login=True)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
-		threads = re.finditer(self.filters['subscriptions'],MC.lineFilter.sub('',html))
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
+		threads = re.finditer(self.filters['subscriptions'],self.MC.lineFilter.sub('',html))
 		callback(100,__language__(30052))
-		pd = self.getPageData(html,page,page_type='threads')
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
+		pd = self.getPageInfo(html,page,page_type='threads')
+		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getPageData(self,html,page,page_type=''):
+	def getPageInfo(self,html,page,page_type=''):
 		next_page = re.search(self.filters['next'],html,re.S)
 		prev_page= None
 		if page != '1':
 			prev_page = re.search(self.filters['prev'],html,re.S)
 		page_disp = re.search(self.filters['page'],html)
-		return PageData(page_disp,next_page,prev_page,page_type=page_type)
+		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
 		if sub == 'replies' and page and int(page) < 0:

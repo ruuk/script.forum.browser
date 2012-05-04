@@ -1,5 +1,5 @@
-import forumbrowser, json, urllib2, urllib, sys, os,re, time, codecs
-
+import forumbrowser, json, urllib2, urllib, sys, os,re, time
+from forumbrowser import FBData
 DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
@@ -81,15 +81,13 @@ class ForumrunnerClient():
 			return pyobj.get('data')
 		else:
 			return FRCFail(pyobj)
-
+		
 ################################################################################
 # ForumPost
 ################################################################################
 class ForumPost(forumbrowser.ForumPost):
-	def __init__(self,pdict):
-		forumbrowser.ForumPost.__init__(self, pdict)
-		self.MC = sys.modules["__main__"].MC
-		self.FB = sys.modules["__main__"].FB
+	def __init__(self,fb,pdict):
+		forumbrowser.ForumPost.__init__(self, fb, pdict)
 		
 	def setVals(self,pdict):
 		self.postId = pdict.get('post_id',pdict.get('id',''))
@@ -132,7 +130,7 @@ class ForumPost(forumbrowser.ForumPost):
 	
 class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'forumrunner'
-	PageData = forumbrowser.PageData
+	ForumPost = ForumPost
 	
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
@@ -144,6 +142,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		self.loadForumFile()
 		self.setupClient()
 		self.setFilters()
+		self.initialize()
 	
 	def setupClient(self):
 		self.needsLogin = True
@@ -248,8 +247,8 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
-				if donecallback: donecallback(None,None,None)
-				return (None,None,None)
+				if donecallback: donecallback(FBData(error=em))
+				return FBData(error=em)
 			if not callback(40,self.lang(30103)): break
 			forums = []
 			for forum,sub in flist:
@@ -262,13 +261,16 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				ERROR('Failed to get PM Counts')
 				pm_counts = None
 			callback(100,self.lang(30052))
-			if donecallback: donecallback(forums,logo,pm_counts)
-			return forums, logo, pm_counts
 			
-		if donecallback: donecallback(None,logo,None)
-		return None,logo,None
+			result = FBData(forums,extra={'logo':logo,'pmcounts':pm_counts})
+			if donecallback: donecallback(result)
+			return result
+			
+		if donecallback: donecallback(FBData(extra={'logo':logo},error='CANCEL'))
+		return FBData(extra={'logo':logo},error='CANCEL')
 
 	def createThreadDict(self,data,sticky=False):
+		if data.get('announcement'): sticky = True
 		data['threadid'] = data.get('thread_id','')
 		data['starter'] = data.get('post_username',self.user)
 		data['title'] = data.get('thread_title','')
@@ -277,7 +279,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		data['sticky'] = sticky
 		return data
 	
-	def _getThreads(self,forumid,page,callback,donecallback):
+	def _getThreads(self,forumid,page,callback):
 		if not callback: callback = self.fakeCallback
 		while True:
 			threads = []
@@ -290,12 +292,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(80,self.lang(30103)): break
 			total = int(data.get('total_threads',1))
 			current = len(data.get('threads',[]))
-			pd = self.PageData(page=page,total_items=total,current_total=current)
+			pd = self.getPageData(page=page,total_items=total,current_total=current)
 			return threads, pd
-			
-		if donecallback:
-			donecallback(None,None)
-		return (None,None)
+		return None,None
 	
 	def hasSubscriptions(self): return True
 	
@@ -303,16 +302,14 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not self.checkLogin(callback=callback): return (None,None)
 		return self.getThreads(None, page, callback, donecallback)
 	
-	def _getSubscriptions(self,page,callback,donecallback):
+	def _getSubscriptions(self,page,callback):
 		callback(20,self.lang(30102))
 		sub = self.client.get_subscriptions(page=page,perpage=20)
 		total = int(sub.get('total_threads',1))
 		current = len(sub.get('threads',[]))
-		pd = self.PageData(page=page,total_items=total,current_total=current)
+		pd = self.getPageData(page=page,total_items=total,current_total=current)
 		normal = sub.get('threads',[])
-		if not callback(70,self.lang(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
+		if not callback(70,self.lang(30103)): return None,None
 		for n in normal: self.createThreadDict(n)
 		return normal, pd
 	
@@ -320,18 +317,16 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		try:
 			if forumid:
-				threads,pd = self._getThreads(forumid,page or 1,callback,donecallback)
+				threads,pd = self._getThreads(forumid,page or 1,callback)
 			else:
-				threads,pd = self._getSubscriptions(page or 1,callback,donecallback)
+				threads,pd = self._getSubscriptions(page or 1,callback)
 		except:
 			em = ERROR('ERROR GETTING THREADS')
 			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None)
-			return (None,None)
+			return self.finish(FBData(error=em),donecallback)
 		
 		callback(100,self.lang(30052))
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
+		return self.finish(FBData(threads,pd),donecallback)
 		
 	def getOnlineUsers(self):
 		#lets not hammer the server. Only get online user list every five minutes
@@ -349,7 +344,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				ERROR('Error getting online users')
 		return self.online
 	
-	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None):
+	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None,announcement=False):
 		if not callback: callback = self.fakeCallback
 		while True:
 			try: page = int(page)
@@ -366,20 +361,25 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 					#start = int((index - 1) / 20) * 20
 					#thread = self.server.get_thread(threadid,start,start + 19)
 					pass
+				elif announcement:
+					thread = self.client.get_announcement(forumid=threadid)
 				else:
 					thread = self.client.get_thread(threadid=threadid,page=page,perpage=10)
+				if not thread:
+					LOG('Failed to get posts (%s): %s' % (threadid,thread.message))
+					callback(-1,thread.message)
+					break
 				posts = thread.get('posts')
 				if not posts:
 					callback(-1,'NO POSTS')
-					if donecallback: donecallback(None,None)
-					return (None,None)
+					return self.finish(FBData(error='NO POSTS'),donecallback)
 				total = int(thread.get('total_posts',1))
 				current = len(thread.get('posts',[]))
-				pd = self.PageData(page,current_total=current,total_items=total,per_page=10,is_replies=True)
+				pd = self.getPageData(page,current_total=current,total_items=total,per_page=10,is_replies=True)
 				if not callback(60,self.lang(30103)): break
 				ct = pd.current + 1
 				for p in posts:
-					fp = ForumPost(p)
+					fp = self.getForumPost(p)
 					fp.postNumber = ct
 					fp.online = fp.userName in oDict
 					sreplies.append(fp)
@@ -388,20 +388,20 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING POSTS')
 				callback(-1,'%s' % em)
-				if donecallback: donecallback(None,None)
-				return (None,None)
+				return self.finish(FBData(error=em),donecallback)
 			
 			if not callback(80,self.lang(30103)): break
 			
 			pd.tid = threadid
 			callback(100,self.lang(30052))
 			
-			if donecallback: donecallback(sreplies, pd)
-			return sreplies, pd
+			return self.finish(FBData(sreplies,pd),donecallback)
 			
-		if donecallback: donecallback(None,None)
-		return (None,None)
+		return self.finish(FBData(error='CANCEL'),donecallback)
 	
+	def getAnnouncement(self,aid,callback=None,donecallback=None):
+		return self.getReplies(aid, None, callback=callback, donecallback=donecallback,announcement=True)
+		
 	def getPMCounts(self,callback_percent=5):
 		if not self.hasPM(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
@@ -427,20 +427,18 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				em = ERROR('ERROR GETTING PRIVATE MESSAGES')
 				callback(-1,'%s' % em)
-				break
+				return self.finish(FBData(error=em),donecallback)
 			pms = []
 			if not callback(80,self.lang(30103)): break
 			for p in messages.get('pms',[]):
-				fp = ForumPost(p)
+				fp = self.getForumPost(p)
 				fp.online = fp.userName in oDict
 				pms.append(fp)
 			
 			callback(100,self.lang(30052))
-			if donecallback: donecallback(pms,None)
-			return pms, None
+			return self.finish(FBData(pms),donecallback)
 		
-		if donecallback: donecallback(None,None)
-		return (None,None)
+		return self.finish(FBData(error='CANCEL'),donecallback)
 
 	def post(self,post,callback=None):
 		if post.isEdit:

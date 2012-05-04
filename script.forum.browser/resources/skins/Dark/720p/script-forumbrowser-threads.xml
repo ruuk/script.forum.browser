@@ -368,6 +368,15 @@
 						<width>1223</width>
 						<height>38</height>
 						<texture border="20">forum-browser-dark-grey-boxr.png</texture>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1223</width>
+						<height>38</height>
+						<texture border="20">forum-browser-dark-black-box.png</texture>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>187</posx>

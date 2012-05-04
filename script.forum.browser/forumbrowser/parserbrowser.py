@@ -1,6 +1,7 @@
 import sys, re
-import scraperbrowser
+import forumbrowser, scraperbrowser, texttransform
 from forumparsers import VBForumParser,VBThreadParser, VBPostParser
+from forumbrowser import FBData
 
 ERROR = sys.modules["__main__"].ERROR
 __language__ = sys.modules["__main__"].__language__
@@ -26,8 +27,15 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				}
 	
 	def __init__(self,forum,always_login=False,ftype=None):
-		scraperbrowser.MC = sys.modules["__main__"].MC
-		scraperbrowser.ScraperForumBrowser.__init__(self, forum, always_login)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login, texttransform.MessageConverter)
+		self.forum = forum
+		self._url = ''
+		self.browser = None
+		self.mechanize = None
+		self.needsLogin = True
+		self.alwaysLogin = always_login
+		self.lastHTML = ''
+		self.reloadForumData(forum)
 		if not ftype: ftype = self.formats.get('forum_type')
 		self.forumType = ftype or ''
 		parser = self.parsers.get(ftype,{})
@@ -39,6 +47,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.postParser = pp and pp() or None
 		self.pmCountsRE = parser.get('pmcountsre')
 		self.filters.update(parser.get('filters',{}))
+		self.initialize()
 		
 	def getForumType(self):
 		return self.forumType
@@ -68,17 +77,17 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		except:
 			em = ERROR('ERROR GETTING FORUMS')
 			callback(-1,'%s' % em)
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
+			return self.finish(FBData(error=em),donecallback)
+		
 		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None,None)
-			return (None,None,None)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
+		
 		forums = self.forumParser.getList(html)
 		logo = self.getLogo(html)
 		pm_counts = self.getPMCounts(html)
 		callback(100,__language__(30052))
-		if donecallback: donecallback(forums,logo,pm_counts)
-		else: return forums, logo, pm_counts
+		
+		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 
 	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None):
 		if not self.threadParser: return scraperbrowser.ScraperForumBrowser.getThreads(self, forumid, page, callback, donecallback)
@@ -90,18 +99,16 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			forceLogin = False
 		html = self.readURL(url,callback=callback,force_login=forceLogin)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback: donecallback(None,None)
-			return (None,None)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = self.threadParser.getList(html)
 		callback(100,__language__(30052))
-		pd = self.getPageData(html,page,page_type='threads')
-		if donecallback: donecallback(threads,pd)
-		else: return threads,pd
+		pd = self.getPageInfo(html,page,page_type='threads')
+		return self.finish(FBData(threads,pd),donecallback)
 		
 	def getSubscriptions(self,page='',callback=None,donecallback=None):
 		url = self.getPageUrl(page,'subscriptions')
-		self.getThreads(None, page, callback, donecallback,url=url)
+		return self.getThreads(None, page, callback, donecallback,url=url)
 		
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
 		if not self.postParser: return scraperbrowser.ScraperForumBrowser.getReplies(self, threadid, forumid, page, lastid, pid, callback, donecallback)
@@ -109,11 +116,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
 		html = self.readURL(url,callback=callback)
 		if not html or not callback(80,__language__(30103)):
-			if donecallback:
-				donecallback(None,None)
-				return
-			else:
-				return (None,None)
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		replies = self.postParser.getList(html)
 		replies.reverse()
 		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
@@ -123,11 +126,11 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		topic = topic and topic.group(1) or ''
 		sreplies = []
 		for r in replies:
-			post = scraperbrowser.ForumPost(pdict=r)
+			post = self.getForumPost(pdict=r)
 			sreplies.append(post)
-		pd = self.getPageData(html,page,page_type='replies')
+		pd = self.getPageInfo(html,page,page_type='replies')
 		pd.setThreadData(topic,threadid)
 		callback(100,__language__(30052))
 		
-		if donecallback: donecallback(sreplies, pd)
-		else: return sreplies, pd
+		return self.finish(FBData(sreplies,pd),donecallback)
+		

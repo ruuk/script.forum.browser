@@ -23,6 +23,10 @@ def convertHTMLCodes(html):
 # Message Converter
 ######################################################################################
 class MessageConverter:
+	
+	tagFilter = re.compile('<[^<>]+?>',re.S)
+	brFilter = re.compile('<br[ /]{0,2}>')
+	
 	def __init__(self,fb):
 		global FB
 		FB = fb
@@ -30,15 +34,6 @@ class MessageConverter:
 		self.resetOrdered(False)
 		self.textwrap = textwrap.TextWrapper(80)
 		
-		#static replacements
-		
-		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
-		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
-		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
-		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
-		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
 		#static filters
 		self.imageFilter = re.compile('<img[^>]+src="(?P<url>http://[^"]+)"[^>]*/>')
 		self.linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
@@ -49,7 +44,7 @@ class MessageConverter:
 		self.blockQuoteFilter = re.compile('<blockquote>(.+?)</blockquote>',re.S)
 		self.colorFilter = re.compile('<font color="(.+?)">(.+?)</font>')
 		self.colorFilter2 = re.compile('<span.*?style=".*?color: ?(.+?)".*?>(.+?)</span>')
-		self.tagFilter = re.compile('<[^<>]+?>',re.S)
+		self.setReplaces()
 		self.resetRegex()
 	
 	def prepareSmileyList(self):
@@ -75,17 +70,6 @@ class MessageConverter:
 		if not FB: return
 		
 		self.prepareSmileyList()
-		
-		if __addon__.getSetting('use_skin_mods') == 'true':
-			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
-			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
-			self.quoteVert = u'\u2502'
-			self.hrReplace = u'[B]'+u'\u2500'*300+u'[/B]'
-		else:
-			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
-			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
-			self.quoteVert = u'|'
-			self.hrReplace = u'[B]'+u'_'*300+u'[/B]'
 
 		self.lineFilter = re.compile('[\n\r\t]')
 		f = FB.filters.get('quote')
@@ -112,12 +96,48 @@ class MessageConverter:
 		self.quoteEndFilter = re.compile('\[\/quote\](?i)')
 		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
 		
-		#dynamic replacements
-		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<code>[/COLOR][CR]_________________________[CR]','utf8')
-		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<php>[/COLOR][CR]_________________________[CR]','utf8')
-		self.htmlReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30185)+'[/B][CR][COLOR '+FB.theme.get('post_code','FF999999')+']\g<html>[/COLOR][CR]_________________________[CR]','utf8')
 		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
 		
+	def setReplaces(self):
+		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
+		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
+		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
+		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
+		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
+		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
+		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
+		self.htmlReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30185)+'[/B][CR][COLOR FF999999]\g<html>[/COLOR][CR]_________________________[CR]','utf8')
+		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR FF999999]\g<code>[/COLOR][CR]_________________________[CR]','utf8')
+		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR FF999999]\g<php>[/COLOR][CR]_________________________[CR]','utf8')
+		
+		if __addon__.getSetting('use_skin_mods') == 'true':
+			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
+			self.quoteVert = u'\u2502'
+			self.hrReplace = u'[B]'+u'\u2500'*300+u'[/B]'
+			self.codeStartReplace = u'\u250c'+u'\u2500'*300
+			self.codeEndReplace = u'\u2514'+u'\u2500'*300
+		else:
+			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
+			self.quoteVert = u'|'
+			self.hrReplace = u'[B]'+u'_'*300+u'[/B]'
+			self.codeStartReplace = u','+u'-'*300
+			self.codeEndReplace = u'`'+u'-'*300
+			
+		self.codeReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30183)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		self.phpReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30184)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		
+	def codeConvert(self,m):
+		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
+		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30183)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+
+	def phpConvert(self,m):
+		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
+		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30184)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+	
 	def resetOrdered(self,ordered):
 		self.ordered = ordered
 		self.ordered_count = 0

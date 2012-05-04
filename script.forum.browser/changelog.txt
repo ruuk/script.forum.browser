@@ -2,8 +2,15 @@ Forum Browser Changelog
 
 TODO:
  Short Term:
-  Clean up message converting for speed
+  Clean up message converting for speed (done for tapatalk)
   Finish custom font usage
+  Finish forumrunner support
+  Finish boxee
+  Activity image when opening dialogs that fetch data first
+  Get logo images with proper ext to remove that annoying log message
+  Forumrunner: send PM's and Forum and Thread subscribing and view Forum Subscriptions
+  Boxeee: Create/Edit posts. Create PM's. Subcriptions.
+  Remove XBMCHub until fixed
   
  Long Term:
   View video links
@@ -22,7 +29,18 @@ TODO:
   Search function
   Make a million dollars
 
-Current Version : 0.9.34
+Current Version : 0.9.35
+
+*** 0.9.35 ***
+
+When selecting buttons on threads view, selected thread now loses highlight to better show where the focus is
+Moved all forumbrowser modules into one folder
+Forumrunner: Now handles announcements
+Choosing 'Go To Newest Post' from the page button menu now jumps to the new post when it goes to the newest page
+Tapatalk: Added code, php and color post tag processing
+Tapatalk: Optimization of message processing
+Better error messages
+Fixed a bug causing error after creading/editing a post
 
 *** 0.9.34 ***
 

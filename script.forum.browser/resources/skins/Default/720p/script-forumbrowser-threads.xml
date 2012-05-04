@@ -368,6 +368,15 @@
 						<width>1223</width>
 						<height>38</height>
 						<texture border="20">forum-browser-grey-boxr.png</texture>
+						<visible>Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1223</width>
+						<height>38</height>
+						<texture border="20">forum-browser-white-boxr.png</texture>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>187</posx>
@@ -385,53 +394,107 @@
 						<texture>forum-browser-thread.png</texture>
 						<visible>StringCompare(ListItem.Genre,is_forum)</visible>
 					</control>
-					<control type="label">
-						<posx>20</posx>
-						<posy>0</posy>
-						<width>165</width>
-						<height>38</height>
-						<font>font13</font>
-						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<info>ListItem.Label</info>
-						<visible>StringCompare(ListItem.Director,)</visible>
+					<control type="group">
+						<control type="label">
+							<posx>224</posx>
+							<posy>0</posy>
+							<width>989</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>white</textcolor>
+							<align>left</align>
+							<info>ListItem.Label2</info>
+							<visible>StringCompare(ListItem.property(unread),)</visible>
+						</control>
+						<control type="label">
+							<posx>224</posx>
+							<posy>0</posy>
+							<width>989</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>white</textcolor>
+							<align>left</align>
+							<label>[B]$INFO[ListItem.Label2][/B]</label>
+							<visible>StringCompare(ListItem.property(unread),unread)</visible>
+						</control>
+						<control type="label">
+							<posx>20</posx>
+							<posy>0</posy>
+							<width>165</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>white</textcolor>
+							<align>left</align>
+							<info>ListItem.Label</info>
+							<visible>StringCompare(ListItem.Director,)</visible>
+						</control>
+						<control type="label">
+							<posx>20</posx>
+							<posy>0</posy>
+							<width>165</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF00BB00</textcolor>
+							<align>left</align>
+							<info>ListItem.Label</info>
+							<visible>StringCompare(ListItem.Director,me)</visible>
+						</control>
+						<visible>Control.HasFocus(120)</visible>
 					</control>
-					<control type="label">
-						<posx>20</posx>
-						<posy>0</posy>
-						<width>165</width>
-						<height>38</height>
-						<font>font13</font>
-						<aligny>center</aligny>
-						<textcolor>FF00BB00</textcolor>
-						<align>left</align>
-						<info>ListItem.Label</info>
-						<visible>StringCompare(ListItem.Director,me)</visible>
-					</control>
-					<control type="label">
-						<posx>224</posx>
-						<posy>0</posy>
-						<width>989</width>
-						<height>38</height>
-						<font>font13</font>
-						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<info>ListItem.Label2</info>
-						<visible>StringCompare(ListItem.property(unread),)</visible>
-					</control>
-					<control type="label">
-						<posx>224</posx>
-						<posy>0</posy>
-						<width>989</width>
-						<height>38</height>
-						<font>font13</font>
-						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<align>left</align>
-						<label>[B]$INFO[ListItem.Label2][/B]</label>
-						<visible>StringCompare(ListItem.property(unread),unread)</visible>
+					<control type="group">
+						<control type="label">
+							<posx>224</posx>
+							<posy>0</posy>
+							<width>989</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>black</textcolor>
+							<align>left</align>
+							<info>ListItem.Label2</info>
+							<visible>StringCompare(ListItem.property(unread),)</visible>
+						</control>
+						<control type="label">
+							<posx>224</posx>
+							<posy>0</posy>
+							<width>989</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>black</textcolor>
+							<align>left</align>
+							<label>[B]$INFO[ListItem.Label2][/B]</label>
+							<visible>StringCompare(ListItem.property(unread),unread)</visible>
+						</control>
+						<control type="label">
+							<posx>20</posx>
+							<posy>0</posy>
+							<width>165</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>black</textcolor>
+							<align>left</align>
+							<info>ListItem.Label</info>
+							<visible>StringCompare(ListItem.Director,)</visible>
+						</control>
+						<control type="label">
+							<posx>20</posx>
+							<posy>0</posy>
+							<width>165</width>
+							<height>38</height>
+							<font>font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF007700</textcolor>
+							<align>left</align>
+							<info>ListItem.Label</info>
+							<visible>StringCompare(ListItem.Director,me)</visible>
+						</control>
+						<visible>!Control.HasFocus(120)</visible>
 					</control>
 				</focusedlayout>
 			</control>
