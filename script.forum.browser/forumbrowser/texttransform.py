@@ -18,7 +18,7 @@ def convertHTMLCodes(html):
 	except:
 		pass
 	return html
-
+	
 ######################################################################################
 # Message Converter
 ######################################################################################
@@ -106,9 +106,6 @@ class MessageConverter:
 		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
 		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
-		self.htmlReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30185)+'[/B][CR][COLOR FF999999]\g<html>[/COLOR][CR]_________________________[CR]','utf8')
-		self.codeReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30183)+'[/B][CR][COLOR FF999999]\g<code>[/COLOR][CR]_________________________[CR]','utf8')
-		self.phpReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30184)+'[/B][CR][COLOR FF999999]\g<php>[/COLOR][CR]_________________________[CR]','utf8')
 		
 		if __addon__.getSetting('use_skin_mods') == 'true':
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
@@ -117,6 +114,7 @@ class MessageConverter:
 			self.hrReplace = u'[B]'+u'\u2500'*300+u'[/B]'
 			self.codeStartReplace = u'\u250c'+u'\u2500'*300
 			self.codeEndReplace = u'\u2514'+u'\u2500'*300
+			self.bullet = u'\u2022'
 		else:
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
@@ -124,9 +122,11 @@ class MessageConverter:
 			self.hrReplace = u'[B]'+u'_'*300+u'[/B]'
 			self.codeStartReplace = u','+u'-'*300
 			self.codeEndReplace = u'`'+u'-'*300
+			self.bullet = u'*'
 			
 		self.codeReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30183)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
 		self.phpReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30184)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		self.htmlReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30185)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
 		
 	def codeConvert(self,m):
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
@@ -137,6 +137,15 @@ class MessageConverter:
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
 		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
 		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30184)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+	
+	def htmlConvert(self,m):
+		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
+		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30185)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+	
+	def indentConvert(self,m):
+		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
+		return '    ' + code.replace('\n','\n    ')
 	
 	def resetOrdered(self,ordered):
 		self.ordered = ordered
@@ -396,7 +405,226 @@ class MessageConverter:
 		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',self.linkReplace,text)
 		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',self.link2Replace,text)
 		return text
+
+######################################################################################
+# BBMessage Converter
+######################################################################################
+class BBMessageConverter(MessageConverter):
+	def __init__(self,fb):
+		self.FB = fb
+		self._currentFilter = None
+		self.textwrap = textwrap.TextWrapper(80)
+		self.textwrap.replace_whitespace = False
+		self.boldFilter = re.compile('\[(/?)b\]')
+		self.italicsFilter = re.compile('\[(/?)i\]')
+		self.indentFilter = re.compile('\[indent\](.*?)\[/indent\](?is)')
+		self.sizeTagFilter = re.compile('\[/?size=?\d*\](?i)')
+		self.numberedFilter = re.compile('\[list=\d\](.*?)\[/list\](?i)')
+		self.bulletedFilter = re.compile('\[list\](.*?)\[/list\](?i)')
+		self.kissingTagFilter = re.compile('(\[/\w+\])(\[\w+\])')
+		self.listItemFilter = re.compile('\[\*\]')
+		self.setReplaces()
+		self.resetRegex()
+	
+	def prepareSmileyList(self):
+		class SmiliesList(list):
+			def get(self,key,default=None): return default
+			
+		new = SmiliesList()
+		if __addon__.getSetting('use_skin_mods') == 'true':
+			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in r:
+					new.append((f,r))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
+		else:
+			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
+				if '[/COLOR]' in x:
+					new.append((f,x))
+				else:
+					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
+		self.FB.smilies = new
 		
+	def resetRegex(self):		
+		self.prepareSmileyList()
+
+		self.lineFilter = re.compile('[\n\r\t]')
+		f = self.FB.filters.get('code')
+		self.codeFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('php')
+		self.phpFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('html')
+		self.htmlFilter = f and re.compile(f) or None
+		f = self.FB.filters.get('image')
+		self.imageFilter = f and re.compile(f) or self.imageFilter
+		f = self.FB.filters.get('link')
+		self.linkFilter = f and re.compile(f) or self.linkFilter
+		f = self.FB.filters.get('link2')
+		self.linkFilter2 = f and re.compile(f) or None
+		f = self.FB.filters.get('color_start')
+		self.colorStart = f and re.compile(f) or None
+		f = self.FB.getQuoteFormat()
+		self.quoteFilter2 = f and re.compile(f) or None
+		
+		self.quoteStartFilter = re.compile(self.FB.getQuoteStartFormat())
+		self.altQuoteStartFilter = re.compile(self.FB.altQuoteStartFilter)
+		self.quoteEndFilter = re.compile('\[\/quote\](?i)')
+		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
+		self.fakeHrFilter = re.compile('[_]{10,}')
+		
+	def messageToDisplay(self,html):
+		#import codecs
+		#codecs.open('test.txt','w','utf8').write(html)
+		html = html.replace('[CR]','\n')
+		html = self.kissingTagFilter.sub(r'\1\n\2',html)
+		html = self.fakeHrFilter.sub(r'\n\g<0>\n',html)
+		html = html.replace('[hr]','\n[hr]\n')
+		html = self.formatQuotes(html)
+		html = self.fakeHrFilter.sub(self.hrReplace,html) #convert the pre-converted [hr]
+		
+		html = self.boldFilter.sub(r'[\1B]',html)
+		html = self.italicsFilter.sub(r'[\1I]',html)
+		
+		if self.codeFilter: html = self.codeFilter.sub(self.codeConvert,html)
+		if self.phpFilter: html = self.phpFilter.sub(self.phpConvert,html)
+		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlConvert,html)
+		html = self.indentFilter.sub(self.indentConvert,html)
+		html = self.sizeTagFilter.sub('',html)
+		
+		if self.colorStart: html = self.colorStart.sub(r'[COLOR FF\1]',html)
+		html = html.replace('[/color]','[/COLOR]')
+		
+		self.imageCount = 0
+		html = self.imageFilter.sub(self.imageConvert,html)
+		html = self.linkFilter.sub(self.linkReplace,html)
+		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
+		html = html.replace('[hr]',self.hrReplace)
+		html = self.removeNested(html,'\[/?B\]','[B]')
+		html = self.removeNested(html,'\[/?I\]','[I]')
+		html = self.bulletedFilter.sub(self.processBulletedList,html)
+		html = self.numberedFilter.sub(self.processOrderedList,html)
+		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
+		html = self.processSmilies(html)
+		return convertHTMLCodes(html)
+			
+	def formatQuotes(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8')
+		ct = 0
+		ms = None
+		me = None
+		vertL = []
+		html = html.replace('[CR]','\n')
+		html = html.replace('<br />','\n')
+		html = self.quoteEndOnLineFilter.sub('\n[/quote]',html)
+		html = self.altQuoteStartFilter.sub(r"[quote='\1']",html)
+		html = re.sub(self.quoteStartFilter.pattern + '(?!\n)','\g<0>\n',html)
+		lines = html.splitlines()
+		out = ''
+		justStarted = False
+		oddVert = u'[COLOR FF55AA55]%s[/COLOR]' % self.quoteVert
+		evenVert = u'[COLOR FF5555AA]%s[/COLOR]' % self.quoteVert
+		
+		for line in lines:
+			if ct < 0: ct = 0
+			ms = self.quoteStartFilter.search(line)
+			startFilter = self.quoteStartFilter
+			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
+			if ms:
+				justStarted = True
+				oldVert = ''.join(vertL)
+				gd = ms.groupdict()
+				rep = self.quoteStartReplace % (gd.get('user') or '')
+				if ct == 0:
+					rep = '[COLOR FF5555AA]' + rep
+					vertL.append(evenVert)
+				elif ct > 0:
+					if ct % 2:
+						rep = '[/COLOR][COLOR FF55AA55]' + rep
+						vertL.append(oddVert)
+					else:
+						rep = '[/COLOR][COLOR FF5555AA]' + rep
+						vertL.append(evenVert)
+				vert = ''.join(vertL)
+				out += oldVert + startFilter.sub(rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct += 1
+			elif me:
+				rep = self.quoteEndReplace
+				if ct == 1: rep += '[/COLOR]'
+				elif ct > 1:
+					if not ct % 2:
+						rep += '[/COLOR][COLOR FF5555AA]'
+					else:
+						rep += '[/COLOR][COLOR FF55AA55]'
+				oldVert = ''.join(vertL)
+				if vertL: vertL.pop()
+				vert = ''.join(vertL)
+				out += oldVert + self.quoteEndFilter.sub('[CR]' + rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
+				ct -= 1
+			elif ct:
+				if justStarted:
+					out += vert + '[CR]'
+				line = self.linkFilter.sub(r'\g<text> [B](Link)[/B]',line)
+				line = re.sub('\[code\](?i)','__________\nCODE:\n',line)
+				line = re.sub('\[/code\](?i)','\n__________',line)
+				line = re.sub('\[php\](?i)','__________\nPHP:\n',line)
+				line = re.sub('\[/php\](?i)','\n__________',line)
+				line = re.sub('\[html\](?i)','__________\nHTML:\n',line)
+				line = re.sub('\[/html\](?i)','\n__________',line)
+				if self.linkFilter2: line = self.linkFilter2.sub('[B](LINK)[/B]',line)
+				wlines = self.textwrap.fill(line).splitlines()
+				for l in wlines:
+					out += vert + l + '[CR]'
+			else:
+				out += line + '[CR]'
+			if not ms:
+				justStarted = False
+		return out
+	
+	def processList(self,html):
+		return self.listItemFilter.sub(self.processItem,html)
+	
+	def processItem(self,m):
+		self.ordered_count += 1
+		if self.ordered: bullet = str(self.ordered_count) + '. '
+		else: bullet = self.bullet + ' '
+		return  bullet
+
+	def removeNested(self,html,regex,starttag):
+		self.nStart = starttag
+		self.nCounter = 0
+		return re.sub(regex,self.nestedSub,html)
+		
+	def nestedSub(self,m):
+		tag = m.group(0)
+		if tag == self.nStart:
+			self.nCounter += 1
+			if self.nCounter == 1: return tag
+		else:
+			self.nCounter -= 1
+			if self.nCounter < 0: self.nCounter = 0
+			if self.nCounter == 0: return tag
+		return ''
+	
+	def imageConvert(self,m):
+		self.imageCount += 1
+		return self.imageReplace % (self.imageCount,m.group('url'))
+		
+	def processSmilies(self,text):
+		if not isinstance(text,unicode): text = unicode(text,'utf8')
+		for f,r in self.FB.smilies: text = text.replace(f,r)
+		return text
+		
+	def parseCodes(self,text):
+		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',self.quoteConvert,text)
+		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',self.quoteConvert,text)
+		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',self.codeReplace,text)
+		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',self.phpReplace,text)
+		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',self.htmlReplace,text)
+		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',self.quoteImageReplace,text)
+		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',self.linkReplace,text)
+		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',self.link2Replace,text)
+		return text
+	
 ######################################################################################
 # Functions
 ######################################################################################

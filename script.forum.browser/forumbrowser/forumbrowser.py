@@ -291,6 +291,7 @@ class ForumPost:
 	def __init__(self,fb,pdict=None):
 		self.FB = fb
 		self.MC = fb.MC
+		self.to = ''
 		self.isShort = False
 		self.isPM = False
 		self.postId = ''
@@ -318,7 +319,10 @@ class ForumPost:
 		if pdict: self.setVals(pdict)
 			
 	def setVals(self,pdict): pass
-			
+		
+	def messageType(self):
+		return self.isPM and 'PM' or 'POST'
+		
 	def setUserInfo(self,info): pass
 		
 	def setPostID(self,pid):
@@ -578,7 +582,6 @@ class ForumBrowser:
 		self.alwaysLogin = always
 		
 	def makeURL(self,url): return url
-		
 	
 	def getPMCounts(self,pct=0): return None
 	
@@ -594,14 +597,16 @@ class ForumBrowser:
 	
 	def canSubscribeForum(self,fid): return False
 	
-	def isForumSubscribed(self,fid): return None
+	def isForumSubscribed(self,fid,default=False): return default
+	
+	def isThreadSubscribed(self,tid,default=False): return default
 		
 	def hasPM(self): return False
 	
 	def hasSubscriptions(self): return False
 	
-	def canDelete(self,user): return False
-		
+	def canDelete(self,user,target='POST'): return False
+			
 	def canEditPost(self,user): return False
 	
 	def fakeCallback(self,pct,message=''): return True

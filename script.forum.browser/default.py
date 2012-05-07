@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.35'
+__version__ = '0.9.36'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -543,16 +543,22 @@ class PostDialog(BaseWindow):
 		self.posted = True
 		try:
 			if self.post.isPM:
-				FB.doPrivateMessage(self.post.to,self.title,message,callback=self.dialogCallback)
+				if not FB.doPrivateMessage(self.post,callback=self.dialogCallback):
+					self.posted = False
+					showMessage(__language__(30050),__language__(30246),self.post.error or '?')
+					return
 			else:
 				if not FB.post(self.post,callback=self.dialogCallback):
 					self.posted = False
-					showMessage(__language__(30050),__language__(30227),self.post.error or '?',error=True)
+					showMessage(__language__(30050),__language__(30227),self.post.error or '?')
+					return
+			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.')
 		except:
 			self.prog.close()
 			self.posted = False
 			raise
-		self.prog.close()
+		finally:
+			self.prog.close()
 		self.close()
 		
 	def parseCodes(self,text):
@@ -811,7 +817,7 @@ class MessageWindow(BaseWindow):
 		options = [__language__(30134)]
 		delete = None
 		edit = None
-		if FB.canDelete(self.post.cleanUserName()):
+		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()):
 			delete = len(options)
 			options.append(__language__(30141))
 		if FB.canEditPost(self.post.cleanUserName()):
@@ -828,19 +834,27 @@ class MessageWindow(BaseWindow):
 				self.close()
 			
 	def deletePost(self):
-		post = forumbrowser.PostMessage(self.post.pid,self.post.tid,self.post.fid)
-		if not self.post.pid: return
+		post = forumbrowser.PostMessage(self.post.postId,self.post.tid,self.post.fid)
+		if not post.pid: return
 		prog = xbmcgui.DialogProgress()
 		prog.create(__language__(30149),__language__(30150))
 		prog.update(0)
 		try:
-			FB.deletePost(post)
+			if self.post.tid == 'private_messages':
+				post.isPM = True
+				result = FB.deletePrivateMessage(post)
+			else:
+				result = FB.deletePost(post)
+			if not result:
+				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.')
+			else:
+				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.')
 		except:
 			prog.close()
 			raise
 		prog.close()
 		self.action = forumbrowser.Action('REFRESH')
-		self.close()
+		if result: self.close()
 		
 	def openPostDialog(self,quote=False):
 		if openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid):
@@ -869,7 +883,9 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 	return posted
 		
 ######################################################################################
+#
 # Replies Window
+#
 ######################################################################################
 class RepliesWindow(PageWindow):
 	def __init__( self, *args, **kwargs ):
@@ -1068,21 +1084,27 @@ class RepliesWindow(PageWindow):
 	
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
-		post = self.posts.get(item.getProperty('post'))
-		d = ChoiceMenu(__language__(30051))
-		d.addItem('quote',__language__(30134))
-		d.addItem('refresh',__language__(30054))
-		if FB.canDelete(item.getLabel()):
-			d.addItem('delete',__language__(30141))
-		if not self.isPM():
-			if FB.canEditPost(item.getLabel()):
-				d.addItem('edit',__language__(30232))
-			if self.threadItem and self.threadItem.getProperty('subscribed'):
+		d = ChoiceMenu(__language__(30051),with_splash=True)
+		try:
+			if item:
+				post = self.posts.get(item.getProperty('post'))
+				d.addItem('quote',__language__(30134))
+				if FB.canDelete(item.getLabel(),post.messageType()):
+					d.addItem('delete',__language__(30141))
+				if not self.isPM():
+					if FB.canEditPost(item.getLabel()):
+						d.addItem('edit',__language__(30232))
+						
+			if self.threadItem and FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
 				d.addItem('unsubscribe',__language__(30240))
 			else:
-				if FB.canSubscribeThread(self.tid):
-					d.addItem('subscribe',__language__(30236))
-		d.addItem('help',__language__(30244))
+				if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236))
+				
+			d.addItem('refresh',__language__(30054))
+			d.addItem('help',__language__(30244))
+		finally:
+			d.cancel()
+		
 		result = d.getResult()
 		if not result: return
 		if result == 'quote':
@@ -1118,13 +1140,17 @@ class RepliesWindow(PageWindow):
 		prog.create(__language__(30149),__language__(30150))
 		prog.update(0)
 		try:
+			post = forumbrowser.PostMessage(pid,self.tid,self.fid)
 			if self.tid == 'private_messages':
-				FB.deletePrivateMessageViaIndex(pid[2:])
+				post.isPM = True
+				result = FB.deletePrivateMessage(post)
 			else:
-				post = forumbrowser.PostMessage(pid,self.tid,self.fid)
-				post = FB.deletePost(post)
-				if post.error:
-					showMessage('Failed','Failed to delete post:',post.error)
+				result = FB.deletePost(post)
+			if not result:
+				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.')
+			else:
+				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.')
+				
 		except:
 			prog.close()
 			raise
@@ -1190,9 +1216,11 @@ def unSubscribeForum(fid):
 	else:
 		showMessage('Failed','Failed to unsubscribed from forum:',str(result))
 	return result
-				
+	
 ######################################################################################
+#
 # Threads Window
+#
 ######################################################################################
 class ThreadsWindow(PageWindow):
 	def __init__( self, *args, **kwargs ):
@@ -1355,33 +1383,29 @@ class ThreadsWindow(PageWindow):
 		PageWindow.onAction(self,action)
 		
 	def doMenu(self):
-		if self.getFocusId() != 120: return
 		item = self.getControl(120).getSelectedItem()
-		d = ChoiceMenu('Options')
-		if item.getProperty('subscribed'):
-			if item.getProperty("is_forum") == 'True':
-				d.addItem('unsubscribeforum', __language__(30242))
-			else:
-				d.addItem('unsubscribe', __language__(30240))
-		else:
-			if FB.canSubscribeThread(item.getProperty('id')):
-				if item.getProperty("is_forum") == 'True':
-					d.addItem('subscribeforum', __language__(30243))
-				else:
-					d.addItem('subscribe', __language__(30236))
-		if self.fid != 'subscriptions':
-			if self.forumItem:
-				sub = False
-				if self.forumItem.getProperty('subscribed'): #If this is set, we don't need to make a call
-					sub = True
-				else:
-					sub = FB.isForumSubscribed(self.fid) #can't trust the unset value so we have to check
-				if not sub is None:
-					if sub:
-						d.addItem('unsubscribecurrentforum', __language__(30242))
+		d = ChoiceMenu('Options',with_splash=True)
+		try:
+			if item:
+				if FB.isThreadSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
+					if item.getProperty("is_forum") == 'True':
+						d.addItem('unsubscribeforum', __language__(30242))
 					else:
-						d.addItem('subscribecurrentforum', __language__(30243))
-		d.addItem('help',__language__(30244))
+						d.addItem('unsubscribe', __language__(30240))
+				else:
+					if item.getProperty("is_forum") == 'True':
+						if FB.canSubscribeForum(item.getProperty('id')): d.addItem('subscribeforum', __language__(30243))
+					else:
+						if FB.canSubscribeThread(item.getProperty('id')): d.addItem('subscribe', __language__(30236))
+				if self.fid != 'subscriptions':
+					if self.forumItem:
+						if FB.isForumSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
+							if FB.canSubscribeThread(item.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242))
+						else:
+							if FB.canSubscribeForum(item.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243))
+			d.addItem('help',__language__(30244))
+		finally:
+			d.cancel()
 		result = d.getResult()
 		if not result: return
 		if result == 'subscribe':
@@ -1415,7 +1439,9 @@ class ThreadsWindow(PageWindow):
 		self.getControl(160).setLabel(FB.loginError)
 
 ######################################################################################
+#
 # Forums Window
+#
 ######################################################################################
 class ForumsWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
@@ -1534,7 +1560,8 @@ class ForumsWindow(BaseWindow):
 			
 	def setLogo(self,logo):
 		if getSetting('save_logos',False):
-			logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.jpg')
+			root, ext = os.path.splitext(logo) #@UnusedVariable
+			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
 			if os.path.exists(logopath):
 				logo = logopath
 			else:
@@ -1628,25 +1655,25 @@ class ForumsWindow(BaseWindow):
 		BaseWindow.onAction(self,action)
 		
 	def doMenu(self):
-		if self.getFocusId() != 120: return
 		item = self.getControl(120).getSelectedItem()
-		fid = item.getProperty('id')
-		d = ChoiceMenu('Options')
-		sub = False
-		if item.getProperty('subscribed'): #If this is set, we don't need to make a call
-			sub = True
-		else:
-			sub = FB.isForumSubscribed(fid) #can't trust the unset value so we have to check
-		if not sub is None:
-			if sub:
-				d.addItem('unsubscribecurrentforum', __language__(30242))
-			else:
-				d.addItem('subscribecurrentforum', __language__(30243))
+		d = ChoiceMenu('Options',with_splash=True)
+		try:
+			if item:
+				fid = item.getProperty('id')
+				if FB.isForumSubscribed(fid,item.getProperty('subscribed')):
+					d.addItem('unsubscribecurrentforum', __language__(30242))
+				else:
+					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
+			d.addItem('refresh',__language__(30054))
+		finally:
+			d.cancel()
 		result = d.getResult()
 		if result == 'subscribecurrentforum':
 			if subscribeForum(fid): item.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
+		elif result == 'refresh':
+			self.fillForumList()
 			
 	def preClose(self):
 		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
@@ -1679,7 +1706,7 @@ class ForumsWindow(BaseWindow):
 		self.resetForum(False)
 		if mode !=  __addon__.getSetting('color_mode'): self.fillForumList()
 
-def openWindow(windowClass,xmlFilename,return_window=False,*args,**kwargs):
+def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=THEME,*args,**kwargs):
 	theme = THEME
 	path = __addon__.getAddonInfo('path')
 	if not getSetting('use_skin_mods',True):
@@ -1691,7 +1718,10 @@ def openWindow(windowClass,xmlFilename,return_window=False,*args,**kwargs):
 		xml = open(src,'r').read()
 		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
 	w = windowClass(xmlFilename,path,theme,*args,**kwargs)
-	w.doModal()
+	if modal:
+		w.doModal()
+	else:
+		w.show()
 	if return_window: return w
 	del w
 	return None
@@ -2125,11 +2155,26 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.close()
 		
 	def onFocus( self, controlId ): self.controlId = controlId
-	
+		
 class ChoiceMenu():
-	def __init__(self,caption):
+	def __init__(self,caption,with_splash=False):
 		self.caption = caption
 		self.items = []
+		self.splash = None
+		if with_splash: self.showSplash()
+		
+	def showSplash(self):
+		self.splash = xbmcgui.WindowXMLDialog('script-forumbrowser-loading-splash.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default')
+		self.splash.show()
+		
+	def hideSplash(self):
+		if not self.splash: return
+		self.splash.close()
+		del self.splash
+		self.splash = None
+		
+	def cancel(self):
+		self.hideSplash()
 		
 	def addItem(self,ID,display,icon='',display2='',sep=False):
 		if not ID: return self.addSep()
@@ -2144,6 +2189,7 @@ class ChoiceMenu():
 		return xbmcgui.Dialog().select(self.caption,options)
 	
 	def getResult(self):
+		self.hideSplash()
 		idx = self.getChoiceIndex()
 		if idx < 0: return None
 		return self.items[idx]['id']

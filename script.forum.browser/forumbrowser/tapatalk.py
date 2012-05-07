@@ -1,8 +1,10 @@
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib, socket, errno
 import urllib2
-import iso8601, forumbrowser, texttransform, textwrap
+import iso8601, forumbrowser
 from forumbrowser import FBData
+from texttransform import BBMessageConverter
+
 #import xbmc #@UnresolvedImport
 
 DEBUG = sys.modules["__main__"].DEBUG
@@ -166,197 +168,6 @@ class CookieTransport(xmlrpclib.Transport):
 		encoded = f.getvalue()
 		f.close()
 		return encoded
-
-######################################################################################
-# Message Converter
-######################################################################################
-class TTMessageConverter(texttransform.MessageConverter):
-	def __init__(self,fb):
-		self.FB = fb
-		self._currentFilter = None
-		self.textwrap = textwrap.TextWrapper(80)
-		self.textwrap.replace_whitespace = False
-		self.boldFilter = re.compile('\[(/?)b\]')
-		self.italicsFilter = re.compile('\[(/?)i\]')
-		self.setReplaces()
-		self.resetRegex()
-	
-	def prepareSmileyList(self):
-		class SmiliesList(list):
-			def get(self,key,default=None): return default
-			
-		new = SmiliesList()
-		if __addon__.getSetting('use_skin_mods') == 'true':
-			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
-				if '[/COLOR]' in r:
-					new.append((f,r))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
-		else:
-			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
-				if '[/COLOR]' in x:
-					new.append((f,x))
-				else:
-					new.append((f,'[COLOR FFBBBB00]'+x+'[/COLOR]'))
-		self.FB.smilies = new
-		
-	def resetRegex(self):		
-		self.prepareSmileyList()
-
-		self.lineFilter = re.compile('[\n\r\t]')
-		f = self.FB.filters.get('code')
-		self.codeFilter = f and re.compile(f) or None
-		f = self.FB.filters.get('php')
-		self.phpFilter = f and re.compile(f) or None
-		f = self.FB.filters.get('html')
-		self.htmlFilter = f and re.compile(f) or None
-		f = self.FB.filters.get('image')
-		self.imageFilter = f and re.compile(f) or self.imageFilter
-		f = self.FB.filters.get('link')
-		self.linkFilter = f and re.compile(f) or self.linkFilter
-		f = self.FB.filters.get('link2')
-		self.linkFilter2 = f and re.compile(f) or None
-		f = self.FB.filters.get('color_start')
-		self.colorStart = f and re.compile(f) or None
-		f = self.FB.getQuoteFormat()
-		self.quoteFilter2 = f and re.compile(f) or None
-		
-		self.quoteStartFilter = re.compile(self.FB.getQuoteStartFormat())
-		self.altQuoteStartFilter = re.compile(self.FB.altQuoteStartFilter)
-		self.quoteEndFilter = re.compile('\[\/quote\](?i)')
-		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
-		self.fakeHrFilter = re.compile('[_]{10,}')
-		
-	def messageToDisplay(self,html):
-		html = self.fakeHrFilter.sub(r'\n\g<0>\n',html)
-		html = html.replace('[hr]','\n[hr]\n')
-		html = self.formatQuotes(html)
-		html = self.fakeHrFilter.sub(self.hrReplace,html) #convert the pre-converted [hr]
-		
-		html = self.boldFilter.sub(r'[\1B]',html)
-		html = self.italicsFilter.sub(r'[\1I]',html)
-		
-		if self.codeFilter: html = self.codeFilter.sub(self.codeConvert,html)
-		if self.phpFilter: html = self.phpFilter.sub(self.phpConvert,html)
-		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlReplace,html)
-		if self.colorStart: html = self.colorStart.sub(r'[COLOR FF\1]',html)
-		html = html.replace('[/color]','[/COLOR]')
-		
-		self.imageCount = 0
-		html = self.imageFilter.sub(self.imageConvert,html)
-		html = self.linkFilter.sub(self.linkReplace,html)
-		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
-		html = html.replace('[hr]',self.hrReplace)
-		html = self.removeNested(html,'\[/?B\]','[B]')
-		html = self.removeNested(html,'\[/?I\]','[I]')
-		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
-		html = self.processSmilies(html)
-		return texttransform.convertHTMLCodes(html)
-			
-	def formatQuotes(self,html):
-		if not isinstance(html,unicode): html = unicode(html,'utf8')
-		ct = 0
-		ms = None
-		me = None
-		vertL = []
-		html = html.replace('[CR]','\n')
-		html = html.replace('<br />','\n')
-		html = self.quoteEndOnLineFilter.sub('\n[/quote]',html)
-		html = self.altQuoteStartFilter.sub(r"[quote='\1']",html)
-		html = re.sub(self.quoteStartFilter.pattern + '(?!\n)','\g<0>\n',html)
-		lines = html.splitlines()
-		out = ''
-		justStarted = False
-		oddVert = u'[COLOR FF55AA55]%s[/COLOR]' % self.quoteVert
-		evenVert = u'[COLOR FF5555AA]%s[/COLOR]' % self.quoteVert
-		
-		for line in lines:
-			if ct < 0: ct = 0
-			ms = self.quoteStartFilter.search(line)
-			startFilter = self.quoteStartFilter
-			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
-			if ms:
-				justStarted = True
-				oldVert = ''.join(vertL)
-				gd = ms.groupdict()
-				rep = self.quoteStartReplace % (gd.get('user') or '')
-				if ct == 0:
-					rep = '[COLOR FF5555AA]' + rep
-					vertL.append(evenVert)
-				elif ct > 0:
-					if ct % 2:
-						rep = '[/COLOR][COLOR FF55AA55]' + rep
-						vertL.append(oddVert)
-					else:
-						rep = '[/COLOR][COLOR FF5555AA]' + rep
-						vertL.append(evenVert)
-				vert = ''.join(vertL)
-				out += oldVert + startFilter.sub(rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
-				ct += 1
-			elif me:
-				rep = self.quoteEndReplace
-				if ct == 1: rep += '[/COLOR]'
-				elif ct > 1:
-					if not ct % 2:
-						rep += '[/COLOR][COLOR FF5555AA]'
-					else:
-						rep += '[/COLOR][COLOR FF55AA55]'
-				oldVert = ''.join(vertL)
-				if vertL: vertL.pop()
-				vert = ''.join(vertL)
-				out += oldVert + self.quoteEndFilter.sub('[CR]' + rep,line,1).replace('[CR]','[CR]' + vert) + '[CR]'
-				ct -= 1
-			elif ct:
-				if justStarted:
-					out += vert + '[CR]'
-				line = self.linkFilter.sub(r'\g<text> [B](Link)[/B]',line)
-				line = line.replace('[code]','__________\nCODE:\n').replace('[/code]','\n__________')
-				line = line.replace('[php]','__________\nPHP:\n').replace('[/php]','\n__________')
-				if self.linkFilter2: line = self.linkFilter2.sub('[B](LINK)[/B]',line)
-				wlines = self.textwrap.fill(line).splitlines()
-				for l in wlines:
-					out += vert + l + '[CR]'
-			else:
-				out += line + '[CR]'
-			if not ms:
-				justStarted = False
-		return out
-	
-	def removeNested(self,html,regex,starttag):
-		self.nStart = starttag
-		self.nCounter = 0
-		return re.sub(regex,self.nestedSub,html)
-		
-	def nestedSub(self,m):
-		tag = m.group(0)
-		if tag == self.nStart:
-			self.nCounter += 1
-			if self.nCounter == 1: return tag
-		else:
-			self.nCounter -= 1
-			if self.nCounter < 0: self.nCounter = 0
-			if self.nCounter == 0: return tag
-		return ''
-	
-	def imageConvert(self,m):
-		self.imageCount += 1
-		return self.imageReplace % (self.imageCount,m.group('url'))
-		
-	def processSmilies(self,text):
-		if not isinstance(text,unicode): text = unicode(text,'utf8')
-		for f,r in self.FB.smilies: text = text.replace(f,r)
-		return text
-		
-	def parseCodes(self,text):
-		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',self.quoteConvert,text)
-		text = re.sub('\[QUOTE\](?P<quote>.+?)\[(?P<user>)?/QUOTE\](?is)',self.quoteConvert,text)
-		text = re.sub('\[CODE\](?P<code>.+?)\[/CODE\](?is)',self.codeReplace,text)
-		text = re.sub('\[PHP\](?P<php>.+?)\[/PHP\](?is)',self.phpReplace,text)
-		text = re.sub('\[HTML\](?P<html>.+?)\[/HTML\](?is)',self.htmlReplace,text)
-		text = re.sub('\[IMG\](?P<url>.+?)\[/IMG\](?is)',self.quoteImageReplace,text)
-		text = re.sub('\[URL="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/URL\](?is)',self.linkReplace,text)
-		text = re.sub('\[URL\](?P<text>(?P<url>.+?))\[/URL\](?is)',self.link2Replace,text)
-		return text
 				
 ################################################################################
 # ForumPost
@@ -382,7 +193,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.signature = pdict.get('signature','') or '' #nothing
 		else:
 			self.isShort = True
-			self.setPostID('PM' + pdict.get('msg_id',''))
+			self.setPostID(pdict.get('msg_id',''))
 			date = str(pdict.get('sent_date',''))
 			if date:
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
@@ -539,7 +350,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login,TTMessageConverter)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
 		self.prefix = 'TT.'
 		self._url = ''
@@ -636,6 +447,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			self.loginError = error
 			self._loggedIn = False
 		else:
+			self.forumConfig.update(result)
 			if DEBUG:
 				LOG('LOGGED IN: ' + str(result.get('result_text','')))
 			else:
@@ -741,10 +553,21 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 		return self.finish(FBData(error='CANCEL'),donecallback)
 		
-	def isForumSubscribed(self,fid):
+	def isForumSubscribed(self,fid,default=False):
+		if default: return True
+		if not self.isLoggedIn(): return False
 		forums = self.getSubscribedForums(None, None)
+		if not forums.data: return False
 		for f in forums.data:
 			if f.get('forumid') == fid: return True
+		return False
+	
+	def isThreadSubscribed(self,tid,default=False):
+		if default: return True
+		if not self.isLoggedIn(): return False
+		threads,pd = self._getSubscriptions() #@UnusedVariable
+		for t in threads:
+			if t.get('threadid') == tid: return True
 		return False
 	
 	def createThreadDict(self,data,sticky=False):
@@ -781,7 +604,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			donecallback(None,None)
 		return (None,None)
 	
-	def _getSubscriptions(self,callback,donecallback):
+	def _getSubscriptions(self,callback=None,donecallback=None):
+		if not callback: callback = self.fakeCallback
 		callback(20,self.lang(30102))
 		sub = self.server.get_subscribed_topic()
 		pd = self.getPageData({},0)
@@ -968,36 +792,37 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Using MyBB edit post bug fix')
 			self.subscribeToThread(pm.tid)
 		return result.get('result',False)
-	
-	def subscribeToThread(self,tid):
-		result = self.server.subscribe_topic(str(tid))
-		if not result.get('result',False):
-			LOG('Failed to subscribe to thread: ' + str(result.get('result_text')))
-			return False
-		return True
 		
 	def canEditPost(self,user):
 		if user == self.user: return True
 		return False
 	
-	def doPrivateMessage(self,to,title,message,callback=None):
+	def doPrivateMessage(self,post,callback=None):
 #		user_name 		yes 	To support sending message to multiple recipients, the app constructs an array and insert user_name for each recipient as an element inside the array. 	3
 #		subject 	byte[] 	yes 		3
 #		text_body 	byte[] 	yes 		3
 #		action 	Int 		1 = REPLY to a message; 2 = FORWARD to a message. If this field is presented, the pm_id below also need to be provided. 	3
 #		pm_id 	String 		It is used in conjunction with "action" parameter to indicate which PM is being replied or forwarded to.
 		toArray = []
-		for t in to.split(','): toArray.append(xmlrpclib.Binary(t))
-		result = self.server.create_message(toArray,xmlrpclib.Binary(title),xmlrpclib.Binary(message))
+		for t in post.to.split(','): toArray.append(xmlrpclib.Binary(t))
+		result = self.server.create_message(toArray,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
 		callback(100,self.lang(30052))
-		return result.get('result') or False
+		if not result.get('result'):
+			LOG('Failed to send PM: ' + str(result.get('result_text')))
+			post.error = str(result.get('result_text'))
+			return False
+		return True
 		
-	def deletePrivateMessageViaIndex(self,pmidx,callback=None):
+	def deletePrivateMessage(self,post,callback=None):
 		pmInfo = self.getPMCounts()
 		boxid = pmInfo.get('boxid')
 		if not boxid: return
-		result = self.server.delete_message(pmidx,boxid)
-		return result.get('result') or False
+		result = self.server.delete_message(post.pid,boxid)
+		if not result.get('result'):
+			post.error = str(result.get('result_text'))
+			LOG('Failed to delete PM:' + post.error)
+			return False
+		return True
 		
 	def deletePost(self,post):
 		if not self.checkLogin(): return False
@@ -1006,13 +831,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not result.get('result'):
 			post.error = str(result.get('result_text'))
 			LOG('Failed to delete post: %s (%s)' % (post.error,soft_hard == 1 and 'Soft' or 'Hard'))
-		return post
+			return False
+		return True
 			
-	def canDelete(self,user):
-		if user == self.user: return True
+	def canDelete(self,user,target='POST'):
+		if user == self.user and self.forumConfig.get('can_moderate'): return True
 		return False
 	
 	def canSubscribeThread(self,tid):
+		return True
+	
+	def canSubscribeForum(self,fid):
 		return True
 	
 	def subscribeThread(self,tid):

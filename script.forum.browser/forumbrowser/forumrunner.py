@@ -1,5 +1,6 @@
 import forumbrowser, json, urllib2, urllib, sys, os,re, time
 from forumbrowser import FBData
+from texttransform import BBMessageConverter
 DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
@@ -86,6 +87,9 @@ class ForumrunnerClient():
 # ForumPost
 ################################################################################
 class ForumPost(forumbrowser.ForumPost):
+	imageFilter = re.compile('<img[^>]+src="(?P<url>https?://[^"]+)"[^>]*/>')
+	linkFilter = re.compile('<a.+?href="(?P<url>.+?)".*?>(?P<text>.+?)</a>')
+	quotFilter = re.compile('<div class="quotedRoot">(.*?)</div>(?s)')
 	def __init__(self,fb,pdict):
 		forumbrowser.ForumPost.__init__(self, fb, pdict)
 		
@@ -95,7 +99,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.userName = pdict.get('username','')
 		self.userId = pdict.get('userid','')
 		self.title = pdict.get('title','')
-		self.message = pdict.get('edittext',pdict.get('text',pdict.get('message','')))
+		self.message = pdict.get('edittext',self.filterMessage(pdict.get('text',pdict.get('message',''))))
 		self.date = pdict.get('post_timestamp',pdict.get('pm_timestamp',''))
 		self.images = pdict.get('images',[])
 		self.thumbs = pdict.get('image_thumbs',[])
@@ -127,13 +131,24 @@ class ForumPost(forumbrowser.ForumPost):
 	def messageToDisplay(self,message):
 		return self.MC.messageToDisplay(message)
 	
+	def filterMessage(self,message):
+		message = message.replace('<br/>','\n').replace('</color>','')#'[/COLOR]')
+		message = message.replace('<b>','[b]').replace('</b>','[/b]').replace('<i>','[i]').replace('</i>','[/i]')
+		message = re.sub('<color color="#(\w+)">','',message) #r'[COLOR FF\1]',message)
+		message = re.sub('\[\*\]',self.MC.bullet,message)
+		message = self.quotFilter.sub(r'[quote]\1[/quote]',message)
+		message = self.linkFilter.sub(r'[url=\g<url>]\g<text>[/url]',message)
+		message = self.imageFilter.sub(r'[img]\g<url>[/img]',message)
+		return message
+		
+	
 	
 class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'forumrunner'
 	ForumPost = ForumPost
 	
 	def __init__(self,forum,always_login=False):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
 		self.prefix = 'FR.'
 		self.lang = sys.modules["__main__"].__language__
@@ -302,16 +317,26 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not self.checkLogin(callback=callback): return (None,None)
 		return self.getThreads(None, page, callback, donecallback)
 	
-	def _getSubscriptions(self,page,callback):
+	def _getSubscriptions(self,page,callback,perpage=20):
 		callback(20,self.lang(30102))
-		sub = self.client.get_subscriptions(page=page,perpage=20)
+		sub = self.client.get_subscriptions(page=page,perpage=perpage)
 		total = int(sub.get('total_threads',1))
 		current = len(sub.get('threads',[]))
 		pd = self.getPageData(page=page,total_items=total,current_total=current)
 		normal = sub.get('threads',[])
 		if not callback(70,self.lang(30103)): return None,None
-		for n in normal: self.createThreadDict(n)
+		for n in normal:
+			self.createThreadDict(n)
+			n['subscribed'] = True
 		return normal, pd
+	
+	def isThreadSubscribed(self,tid,default=False):
+		if default: return True
+		if not self.isLoggedIn(): return False
+		normal,pd = self._getSubscriptions(1,self.fakeCallback,perpage=50) #@UnusedVariable
+		for n in normal:
+			if n.get('thread_id') == tid: return True
+		return False
 	
 	def getThreads(self,forumid,page=1,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
@@ -432,6 +457,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(80,self.lang(30103)): break
 			for p in messages.get('pms',[]):
 				fp = self.getForumPost(p)
+				fp.isPM = True
 				fp.online = fp.userName in oDict
 				pms.append(fp)
 			
@@ -474,9 +500,18 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def canSubscribeThread(self,tid): return True
 	
 	def subscribeThread(self,tid):
+		if not self.checkLogin(): return False
 		result = self.client.subscribe_thread(threadid=str(tid))
 		if not result:
 			LOG('Failed to subscribe to thread: ' + result.message)
+			return result.message
+		return True
+	
+	def unSubscribeThread(self,tid):
+		if not self.checkLogin(): return False
+		result = self.client.unsubscribe_thread(threadid=str(tid))
+		if not result:
+			LOG('Failed to unsubscribe from thread: ' + result.message)
 			return result.message
 		return True
 		
@@ -484,3 +519,32 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if user == self.user: return True
 		return False
 	
+	def doPrivateMessage(self,post,callback=None):
+		if not self.checkLogin(): return False
+		result = self.client.send_pm(recipients=post.to,title=post.title,message=post.message)
+		callback(100,self.lang(30052))
+		if not result:
+			LOG('Failed to send PM: ' + result.message)
+			post.error = result.message
+			return False
+		return True
+	
+	def canDelete(self,user,target='POST'): return user == self.user
+	
+	def deletePrivateMessage(self,post,callback=None):
+		if not self.checkLogin(): return False
+		result = self.client.delete_pm(pm=post.pid)
+		if not result:
+			LOG('Failed to delete PM: ' + result.message)
+			post.error = result.message
+			return False
+		return True
+	
+	def deletePost(self,post):
+		if not self.checkLogin(): return False
+		result = self.client.delete_post(postid=post.pid,threadid=post.tid,reason='')
+		if not result:
+			LOG('Failed to delete post: ' + result.message)
+			post.error = result.message
+			return False
+		return True

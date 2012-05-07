@@ -4,13 +4,7 @@ TODO:
  Short Term:
   Clean up message converting for speed (done for tapatalk)
   Finish custom font usage
-  Finish forumrunner support
-  Finish boxee
-  Activity image when opening dialogs that fetch data first
-  Get logo images with proper ext to remove that annoying log message
-  Forumrunner: send PM's and Forum and Thread subscribing and view Forum Subscriptions
-  Boxeee: Create/Edit posts. Create PM's. Subcriptions.
-  Remove XBMCHub until fixed
+  Boxeee: Create/Edit posts. Create PM's. Subcriptions. etc.
   
  Long Term:
   View video links
@@ -27,9 +21,26 @@ TODO:
   Tapatalk: Use charset from get_config
   Find forum mobiquo.php path from tapatalk.js path in html page
   Search function
+  Latest Threads
+  Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.35
+Current Version : 0.9.36
+
+*** 0.9.36 ***
+
+Forumrunner: Send private messages, Thread Unsubscribe, Delete PMs, Delete Posts
+Tapatalk: Added a check for thread subscriptions when showing the context menu because we can't trust the data returned with the thread list
+Added refresh to the forums context menu
+Tapatalk & Forumrunner: Message BB Code tag processing for Code,HTML,PHP,indent,bulleted list, numbered list, color tags, size tags(removes them)
+Tapatalk: process non-user post html tags for quote, link, image etc
+Removed XBMCHub (It's broken and they're getting Tapatalk)
+Added dialogs when deleting posts and PMs
+Added a dialog after successfully sending a PM/Post
+Tapatalk: Since the api currently only allows deleting posts by moderators, deleting is now disabled (not on menu) unless the user is a moderator
+Logos now cached with correct filename extension
+Tapatalk: Fix bug causing error on forums without forum subscriptions or when not logged in when showing dialogs
+Show activity splash when waiting for dialogs that fetch data
 
 *** 0.9.35 ***
 
@@ -40,7 +51,7 @@ Choosing 'Go To Newest Post' from the page button menu now jumps to the new post
 Tapatalk: Added code, php and color post tag processing
 Tapatalk: Optimization of message processing
 Better error messages
-Fixed a bug causing error after creading/editing a post
+Fixed a bug causing error after creating/editing a post
 
 *** 0.9.34 ***
 

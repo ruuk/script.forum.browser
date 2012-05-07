@@ -41,7 +41,6 @@ class ForumPost(forumbrowser.ForumPost):
 		self.postNumber = pdict.get('postnumber') or None
 		self.postCount = pdict.get('postcount') or None
 		self.joinDate = pdict.get('joindate') or ''
-		self.isPM = self.postId.startswith('PM')
 	
 	def messageToText(self,html):
 		html = self.MC.lineFilter.sub('',html)
@@ -500,7 +499,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			pms = []
 			for m in messages:
 				p = self.getForumPost(m.groupdict())
-				p.setPostID('PM%s' % len(pms))
+				p.setPostID(len(pms))
+				p.isPM = True
 				p.message = re.sub('[\t\r]','',p.message)
 				p.makeAvatarURL()
 				pms.append(p)
@@ -646,20 +646,23 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			
 		return True
 		
-	def doPrivateMessage(self,to,title,message,callback=None):
-		self.doForm(	self.urls.get('pm_new_message'),
-						self.forms.get('pm_name'),
-						self.forms.get('pm_action'),
-						{self.forms.get('pm_recipient'):to,self.forms.get('pm_title'):title,self.forms.get('pm_message'):message},
-						callback=callback)
-			
-	def deletePrivateMessageViaIndex(self,pmidx,callback=None):
+	def doPrivateMessage(self,post,callback=None):
+		return self.doForm(	self.urls.get('pm_new_message'),
+							self.forms.get('pm_name'),
+							self.forms.get('pm_action'),
+							{self.forms.get('pm_recipient'):post.to,self.forms.get('pm_title'):post.title,self.forms.get('pm_message'):post.message},
+							callback=callback)
+		
+	def deletePrivateMessage(self,post,callback=None):
+		self.deletePrivateMessageViaIndex(post, callback)
+		
+	def deletePrivateMessageViaIndex(self,post,callback=None):
 		html = self.readURL(self.urls.get('private_messages_inbox'),callback=callback,force_login=True)
 		if not html: return
 		pmid_list = re.findall(self.filters.get('pm_pmid_list'),html,re.S)
 		try:
 			pmid_list.reverse()
-			pmid = pmid_list[int(pmidx)]
+			pmid = pmid_list[int(post.pid)]
 		except:
 			ERROR('DELETE PM VIA INDEX ERROR')
 			return
@@ -775,8 +778,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				control.items[0].selected = value == 'True'
 			x+=1
 			
-	def canDelete(self,user):
-		return self.user == user and self.urls.get('deletepost')
+	def canDelete(self,user,target='POST'):
+		if target == 'POST':
+			return self.user == user and self.urls.get('deletepost')
+		else:
+			return self.user == user and self.urls.get('deletepm')
 	
 	def getQuoteFormat(self):
 		return None
