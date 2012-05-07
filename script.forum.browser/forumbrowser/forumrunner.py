@@ -217,6 +217,10 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def login(self):
 		LOG('LOGGING IN')
 		result = self.client.login(username=self.user,password=self.password)
+		if not result:
+			LOG('Failed to login: ' + result.message)
+			self.loginError = result.message
+			return False
 		if not result.get('authenticated'):
 			error = str(result.get('requires_authentication',''))
 			LOG('LOGIN FAILED: ' + error)
@@ -361,6 +365,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			try:
 				oDict = {}
 				online = self.client.online()
+				if not online:
+					LOG('Could not get online users: ' + online.message)
+					return self.online
 				for o in online.get('users',online.get('online_users',[])): #online_users is the documented key but not found in practice
 					oDict[o.get('username','?')] = o.get('userid','?')
 				self.online = oDict
@@ -409,7 +416,6 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 					fp.online = fp.userName in oDict
 					sreplies.append(fp)
 					ct+=1
-				sreplies.reverse()
 			except:
 				em = ERROR('ERROR GETTING POSTS')
 				callback(-1,'%s' % em)

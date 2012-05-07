@@ -118,7 +118,6 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		replies = self.postParser.getList(html)
-		replies.reverse()
 		topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		if not threadid:
 			threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)

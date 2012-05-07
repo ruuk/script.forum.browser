@@ -5,6 +5,15 @@ TODO:
   Clean up message converting for speed (done for tapatalk)
   Finish custom font usage
   Boxeee: Create/Edit posts. Create PM's. Subcriptions. etc.
+  Progress bar contrast on dark skin
+  Add white background to image viewer on dark skin
+  Subscriptions view shows threads in upper left corner
+  Remove subscriptions from subs view when unsubscribe
+  Buttons on image viewer when mouse off
+  Forumrunner runner icon?
+  Help for full message view
+  Forum browser version number on screen?
+  Prompt to restart forum browser when switching skins
   
  Long Term:
   View video links
@@ -25,7 +34,14 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.36
+Current Version : 0.9.37
+
+*** 0.9.37 ***
+
+Forumrunner: Fixed a bug causing an error with no message on login failure
+When 'reverse posts' and 'open thread a newest post' are enabled it no longer jumps to the bottom
+Reversed PM listings so that newest is at the top.
+Fixed new bug with boxee error when showing private messages 
 
 *** 0.9.36 ***
 

@@ -52,6 +52,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return texttransform.convertHTMLCodes(html).strip()
 	
 	def setPostID(self,pid):
+		pid = str(pid)
 		self.postId = pid
 		self.pid = pid
 		self.isPM = pid.startswith('PM')
@@ -520,7 +521,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					p.setPostID('PM%s' % len(pms))
 					pms.append(p)
 		callback(100,__language__(30052))
-		
+		pms.reverse()
 		return self.finish(FBData(pms),donecallback)
 			
 	def hasSubscriptions(self):

@@ -673,7 +673,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					fp.setUserInfo(infos[fp.userName])
 					sreplies.append(fp)
 					ct += 1
-				sreplies.reverse()
 			except xmlrpclib.Fault, e:
 				LOG('ERROR GETTING POSTS: ' + e.faultString)
 				raise forumbrowser.Error(e.faultString)

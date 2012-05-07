@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.36'
+__version__ = '0.9.37'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -992,7 +992,9 @@ class RepliesWindow(PageWindow):
 			if not self.topic: self.topic = data.pageData.topic
 			if not self.tid: self.tid = data.pageData.tid
 			self.setupPage(data.pageData)
-			if __addon__.getSetting('reverse_sort') != 'true' or self.isPM(): data.data.reverse()
+			if getSetting('reverse_sort',False) and not self.isPM():
+				print 'reverse'
+				data.data.reverse()
 			self.posts = {}
 			select = -1
 			for post,idx in zip(data.data,range(0,len(data.data))):
@@ -1019,7 +1021,7 @@ class RepliesWindow(PageWindow):
 				self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM():
+			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False):
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
