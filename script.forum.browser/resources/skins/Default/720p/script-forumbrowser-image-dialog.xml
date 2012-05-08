@@ -11,6 +11,14 @@
 			<posx>240</posx>
 			<posy>50</posy>
 			<control type="image">
+				<posx>-20</posx>
+				<posy>-10</posy>
+				<width>840</width>
+				<height>650</height>
+				<colordiffuse>AA000000</colordiffuse>
+				<texture border="20">forum-browser-white-box.png</texture>
+			</control>
+			<control type="image">
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>800</width>
@@ -31,7 +39,7 @@
 				<posx>15</posx>
 				<posy>40</posy>
 				<width>770</width>
-				<height>580</height>
+				<height>570</height>
 				<onleft>120</onleft>
 				<onright>120</onright>
 				<onup>120</onup>
@@ -39,6 +47,13 @@
 				<!-- pagecontrol>121</pagecontrol -->
 				<scrolltime>200</scrolltime>
 				<itemlayout height="200">
+					<control type="image">
+						<posx>30</posx>
+						<posy>5</posy>
+						<width>710</width>
+						<height>190</height>
+						<texture>forum-browser-panel-full.png</texture>
+					</control>
 					<control type="image">
 						<posx>30</posx>
 						<posy>5</posy>
@@ -54,6 +69,13 @@
 						<width>770</width>
 						<height>200</height>
 						<texture border="20">forum-browser-black-box.png</texture>
+					</control>
+					<control type="image">
+						<posx>30</posx>
+						<posy>5</posy>
+						<width>710</width>
+						<height>190</height>
+						<texture>forum-browser-panel-full.png</texture>
 					</control>
 					<control type="image">
 						<posx>30</posx>

@@ -191,7 +191,7 @@
 					<posy>0</posy>
 					<width>230</width>
 					<height>60</height>
-					<colordiffuse>FFAAAAAA</colordiffuse>
+					<colordiffuse>FFCCCCCC</colordiffuse>
 					<texture border="20">forum-browser-dark-white-boxr.png</texture>
 					<visible>Control.isVisible(106)</visible>
 				</control>
@@ -211,8 +211,8 @@
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
-					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-dark-white-trans-boxr.png</texturenofocus>
+					<texturefocus border="20">forum-browser-dark-white-trans-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-dark-white-trans-boxr-nf.png</texturenofocus>
 				</control>
 			</control>
 			

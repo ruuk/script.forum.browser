@@ -58,11 +58,11 @@
 				<posy>22</posy>
 				<width>110</width>
 				<height>40</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Threads</label>
+				<label>[B]Threads[/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -72,7 +72,7 @@
 				<posy>14</posy>
 				<width>720</width>
 				<height>60</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
@@ -103,7 +103,7 @@
 						<width>48</width>
 						<height>60</height>
 						<visible>true</visible>
-						<font>font12</font>
+						<font>ForumBrowser-font12</font>
 						<align>right</align>
 						<textcolor>FF000000</textcolor>
 						<disabledcolor>20555555</disabledcolor>
@@ -121,7 +121,7 @@
 						<width>48</width>
 						<height>60</height>
 						<visible>true</visible>
-						<font>font12</font>
+						<font>ForumBrowser-font12</font>
 						<align>left</align>
 						<textcolor>FF000000</textcolor>
 						<disabledcolor>20555555</disabledcolor>
@@ -138,7 +138,7 @@
 						<onright>106</onright>
 						<onup>120</onup>
 						<ondown>120</ondown>
-						<font>font12</font>
+						<font>ForumBrowser-font12</font>
 						<aligny>center</aligny>
 						<align>center</align>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
@@ -172,7 +172,7 @@
 					<posy>0</posy>
 					<width>230</width>
 					<height>60</height>
-					<colordiffuse>FFAAAAAA</colordiffuse>
+					<colordiffuse>FFCCCCCC</colordiffuse>
 					<texture border="20">forum-browser-dark-white-boxr.png</texture>
 					<visible>Control.isVisible(106)</visible>
 				</control>
@@ -186,14 +186,14 @@
 					<onright>202</onright>
 					<onup>120</onup>
 					<ondown>120</ondown>
-					<font>font12</font>
+					<font>ForumBrowser-font12</font>
 					<textcolor>FF000000</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
-					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-dark-white-trans-boxr.png</texturenofocus>
+					<texturefocus border="20">forum-browser-dark-white-trans-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-dark-white-trans-boxr-nf.png</texturenofocus>
 				</control>
 			</control>
 			
@@ -218,7 +218,7 @@
 					<posy>4</posy>
 					<width>400</width>
 					<height>10</height>
-					<font>font10</font>
+					<font>ForumBrowser-font10</font>
 					<textcolor>white</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
@@ -240,7 +240,7 @@
 				<posy>645</posy>
 				<width>1192</width>
 				<height>45</height>
-				<font>font13</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
@@ -254,12 +254,12 @@
 				<posy>655</posy>
 				<width>1192</width>
 				<height>45</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
-				<label>$INFO[Container(120).ListItem.Property(last)]</label>
+				<label>[B]$INFO[Container(120).ListItem.Property(last)][/B]</label>
 				<visible>StringCompare(Container(120).ListItem.Studio,me)</visible>
 			</control>
 			
@@ -315,7 +315,7 @@
 						<posy>0</posy>
 						<width>165</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<selectedcolor>black</selectedcolor>
@@ -328,7 +328,7 @@
 						<posy>0</posy>
 						<width>165</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FF007700</textcolor>
 						<selectedcolor>black</selectedcolor>
@@ -341,7 +341,7 @@
 						<posy>0</posy>
 						<width>989</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FFCCCCCC</textcolor>
 						<align>left</align>
@@ -353,7 +353,7 @@
 						<posy>0</posy>
 						<width>989</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -399,7 +399,7 @@
 						<posy>0</posy>
 						<width>165</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -411,7 +411,7 @@
 						<posy>0</posy>
 						<width>165</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FF00BB00</textcolor>
 						<align>left</align>
@@ -423,7 +423,7 @@
 						<posy>0</posy>
 						<width>989</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FFCCCCCC</textcolor>
 						<align>left</align>
@@ -435,7 +435,7 @@
 						<posy>0</posy>
 						<width>989</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>

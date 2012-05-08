@@ -21,11 +21,12 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.37'
+__version__ = '0.9.38'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
 THEME = 'Default'
+SKINS = ['Default','Dark','Default']
 if __addon__.getSetting('skin') == '1':
 	THEME = 'Dark'
 
@@ -293,7 +294,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	def setProgress(self,pct,message=''):
 		if pct<0:
 			self.stop()
-			showMessage('ERROR',message)
+			showMessage('ERROR',message,error=True)
 			return False
 		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
@@ -420,10 +421,13 @@ class ImagesDialog(BaseWindow):
 	def doMenu(self):
 		d = ChoiceMenu('Options')
 		d.addItem('save', 'Save Image')
+		d.addItem('help','Help')
 		result = d.getResult()
 		if not result: return
 		if result == 'save':
 			self.saveImage()
+		elif result == 'help':
+			showHelp('imageviewer')
 			
 	def downloadImage(self,url):
 		base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
@@ -438,7 +442,7 @@ class ImagesDialog(BaseWindow):
 		if source.startswith('http'):
 			result = self.downloadImage(source)
 			if not result:
-				showMessage('Failed','Failed to download file.')
+				showMessage('Failed','Failed to download file.',success=False)
 				return
 			source = result[0]
 		filename = doKeyboard('Enter Filename', firstfname)
@@ -464,7 +468,7 @@ class ImagesDialog(BaseWindow):
 			target = os.path.join(result,filename)
 		import shutil
 		shutil.copy(source, target)
-		showMessage('Finished','File Saved Successfully: ',os.path.basename(target))
+		showMessage('Finished','File Saved Successfully: ',os.path.basename(target),success=True)
 		
 ######################################################################################
 # Post Dialog
@@ -545,14 +549,14 @@ class PostDialog(BaseWindow):
 			if self.post.isPM:
 				if not FB.doPrivateMessage(self.post,callback=self.dialogCallback):
 					self.posted = False
-					showMessage(__language__(30050),__language__(30246),self.post.error or '?')
+					showMessage(__language__(30050),__language__(30246),self.post.error or '?',success=False)
 					return
 			else:
 				if not FB.post(self.post,callback=self.dialogCallback):
 					self.posted = False
-					showMessage(__language__(30050),__language__(30227),self.post.error or '?')
+					showMessage(__language__(30050),__language__(30227),self.post.error or '?',success=False)
 					return
-			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.')
+			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.',success=True)
 		except:
 			self.prog.close()
 			self.posted = False
@@ -691,7 +695,9 @@ class LinePostDialog(PostDialog):
 		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',FB.MC.lineFilter.sub('',test3))
 
 ######################################################################################
+#
 # Message Window
+#
 ######################################################################################
 class MessageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
@@ -823,6 +829,8 @@ class MessageWindow(BaseWindow):
 		if FB.canEditPost(self.post.cleanUserName()):
 			edit = len(options)
 			options.append(__language__(30232))
+		hlp = len(options)
+		options.append(__language__(30244))
 		idx = xbmcgui.Dialog().select(__language__(30051),options)
 		if idx == 0: self.openPostDialog(quote=True)
 		elif idx == delete: self.deletePost()
@@ -832,6 +840,8 @@ class MessageWindow(BaseWindow):
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH')
 				self.close()
+		elif idx == hlp:
+			showHelp('message')
 			
 	def deletePost(self):
 		post = forumbrowser.PostMessage(self.post.postId,self.post.tid,self.post.fid)
@@ -846,9 +856,9 @@ class MessageWindow(BaseWindow):
 			else:
 				result = FB.deletePost(post)
 			if not result:
-				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.')
+				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.',success=False)
 			else:
-				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.')
+				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 		except:
 			prog.close()
 			raise
@@ -929,7 +939,7 @@ class RepliesWindow(PageWindow):
 		self.setTheme()
 		self.getControl(201).setEnabled(self.parent.parent.hasLogin())
 		self.showThread()
-		self.setFocusId(120)
+		#self.setFocusId(120)
 	
 	def setTheme(self):
 		mtype = self.isPM() and __language__(30151) or __language__(30130)
@@ -955,6 +965,8 @@ class RepliesWindow(PageWindow):
 	def fillRepliesList(self,page=''):
 		#page = int(page)
 		#if page < 0: raise Exception()
+		self.getControl(106).setVisible(True)
+		self.setFocusId(106)
 		if self.tid == 'private_messages':
 			t = self.getThread(FB.getPrivateMessages,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='PRIVATE MESSAGES')
 			t.setArgs(callback=t.progressCallback,donecallback=t.finishedCallback)
@@ -976,12 +988,12 @@ class RepliesWindow(PageWindow):
 			self.setFocusId(201)
 			if data.error == 'CANCEL': return
 			LOG('GET REPLIES ERROR')
-			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR]' + data.error)
+			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR]' + data.error,success=False)
 			return
 		elif not data.data:
 			self.setFocusId(201)
 			LOG('NO REPLIES')
-			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR] No Posts Found')
+			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR] No Posts Found',success=False)
 			return
 		
 		self.empty = False
@@ -1025,9 +1037,10 @@ class RepliesWindow(PageWindow):
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
+			self.setFocusId(201)
 			#xbmcgui.unlock()
 			ERROR('FILL REPLIES ERROR')
-			showMessage(__language__(30050),__language__(30133))
+			showMessage(__language__(30050),__language__(30133),error=True)
 			raise
 		#xbmcgui.unlock()
 		if select > -1: self.postSelected(itemindex=select)
@@ -1149,9 +1162,9 @@ class RepliesWindow(PageWindow):
 			else:
 				result = FB.deletePost(post)
 			if not result:
-				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.')
+				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.',success=False)
 			else:
-				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.')
+				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 				
 		except:
 			prog.close()
@@ -1190,33 +1203,33 @@ class RepliesWindow(PageWindow):
 def subscribeThread(tid):
 	result = FB.subscribeThread(tid)
 	if result == True:
-		showMessage('Success','Subscribed to thread.')
+		showMessage('Success','Subscribed to thread.',success=True)
 	else:
-		showMessage('Failed','Failed to subscribed to thread:',str(result))
+		showMessage('Failed','Failed to subscribed to thread:',str(result),success=False)
 	return result
 		
 def unSubscribeThread(tid):
 	result = FB.unSubscribeThread(tid)
 	if result == True:
-		showMessage('Success','Unsubscribed from thread.')
+		showMessage('Success','Unsubscribed from thread.',success=True)
 	else:
-		showMessage('Failed','Failed to unsubscribed from thread:',str(result))
+		showMessage('Failed','Failed to unsubscribed from thread:',str(result),success=False)
 	return result
 
 def subscribeForum(fid):
 	result = FB.subscribeForum(fid)
 	if result == True:
-		showMessage('Success','Subscribed to forum.')
+		showMessage('Success','Subscribed to forum.',success=True)
 	else:
-		showMessage('Failed','Failed to subscribed to forum:',str(result))
+		showMessage('Failed','Failed to subscribed to forum:',str(result),success=False)
 	return result
 
 def unSubscribeForum(fid):
 	result = FB.unSubscribeForum(fid)
 	if result == True:
-		showMessage('Success','Unsubscribed from forum.')
+		showMessage('Success','Unsubscribed from forum.',success=True)
 	else:
-		showMessage('Failed','Failed to unsubscribed from forum:',str(result))
+		showMessage('Failed','Failed to unsubscribed from forum:',str(result),success=False)
 	return result
 	
 ######################################################################################
@@ -1248,18 +1261,20 @@ class ThreadsWindow(PageWindow):
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.setTheme()
 		self.fillThreadList()
-		self.setFocus(self.getControl(120))
+		#self.setFocus(self.getControl(120))
 		
 	def setTheme(self):
 		self.desc_base = unicode.encode(__language__(30162)+' %s','utf8')
-		self.getControl(103).setLabel(__language__(30160))
-		self.getControl(104).setLabel(self.topic)
+		self.getControl(103).setLabel('[B]%s[/B]' % (self.fid != 'subscriptions' and __language__(30160) or ''))
+		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 	
 	def errorCallback(self,error):
 		showMessage(__language__(30050),__language__(30161),error.message,error=True)
 		self.endProgress()
 		
 	def fillThreadList(self,page=''):
+		self.getControl(106).setVisible(True)
+		self.setFocusId(106)
 		if self.fid == 'subscriptions':
 			t = self.getThread(FB.getSubscriptions,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SUBSCRIPTIONS')
 			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback)
@@ -1272,7 +1287,7 @@ class ThreadsWindow(PageWindow):
 		if not data:
 			if data.error == 'CANCEL': return
 			LOG('GET THREADS ERROR')
-			showMessage(__language__(30050),__language__(30161),__language__(30053),data.error)
+			showMessage(__language__(30050),__language__(30161),__language__(30053),data.error,success=False)
 			return
 		
 		self.empty = False
@@ -1281,10 +1296,11 @@ class ThreadsWindow(PageWindow):
 			self.setupPage(data.pageData)
 			if not (self.addForums(data['forums']) + self.addThreads(data.data)):
 				LOG('Empty Forum')
-				showMessage(__language__(30229),__language__(30230))
+				showMessage(__language__(30229),__language__(30230),success=False)
+			self.setFocusId(120)
 		except:
 			ERROR('FILL THREAD ERROR')
-			showMessage(__language__(30050),__language__(30163))
+			showMessage(__language__(30050),__language__(30163),error=True)
 		self.setLoggedIn()
 			
 	def addThreads(self,threads):
@@ -1325,7 +1341,6 @@ class ThreadsWindow(PageWindow):
 			item.setProperty('reply_count',reply_count)
 			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
 			self.getControl(120).addItem(item)
-			self.setFocusId(120)
 		return True
 			
 	def addForums(self,forums):
@@ -1362,7 +1377,7 @@ class ThreadsWindow(PageWindow):
 			self.topic = topic
 			self.setTheme()
 			self.fillThreadList()
-			self.setFocus(self.getControl(120))
+			self.setFocusId(120)
 		else:
 			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,parent=self)
 
@@ -1415,9 +1430,13 @@ class ThreadsWindow(PageWindow):
 		elif result == 'subscribeforum':
 			if subscribeForum(item.getProperty('id')): item.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribe':
-			if unSubscribeThread(item.getProperty('id')): item.setProperty('subscribed','')
+			if unSubscribeThread(item.getProperty('id')):
+				item.setProperty('subscribed','')
+				self.removeItem(item)
 		elif result == 'unsubscribeforum':
-			if unSubscribeForum(item.getProperty('id')): item.setProperty('subscribed','')
+			if unSubscribeForum(item.getProperty('id')):
+				item.setProperty('subscribed','')
+				self.removeItem(item)
 		elif result == 'subscribecurrentforum':
 			if subscribeForum(self.fid): self.forumItem.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribecurrentforum':
@@ -1427,7 +1446,17 @@ class ThreadsWindow(PageWindow):
 				showHelp('subscriptions')
 			else:
 				showHelp('threads')
-		
+	
+	def removeItem(self,item):
+		clist = self.getControl(120)
+		items = []
+		for idx in range(0,clist.size()):
+			i = clist.getListItem(idx)
+			if item != i: items.append(i)
+		clist.reset()
+		clist.addItems(items)
+			
+			
 		
 	def gotoPage(self,page):
 		self.stopThread()
@@ -1469,13 +1498,16 @@ class ForumsWindow(BaseWindow):
 		try:
 			self.setLoggedIn() #So every time we return to the window we check
 			if self.started: return
+			self.setVersion()
 			self.setStopControl(self.getControl(105))
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 			self.started = True
+			self.getControl(105).setVisible(True)
+			self.setFocusId(105)
+			getForumBrowser()
 			self.getControl(112).setVisible(False)
 			self.resetForum()
 			self.fillForumList(True)
-			self.setFocusId(120)
 		except:
 			self.setStopControl(self.getControl(105)) #In case the error happens before we do this
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
@@ -1484,9 +1516,12 @@ class ForumsWindow(BaseWindow):
 			self.setFocusId(202)
 			raise
 		
+	def setVersion(self):
+		self.getControl(109).setLabel('v' + __version__)
+		
 	def setTheme(self):
-		self.getControl(103).setLabel(__language__(30170))
-		self.getControl(104).setLabel(FB.forum)
+		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30170))
+		self.getControl(104).setLabel('[B]%s[/B]' % FB.forum)
 		
 	def errorCallback(self,error):
 		showMessage(__language__(30050),__language__(30171),error.message,error=True)
@@ -1495,12 +1530,12 @@ class ForumsWindow(BaseWindow):
 	
 	def fillForumList(self,first=False):
 		self.setTheme()
+		self.setFocusId(105)
 		if first and __addon__.getSetting('auto_thread_subscriptions_window') == 'true':
 			if self.hasLogin() and FB.hasSubscriptions():
 				FB.getForums(callback=self.setProgress,donecallback=self.doFillForumList)
 				self.openSubscriptionsWindow()
 				return
-			
 		t = self.getThread(FB.getForums,finishedCallback=self.doFillForumList,errorCallback=self.errorCallback,name='FORUMS')
 		t.setArgs(callback=t.progressCallback,donecallback=t.finishedCallback)
 		t.start()
@@ -1511,7 +1546,7 @@ class ForumsWindow(BaseWindow):
 		if not data:
 			self.setFocusId(202)
 			if data.error == 'CANCEL': return
-			showMessage(__language__(30050),__language__(30171),__language__(30053),'[CR]'+data.error)
+			showMessage(__language__(30050),__language__(30171),__language__(30053),'[CR]'+data.error,success=False)
 			return
 		self.empty = True
 		
@@ -1544,7 +1579,7 @@ class ForumsWindow(BaseWindow):
 		except:
 			#xbmcgui.unlock()
 			ERROR('FILL FORUMS ERROR')
-			showMessage(__language__(30050),__language__(30174))
+			showMessage(__language__(30050),__language__(30174),error=True)
 			self.setFocusId(202)
 		if self.empty: self.setFocusId(202)
 		#xbmcgui.unlock()
@@ -1595,18 +1630,14 @@ class ForumsWindow(BaseWindow):
 		if not item: return False
 		fid = item.getProperty('id')
 		topic = item.getProperty('topic')
-		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self,item=item)
-		w.doModal()
-		del w
+		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item)
 		self.setPMCounts(FB.getPMCounts())
 		return True
 		
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
 		topic = __language__(30175)
-		w = ThreadsWindow("script-forumbrowser-threads.xml" , __addon__.getAddonInfo('path'), THEME,fid=fid,topic=topic,parent=self)
-		w.doModal()
-		del w
+		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self)
 		self.setPMCounts(FB.getPMCounts())
 		
 	def changeForum(self):
@@ -1690,6 +1721,7 @@ class ForumsWindow(BaseWindow):
 		self.setLogoFromFile()
 		
 	def setLoggedIn(self):
+		if not FB: return
 		if FB.isLoggedIn():
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
@@ -1698,7 +1730,6 @@ class ForumsWindow(BaseWindow):
 		self.getControl(112).setVisible(FB.SSL)
 		
 	def openSettings(self):
-		mode = __addon__.getSetting('color_mode')
 		oldLogin = self.getUsername() + self.getPassword()
 		doSettings()
 		if not oldLogin == self.getUsername() + self.getPassword():
@@ -1706,7 +1737,11 @@ class ForumsWindow(BaseWindow):
 			self.setPMCounts()
 		self.setLoggedIn()
 		self.resetForum(False)
-		if mode !=  __addon__.getSetting('color_mode'): self.fillForumList()
+		skin = SKINS[getSetting('skin',0)]
+		if skin != THEME:
+			showMessage('Skin Changed','Skin changed. Restart Forum Browser to apply.')
+
+# Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=THEME,*args,**kwargs):
 	theme = THEME
@@ -1926,7 +1961,7 @@ def addTapatalkForum(current=False):
 				url = forumrunner.testForum(url)
 			if url: pageURL = url.split('/forumrunner',1)[0]
 			if not url:
-				showMessage('Failed','Forum not found or not compatible')
+				showMessage('Failed','Forum not found or not compatible',success=False)
 				return
 		else:
 			forum = doKeyboard('Enter forum name or address')
@@ -1949,10 +1984,10 @@ def addTapatalkForum(current=False):
 					pageURL = url.split('/forumrunner',1)[0]
 			
 			if not url:
-				showMessage('Failed','Forum not found or not compatible')
+				showMessage('Failed','Forum not found or not compatible',success=False)
 				return
 		
-			showMessage('Found','Forum %s found' % forum,'Type: ' + label,url)
+			showMessage('Found','Forum %s found' % forum,'[CR]Type: ' + label,'[CR]'+ url,success=True)
 			forum = url.split('http://',1)[-1].split('/',1)[0]
 			
 		dialog.update(20,'Getting Description And Images')
@@ -1983,7 +2018,7 @@ def saveForum(ftype,forumID,name,desc,url,logo):
 def addForumFromOnline():
 	odb = forumbrowser.FBOnlineDatabase()
 	flist = odb.getForumList()
-	menu = ImageChoiceMenu('Choose Forum')
+	menu = ImageChoiceMenu('Choose Forum',True)
 	for f in flist:
 		menu.addItem(f, f.get('name'), f.get('logo'), f.get('desc'))
 	for f in getHiddenForums():
@@ -2016,9 +2051,9 @@ def addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=None):
 	odb = forumbrowser.FBOnlineDatabase()
 	msg = odb.addForum(name, url, logo, desc, ftype)
 	if msg == 'OK':
-		showMessage('Added','Forum added successfully')
+		showMessage('Added','Forum added successfully',success=True)
 	else:
-		showMessage('Not Added','Forum not added:',str(msg).title())
+		showMessage('Not Added','Forum not added:',str(msg).title(),success=False)
 		LOG('Forum Not Added: ' + str(msg))
 	
 def chooseLogo(forum,image_urls):
@@ -2065,10 +2100,10 @@ def removeForum():
 	os.remove(path)
 	showMessage('Removed','Forum removed.')
 
-def showMessage(caption,text,text2='',text3='',error=False):
+def showMessage(caption,text,text2='',text3='',error=False,success=None):
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
-	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error)
+	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success)
 	w.doModal()
 	del w
 
@@ -2077,6 +2112,7 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 		self.text = kwargs.get('text') or ''
 		self.caption = kwargs.get('caption') or ''
 		self.error = kwargs.get('error')
+		self.success = kwargs.get('success')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
@@ -2084,7 +2120,13 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 		textbox = self.getControl(122)
 		textbox.reset()
 		textbox.setText(self.text)
-		if self.error: self.getControl(250).setColorDiffuse('FFFF0000')
+		if self.error:
+			self.getControl(250).setColorDiffuse('FFFF0000')
+		elif self.success is not None:
+			if self.success:
+				self.getControl(250).setColorDiffuse('FF009900')
+			else:
+				self.getControl(250).setColorDiffuse('FF999900')
 		self.setFocusId(111)
 		
 	def onAction(self,action):
@@ -2434,12 +2476,12 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 			copyTree(skinPath,localSkinPath)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
-			showMessage('Error',err,'Failed to copy files, aborting.')
+			showMessage('Error',err,'Failed to copy files, aborting.',error=True)
 			return
 		finally:
 			dialog.close()
 		#restart = True
-		showMessage('Success','Files copied.','XBMC needs to be restarted','for mod to take effect')
+		showMessage('Success','Files copied.','XBMC needs to be restarted','for mod to take effect',success=True)
 	skinPath = localSkinPath
 	
 	sourcePath = os.path.join(fbPath,'keyboard','DialogKeyboard.xml')
@@ -2546,13 +2588,9 @@ elif sys.argv[-1] == 'settingshelp':
 else:
 	checkForSkinMods()
 	checkPasswordEncryption()
-	
-	getForumBrowser()
 
 	TD = ThreadDownloader()
 	
-	w = ForumsWindow("script-forumbrowser-forums.xml" , __addon__.getAddonInfo('path'), THEME)
-	w.doModal()
-	del w
+	openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
 	#sys.modules.clear()
 	

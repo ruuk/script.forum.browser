@@ -108,8 +108,9 @@
 					<posy>-5</posy>
 					<width>250</width>
 					<height>80</height>
-					<texture border="20">forum-browser-white-box.png</texture>
+					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
+					<visible>!Control.IsVisible(106)</visible>
 				</control>
 				<control type="group">
 					<control type="button" id="200">
@@ -211,8 +212,8 @@
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3010]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
-					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-trans-boxr.png</texturenofocus>
+					<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-trans-boxr-nf.png</texturenofocus>
 				</control>
 			</control>
 			

@@ -114,7 +114,9 @@ class HTMLPageInfo:
 		
 	def images(self):
 		images = self._images(self.html, self.base)
-		images += self._images(self.html2, self.base2)
+		images2 = self._images(self.html2, self.base2)
+		for i in images2:
+			if not i in images: images.append(i)
 		return images
 		
 	def _images(self,html,base):
@@ -122,17 +124,20 @@ class HTMLPageInfo:
 		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',html) #Meta tag images
 		final = []
 		for u in urlList + urlList2:
-			if u in final: continue
+			u = u.strip()
 			if u.startswith('http'):
-				final.append(u)
-			elif u.startswith('./'):
-				final.append(base + u[2:])
-			elif u.startswith('.'):
-				final.append(base + u[1:])
-			elif u.startswith('/'):
 				pass
+			elif u.startswith('./'):
+				u = base + u[2:]
+			elif u.startswith('.'):
+				u = base + u[1:]
+			elif u.startswith('/'):
+				u = None
 			else:
-				final.append(base + u)
+				u = base + u
+			if u in final: continue
+			if u:
+				final.append(u)
 		return final
 
 ################################################################################
@@ -474,7 +479,7 @@ class ForumBrowser:
 	def initialize(self):
 		self.MC = self.messageConvertorClass(self)
 	
-	def finish(self,data,callback):
+	def finish(self,data,callback=None):
 		if callback: callback(data)
 		return data
 	

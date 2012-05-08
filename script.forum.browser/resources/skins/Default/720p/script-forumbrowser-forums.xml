@@ -66,11 +66,11 @@
 				<posy>30</posy>
 				<width>230</width>
 				<height>60</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Forums</label>
+				<label>[B]Forums[/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -80,13 +80,14 @@
 				<posy>30</posy>
 				<width>380</width>
 				<height>60</height>
-				<font>font13_title</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>Loading...</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
+			
 			<control type="image" id="300">
 				<posx>1010</posx>
 				<posy>35</posy>
@@ -119,18 +120,18 @@
 				<posy>35</posy>
 				<width>130</width>
 				<height>60</height>
-				<onleft>105</onleft>
-				<onright>202</onright>
-				<onup>120</onup>
+				<onleft>202</onleft>
+				<onright>200</onright>
+				<onup>200</onup>
 				<ondown>120</ondown>
-				<font>font12</font>
+				<font>ForumBrowser-font12</font>
 				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>$LOCALIZE[SCRIPT3010]</label>
 				<colordiffuse>FFFF0000</colordiffuse>
-				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-trans-boxr.png</texturenofocus>
+				<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>
+				<texturenofocus border="20">forum-browser-white-trans-boxr-nf.png</texturenofocus>
 			</control>
 			
 			<control type="image" id="351">
@@ -141,6 +142,17 @@
 				<height>145</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
 				<colordiffuse>FFCCCCCC</colordiffuse>
+			</control>
+			<control type="label" id="109">
+				<description>Version</description>
+				<posx>1250</posx>
+				<posy>95</posy>
+				<width>200</width>
+				<height>10</height>
+				<font>ForumBrowser-font10</font>
+				<textcolor>black</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
 			</control>
 			<control type="group">
 				<posx>20</posx>
@@ -182,14 +194,14 @@
 					<onleft>120</onleft>
 					<onright>201</onright>
 					<onup>120</onup>
-					<ondown>120</ondown>
+					<ondown>105</ondown>
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>295</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
-					<font>font13</font>
+					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3003]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
@@ -204,14 +216,14 @@
 					<onleft>200</onleft>
 					<onright>203</onright>
 					<onup>120</onup>
-					<ondown>120</ondown>
+					<ondown>105</ondown>
 					<posx>315</posx>
 					<posy>0</posy>
 					<width>295</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
-					<font>font13</font>
+					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3004]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
@@ -226,14 +238,14 @@
 					<onleft>201</onleft>
 					<onright>202</onright>
 					<onup>120</onup>
-					<ondown>120</ondown>
+					<ondown>105</ondown>
 					<posx>630</posx>
 					<posy>0</posy>
 					<width>295</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
-					<font>font13</font>
+					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3009]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
@@ -248,14 +260,14 @@
 					<onleft>203</onleft>
 					<onright>120</onright>
 					<onup>120</onup>
-					<ondown>120</ondown>
+					<ondown>105</ondown>
 					<posx>945</posx>
 					<posy>0</posy>
 					<width>295</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
-					<font>font13</font>
+					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<label>$LOCALIZE[SCRIPT3005]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
@@ -294,7 +306,7 @@
 					<posy>4</posy>
 					<width>400</width>
 					<height>10</height>
-					<font>font10</font>
+					<font>ForumBrowser-font10</font>
 					<textcolor>black</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
@@ -316,7 +328,7 @@
 				<posy>595</posy>
 				<width>1192</width>
 				<height>45</height>
-				<font>font12</font>
+				<font>ForumBrowser-font12</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
@@ -347,8 +359,8 @@
 				<height>440</height>
 				<onleft>202</onleft>
 				<onright>200</onright>
-				<onup>120</onup>
-				<ondown>120</ondown>
+				<onup>105</onup>
+				<ondown>200</ondown>
 				<viewtype label="535">list</viewtype>
 				<pagecontrol>121</pagecontrol>
 				<scrolltime>200</scrolltime>
@@ -358,11 +370,11 @@
 						<posy>0</posy>
 						<width>980</width>
 						<height>38</height>
-						<font>font13_title</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>black</textcolor>
 						<align>left</align>
-						<info>ListItem.Label</info>
+						<label>[B]$INFO[ListItem.Label][/B]</label>
 						<visible>StringCompare(ListItem.Genre,)</visible>
 					</control>
 					<control type="label">
@@ -370,7 +382,7 @@
 						<posy>0</posy>
 						<width>980</width>
 						<height>38</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FF333333</textcolor>
 						<align>left</align>
@@ -392,11 +404,11 @@
 							<posy>0</posy>
 							<width>980</width>
 							<height>38</height>
-							<font>font13_title</font>
+							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
 							<textcolor>white</textcolor>
 							<align>left</align>
-							<info>ListItem.Label</info>
+							<label>[B]$INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Genre,)</visible>
 						</control>
 						<control type="label">
@@ -404,7 +416,7 @@
 							<posy>0</posy>
 							<width>980</width>
 							<height>38</height>
-							<font>font13</font>
+							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
 							<textcolor>FFDDDDDD</textcolor>
 							<align>left</align>
@@ -426,11 +438,11 @@
 							<posy>0</posy>
 							<width>980</width>
 							<height>38</height>
-							<font>font13_title</font>
+							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
 							<textcolor>black</textcolor>
 							<align>left</align>
-							<info>ListItem.Label</info>
+							<label>[B]$INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Genre,)</visible>
 						</control>
 						<control type="label">
@@ -438,7 +450,7 @@
 							<posy>0</posy>
 							<width>980</width>
 							<height>38</height>
-							<font>font13</font>
+							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
 							<textcolor>FF333333</textcolor>
 							<align>left</align>
@@ -458,6 +470,8 @@
 					<posy>0</posy>
 					<width>4</width>
 					<height>440</height>
+					<onleft>120</onleft>
+					<onright>120</onright>
 					<texturesliderbackground border="1">-</texturesliderbackground>
 					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
 					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>

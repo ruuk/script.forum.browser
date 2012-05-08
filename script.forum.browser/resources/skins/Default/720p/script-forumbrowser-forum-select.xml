@@ -12,10 +12,10 @@
 			<posx>100</posx>
 			<posy>50</posy>
 			<control type="image">
-				<posx>20</posx>
-				<posy>20</posy>
-				<width>610</width>
-				<height>630</height>
+				<posx>-20</posx>
+				<posy>-10</posy>
+				<width>640</width>
+				<height>650</height>
 				<texture border="20">forum-browser-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
@@ -132,11 +132,11 @@
 			<posx>720</posx>
 			<posy>50</posy>
 			<control type="image">
-				<posx>20</posx>
-				<posy>20</posy>
-				<width>470</width>
-				<height>430</height>
-				<texture border="20">forum-browser-white-box.png</texture>
+				<posx>-20</posx>
+				<posy>-10</posy>
+				<width>500</width>
+				<height>450</height>
+				<texture border="30">forum-browser-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="image">
@@ -144,7 +144,7 @@
 				<posy>0</posy>
 				<width>460</width>
 				<height>420</height>
-				<texture border="20">forum-browser-black-box.png</texture>
+				<texture border="30">forum-browser-black-box.png</texture>
 			</control>
 			<control type="textbox" id="310">
 				<posx>20</posx>

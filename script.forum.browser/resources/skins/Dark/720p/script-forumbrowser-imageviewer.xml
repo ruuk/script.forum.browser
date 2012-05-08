@@ -1,5 +1,5 @@
 <window>
-  <defaultcontrol>110</defaultcontrol>
+  <defaultcontrol>202</defaultcontrol>
   <coordinates>
     <system>1</system>
     <posx>0</posx>
@@ -25,11 +25,18 @@
         <texture border="40">forum-browser-dark-black-box.png</texture>
       </control>
       
-      <control type="image" id="102">
-        <posx>20</posx>
+      <control type="image">
+        <posx>15</posx>
         <posy>10</posy>
-        <width>1058</width>
+        <width>1060</width>
         <height>610</height>
+        <texture border="20">forum-browser-dark-white-boxr.png</texture>
+      </control>
+      <control type="image" id="102">
+        <posx>25</posx>
+        <posy>20</posy>
+        <width>1040</width>
+        <height>590</height>
         <aspectratio>keep</aspectratio>
       </control>
       
