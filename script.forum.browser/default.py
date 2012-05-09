@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.39'
+__version__ = '0.9.40'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -270,10 +270,6 @@ class ThreadWindow:
 class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''		
-		if __addon__.getSetting('use_forum_colors') == 'false':
-			self._prog_format = '%s'
-		else:
-			self._prog_format = '[COLOR '+FB.theme.get('title_fg','FF000000')+']%s[/COLOR]'
 		ThreadWindow.__init__(self)
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
@@ -298,7 +294,7 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 			return False
 		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
-		self.getControl(104).setLabel(self._prog_format % message)
+		self.getControl(104).setLabel(message)
 		return True
 		
 	def endProgress(self):
