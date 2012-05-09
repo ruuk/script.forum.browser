@@ -31,7 +31,7 @@
 				<posy>10</posy>
 				<width>500</width>
 				<height>20</height>
-				<font>font20</font>
+				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
 				<textcolor>white</textcolor>
 				<align>center</align>
@@ -68,7 +68,7 @@
 						<posy>0</posy>
 						<width>462</width>
 						<height>60</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -103,7 +103,7 @@
 						<posy>0</posy>
 						<width>462</width>
 						<height>60</height>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<align>left</align>
@@ -135,7 +135,7 @@
 				<posy>20</posy>
 				<width>420</width>
 				<height>480</height>
-				<font>font20</font>
+				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>center</align>
 				<info>Container(120).ListItem.Label2</info>

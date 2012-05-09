@@ -132,7 +132,7 @@ class HTMLPageInfo:
 			elif u.startswith('.'):
 				u = base + u[1:]
 			elif u.startswith('/'):
-				u = None
+				u = self.base2 + u[1:]
 			else:
 				u = base + u
 			if u in final: continue

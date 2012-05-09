@@ -36,3 +36,7 @@ The only restrictions for the file is the file is that is must be readable by XB
 Enables more detailed logging. You should only enable this if the developer asks you to when reporting a bug.
 @item:do_mybb_edit_bug_fix=Enable MyBB Edit Post Bug Re-Subscribe Fix
 A bug in (as of this writing) the current version of the MyBB plugin for tapatalk causes the current thread to be unsubscribed when you submit an edited post. Enabling this will cause forum browser to re-subscribe if you were subscribed before editing.
+@item:forumrunner_disable_ssl=Disable SSL For Forumrunner
+Most (all?) Forumrunner forums don't seem to work with https enabled.
+
+Disabling this makes startup faster for those forums because it doesn't have to fail first.

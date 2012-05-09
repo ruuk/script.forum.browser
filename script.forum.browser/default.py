@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.38'
+__version__ = '0.9.39'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -388,6 +388,7 @@ class ImagesDialog(BaseWindow):
 		self.controlId = controlId
 		
 	def showImage(self):
+		if not self.images: return
 		self.getControl(102).setImage(self.images[self.index])
 		
 	def nextImage(self):
@@ -807,6 +808,8 @@ class MessageWindow(BaseWindow):
 		#image_files = Downloader(message=__language__(30148)).downloadURLs(base,[url],'.jpg')
 		#if not image_files: return
 		image_files = self.post.imageURLs()
+		for l in self.post.links():
+			if l.isImage(): image_files.append(l.url)
 		if url in image_files:
 			image_files.pop(image_files.index(url))
 			image_files.insert(0,url)
@@ -867,8 +870,11 @@ class MessageWindow(BaseWindow):
 		if result: self.close()
 		
 	def openPostDialog(self,quote=False):
-		if openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid):
-			self.action = forumbrowser.Action('REFRESH')
+		pm = openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid)
+		if pm:
+			self.action = forumbrowser.PostMessage(pid=pm.pid)
+			self.action.action = 'GOTOPOST'
+			self.close()
 		
 	def setLoggedIn(self):
 		if FB.isLoggedIn():
@@ -890,7 +896,8 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 	w = openWindow(LinePostDialog,"script-forumbrowser-post.xml" ,post=pm,return_window=True)
 	posted = w.posted
 	del w
-	return posted
+	if posted: return pm
+	return None
 		
 ######################################################################################
 #
@@ -962,7 +969,7 @@ class RepliesWindow(PageWindow):
 		showMessage(__language__(30050),__language__(30131),error.message,error=True)
 		self.endProgress()
 	
-	def fillRepliesList(self,page=''):
+	def fillRepliesList(self,page='',pid=None):
 		#page = int(page)
 		#if page < 0: raise Exception()
 		self.getControl(106).setVisible(True)
@@ -975,7 +982,7 @@ class RepliesWindow(PageWindow):
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
 		else:
 			t = self.getThread(FB.getReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='POSTS')
-			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid,callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid or pid,callback=t.progressCallback,donecallback=t.finishedCallback)
 		t.start()
 		
 	def setMessageProperty(self,post,item,short=False):
@@ -1077,6 +1084,9 @@ class RepliesWindow(PageWindow):
 				else: self.showThread()
 			elif w.action.action == 'REFRESH':
 				self.fillRepliesList(self.pageData.getPageNumber())
+			elif w.action.action == 'GOTOPOST':
+				self.firstRun = True
+				self.fillRepliesList(self.pageData.getPageNumber(),pid=w.action.pid)
 		del w
 		
 	def onClick(self,controlID):
@@ -1186,8 +1196,10 @@ class RepliesWindow(PageWindow):
 			pid = item.getProperty('post')
 		else:
 			pid = 0
-		if openPostDialog(post,pid,self.tid,self.fid):
-			self.fillRepliesList(self.pageData.getPageNumber('-1'))
+		pm = openPostDialog(post,pid,self.tid,self.fid)
+		if pm:
+			self.firstRun = True
+			self.fillRepliesList(self.pageData.getPageNumber('-1'),pid=pm.pid)
 	
 	def gotoPage(self,page):
 		self.stopThread()
@@ -1744,15 +1756,14 @@ class ForumsWindow(BaseWindow):
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=THEME,*args,**kwargs):
-	theme = THEME
 	path = __addon__.getAddonInfo('path')
 	if not getSetting('use_skin_mods',True):
-		theme = 'Current'
-		src = os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)
-		path = __addon__.getAddonInfo('profile')
+		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
+		#path = __addon__.getAddonInfo('profile')
 		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
-		if not os.path.exists(skin): os.makedirs(skin)
+		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
+		xmlFilename = 'script-forumbrowser-current.xml'
 		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
 	w = windowClass(xmlFilename,path,theme,*args,**kwargs)
 	if modal:
@@ -1865,8 +1876,7 @@ def doSettings():
 	elif result == 'settings':
 		__addon__.openSettings()
 		global DEBUG
-		DEBUG = __addon__.getSetting('debug') == 'true'
-		tapatalk.DEBUG = DEBUG
+		DEBUG = getSetting('debug',False)
 		FB.MC.resetRegex()
 		checkForSkinMods()
 	
@@ -2136,9 +2146,7 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 	def onFocus( self, controlId ): self.controlId = controlId
 	
 def showText(caption,text):
-	w = TextDialog('script-forumbrowser-text-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text)
-	w.doModal()
-	del w
+	openWindow(TextDialog,'script-forumbrowser-text-dialog.xml',theme='Default',caption=caption,text=text)
 
 class TextDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
@@ -2240,8 +2248,7 @@ class ChoiceMenu():
 
 class OptionsChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None):
-		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',items=self.items,caption=self.caption,select=select)
-		w.doModal()
+		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',items=self.items,caption=self.caption,select=select)
 		result = w.result
 		del w
 		if result == None: return None
@@ -2249,8 +2256,7 @@ class OptionsChoiceMenu(ChoiceMenu):
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None):
-		w = ImageChoiceDialog(windowFile , xbmc.translatePath(__addon__.getAddonInfo('path')), 'Default',items=self.items,caption=self.caption,select=select)
-		w.doModal()
+		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',items=self.items,caption=self.caption,select=select)
 		result = w.result
 		del w
 		if result == None: return None

@@ -190,7 +190,7 @@
 					<textcolor>FF000000</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3010]</label>
+					<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
 					<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-trans-boxr-nf.png</texturenofocus>

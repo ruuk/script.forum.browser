@@ -211,6 +211,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.userInfo = info
 		self.status = str(info.get('display_text',''))
 		self.activity = str(info.get('current_activity',''))
+		self.online = info.get('is_online',False) or self.online
 		self.postCount = info.get('post_count',0)
 		date = str(info.get('reg_time',''))
 		if date:
@@ -392,7 +393,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.forum = forum
 		self.transport = CookieTransport()
 		url = self._url
-		if __addon__.getSetting('enable_ssl'):
+		if __addon__.getSetting('enable_ssl') == 'true':
 			LOG('Enabling SSL')
 			url = url.replace('http://','https://')
 			self.SSL = True
@@ -758,6 +759,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not status:
 			post.error = str(result.get('result_text'))
 			LOG('Failed To Post: ' + post.error)
+		post.pid = result.get('post_id',post.pid)
 		return status
 		
 	def getPostForEdit(self,pid):

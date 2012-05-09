@@ -2,11 +2,12 @@ Forum Browser Changelog
 
 TODO:
  Short Term:
-  Clean up message converting for speed (done for tapatalk)
-  Finish custom font usage
   Boxeee: Create/Edit posts. Create PM's. Subcriptions. etc.
   
  Long Term:
+  Remember SSL Fail?
+  View online users list
+  Access to other PM boxes
   View video links
   Improve the database and database management
   Skip forward on remote causes XBMC dialog
@@ -25,7 +26,18 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.38
+Current Version : 0.9.39
+
+*** 0.9.39 ***
+
+Tapatalk: Private message list users online statuses now show correctly
+After submitting a new post, now goes to the page with the new post and jumps to it
+Logo chooser dialog now properly gets images with '/' prefixed urls
+Fixes for issues when not using skin mods
+Finished applying custom font usage to all windows
+Changed forumrunner icon... again :)
+Link images now work in the image viewer again, plus image viewer will now show all images (normal and link)
+Added advanced settings option to disable SSL for Forumrunner (default=true). None of the forums I've tested seem to work with it and it just causes a delay on startup
 
 *** 0.9.38 ***
 

@@ -78,6 +78,7 @@ class ForumrunnerClient():
 		except:
 			pass
 		if not pyobj: pyobj = json.loads(re.sub(r'\\u[\d\w]+','?',data),strict=False)
+		if DEBUG: LOG('JSON: ' + str(pyobj))
 		if pyobj.get('success'):
 			return pyobj.get('data')
 		else:
@@ -164,7 +165,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not self._url:
 			self._url = 'http://%s/forumrunner/request.php' % self.forum
 		url = self._url
-		if __addon__.getSetting('enable_ssl'):
+		if __addon__.getSetting('enable_ssl') == 'true' and not __addon__.getSetting('forumrunner_disable_ssl') == 'true':
 			LOG('Enabling SSL')
 			url = url.replace('http://','https://')
 		self.client = ForumrunnerClient(url)
@@ -387,16 +388,10 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(40,self.lang(30102)): break
 			try:
 				sreplies = []
-				if pid:
-					#test = self.server.get_thread_by_post(pid,20)
-					#index = test.get('position')
-					#start = int((index - 1) / 20) * 20
-					#thread = self.server.get_thread(threadid,start,start + 19)
-					pass
-				elif announcement:
+				if announcement:
 					thread = self.client.get_announcement(forumid=threadid)
 				else:
-					thread = self.client.get_thread(threadid=threadid,page=page,perpage=10)
+					thread = self.client.get_thread(threadid=threadid,page=page,perpage=20)
 				if not thread:
 					LOG('Failed to get posts (%s): %s' % (threadid,thread.message))
 					callback(-1,thread.message)
@@ -407,7 +402,16 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 					return self.finish(FBData(error='NO POSTS'),donecallback)
 				total = int(thread.get('total_posts',1))
 				current = len(thread.get('posts',[]))
-				pd = self.getPageData(page,current_total=current,total_items=total,per_page=10,is_replies=True)
+				pd = self.getPageData(page,current_total=current,total_items=total,per_page=20,is_replies=True)
+				if pid:
+					page = pd.getPageNumber(-1)
+					thread2 = self.client.get_thread(threadid=threadid,page=page,perpage=20)
+					if thread2:
+						posts2 = thread2.get('posts')
+						if posts2:
+							posts = posts2
+						else:
+							LOG('Failed to get last page')
 				if not callback(60,self.lang(30103)): break
 				ct = pd.current + 1
 				for p in posts:
