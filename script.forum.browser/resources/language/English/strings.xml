@@ -123,7 +123,7 @@
     <string id="30238">Password Encryption Type</string>
     <string id="30239">Encryption Key File (Optional)</string>
     
-    <string id="30240">Unsubscribe From Thread</string>
+    <string id="30240">Unsubscribe Thread</string>
     <string id="30241">Add Current Forum To Online Database</string>
     
     <string id="30242">Unsubscribe From Forum</string>
@@ -134,6 +134,8 @@
     <string id="30245">Cache Logo Images Locally</string>
     <string id="30246">Sending a private message failed:</string>
     <string id="30247">Disable SSL For Forumrunner</string>
+    
+    <string id="30248">Please wait...</string>
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>

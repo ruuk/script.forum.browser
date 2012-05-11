@@ -31,8 +31,8 @@ def testForum(forum):
 	return None
 
 class FRCFail:
-	def __init__(self,result={}):
-		self.result = result
+	def __init__(self,result=None):
+		self.result = result or {}
 		self.message = result.get('message','') or ''
 		
 	def __nonzero__(self):

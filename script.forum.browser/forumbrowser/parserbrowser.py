@@ -6,9 +6,14 @@ from forumbrowser import FBData
 ERROR = sys.modules["__main__"].ERROR
 __language__ = sys.modules["__main__"].__language__
 
-
-
+class ForumPost(scraperbrowser.ForumPost):
+	def messageAsQuote(self):
+		qr = self.FB.getQuoteReplace()
+		return qr.replace('!QUOTE!',self.message).replace('!USER!',self.userName).replace('!POSTID!',self.postId)
+	
 class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
+	ForumPost = ForumPost
+	browserType = 'ParserForumBrowser'
 	parsers = 	{	'vb':	{	'forums':VBForumParser,
 								'threads':VBThreadParser,
 								'posts':VBPostParser,
@@ -21,13 +26,14 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 											'link':'\[url="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/url\](?is)',
 											'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 											'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
-											'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)'
+											'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
+											'color_start':'\[color=?#?(?P<color>\w+)\]'
 											}
 							}
 				}
 	
 	def __init__(self,forum,always_login=False,ftype=None):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login, texttransform.MessageConverter)
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login, texttransform.BBMessageConverter)
 		self.forum = forum
 		self._url = ''
 		self.browser = None
@@ -68,28 +74,32 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not m: return {'unread':'0'}
 		return {'unread':m.group(1)}
 	
-	def getForums(self,callback=None,donecallback=None):
+	def getForums(self,callback=None,donecallback=None,url='',subs=False):
 		if not self.forumParser: return scraperbrowser.ScraperForumBrowser.getForums(self, callback, donecallback)
 		if not callback: callback = self.fakeCallback
 		try:
 			self.checkLogin()
-			html = self.readURL(self.getURL('forums'),callback=callback)
+			html = self.readURL(url or self.getURL('forums'),callback=callback)
 		except:
 			em = ERROR('ERROR GETTING FORUMS')
 			callback(-1,'%s' % em)
-			return self.finish(FBData(error=em),donecallback)
+			return self.finish(FBData(error=em or 'ERROR'),donecallback)
 		
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
 		forums = self.forumParser.getList(html)
+		for f in forums:
+			f['subscribed'] = subs
+			f['is_forum'] = True
+		
 		logo = self.getLogo(html)
 		pm_counts = self.getPMCounts(html)
 		callback(100,__language__(30052))
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 
-	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None):
+	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
 		if not self.threadParser: return scraperbrowser.ScraperForumBrowser.getThreads(self, forumid, page, callback, donecallback)
 		if not callback: callback = self.fakeCallback
 		if url:
@@ -102,13 +112,23 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = self.threadParser.getList(html)
+		forums = self.forumParser.getList(html)
+		extra = None
+		if forums: extra = {'forums':forums}
+		if subs:
+			for t in threads: t['subscribed'] = True
 		callback(100,__language__(30052))
 		pd = self.getPageInfo(html,page,page_type='threads')
-		return self.finish(FBData(threads,pd),donecallback)
+		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 		
 	def getSubscriptions(self,page='',callback=None,donecallback=None):
 		url = self.getPageUrl(page,'subscriptions')
-		return self.getThreads(None, page, callback, donecallback,url=url)
+		url2 = self.getPageUrl(page,'forum_subscriptions')
+		data = self.getThreads(None, page,url=url,subs=True)
+		forums = self.getForums(url=url2,subs=True)
+		data.extra['forums'] = forums.data
+		return self.finish(data, donecallback)
+		
 		
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
 		if not self.postParser: return scraperbrowser.ScraperForumBrowser.getReplies(self, threadid, forumid, page, lastid, pid, callback, donecallback)
@@ -132,4 +152,44 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		callback(100,__language__(30052))
 		
 		return self.finish(FBData(sreplies,pd),donecallback)
+	
+	def subscribeThread(self,tid):
+		url = 'http://forums.boxee.tv/subscription.php?do=addsubscription&t=' + tid
+		try:
+			self.doForm(url,action_match='subscription.php?do=doaddsubscription',controls='subscribe_notification_control%s')
+			#TODO: check for success = perhaps look for exec_refresh()
+			return True
+		except:
+			return ERROR('Failed to subscribe to thread: ' + tid)
 		
+	def unSubscribeThread(self, tid):
+		url = 'http://forums.boxee.tv/subscription.php?do=removesubscription&t=' + tid
+		try:
+			self.readURL(url, force_login=True)
+			#TODO: check for success = perhaps look for exec_refresh()
+			return True
+		except:
+			return ERROR('Failed to unsubscribe from thread: ' + tid)
+		
+	def subscribeForum(self, fid):
+		url = 'http://forums.boxee.tv/subscription.php?do=addsubscription&f=' + fid
+		try:
+			self.doForm(url,action_match='subscription.php?do=doaddsubscription',controls='subscribe_forum_notification_control%s')
+			#TODO: check for success = perhaps look for exec_refresh()
+			return True
+		except:
+			return ERROR('Failed to subscribe to forum: ' + fid)
+		
+	def unSubscribeForum(self, fid):
+		url = 'http://forums.boxee.tv/subscription.php?do=removesubscription&f=' + fid
+		try:
+			self.readURL(url, force_login=True)
+			#TODO: check for success = perhaps look for exec_refresh()
+			return True
+		except:
+			return ERROR('Failed to unsubscribe from forum: ' + fid)
+		
+	def canSubscribeThread(self, tid): return True
+	
+	def canSubscribeForum(self, fid): return True
+	

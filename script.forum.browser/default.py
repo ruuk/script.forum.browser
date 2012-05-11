@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.40'
+__version__ = '0.9.41'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -97,7 +97,8 @@ def getSetting(key,default=None):
 # Base Window Classes
 ######################################################################################
 class StoppableThread(threading.Thread):
-	def __init__(self,group=None, target=None, name=None, args=(), kwargs={}):
+	def __init__(self,group=None, target=None, name=None, args=(), kwargs=None):
+		kwargs = kwargs or {}
 		self._stop = threading.Event()
 		threading.Thread.__init__(self,group=group, target=target, name=name, args=args, kwargs=kwargs)
 		
@@ -484,9 +485,9 @@ class PostDialog(BaseWindow):
 	def onInit(self):
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.post.quote:
-			qformat = FB.formats.get('quote')
+			qformat = FB.getQuoteReplace()
 			pid = self.post.pid
-			if qformat:
+			if False:
 				#This won't work with other formats, need to do this better TODO
 				if not pid or self.isPM(): qformat = qformat.replace(';!POSTID!','')
 				for line in qformat.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
@@ -537,29 +538,27 @@ class PostDialog(BaseWindow):
 		
 	def postReply(self):
 		message = self.getOutput()
-		self.prog = xbmcgui.DialogProgress()
-		self.prog.create(__language__(30126),__language__(30127))
-		self.prog.update(0)
+		splash = showActivitySplash('Posting')
 		self.post.setMessage(self.title,message)
 		self.posted = True
 		try:
 			if self.post.isPM:
-				if not FB.doPrivateMessage(self.post,callback=self.dialogCallback):
+				if not FB.doPrivateMessage(self.post,callback=splash.update):
 					self.posted = False
 					showMessage(__language__(30050),__language__(30246),self.post.error or '?',success=False)
 					return
 			else:
-				if not FB.post(self.post,callback=self.dialogCallback):
+				if not FB.post(self.post,callback=splash.update):
 					self.posted = False
 					showMessage(__language__(30050),__language__(30227),self.post.error or '?',success=False)
 					return
 			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.',success=True)
 		except:
-			self.prog.close()
 			self.posted = False
-			raise
+			err = ERROR('Error creating post')
+			showMessage('ERROR','Error creating post:',err,error=True)
 		finally:
-			self.prog.close()
+			splash.close()
 		self.close()
 		
 	def parseCodes(self,text):
@@ -737,6 +736,8 @@ class MessageWindow(BaseWindow):
 			item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
 			if link.isImage():
 				item.setIconImage(link.url)
+			elif link.textIsImage():
+				item.setIconImage(link.text)
 			elif link.isPost():
 				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
 			elif link.isThread():
@@ -845,9 +846,7 @@ class MessageWindow(BaseWindow):
 	def deletePost(self):
 		post = forumbrowser.PostMessage(self.post.postId,self.post.tid,self.post.fid)
 		if not post.pid: return
-		prog = xbmcgui.DialogProgress()
-		prog.create(__language__(30149),__language__(30150))
-		prog.update(0)
+		splash = showActivitySplash('Deleting')
 		try:
 			if self.post.tid == 'private_messages':
 				post.isPM = True
@@ -859,14 +858,15 @@ class MessageWindow(BaseWindow):
 			else:
 				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 		except:
-			prog.close()
-			raise
-		prog.close()
+			err = ERROR('Delete post error.')
+			showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
+		finally:
+			splash.close()
 		self.action = forumbrowser.Action('REFRESH')
 		if result: self.close()
 		
 	def openPostDialog(self,quote=False):
-		pm = openPostDialog(quote and self.post or None,tid=self.post.tid,fid=self.post.fid)
+		pm = openPostDialog(quote and self.post or None,pid=self.post.postId,tid=self.post.tid,fid=self.post.fid)
 		if pm:
 			self.action = forumbrowser.PostMessage(pid=pm.pid)
 			self.action.action = 'GOTOPOST'
@@ -1008,7 +1008,6 @@ class RepliesWindow(PageWindow):
 			if not self.tid: self.tid = data.pageData.tid
 			self.setupPage(data.pageData)
 			if getSetting('reverse_sort',False) and not self.isPM():
-				print 'reverse'
 				data.data.reverse()
 			self.posts = {}
 			select = -1
@@ -1106,6 +1105,7 @@ class RepliesWindow(PageWindow):
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
 		d = ChoiceMenu(__language__(30051),with_splash=True)
+		post = None
 		try:
 			if item:
 				post = self.posts.get(item.getProperty('post'))
@@ -1117,9 +1117,9 @@ class RepliesWindow(PageWindow):
 						d.addItem('edit',__language__(30232))
 						
 			if self.threadItem and FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
-				d.addItem('unsubscribe',__language__(30240))
+				d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
 			else:
-				if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236))
+				if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
 				
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
@@ -1157,9 +1157,7 @@ class RepliesWindow(PageWindow):
 		item = self.getControl(120).getSelectedItem()
 		pid = item.getProperty('post')
 		if not pid: return
-		prog = xbmcgui.DialogProgress()
-		prog.create(__language__(30149),__language__(30150))
-		prog.update(0)
+		splash = showActivitySplash('Deleting')
 		try:
 			post = forumbrowser.PostMessage(pid,self.tid,self.fid)
 			if self.tid == 'private_messages':
@@ -1171,11 +1169,11 @@ class RepliesWindow(PageWindow):
 				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.',success=False)
 			else:
 				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
-				
 		except:
-			prog.close()
-			raise
-		prog.close()
+			err = ERROR('Delete post error.')
+			showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
+		finally:
+			splash.close()
 		self.fillRepliesList(self.pageData.getPageNumber())
 		
 	def openPostDialog(self,post=None):
@@ -1209,36 +1207,52 @@ class RepliesWindow(PageWindow):
 		self.getControl(160).setLabel(FB.loginError)
 
 def subscribeThread(tid):
-	result = FB.subscribeThread(tid)
-	if result == True:
-		showMessage('Success','Subscribed to thread.',success=True)
-	else:
-		showMessage('Failed','Failed to subscribed to thread:',str(result),success=False)
-	return result
+	splash = showActivitySplash()
+	try:
+		result = FB.subscribeThread(tid)
+		if result == True:
+			showMessage('Success','Subscribed to thread.',success=True)
+		else:
+			showMessage('Failed','Failed to subscribed to thread:',str(result),success=False)
+		return result
+	finally:
+		splash.close()
 		
 def unSubscribeThread(tid):
-	result = FB.unSubscribeThread(tid)
-	if result == True:
-		showMessage('Success','Unsubscribed from thread.',success=True)
-	else:
-		showMessage('Failed','Failed to unsubscribed from thread:',str(result),success=False)
-	return result
+	splash = showActivitySplash()
+	try:
+		result = FB.unSubscribeThread(tid)
+		if result == True:
+			showMessage('Success','Unsubscribed from thread.',success=True)
+		else:
+			showMessage('Failed','Failed to unsubscribed from thread:',str(result),success=False)
+		return result
+	finally:
+		splash.close()
 
 def subscribeForum(fid):
-	result = FB.subscribeForum(fid)
-	if result == True:
-		showMessage('Success','Subscribed to forum.',success=True)
-	else:
-		showMessage('Failed','Failed to subscribed to forum:',str(result),success=False)
-	return result
+	splash = showActivitySplash()
+	try:
+		result = FB.subscribeForum(fid)
+		if result == True:
+			showMessage('Success','Subscribed to forum.',success=True)
+		else:
+			showMessage('Failed','Failed to subscribed to forum:',str(result),success=False)
+		return result
+	finally:
+		splash.close()
 
 def unSubscribeForum(fid):
-	result = FB.unSubscribeForum(fid)
-	if result == True:
-		showMessage('Success','Unsubscribed from forum.',success=True)
-	else:
-		showMessage('Failed','Failed to unsubscribed from forum:',str(result),success=False)
-	return result
+	splash = showActivitySplash()
+	try:
+		result = FB.unSubscribeForum(fid)
+		if result == True:
+			showMessage('Success','Unsubscribed from forum.',success=True)
+		else:
+			showMessage('Failed','Failed to unsubscribed from forum:',str(result),success=False)
+		return result
+	finally:
+		splash.close()
 	
 ######################################################################################
 #
@@ -1412,22 +1426,22 @@ class ThreadsWindow(PageWindow):
 		d = ChoiceMenu('Options',with_splash=True)
 		try:
 			if item:
-				if FB.isThreadSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
-					if item.getProperty("is_forum") == 'True':
+				if item.getProperty("is_forum") == 'True':
+					if FB.isForumSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
 						d.addItem('unsubscribeforum', __language__(30242))
 					else:
-						d.addItem('unsubscribe', __language__(30240))
-				else:
-					if item.getProperty("is_forum") == 'True':
 						if FB.canSubscribeForum(item.getProperty('id')): d.addItem('subscribeforum', __language__(30243))
+				else:
+					if FB.isThreadSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
+						d.addItem('unsubscribe', __language__(30240))
 					else:
 						if FB.canSubscribeThread(item.getProperty('id')): d.addItem('subscribe', __language__(30236))
 				if self.fid != 'subscriptions':
 					if self.forumItem:
-						if FB.isForumSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
-							if FB.canSubscribeThread(item.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242))
+						if FB.isForumSubscribed(self.forumItem.getProperty('id'),self.forumItem.getProperty('subscribed')):
+							d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getLabel()[:25])
 						else:
-							if FB.canSubscribeForum(item.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243))
+							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getLabel()[:25])
 			d.addItem('help',__language__(30244))
 		finally:
 			d.cancel()
@@ -1612,6 +1626,7 @@ class ForumsWindow(BaseWindow):
 			else:
 				try:
 					open(logopath,'wb').write(urllib2.urlopen(logo).read())
+					logo = logopath
 				except:
 					LOG('ERROR: Could not save logo for: ' + FB.getForumID())
 					
@@ -1751,7 +1766,8 @@ class ForumsWindow(BaseWindow):
 
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
-def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=THEME,*args,**kwargs):
+def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
+	theme = theme or THEME
 	path = __addon__.getAddonInfo('path')
 	if not getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
@@ -1959,13 +1975,13 @@ def addTapatalkForum(current=False):
 		if current:
 			ftype = FB.prefix[:2]
 			forum = FB.forum
-			url = FB._url
+			url = orig = FB._url
 			url = tapatalk.testForum(url)
-			if url: pageURL = url.split('/mobiquo',1)[0]
+			if url: pageURL = url.split('/mobiquo/',1)[0]
 			if not url:
 				from forumbrowser import forumrunner
-				url = forumrunner.testForum(url)
-			if url: pageURL = url.split('/forumrunner',1)[0]
+				url = forumrunner.testForum(orig)
+			if url: pageURL = url.split('/forumrunner/',1)[0]
 			if not url:
 				showMessage('Failed','Forum not found or not compatible',success=False)
 				return
@@ -1980,14 +1996,14 @@ def addTapatalkForum(current=False):
 			if url:
 				ftype = 'TT'
 				label = 'Tapatalk'
-				pageURL = url.split('/mobiquo',1)[0]
+				pageURL = url.split('/mobiquo/',1)[0]
 			else:
 				from forumbrowser import forumrunner #@Reimport
 				url = forumrunner.testForum(forum)
 				if url:
 					ftype = 'FR'
 					label = 'Forumrunner'
-					pageURL = url.split('/forumrunner',1)[0]
+					pageURL = url.split('/forumrunner/',1)[0]
 			
 			if not url:
 				showMessage('Failed','Forum not found or not compatible',success=False)
@@ -2204,6 +2220,45 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		
 	def onFocus( self, controlId ): self.controlId = controlId
 		
+class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
+	def __init__( self, *args, **kwargs ):
+		self.caption = kwargs.get('caption')
+		self.canceled = False
+		
+	def onInit(self):
+		self.getControl(100).setLabel(self.caption)
+		
+	def update(self,message):
+		self.getControl(100).setLabel(message)
+		return not self.canceled
+		
+	def onAction(self,action):
+		if action == ACTION_PARENT_DIR: action = ACTION_PREVIOUS_MENU
+		if action == ACTION_PREVIOUS_MENU:
+			self.canceled = True
+	
+	def onClick(self,controlID):
+		pass
+	
+class ActivitySplash():
+	def __init__(self,caption=''):
+		self.splash = openWindow(ActivitySplashWindow,'script-forumbrowser-loading-splash.xml',return_window=True,modal=False,theme='Default',caption=caption)
+		self.splash.show()
+		
+	def update(self,pct,message):
+		self.splash.update(message)
+
+	def close(self):
+		if not self.splash: return
+		self.splash.close()
+		del self.splash
+		self.splash = None
+		
+def showActivitySplash(caption=__language__(30248)):
+	s = ActivitySplash(caption)
+	s.update(0,caption)
+	return s
+	
 class ChoiceMenu():
 	def __init__(self,caption,with_splash=False):
 		self.caption = caption
@@ -2212,14 +2267,11 @@ class ChoiceMenu():
 		if with_splash: self.showSplash()
 		
 	def showSplash(self):
-		self.splash = xbmcgui.WindowXMLDialog('script-forumbrowser-loading-splash.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default')
-		self.splash.show()
+		self.splash = showActivitySplash()
 		
 	def hideSplash(self):
 		if not self.splash: return
 		self.splash.close()
-		del self.splash
-		self.splash = None
 		
 	def cancel(self):
 		self.hideSplash()

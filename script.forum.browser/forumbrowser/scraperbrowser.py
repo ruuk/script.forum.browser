@@ -86,7 +86,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.imageFilter.findall(self.getMessage(),re.S)
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
+		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
 		
 	def linkURLs(self):
 		return self.MC.linkFilter.finditer(self.getMessage(),re.S)
@@ -306,18 +306,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.mechanize = mechanize
 		if not self.browser:
 			self.browser = self.mechanize.Browser()
-			class SanitizeHandler(mechanize.BaseHandler):
-				def http_response(self, request, response):
-					if not hasattr(response, "seek"):
-						response = mechanize.response_seek_wrapper(response)
-					#if	HTML   used   get   it though  a	robust  Parser	like  BeautifulSoup
-			
-					if response.info().dict.has_key('content-type') and ('html' in response.info().dict['content-type']):
-						data = response.get_data()
-						response.set_data(re.sub('<![^>]*?>','',data))
-					return response
-
-			self.browser.add_handler(SanitizeHandler())
+			self.browser.addheaders = [('User-Agent','Wget/1.12')]
+#			class SanitizeHandler(mechanize.BaseHandler):
+#				def http_response(self, request, response):
+#					if not hasattr(response, "seek"):
+#						response = mechanize.response_seek_wrapper(response)
+#			
+#					if response.info().dict.has_key('content-type') and ('html' in response.info().dict['content-type']):
+#						data = response.get_data()
+#						response.set_data(re.sub('<!(?!-)[^>]*?>','',data))
+#					return response
+#
+#			self.browser.add_handler(SanitizeHandler())
 		response = self.browser.open(self.getURL('login'))
 		html = response.read()
 		try:
@@ -337,6 +337,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		html = response.read()
 		if not 'action="%s"' % self.forms.get('login_action','@%+#') in html:
 			self._loggedIn = True
+			LOG('LOGGED IN')
 			return True
 		LOG('FAILED TO LOGIN')
 		return False
@@ -372,7 +373,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			LOG('ERROR - EMPTY URL IN readURL()')
 			return ''
 		if not callback: callback = self.fakeCallback
-		if self.canLogin() and (self.isLoggedIn() or self.formats.get('login_required') == 'True' or force_login or (self.alwaysLogin and self.password)):
+		if self.canLogin() and (self.isLoggedIn() or self.formats.get('login_required') == 'True' or force_login or self.alwaysLogin):
 			if not self.checkLogin(callback=callback): return ''
 			data = self.browserReadURL(url,callback)
 			if self.forms.get('login_action','@%+#') in data:
@@ -584,9 +585,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			
 	def URLSubs(self,url,pid='',tid='',fid='',post=None):
 		if post:
-			url = url.replace('!POSTID!',post.pid).replace('!THREADID!',post.tid).replace('!FORUMID!',post.fid)
+			url = url.replace('!POSTID!',str(post.pid)).replace('!THREADID!',str(post.tid)).replace('!FORUMID!',str(post.fid))
 		else:
-			url = url.replace('!POSTID!',pid).replace('!THREADID!',tid).replace('!FORUMID!',fid)
+			url = url.replace('!POSTID!',str(pid)).replace('!THREADID!',str(tid)).replace('!FORUMID!',str(fid))
 		#removes empty vars
 		return re.sub('(?:\w+=&)|(?:\w+=$)','',url)
 		
@@ -600,7 +601,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	
 	def post(self,post,callback=None):
 		if not callback: callback = self.fakeCallback
-		if not self.checkLogin(callback=callback): return False
+		if not self.checkLogin(callback=callback):
+			post.error = 'Could not log in'
+			return False
 		url = self.postURL(post)
 		res = self.browser.open(url)
 		#print res.info()
@@ -608,7 +611,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		#open('/home/ruuk/test2.text','w').write(html)
 		if self.forms.get('login_action','@%+#') in html:
 			callback(5,__language__(30100))
-			if not self.login(): return False
+			if not self.login():
+				post.error = 'Could not log in'
+				return False
 			res = self.browser.open(url)
 			html = res.read()
 		callback(40,__language__(30105))
@@ -629,6 +634,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if form:
 				self.browser.form = form
 			else:
+				post.error = 'Could not find form.'
 				return False
 		try:
 			if post.title: self.browser[self.forms['post_title']] = post.title
@@ -639,14 +645,29 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
 			res = self.browser.submit(name=self.forms.get('post_submit_name'),label=self.forms.get('post_submit_value'))
-			#open('/home/ruuk/test2.text','w').write(res.read())
+			html = res.read()
+			#open('/home/ruuk/test.txt','w').write(html)
+			err = self.checkForError(html)
+			if err:
+				post.error = err
+				return False
 			callback(100,__language__(30052))
 		except:
-			ERROR('FORM ERROR')
+			post.error = ERROR('FORM ERROR')
 			return False
 			
 		return True
 		
+	def checkForError(self,html):
+		errm = re.search('(<div[^>]*?class="[^"]*?error[^"]*?[^>]*?>)(.*?)</div>(?is)',html)
+		if errm:
+			if 'hidden' in errm.group(1):
+				return None
+			error = re.sub('[\n\t\r]','',errm.group(2))
+			error = re.sub('<[^>]*?>','\n',error).replace('\n\n','\n').replace('\n','[CR]')
+			return error
+		return None
+	
 	def doPrivateMessage(self,post,callback=None):
 		return self.doForm(	self.urls.get('pm_new_message'),
 							self.forms.get('pm_name'),
@@ -674,7 +695,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						controls='pm_delete_control%s',
 						callback=callback)
 						
-	def doForm(self,url,form_name=None,action_match=None,field_dict={},controls=None,submit_name=None,submit_value=None,wait='1',callback=None):
+	def doForm(self,url,form_name=None,action_match=None,field_dict=None,controls=None,submit_name=None,submit_value=None,wait='1',callback=None):
+		field_dict = field_dict or {}
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False
 		res = self.browser.open(url)
@@ -731,9 +753,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		html = res.read()
 		
 		if self.forms.get('login_action','@%+#') in html:
-			if not self.login(): return post
-			res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
-			html = res.read()
+			if not self.login():
+				post.error = 'Could not log in.'
+				return False
+			try:
+				res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
+				html = res.read()
+			except:
+				post.error = ERROR('Error deleting post')
 			
 		selected = False
 		try:
@@ -748,7 +775,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				self.browser.form = form
 			else:
 				LOG('DELETE NO FORM 2')
-				return post
+				post.error = 'Could not find form'
+				return False
 		
 		try:
 			#self.browser.find_control(name="deletepost").value = ["delete"]
@@ -757,9 +785,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.browser.submit()
 		except:
 			ERROR('DELETE NO CONTROL')
-			return post
-		post.error = ''
-		return post
+			post.error = 'Could not find form controls'
+			return False
+		return True
 		#<a href="editpost.php?do=editpost&amp;p=631488" name="vB::QuickEdit::631488">
 	
 	def setControls(self,control_string):

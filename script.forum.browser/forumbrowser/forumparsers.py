@@ -37,9 +37,11 @@ def testP(url):
 	html = urllib2.urlopen(url).read()
 	p.feed(html)
 	for a in p.all:
-		print a#.get('postid')
+		print a #.get('postid')
 	return p
 	
+class DoneException(Exception): pass
+
 class BaseParser(HTMLParser.HTMLParser):
 	def __init__(self):
 		self.all = []
@@ -53,9 +55,11 @@ class BaseParser(HTMLParser.HTMLParser):
 		self.tagFixRE3 = re.compile(r"(='[^']*?)'([^'=]*?' )")
 		self.tagFixRE4 = re.compile(r'(")(\w+=")')
 		self.tagFixRE5 = re.compile(r'(?<!=)"" ')
+		self.current = None
+		self.mode = None
 		self.resetCurrent(False)
 		HTMLParser.HTMLParser.__init__(self)
-		
+	
 	def badQuoteFix(self,m):
 		w = m.group(0)
 		new = re.sub(r'( \w+=")',r'"\1',w)
@@ -71,6 +75,9 @@ class BaseParser(HTMLParser.HTMLParser):
 		data = self.tagFixRE5.sub('" ',data)
 		return data
 	
+	def done(self):
+		raise DoneException()
+	
 	def feed(self,data):
 		#open('/home/ruuk/test2.text','w').write(data)
 		data = self.commentRE.sub('',data)
@@ -84,8 +91,7 @@ class BaseParser(HTMLParser.HTMLParser):
 	
 	def resetCurrent(self,add=True):
 		if add:
-			if self.current:
-				#print self.current
+			if self.current:				
 				self.all.append(self.current)
 		self.mode = None
 		self.subMode = None
@@ -99,8 +105,12 @@ class BaseParser(HTMLParser.HTMLParser):
 		return ''
 		
 	def getList(self,data):
+		self.resetCurrent()
 		self.all = []
-		self.feed(data)
+		try:
+			self.feed(data)
+		except DoneException:
+			print 'PB HTMLParser terminated early'
 		self.reset()
 		return self.all
 	
@@ -148,6 +158,7 @@ class VBPostParser(BaseParser):
 		self.currentStat = ''
 		self.currentQuote = ''
 		self.quoteMode = ''
+		self.lastFont = ''
 		self.currentTag = None
 		self.currentDepth = 0
 		self.resetContent()
@@ -160,7 +171,8 @@ class VBPostParser(BaseParser):
 		self.quoteMode = None
 		self.currentQuote = ''
 		self.currentStat = ''
-		
+		self.lastFont = ''
+	
 	def feed(self,data):
 		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
 		BaseParser.feed(self, data)
@@ -195,12 +207,11 @@ class VBPostParser(BaseParser):
 				
 	def handle_starttag(self,tag,attrs):
 		className = self.getAttr('class', attrs)
-		#print tag, self.subMode, className, self.getAttr('src', attrs)
 		if className:
 			if 'postbit' in className.split(' ') or (tag == 'li' and 'postbit' in className):
 				self.mode = 'POST'
 				self.postTag = tag
-			elif self.subMode == 'CONTENT' and 'bbcode' in className:
+			elif self.subMode == 'CONTENT' and 'bbcode_quote' in className:
 				self.quoteMode = 'START'
 				self.currentQuote = '[quote='
 				#timmins;246901]
@@ -240,7 +251,8 @@ class VBPostParser(BaseParser):
 			elif tag == 'a' and 'username' in className:
 				self.subMode = 'USER1'
 				self.setUID(self.getAttr('href', attrs))
-				
+			elif self.subMode == 'CONTENT' and 'bbcode_description' in className:
+				self.subMode = 'BLOCK'
 		elif self.subMode == 'CONTENT' and (tag == 'img' or tag == 'a' or tag == 'b' or tag == 'i'):
 			conv = ''
 			if tag == 'a':
@@ -257,8 +269,22 @@ class VBPostParser(BaseParser):
 				if self.quoteMode == 'QUOTE': self.currentQuote += conv
 			else:
 				self.current['message'] += conv
+		elif self.subMode == 'CONTENT' and tag == 'font':
+			color = self.getAttr('color', attrs)
+			tag = ''
+			if color:
+				tag = '[color=%s]' % color
+				self.lastFont = '[/color]'
+			else:
+				size = self.getAttr('size', attrs)
+				if size:
+					tag = '[size=%s]' % size
+					self.lastFont = '[/size]'
+			if self.quoteMode:
+				if self.quoteMode == 'QUOTE': self.currentQuote += tag
+			else:
+				self.current['message'] += tag
 			
-				
 		if self.subMode == 'AVATAR' and tag == 'img':
 			self.current['avatar'] = self.revertCodes(self.getAttr('src', attrs)).strip()
 				
@@ -272,7 +298,7 @@ class VBPostParser(BaseParser):
 				self.quoteMode = 'USER2'
 			elif self.subMode == 'CONTENT' and self.quoteMode == 'POSTID' and tag == 'a':
 				href = self.getAttr('href', attrs)
-				self.currentQuote += ';' + self.setPID(href, True) + ']<br />'
+				self.currentQuote += ';' + self.setPID(href, True) + ']\n'
 				self.quoteMode = 'WAIT'
 		
 		self.checkCurrentTag(tag)
@@ -317,37 +343,55 @@ class VBPostParser(BaseParser):
 				self.quoteMode = 'POSTID'
 			elif self.subMode == 'CONTENT' and self.quoteMode == 'QUOTE':
 				self.currentQuote += self.revertCodes(data).strip()
-			elif self.subMode == 'CONTENT' and not self.quoteMode:
+			elif self.subMode == 'BLOCK' and not self.quoteMode:
+				tag = ''
+				if 'html' in data.lower():
+					self.quoteMode = '[/html]'
+					tag = '[html]'
+				elif 'php' in data.lower():
+					self.quoteMode = '[/php]'
+					tag = '[php]'
+				elif 'code' in data.lower():
+					self.quoteMode = '[/code]'
+					tag = '[code]'
+				self.current['message'] += tag
+			elif (self.subMode == 'CONTENT' and not self.quoteMode) or self.subMode == 'BLOCK':
 				self.current['message'] += self.revertCodes(data).strip()
 			elif self.subMode == 'SIGNATURE':
 				self.current['signature'] += self.revertCodes(data).strip()
-			
-	
+					
 	def handle_endtag(self,tag):
 		self.checkEndTag(tag)
 		if self.subMode == 'CONTENT':
 			if tag == 'br' or tag == 'div':
 				if self.quoteMode == 'QUOTE':
-					self.currentQuote  += '<br />'
+					self.currentQuote  += '\n'
 				else:
-					self.current['message'] += '<br />'
-			if tag == 'div' and self.quoteMode == 'QUOTE':
-				self.quoteMode = None
-				self.currentQuote += '[/quote]'
-				self.current['message'] += self.currentQuote
-				self.currentQuote = ''
-			if tag == 'a' or tag == 'b' or tag == 'i':
+					self.current['message'] += '\n'
+			elif tag == 'a' or tag == 'b' or tag == 'i' or tag == 'font':
 				if tag == 'a':
 					conv = '[/url]'
 				elif tag == 'b':
 					conv = '[/b]'
 				elif tag == 'i':
 					conv = '[/i]'
-				if self.quoteMode:
+				elif tag == 'font':
+					conv = self.lastFont
+					self.lastFont = ''
+				if not self.subMode == 'BLOCK' and self.quoteMode:
 					if self.quoteMode == 'QUOTE':
 						self.currentQuote += conv
 				else:
 					self.current['message'] += conv
+			if tag == 'div' and self.quoteMode == 'QUOTE':
+				self.quoteMode = None
+				self.currentQuote += '[/quote]'
+				self.current['message'] += self.currentQuote
+				self.currentQuote = ''
+		elif self.subMode == 'BLOCK':
+			if tag == 'br':
+				self.current['message'] += '\n'
+				
 		if tag == self.postTag:
 			if self.mode == 'POST':
 				self.depth -= 1
@@ -361,6 +405,12 @@ class VBPostParser(BaseParser):
 		elif tag == 'dl':
 				self.subMode = None
 				self.currentStat = None
+				
+		if self.subMode == 'BLOCK' and (tag == 'pre' or tag =='code'):
+			if self.quoteMode:
+				self.current['message'] += self.quoteMode
+				self.subMode = 'CONTENT'
+				self.quoteMode = None
 		
 class VBThreadParser(BaseParser):
 	def __init__(self):
@@ -368,6 +418,9 @@ class VBThreadParser(BaseParser):
 		
 	def feed(self,data):
 		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
+		if not 'threadbit' in data:
+			print 'PB HTMLParser - No Threads'
+			return
 		BaseParser.feed(self, data)
 		
 	def setTID(self,data):
@@ -400,12 +453,16 @@ class VBThreadParser(BaseParser):
 				href = self.getAttr('href', attrs)
 				if href:
 					self.current['lastid'] = self.extractID('member.php', 'u', href)
-		if self.mode == 'THREAD' and tag == 'div':
-			self.depth += 1
+		
+		if self.mode == 'THREAD':
+			if tag == 'div':
+				self.depth += 1
+			elif self.subMode == 'SUBSCRIBED' and tag == 'img':
+					src = self.getAttr('src', attrs)
+					if src and 'subscribed' in src: self.current['subscribed'] = True
 		
 	
 	def handle_data(self,data):
-		if data.strip(): self.mode, self.subMode, data.strip()
 		if self.mode == 'THREAD':
 			if not self.subMode:
 				if data.strip() == 'Sticky:':
@@ -415,7 +472,7 @@ class VBThreadParser(BaseParser):
 				self.subMode = None
 			elif self.subMode == 'STARTER':
 				self.current['starter'] = self.revertCodes(data).strip()
-				self.subMode = None
+				self.subMode = 'SUBSCRIBED'
 			elif self.subMode == 'LASTPOSTER':
 				self.current['lastposter'] = self.revertCodes(data).strip()
 				self.subMode = None
@@ -435,13 +492,22 @@ class VBForumParser(BaseParser):
 		self.handle_endtag = self.normalEndtag
 		self.parseMode = 'NORMAL'
 		self.error = ''
+		self.someFound = False
+		self.setDelimeters()
 	
+	def setDelimeters(self):
+		self.forumDelimeter = 'forumrow'
+		
 	def feed(self,data):
+		self.someFound = False
 		data = data.split('<!-- main -->',1)[-1].split('<!-- /main -->',1)[0]
-		if not 'forumrow table' in data:
-			self.handle_starttag = self.tableStarttag
-			self.handle_endtag = self.tableEndtag
-			self.parseMode = 'TABLE'
+		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
+		#open('/home/ruuk/test.txt','w').write(data)
+		if not 'forumrow' in data:
+			return 
+#			self.handle_starttag = self.tableStarttag
+#			self.handle_endtag = self.tableEndtag
+#			self.parseMode = 'TABLE'
 		BaseParser.feed(self,data)
 		
 	def tableStarttag(self,tag,attrs):
@@ -480,12 +546,15 @@ class VBForumParser(BaseParser):
 					raise Exception(error.strip())
 			
 	def normalStarttag(self,tag,attrs):
+		if self.someFound and (tag == 'form' or tag == 'input'):
+			self.done()
 		if tag == 'div':
 			className = self.getAttr('class', attrs)
 			if className:
-				if className == 'forumrow table':
+				if self.forumDelimeter in className:
 					self.mode = 'FORUM'
 					self.depth += 1
+					self.someFound = True
 					return
 				elif 'forumhead' in className:
 					self.resetCurrent(False)
@@ -505,6 +574,12 @@ class VBForumParser(BaseParser):
 				href = self.getAttr('href', attrs)
 				if 'forumdisplay' in href:
 					self.setFID(href)
+			elif not self.subMode:
+				if tag == 'a':
+					href = self.getAttr('href', attrs)
+					if href and 'removesubscription' in href:
+						self.current['subscribed'] = True
+						
 					
 		elif self.mode == "SUBFORUM":
 			if not self.subMode:
@@ -545,7 +620,7 @@ class VBForumParser(BaseParser):
 	
 	def normalEndtag(self,tag):
 		if tag == 'div':
-			if self.mode == 'FORUM':
+			if self.mode == 'FORUM' or self.mode == 'ERROR':
 				self.depth -= 1
 				if self.depth < 1:
 					self.resetCurrent()

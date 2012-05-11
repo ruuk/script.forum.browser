@@ -12,15 +12,18 @@ def ERROR(message):
 
 class Error(Exception): pass
 
-class FBData:
-	def __init__(self,data=None,pagedata=None,extra={},error=None):
+class FBData():
+	def __init__(self,data=None,pagedata=None,extra=None,error=None):
 		self.data = data
 		self.pageData = pagedata
-		self.extra = extra
+		self.extra = extra or {}
 		self.error = error
 	
 	def __getitem__(self,key):
 		return self.extra.get(key)
+	
+	def __setitem__(self,key,value):
+		self.extra[key] = value
 	
 	def getExtra(self,key,default=None):
 		return self.extra.get(key,default)
@@ -78,10 +81,7 @@ class HTMLPageInfo:
 		
 	def _getHTML(self):
 		try:
-			opener = urllib2.build_opener()
-			o = opener.open(urllib2.Request(self.url,None,{'User-Agent':'Wget/1.12'}))
-			self.html = o.read()
-			o.close()
+			self.html = self.getHTML(self.url)
 		except:
 			self.isValid = False
 			LOG('HTMLPageInfo 1: FAILED')
@@ -89,14 +89,18 @@ class HTMLPageInfo:
 		if self.url == self.base2: return
 		
 		try:
-			opener = urllib2.build_opener()
-			o = opener.open(urllib2.Request(self.base2,None,{'User-Agent':'Wget/1.12'}))
-			self.html2 = o.read()
-			o.close()
+			self.html2 = self.getHTML(self.base2)
 			self.isValid = True
 		except:
 			LOG('HTMLPageInfo 2: FAILED')
 		
+	def getHTML(self,url):
+		opener = urllib2.build_opener()
+		o = opener.open(urllib2.Request(url,None,{'User-Agent':'Wget/1.12'}))
+		html = o.read()
+		o.close()
+		return html
+			
 	def title(self,default=''):
 		try: return re.search('<title>(.*?)</title>',self.html).group(1) or ''
 		except: pass
@@ -115,7 +119,9 @@ class HTMLPageInfo:
 	def images(self):
 		images = self._images(self.html, self.base)
 		images2 = self._images(self.html2, self.base2)
-		for i in images2:
+		images3 = self.getStyleImages(self.html, self.base)
+		images4 = self.getStyleImages(self.html2, self.base2)
+		for i in images2 + images3 + images4:
 			if not i in images: images.append(i)
 		return images
 		
@@ -124,22 +130,41 @@ class HTMLPageInfo:
 		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',html) #Meta tag images
 		final = []
 		for u in urlList + urlList2:
-			u = u.strip()
-			if u.startswith('http'):
-				pass
-			elif u.startswith('./'):
-				u = base + u[2:]
-			elif u.startswith('.'):
-				u = base + u[1:]
-			elif u.startswith('/'):
-				u = self.base2 + u[1:]
-			else:
-				u = base + u
+			u = self.fullURL(u, base)
 			if u in final: continue
 			if u:
 				final.append(u)
 		return final
 
+	def getStyleImages(self,html,base):
+		styles = ''
+		for url in re.findall('<link[^>]*?href="(?P<url>[^"]*?)"[^>]*?"text/css"[^>]*?>',html) + re.findall('<link[^>]*?"text/css"[^>]*?href="(?P<url>[^"]*?)"[^>]*?>',html):
+			#print url
+			url = self.fullURL(url, base)
+			try:
+				styles += self.getHTML(url)
+			except:
+				LOG('Failed to get stylesheet')
+		urls = []
+		for url in re.findall("background(?:-image)?:[^\(]+?url\(['\"](?P<url>[^\"']+?)['\"]\)",styles):
+			urls.append(self.fullURL(url, base))
+		#print urls
+		return urls
+	
+	def fullURL(self,u,base):
+		u = u.strip()
+		if u.startswith('http'):
+			pass
+		elif u.startswith('./') or u.startswith('../'):
+			u = base + u[2:]
+		elif u.startswith('.'):
+			u = base + u[1:]
+		elif u.startswith('/'):
+			u = self.base2 + u[1:]
+		else:
+			u = base + u
+		return u
+	
 ################################################################################
 # Action
 ################################################################################
@@ -148,6 +173,7 @@ class Action:
 		self.action = action
 
 class PMLink:
+	linkImageFilter = re.compile('https?://.+?\.(?:jpg|png|gif|bmp)$')
 	def __init__(self,fb,match=None):
 		self.FB = fb
 		self.MC = fb.MC
@@ -157,16 +183,18 @@ class PMLink:
 		self.tid = ''
 		self.fid = ''
 		self._isImage = False
+		self._textIsImage = False
 		
 		if match:
-			self.url = match.group('url')
+			self.url = match.group('url').strip()
 			text = match.group('text')
 			self.text = self.MC.tagFilter.sub('',text).strip()
 		self.processURL()
+		self.processText()
 			
 	def processURL(self):
 		if not self.url: return
-		self._isImage = re.search('http://.+?\.(?:jpg|png|gif|bmp)',self.url) and True or False
+		self._isImage = self.linkImageFilter.search(self.url) and True or False
 		if self._isImage: return
 		pm = re.search(self.FB.filters.get('post_link','@`%#@>-'),self.url)
 		tm = re.search(self.FB.filters.get('thread_link','@`%#@>-'),self.url)
@@ -178,6 +206,12 @@ class PMLink:
 			d = tm.groupdict()
 			self.tid = d.get('threadid','')
 			
+	def processText(self):
+		m = self.MC.imageFilter.search(self.text)
+		if m:
+			self._textIsImage = True
+			self.text = m.groupdict().get('url',self.text)
+			
 	def urlShow(self):
 		if self.isPost(): return 'Post ID: %s' % self.pid
 		elif self.isThread(): return 'Thread ID: %s' % self.tid
@@ -185,6 +219,9 @@ class PMLink:
 		
 	def isImage(self):
 		return self._isImage
+	
+	def textIsImage(self):
+		return self._textIsImage
 		
 	def isPost(self):
 		return self.pid and True or False

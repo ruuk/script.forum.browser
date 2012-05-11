@@ -292,7 +292,8 @@ class ForumPost(forumbrowser.ForumPost):
 # PageData
 ################################################################################
 class PageData:
-	def __init__(self,fb,data={},current=0,per_page=20,total_items=0):
+	def __init__(self,fb,data=None,current=0,per_page=20,total_items=0):
+		data = data or {}
 		self.fake = not bool(data)
 		self.prev = current > 0
 		self.current = current
@@ -736,7 +737,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():
 			forums = self.getSubscribedForums(callback, None)
-			return self.finish(FBData(threads.data,threads.pageData,extra={'forums':forums.data}),donecallback)
+			threads['forums'] = forums.data
+			return self.finish(threads,donecallback)
 		else:
 			return self.finish(FBData(threads.data,threads.pageData),donecallback)
 		
@@ -791,7 +793,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		result = self.server.save_raw_post(pm.pid,xmlrpclib.Binary(pm.title),xmlrpclib.Binary(pm.message))
 		if fix:
 			LOG('Using MyBB edit post bug fix')
-			self.subscribeToThread(pm.tid)
+			self.subscribeThread(pm.tid)
 		return result.get('result',False)
 		
 	def canEditPost(self,user):
