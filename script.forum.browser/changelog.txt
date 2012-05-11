@@ -26,7 +26,11 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.41
+Current Version : 0.9.42
+
+*** 0.9.42 ***
+
+Missing files in zip
 
 *** 0.9.41 ***
 
