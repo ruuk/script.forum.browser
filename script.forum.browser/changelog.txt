@@ -34,15 +34,16 @@ Logo chooser now also extracts images from stylesheets
 Fixed some issues with adding new/current forum
 Fixed a bug where some links were being detected as links to images when the were not
 Now properly handles [url] tags containing [img] tags (images ti the images list, and the links to the links list with a thumbnail to the image)
-Fixed some issues with context menu subscription option visiblity on threads view
+Fixed some issues with context menu subscription option visibility on threads view
 Boxee: subscribe to/unsubscribe from threads and forums, plus added forums to subscriptions view
 Boxee: Create post, delete post, quote post
 Boxee: Code, HTML, PHP, color and size handling
 Added activity splashes for subscribing/unsubscribing
 Added caption to activity splash
-After many years of programming in python, I just found out "def function(x={}): self.y = x" or similar is a bad idea. Changed instances of that throughout.
-In context menu, now shows name for subscribe/unsubscribe for the forum/thread you are in. example Subscibe to forum: Forum Name
-Added VBulletin forum to show off the new parsing engine used with Boxee. It works for both without any modifaction.
+After many years of programming in python, I just found out "def function(x={}): self.y = x" or similar is a bad idea. Changed instances of that throughout
+In context menu, now shows name for subscribe/unsubscribe for the forum/thread you are in. example Subscribe to forum: Forum Name
+Added VBulletin forum to show off the new parsing engine used with Boxee. It works for both without any modification
+New fanart
 
 *** 0.9.40 ***
 
