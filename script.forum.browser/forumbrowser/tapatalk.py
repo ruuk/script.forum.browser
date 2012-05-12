@@ -719,6 +719,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				if not fp.userName in infos:
 					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
 				fp.setUserInfo(infos[fp.userName])
+				fp.isPM = True
 				pms.append(fp)
 			
 			callback(100,self.lang(30052))
@@ -764,7 +765,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		post.pid = result.get('post_id',post.pid)
 		return status
 		
-	def getPostForEdit(self,pid):
+	def getPostForEdit(self,post):
+		pid = post.postId
 		result = self.server.get_raw_post(pid)
 		if not result:
 			LOG('Could not get raw post for editing')
@@ -838,7 +840,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return True
 			
 	def canDelete(self,user,target='POST'):
-		if user == self.user and self.forumConfig.get('can_moderate'): return True
+		if user == self.user and target == 'PM': return True
+		if self.forumConfig.get('can_moderate'): return True
 		return False
 	
 	def canSubscribeThread(self,tid):

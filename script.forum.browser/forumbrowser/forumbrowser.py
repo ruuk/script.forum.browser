@@ -255,6 +255,14 @@ class PostMessage(Action):
 	def setMessage(self,title,message):
 		self.title = title
 		self.message = message
+		
+	def fromPost(self,post):
+		self.pid = post.postId
+		self.tid = post.tid
+		self.fid = post.fid
+		self.message = post.message
+		self.title = post.title
+		return self
 
 ################################################################################
 # PageData
@@ -324,7 +332,8 @@ class PageData:
 	def getPageDisplay(self):
 		if self.pageDisplay: return self.pageDisplay
 		if self.page is not None and self.totalPages is not None:
-			return 'Page %s of %s' % (self.page,self.totalPages)
+			total  = self.totalPages or 1
+			return 'Page %s of %s' % (self.page,total)
 
 ################################################################################
 # ForumPost
@@ -427,13 +436,13 @@ class ForumBrowser:
 	PageData = PageData
 	quoteFormats = 	{	'mb':"(?s)\[quote='(?P<user>[^']*?)' pid='(?P<pid>[^']*?)' dateline='(?P<date>[^']*?)'\](?P<quote>.*)\[/quote\]",
 						'xf':'(?s)\[quote="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)"\](?P<quote>.*)\[/quote\]',
-						'vb':'\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',
+						'vb':'\[QUOTE=(?P<user>[^;\]]+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',
 						'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?P<quote>.+?)\[/quote\](?is)'
 					}
 	
 	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
 							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
-							'vb':'(?i)\[quote(?:\=(?P<user>\w+)(?:;\d+)*)?\]',
+							'vb':'(?i)\[quote(?:\=(?P<user>[^;\]]+)(?:;\d+)*)?\]',
 							'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?is)'
 						}
 	

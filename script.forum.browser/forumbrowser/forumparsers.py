@@ -49,7 +49,7 @@ class BaseParser(HTMLParser.HTMLParser):
 		self.imgSrcRE = re.compile(r'src="([^"]*?)"')
 		self.aHrefRE = re.compile(r'href="([^"]*?)"')
 		self.tagRE = re.compile(r'<[^>]*?>')
-		self.commentRE = re.compile(r"<\![^>]*?>")
+		self.badCommentRE = re.compile(r"<\!(?!-)[^>]*?>")
 		self.tagFixRE1 = re.compile(r'(="[^"]*?)"(?! )([^"]*?" )')
 		self.tagFixRE2 = re.compile(r'(="[^"]*?" )([^"]*?)(?<!=)"(\w+=)(\w+)')
 		self.tagFixRE3 = re.compile(r"(='[^']*?)'([^'=]*?' )")
@@ -80,7 +80,7 @@ class BaseParser(HTMLParser.HTMLParser):
 	
 	def feed(self,data):
 		#open('/home/ruuk/test2.text','w').write(data)
-		data = self.commentRE.sub('',data)
+		data = self.badCommentRE.sub('',data)
 		data = self.tagRE.sub(self.cleanTag,data)
 		data = re.sub(r"(&)([\w\d]+;)(?=[^<]*?<)",r'%\2',data)
 		#open('/home/ruuk/test.text','w').write(data)
@@ -104,11 +104,12 @@ class BaseParser(HTMLParser.HTMLParser):
 				return a[1]
 		return ''
 		
-	def getList(self,data):
+	def getList(self,data,*args,**kwargs):
+		if not isinstance(data,unicode): data = unicode(data,'utf8','replace')
 		self.resetCurrent()
 		self.all = []
 		try:
-			self.feed(data)
+			self.feed(data,*args,**kwargs)
 		except DoneException:
 			print 'PB HTMLParser terminated early'
 		self.reset()
@@ -154,14 +155,18 @@ class BaseParser(HTMLParser.HTMLParser):
 class VBPostParser(BaseParser):
 	def __init__(self):
 		self.pidRE = re.compile(r'#post(\d+)')
+		self.pidRE2 = re.compile(r'p=(\d+)')
 		self.postTag = None
 		self.currentStat = ''
 		self.currentQuote = ''
 		self.quoteMode = ''
 		self.lastFont = ''
+		self.parseMode = None
+		self.parseTag = ''
 		self.currentTag = None
 		self.currentDepth = 0
 		self.resetContent()
+		self.lastStart = ''
 		BaseParser.__init__(self)
 		
 	def resetContent(self):
@@ -174,12 +179,20 @@ class VBPostParser(BaseParser):
 		self.lastFont = ''
 	
 	def feed(self,data):
-		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
+		data = data.split('<!-- closing div for above_body -->',1)[-1].split('<!-- closing div for body_wrapper -->',1)[0]
+		data = data.split('<!-- controls above postbits -->',1)[-1].split('<!-- controls below postbits -->',1)[0]
+		
+		m = re.search('[\'" ]postbit[\'" ]',data)	
+		if not m or m.start() < 0:
+			print 'PB HTMLParser - Posts Table Mode'
+			self.parseMode = 'TABLE'
+			self.parseTag = 'tr'
 		BaseParser.feed(self, data)
 		
 	def setPID(self,data,ret=False):
 		if not data: return ''
 		m = self.pidRE.search(data)
+		if not m: m = self.pidRE2.search(data)
 		if m:
 			if ret: return m.group(1) or ''
 			self.current['postid'] = m.group(1)
@@ -204,9 +217,27 @@ class VBPostParser(BaseParser):
 				self.currentTag = None
 				self.currentDepth = 0
 				self.subMode = None
-				
+		
+	def handle_comment(self,data):
+		data = data.strip()
+		#print data
+		if self.parseMode == 'TABLE':
+			if data == 'message':
+				self.subMode = 'CONTENT'
+				self.current['message'] = ''
+			elif data == '/ message':
+				self.resetContent()
+			elif data == 'icon and title':
+				self.subMode = 'TITLE'
+			elif data == '/icon and title':
+				self.subMode = None
+			
 	def handle_starttag(self,tag,attrs):
 		className = self.getAttr('class', attrs)
+		idName = self.getAttr('id', attrs)
+		if self.parseMode == 'TABLE':
+			if tag == 'tr':
+				self.mode = 'POST'
 		if className:
 			if 'postbit' in className.split(' ') or (tag == 'li' and 'postbit' in className):
 				self.mode = 'POST'
@@ -253,6 +284,16 @@ class VBPostParser(BaseParser):
 				self.setUID(self.getAttr('href', attrs))
 			elif self.subMode == 'CONTENT' and 'bbcode_description' in className:
 				self.subMode = 'BLOCK'
+		elif idName:
+			if self.parseMode == 'TABLE' and 'postcount' in idName:
+				name = self.getAttr('name', attrs)
+				if name.isdigit():
+					self.current['postnumber'] = name
+					#print name
+				else:
+					self.subMode = 'POSTNUMBER'
+				href = self.getAttr('href', attrs)
+				self.setPID(href)
 		elif self.subMode == 'CONTENT' and (tag == 'img' or tag == 'a' or tag == 'b' or tag == 'i'):
 			conv = ''
 			if tag == 'a':
@@ -304,6 +345,8 @@ class VBPostParser(BaseParser):
 		self.checkCurrentTag(tag)
 	
 	def handle_data(self,data):
+		dstrip = data.strip()
+		if not dstrip: return
 		#if data.strip(): print self.quoteMode, self.mode, self.subMode, self.postTag, data.strip()
 		if self.mode == 'POST':
 			if self.subMode == 'DATE':
@@ -319,7 +362,7 @@ class VBPostParser(BaseParser):
 				self.current['status'] = self.revertCodes(data).strip()
 				self.subMode = None
 			elif self.subMode == 'POSTNUMBER':
-				self.current['postnumber'] = data.strip().replace('#','')
+				self.current['postnumber'] = dstrip.replace('#','')
 				self.subMode = None
 			elif self.subMode == 'TITLE':
 				title = self.revertCodes(data).strip()
@@ -343,17 +386,21 @@ class VBPostParser(BaseParser):
 				self.quoteMode = 'POSTID'
 			elif self.subMode == 'CONTENT' and self.quoteMode == 'QUOTE':
 				self.currentQuote += self.revertCodes(data).strip()
-			elif self.subMode == 'BLOCK' and not self.quoteMode:
-				tag = ''
+			elif (self.subMode == 'BLOCK' or (dstrip in ('HTML Code:','PHP Code:','Code:'))) and not self.quoteMode:
+				if not self.subMode == 'BLOCK':
+					tag = '\n'
+				else:
+					tag = ''
+				self.subMode = 'BLOCK'
 				if 'html' in data.lower():
 					self.quoteMode = '[/html]'
-					tag = '[html]'
+					tag += '[html]'
 				elif 'php' in data.lower():
 					self.quoteMode = '[/php]'
-					tag = '[php]'
+					tag += '[php]'
 				elif 'code' in data.lower():
 					self.quoteMode = '[/code]'
-					tag = '[code]'
+					tag += '[code]'
 				self.current['message'] += tag
 			elif (self.subMode == 'CONTENT' and not self.quoteMode) or self.subMode == 'BLOCK':
 				self.current['message'] += self.revertCodes(data).strip()
@@ -391,8 +438,10 @@ class VBPostParser(BaseParser):
 		elif self.subMode == 'BLOCK':
 			if tag == 'br':
 				self.current['message'] += '\n'
-				
-		if tag == self.postTag:
+		if self.parseMode == 'TABLE' and tag == self.parseTag:
+			if self.current.get('postid') and self.current.get('message'):
+				self.resetCurrent()
+		elif tag == self.postTag:
 			if self.mode == 'POST':
 				self.depth -= 1
 				if self.depth < 1:
@@ -415,12 +464,19 @@ class VBPostParser(BaseParser):
 class VBThreadParser(BaseParser):
 	def __init__(self):
 		BaseParser.__init__(self)
+		self.parseMode = 'NORMAL'
 		
 	def feed(self,data):
-		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
-		if not 'threadbit' in data:
-			print 'PB HTMLParser - No Threads'
-			return
+		data = data.split('<!-- closing div for above_body -->',1)[-1].split('<!-- closing div for body_wrapper -->',1)[0]
+		data = data.split('<!-- / controls above thread list -->',1)[-1].split('<!-- controls below thread list -->',1)[0]
+		data = data.split('<!-- show threads -->',1)[-1]
+		m = re.search('[\'" ]threadbit[\'" ]',data)	
+		if not m or m.start() < 0:
+			#print 'PB HTMLParser - No Threads'
+			#return
+			print 'PB HTMLParser - Threads Table Mode'
+			self.parseMode = 'TABLE'
+			self.parseTag = 'tr'
 		BaseParser.feed(self, data)
 		
 	def setTID(self,data):
@@ -429,6 +485,22 @@ class VBThreadParser(BaseParser):
 	
 	def handle_starttag(self,tag,attrs):
 		className = self.getAttr('class', attrs)
+		if self.parseMode == 'TABLE':
+			if tag == 'tr':
+				self.mode = 'THREAD'
+				return
+			elif self.mode == 'THREAD':
+				attrsStr =  str(attrs)
+				if tag == 'a':
+					href = self.getAttr('href', attrs)
+					if 'showthread.php' in href and not 'goto' in href and not self.current.get('threadid'):
+						self.setTID(href)
+						self.subMode = 'TITLE'
+				if 'member.php' in attrsStr:
+					if not 'lastposter' in attrsStr:
+						self.subMode = 'STARTER'
+					else:
+						self.subMode = 'LASTPOSTER'
 		if className:
 			if 'threadbit' in className:
 				self.mode = 'THREAD'
@@ -479,7 +551,12 @@ class VBThreadParser(BaseParser):
 			
 	
 	def handle_endtag(self,tag):
-		if tag == 'div':
+		if self.parseMode == 'TABLE':
+			if tag == 'tr':
+				if self.mode == 'THREAD':
+					#print self.current
+					self.resetCurrent()
+		elif tag == 'div':
 			if self.mode == 'THREAD':
 				self.depth -= 1
 				if self.depth < 1:
@@ -498,16 +575,17 @@ class VBForumParser(BaseParser):
 	def setDelimeters(self):
 		self.forumDelimeter = 'forumrow'
 		
-	def feed(self,data):
+	def feed(self,data,in_threads=False):
 		self.someFound = False
 		data = data.split('<!-- main -->',1)[-1].split('<!-- /main -->',1)[0]
 		data = data.split('<!-- closing div for above_body -->')[-1].split('<!-- closing div for body_wrapper -->')[0]
 		#open('/home/ruuk/test.txt','w').write(data)
 		if not 'forumrow' in data:
-			return 
-#			self.handle_starttag = self.tableStarttag
-#			self.handle_endtag = self.tableEndtag
-#			self.parseMode = 'TABLE'
+			if in_threads: return 
+			self.handle_starttag = self.tableStarttag
+			self.handle_endtag = self.tableEndtag
+			self.parseMode = 'TABLE'
+			print 'PB HTMLParser - Forums Table Mode'
 		BaseParser.feed(self,data)
 		
 	def tableStarttag(self,tag,attrs):

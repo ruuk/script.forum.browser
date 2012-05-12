@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.42'
+__version__ = '0.9.43'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -360,10 +360,7 @@ class PageWindow(BaseWindow):
 			pageData = PageData(None)
 		self.getControl(200).setVisible(pageData.prev)
 		self.getControl(202).setVisible(pageData.next)
-		if __addon__.getSetting('use_forum_colors') == 'false':
-			self.getControl(105).setLabel(pageData.getPageDisplay())
-		else:
-			self.getControl(105).setLabel(pageData.getPageDisplay())
+		self.getControl(105).setLabel(pageData.getPageDisplay())
 		
 	def gotoPage(self,page): pass
 
@@ -476,10 +473,7 @@ class PostDialog(BaseWindow):
 		self.post = kwargs.get('post')
 		self.title = self.post.title
 		self.posted = False
-		if __addon__.getSetting('use_forum_colors') == 'false':
-			self.display_base = '%s\n \n'
-		else:
-			self.display_base = '[COLOR '+FB.theme.get('desc_fg',FB.theme.get('title_fg','FF000000'))+']%s[/COLOR]\n \n'
+		self.display_base = '%s\n \n'
 		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
@@ -506,7 +500,10 @@ class PostDialog(BaseWindow):
 			self.getControl(202).setLabel(__language__(30178))
 		else:
 			self.getControl(103).setLabel('[B]Post Reply[/B]')
-		self.getControl(104).setLabel(__language__(30120))
+		if self.post.title:
+			self.getControl(104).setLabel(self.post.title)
+		else:
+			self.getControl(104).setLabel(__language__(30120))
 		
 	def onClick( self, controlID ):
 		if BaseWindow.onClick(self, controlID): return
@@ -835,7 +832,7 @@ class MessageWindow(BaseWindow):
 		if idx == 0: self.openPostDialog(quote=True)
 		elif idx == delete: self.deletePost()
 		elif idx == edit:
-			pm = FB.getPostForEdit(self.post.postId)
+			pm = FB.getPostForEdit(self.post)
 			pm.tid = self.post.tid
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH')
@@ -844,24 +841,7 @@ class MessageWindow(BaseWindow):
 			showHelp('message')
 			
 	def deletePost(self):
-		post = forumbrowser.PostMessage(self.post.postId,self.post.tid,self.post.fid)
-		if not post.pid: return
-		splash = showActivitySplash('Deleting')
-		try:
-			if self.post.tid == 'private_messages':
-				post.isPM = True
-				result = FB.deletePrivateMessage(post)
-			else:
-				result = FB.deletePost(post)
-			if not result:
-				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.',success=False)
-			else:
-				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
-		except:
-			err = ERROR('Delete post error.')
-			showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
-		finally:
-			splash.close()
+		result = deletePost(self.post,is_pm=(self.post.tid == 'private_messages'))
 		self.action = forumbrowser.Action('REFRESH')
 		if result: self.close()
 		
@@ -894,7 +874,30 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 	del w
 	if posted: return pm
 	return None
-		
+
+def deletePost(post,is_pm=False):
+	pm = forumbrowser.PostMessage(post.postId,post.tid,post.fid)
+	if not pm.pid: return
+	yes = xbmcgui.Dialog().yesno('Really Delete?','Are you sure you want to delete this message?')
+	if not yes: return
+	splash = showActivitySplash('Deleting')
+	try:
+		if is_pm or post.isPM:
+			pm.isPM = True
+			result = FB.deletePrivateMessage(pm)
+		else:
+			result = FB.deletePost(pm)
+		if not result:
+			showMessage('Failed','Failed to delete: ',pm.error or 'Reason unknown.',success=False)
+		else:
+			showMessage('Success',pm.isPM and 'Message deleted.' or 'Post deleted.',success=True)
+	except:
+		err = ERROR('Delete post error.')
+		showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
+	finally:
+		splash.close()
+	return result
+
 ######################################################################################
 #
 # Replies Window
@@ -1116,10 +1119,11 @@ class RepliesWindow(PageWindow):
 					if FB.canEditPost(item.getLabel()):
 						d.addItem('edit',__language__(30232))
 						
-			if self.threadItem and FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
-				d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
-			else:
-				if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
+			if self.threadItem:
+				if FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
+					d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
+				else:
+					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
 				
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
@@ -1135,7 +1139,7 @@ class RepliesWindow(PageWindow):
 			self.stopThread()
 			self.fillRepliesList(self.pageData.getPageNumber())
 		elif result == 'edit':
-			pm = FB.getPostForEdit(post.postId)
+			pm = FB.getPostForEdit(post)
 			pm.tid = self.tid
 			if openPostDialog(editPM=pm):
 				self.fillRepliesList(self.pageData.getPageNumber())
@@ -1157,24 +1161,9 @@ class RepliesWindow(PageWindow):
 		item = self.getControl(120).getSelectedItem()
 		pid = item.getProperty('post')
 		if not pid: return
-		splash = showActivitySplash('Deleting')
-		try:
-			post = forumbrowser.PostMessage(pid,self.tid,self.fid)
-			if self.tid == 'private_messages':
-				post.isPM = True
-				result = FB.deletePrivateMessage(post)
-			else:
-				result = FB.deletePost(post)
-			if not result:
-				showMessage('Failed','Failed to delete: ',post.error or 'Reason unknown.',success=False)
-			else:
-				showMessage('Success',post.isPM and 'Message deleted.' or 'Post deleted.',success=True)
-		except:
-			err = ERROR('Delete post error.')
-			showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
-		finally:
-			splash.close()
-		self.fillRepliesList(self.pageData.getPageNumber())
+		post = self.posts.get(pid)
+		if deletePost(post,is_pm=(self.tid == 'private_messages')):
+			self.fillRepliesList(self.pageData.getPageNumber())
 		
 	def openPostDialog(self,post=None):
 		if post:
@@ -1399,7 +1388,6 @@ class ThreadsWindow(PageWindow):
 			self.topic = topic
 			self.setTheme()
 			self.fillThreadList()
-			self.setFocusId(120)
 		else:
 			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,parent=self)
 
@@ -1886,7 +1874,12 @@ def doSettings():
 #	elif result == 'register': registerForum()
 	elif result == 'help': showHelp('forums')
 	elif result == 'settings':
-		__addon__.openSettings()
+		w = openWindow(xbmcgui.WindowXMLDialog,'script-forumbrowser-overlay.xml',return_window=True,modal=False,theme='Default')
+		try:
+			__addon__.openSettings()
+		finally:
+			w.close()
+			del w
 		global DEBUG
 		DEBUG = getSetting('debug',False)
 		FB.MC.resetRegex()
@@ -2025,9 +2018,11 @@ def addTapatalkForum(current=False):
 		dialog.update(40,'Choose Logo')
 		logo = chooseLogo(forum,images)
 		LOG('Adding Forum: %s at URL: %s' % (forum,url))
-		saveForum(ftype,ftype + '.' + forum,forum,desc,url,logo)
+		name = forum
+		if name.startswith('www.'): name = name[4:]
+		saveForum(ftype,ftype + '.' + forum,name,desc,url,logo)
 		dialog.update(60,'Add To Online Database')
-		addForumToOnlineDatabase(forum,url,desc,logo,ftype,dialog=dialog)
+		addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
 		dialog.close()
 	

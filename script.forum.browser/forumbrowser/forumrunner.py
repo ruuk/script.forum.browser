@@ -490,7 +490,8 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			post.error = result.message
 		return bool(result)
 	
-	def getPostForEdit(self,pid):
+	def getPostForEdit(self,post):
+		pid = post.postId
 		result = self.client.get_post(postid=pid)
 		if not result:
 			LOG('Could not get raw post for editing')

@@ -211,6 +211,7 @@
 					<align>center</align>
 					<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
+					<pulseonselect>false</pulseonselect>
 					<texturefocus border="20">forum-browser-dark-white-trans-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-white-trans-boxr-nf.png</texturenofocus>
 				</control>

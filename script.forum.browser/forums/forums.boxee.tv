@@ -124,6 +124,13 @@ form:post_title=title
 form:post_message=message
 form:post_submit_wait=1
 
+url:editpost=editpost.php?p=!POSTID!&do=editpost
+
+form:edit_post_action=do=updatepost
+form:edit_post_title=title
+form:edit_post_message=message
+form:edit_post_submit_wait=1
+
 form:login_action=login.php?do=login
 form:login_user=vb_login_username
 form:login_pass=vb_login_password

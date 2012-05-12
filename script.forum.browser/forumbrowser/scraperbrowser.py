@@ -52,7 +52,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return texttransform.convertHTMLCodes(html).strip()
 	
 	def setPostID(self,pid):
-		pid = str(pid)
+		pid = str(pid) or repr(time.time())
 		self.postId = pid
 		self.pid = pid
 		self.isPM = pid.startswith('PM')
@@ -335,6 +335,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.browser[self.forms['login_pass']] = self.password
 		response = self.browser.submit()
 		html = response.read()
+		self.lastHTML = html
 		if not 'action="%s"' % self.forms.get('login_action','@%+#') in html:
 			self._loggedIn = True
 			LOG('LOGGED IN')
@@ -348,7 +349,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not self.canLogin():
 			self._loggedIn = False
 			return False
-		if not self.browser or self.needsLogin:
+		if not self.browser or self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
 			if not callback(5,__language__(30100)): return False
 			if not self.login():
@@ -594,21 +595,33 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def postURL(self,post):
 		return self.URLSubs(self.getURL('newpost'),post=post)
 	
+	def editURL(self,post):
+		return self.URLSubs(self.getURL('editpost'),post=post)
+	
 	def predicatePost(self,formobj):
 		return self.forms.get('post_action','@%+#') in formobj.action
+	
+	def predicateEditPost(self,formobj):
+		return self.forms.get('edit_post_action','@%+#') in formobj.action
 		
 	def fakeCallback(self,pct,message=''): return True
 	
-	def post(self,post,callback=None):
+	def post(self,post,callback=None,edit=False):
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback):
 			post.error = 'Could not log in'
 			return False
-		url = self.postURL(post)
+		pre = ''
+		if edit or post.isEdit:
+			pre = 'edit_'
+			url = self.editURL(post)
+		else:
+			url = self.postURL(post)
+			
 		res = self.browser.open(url)
 		#print res.info()
 		html = res.read()
-		#open('/home/ruuk/test2.text','w').write(html)
+		open('/home/ruuk/test.txt','w').write(html)
 		if self.forms.get('login_action','@%+#') in html:
 			callback(5,__language__(30100))
 			if not self.login():
@@ -619,32 +632,35 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		callback(40,__language__(30105))
 		selected = False
 		try:
-			if self.forms.get('post_name'):
-				self.browser.select_form(self.forms.get('post_name'))
+			if self.forms.get(pre + 'post_name'):
+				self.browser.select_form(self.forms.get(pre + 'post_name'))
 				LOG('FORM SELECTED BY NAME')
 			else:
-				self.browser.select_form(predicate=self.predicatePost)
+				if edit or post.isEdit:
+					self.browser.select_form(predicate=self.predicateEditPost)
+				else:
+					self.browser.select_form(predicate=self.predicatePost)
 				LOG('FORM SELECTED BY ACTION')
 			selected = True
 		except:
 			ERROR('NO FORM 1')
 			
 		if not selected:
-			form = self.getForm(html,self.forms.get('post_action',''),self.forms.get('post_name',''))
+			form = self.getForm(html,self.forms.get(pre + 'post_action',''),self.forms.get(pre + 'post_name',''))
 			if form:
 				self.browser.form = form
 			else:
 				post.error = 'Could not find form.'
 				return False
 		try:
-			if post.title: self.browser[self.forms['post_title']] = post.title
-			self.browser[self.forms['post_message']] = post.message
-			self.setControls('post_controls%s')
-			wait = int(self.forms.get('post_submit_wait',0))
+			if post.title: self.browser[self.forms[pre + 'post_title']] = post.title
+			self.browser[self.forms[pre + 'post_message']] = post.message
+			self.setControls(pre + 'post_controls%s')
+			wait = int(self.forms.get(pre + 'post_submit_wait',0))
 			if wait: callback(60,__language__(30107) % wait)
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
-			res = self.browser.submit(name=self.forms.get('post_submit_name'),label=self.forms.get('post_submit_value'))
+			res = self.browser.submit(name=self.forms.get(pre + 'post_submit_name'),label=self.forms.get(pre + 'post_submit_value'))
 			html = res.read()
 			#open('/home/ruuk/test.txt','w').write(html)
 			err = self.checkForError(html)
@@ -816,11 +832,15 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def getQuoteFormat(self):
 		return None
 	
-	def getPostForEdit(self,pid,callback=None): return None
+	def getPostForEdit(self,post):
+		pm =  forumbrowser.PostMessage().fromPost(post)
+		pm.isEdit = True
+		return pm
 		
-	def editPost(self,pm,callback=None): return None
+	def editPost(self,pm,callback=None):
+		return self.post(pm,callback,edit=True)
 	
-	def canEditPost(self,user): return False
+	def canEditPost(self,user): return True
 	
 	def getQuoteStartFormat(self):
 		return self.filters.get('quote_start','[QUOTE]')

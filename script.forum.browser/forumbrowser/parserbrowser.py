@@ -23,7 +23,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 											'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 											'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 											'image':'\[img\](?P<url>[^\[]+)\[/img\](?is)',
-											'link':'\[url="?(?P<url>[^\]]+?)"?\](?P<text>.+?)\[/url\](?is)',
+											'link':'\[url="?(?P<url>[^\]]+?)"?\](?P<text>.*?)\[/url\](?is)',
 											'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 											'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 											'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
@@ -67,11 +67,11 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def getPMCounts(self,html=None):
 		if not self.pmCountsRE: return scraperbrowser.ScraperForumBrowser.getPMCounts(self, html)
+		self.checkLogin()
 		if not html: html = self.lastHTML
 		if not html: return None
-		self.checkLogin()
 		m = re.search(self.pmCountsRE,html)
-		if not m: return {'unread':'0'}
+		if not m: return {'unread':'?'}
 		return {'unread':m.group(1)}
 	
 	def getForums(self,callback=None,donecallback=None,url='',subs=False):
@@ -112,7 +112,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = self.threadParser.getList(html)
-		forums = self.forumParser.getList(html)
+		forums = self.forumParser.getList(html,in_threads=True)
 		extra = None
 		if forums: extra = {'forums':forums}
 		if subs:
