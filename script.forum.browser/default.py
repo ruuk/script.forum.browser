@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.44'
+__version__ = '0.9.45'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -817,7 +817,7 @@ class MessageWindow(BaseWindow):
 			self.doMenu()
 		
 	def doMenu(self):
-		options = [__language__(30134)]
+		options = [self.post.isPM and __language__(30249) or __language__(30134)]
 		delete = None
 		edit = None
 		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()):
@@ -841,7 +841,7 @@ class MessageWindow(BaseWindow):
 			showHelp('message')
 			
 	def deletePost(self):
-		result = deletePost(self.post,is_pm=(self.post.tid == 'private_messages'))
+		result = deletePost(self.post,is_pm=self.post.isPM)
 		self.action = forumbrowser.Action('REFRESH')
 		if result: self.close()
 		
@@ -866,7 +866,9 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 		pm = forumbrowser.PostMessage(pid,tid,fid,is_pm=(tid == 'private_messages'))
 		if post: pm.setQuote(post.userName,post.messageAsQuote())
 		if tid == 'private_messages':
-			to = doKeyboard('Enter Receipient(s)')
+			default = ''
+			if post: default = post.userName
+			to = doKeyboard('Enter Receipient(s)',default=default)
 			if not to: return
 			pm.to = to
 	w = openWindow(LinePostDialog,"script-forumbrowser-post.xml" ,post=pm,return_window=True)
@@ -893,6 +895,7 @@ def deletePost(post,is_pm=False):
 			showMessage('Success',pm.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 	except:
 		err = ERROR('Delete post error.')
+		LOG('Error deleteing post/pm: ' % err)
 		showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
 	finally:
 		splash.close()
@@ -1112,7 +1115,7 @@ class RepliesWindow(PageWindow):
 		try:
 			if item:
 				post = self.posts.get(item.getProperty('post'))
-				d.addItem('quote',__language__(30134))
+				d.addItem('quote',self.isPM() and __language__(30249) or __language__(30134))
 				if FB.canDelete(item.getLabel(),post.messageType()):
 					d.addItem('delete',__language__(30141))
 				if not self.isPM():
@@ -1162,14 +1165,14 @@ class RepliesWindow(PageWindow):
 		pid = item.getProperty('post')
 		if not pid: return
 		post = self.posts.get(pid)
-		if deletePost(post,is_pm=(self.tid == 'private_messages')):
+		if deletePost(post,is_pm=self.isPM()):
 			self.fillRepliesList(self.pageData.getPageNumber())
 		
 	def openPostDialog(self,post=None):
 		if post:
 			item = self.getControl(120).getSelectedItem()
 		else:
-			if self.tid == 'private_messages':
+			if self.isPM():
 				item = None
 			else:
 				if not self.getControl(120).size(): return

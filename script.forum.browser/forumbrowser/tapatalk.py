@@ -840,7 +840,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return True
 			
 	def canDelete(self,user,target='POST'):
-		if user == self.user and target == 'PM': return True
+		if target == 'PM': return True
 		if self.forumConfig.get('can_moderate'): return True
 		return False
 	

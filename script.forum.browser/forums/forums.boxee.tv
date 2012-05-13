@@ -25,7 +25,7 @@ url:private_messages_delete=private.php?do=showpm&pmid=!PMID!
 url:private_messages_inbox=private.php?folderid=0
 
 filter:pm_message_entry=<td.+?id="m\d+".+?class="smallfont">(?P<date>\d+-\d+-\d+)</span><a href="private.php\?do=showpm&amp;pmid=(?P<pmid>\d+)">(?P<title>.+?)</a>.+?class="time">(?P<time>\d+:\d+)</span>.+?member.php\?u=(?P<userid>\d+)
-filter:pm_pmid_list=private.php\?do=showpm&amp;pmid=(?P<pmid>\d+)">
+filter:pm_pmid_list=private.php\?do=showpm&amp;pmid=(?P<pmid>\d+)"
 
 form:pm_delete_action=private.php?do=managepm
 form:pm_delete_control1=checkbox:id.deletepm=True

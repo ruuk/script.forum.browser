@@ -2,9 +2,12 @@ Forum Browser Changelog
 
 TODO:
  Short Term:
-  Use new option menus for context?
+  Fix bugs/issues
   
  Long Term:
+  Use new option menus for context?
+  Better 'Choose Forum' menu
+  Option to PM author of selected post
   Remember SSL Fail?
   View online users list
   Access to other PM boxes
@@ -26,7 +29,13 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.44
+Current Version : 0.9.45
+
+*** 0.9.45 ***
+
+Now all pm's now show delete option, not just ones created by the user
+Boxee: fixed some issues with deleting PMs
+Changed 'Quote' to 'Reply/Forward' in contex menus for PMs, and auto fill recipient when selected
 
 *** 0.9.44 ***
 

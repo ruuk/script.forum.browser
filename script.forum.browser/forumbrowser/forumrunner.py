@@ -540,7 +540,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		return True
 	
-	def canDelete(self,user,target='POST'): return user == self.user
+	def canDelete(self,user,target='POST'):
+		if target == 'PM': return True
+		return user == self.user
 	
 	def deletePrivateMessage(self,post,callback=None):
 		if not self.checkLogin(): return False

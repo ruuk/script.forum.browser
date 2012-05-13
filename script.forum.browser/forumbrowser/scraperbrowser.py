@@ -28,7 +28,7 @@ class ForumPost(forumbrowser.ForumPost):
 		forumbrowser.ForumPost.__init__(self, fb, pdict)
 			
 	def setVals(self,pdict):
-		self.setPostID(pdict.get('postid',''))
+		self.setPostID(pdict.get('postid',pdict.get('pmid','')))
 		self.date = pdict.get('date','')
 		self.userId = pdict.get('userid','')
 		self.userName = pdict.get('user') or pdict.get('guest') or 'UERROR'
@@ -520,7 +520,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			for d in cdata:
 				if folder and folder == d.get('folder'):
 					p = self.getForumPost(pdict=d)
-					p.setPostID('PM%s' % len(pms))
+					p.isPM = True
+					p.setPostID(len(pms))
 					pms.append(p)
 		callback(100,__language__(30052))
 		pms.reverse()
@@ -692,24 +693,25 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 							callback=callback)
 		
 	def deletePrivateMessage(self,post,callback=None):
-		self.deletePrivateMessageViaIndex(post, callback)
+		return self.deletePrivateMessageViaIndex(post, callback)
 		
 	def deletePrivateMessageViaIndex(self,post,callback=None):
 		html = self.readURL(self.urls.get('private_messages_inbox'),callback=callback,force_login=True)
-		if not html: return
+		if not html: return False
 		pmid_list = re.findall(self.filters.get('pm_pmid_list'),html,re.S)
 		try:
 			pmid_list.reverse()
 			pmid = pmid_list[int(post.pid)]
 		except:
-			ERROR('DELETE PM VIA INDEX ERROR')
-			return
+			err = ERROR('DELETE PM VIA INDEX ERROR')
+			post.error = err
+			return False
 			
-		self.doForm(	self.urls.get('private_messages_delete').replace('!PMID!',pmid),
-						self.forms.get('pm_delete_name'),
-						self.forms.get('pm_delete_action'),
-						controls='pm_delete_control%s',
-						callback=callback)
+		return self.doForm(	self.urls.get('private_messages_delete').replace('!PMID!',pmid),
+							self.forms.get('pm_delete_name'),
+							self.forms.get('pm_delete_action'),
+							controls='pm_delete_control%s',
+							callback=callback)
 						
 	def doForm(self,url,form_name=None,action_match=None,field_dict=None,controls=None,submit_name=None,submit_value=None,wait='1',callback=None):
 		field_dict = field_dict or {}
@@ -827,7 +829,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if target == 'POST':
 			return self.user == user and self.urls.get('deletepost')
 		else:
-			return self.user == user and self.urls.get('deletepm')
+			return bool(self.urls.get('private_messages_delete'))
 	
 	def getQuoteFormat(self):
 		return None
