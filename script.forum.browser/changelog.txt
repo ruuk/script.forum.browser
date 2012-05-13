@@ -26,7 +26,11 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.43
+Current Version : 0.9.44
+
+*** 0.9.44 ***
+
+Removed testing code
 
 *** 0.9.43 ***
 
@@ -34,7 +38,7 @@ Disabled the pulsing of the stop button over the progress bar
 Added dark overly when opening addon settings so XBMC skins with transparent settings windows are easier to see
 Fixed: when selecting forums listed in the threads view, stop button was not getting focus
 Fixed not logging in and logged in status not showing when setting passwords on boxee
-When editing a post, the post title now displays on the title button on startup
+When editing a post, the post title now displays on the title button on editor open
 Boxee: Edit posts
 Fix: Delete now shows up for private messages
 Deleting now asks if you are sure

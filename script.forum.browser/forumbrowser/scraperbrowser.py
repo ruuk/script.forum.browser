@@ -621,7 +621,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		res = self.browser.open(url)
 		#print res.info()
 		html = res.read()
-		open('/home/ruuk/test.txt','w').write(html)
+		#open('/home/ruuk/test.txt','w').write(html)
 		if self.forms.get('login_action','@%+#') in html:
 			callback(5,__language__(30100))
 			if not self.login():
