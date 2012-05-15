@@ -41,7 +41,7 @@ def testP(url):
 	return p
 	
 class DoneException(Exception): pass
-
+	
 class BaseParser(HTMLParser.HTMLParser):
 	def __init__(self):
 		self.all = []
@@ -55,6 +55,7 @@ class BaseParser(HTMLParser.HTMLParser):
 		self.tagFixRE3 = re.compile(r"(='[^']*?)'([^'=]*?' )")
 		self.tagFixRE4 = re.compile(r'(")(\w+=")')
 		self.tagFixRE5 = re.compile(r'(?<!=)"" ')
+		self.badTagRE = re.compile(r'<(?P<tag>\w*)(?: |>)(?:[^>]*?>)?.*?</(?P=tag)(?!>)')
 		self.current = None
 		self.mode = None
 		self.resetCurrent(False)
@@ -81,6 +82,7 @@ class BaseParser(HTMLParser.HTMLParser):
 	def feed(self,data):
 		#open('/home/ruuk/test2.text','w').write(data)
 		data = self.badCommentRE.sub('',data)
+		data = self.badTagRE.sub(r'\g<0>>',data)
 		data = self.tagRE.sub(self.cleanTag,data)
 		data = re.sub(r"(&)([\w\d]+;)(?=[^<]*?<)",r'%\2',data)
 		#open('/home/ruuk/test.text','w').write(data)
@@ -707,3 +709,204 @@ class VBForumParser(BaseParser):
 		ID = self.extractID('forumdisplay.php','f',data)
 		if ID: self.current['forumid'] = ID
 			
+class HTMLTag:
+	def __init__(self,tag,tag_text,attrs):
+		self.tag = tag
+		self.tagText = tag_text
+		self.attrsList = attrs
+		self.attrs = None
+		self.depth = 0
+		self.parent = None
+		self.data = ''
+		self.dataStack = []
+		self.callback = None
+		self.main = False
+		self.data = None
+		
+	def __str__(self):
+		return self.tag
+	
+	def __repr__(self):
+		return self.tagText
+	
+	def processAttrs(self):
+		self.attrs = {}
+		for a in self.attrsList: self.attrs[a[0]] = a[1]
+		
+	def getAttr(self,attr):
+		if self.attrs == None: self.processAttrs()
+		return self.attrs.get(attr,'')
+	
+	def getClasses(self):
+		cls = self.getAttr('class')
+		if not cls: return []
+		return cls.split(' ')
+
+class AdvancedParser(BaseParser):
+	def __init__(self):
+		BaseParser.__init__(self)
+		self.lastTag = None
+		self.stack = []
+		
+	def handle_starttag(self,tag,attrs):
+		tag = HTMLTag(tag,self.get_starttag_text(),attrs)
+		if self.stack: tag.parent = self.stack[-1]
+		self.stack.append(tag)
+		tag.depth = len(self.stack)
+		self.handleStartTag(tag)
+	
+	def handle_data(self,data):
+		data = data.strip()
+		if not data: return
+		data = self.revertCodes(data)
+		tag = self.stack and self.stack[-1] or None
+		if tag:
+			tag.data = data
+			tag.dataStack.append(data)
+		self.handleData(tag, data)
+	
+	def handle_endtag(self,tag):
+		if not self.stack: return
+		endTag = self.stack.pop()
+		if endTag.parent:
+			endTag.parent.dataStack += endTag.dataStack
+		if endTag.callback: endTag.callback(endTag)
+		self.handleEndTag(endTag)
+		self.lastTag = endTag
+	
+	def handleStartTag(self,tag):
+		pass
+	
+	def handleEndTag(self,tag):
+		pass
+	
+	def handleData(self,tag,data):
+		pass
+	
+class GeneralForumParser(AdvancedParser):
+	def __init__(self):
+		AdvancedParser.__init__(self)
+		self.lastForumTag = None
+		self.lastForum = None
+		self.forumDepth = 0
+		self.maxForumDepth = 0
+		self.subsSet = False
+		self.forums = []
+		self.reVB = re.compile('forumdisplay.php(?:\?|/)(?:[^"]*?f=)?(?P<id>\d+)')
+		self.rePhPBB = re.compile('viewforum.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
+		self.reMyBB = re.compile('forum-(\d+).html')
+		self.linkRE = self.reVB
+		
+	def getForums(self,html):
+		self.reset()
+		if self.reVB.search(html):
+			self.forumType = 'vb'
+		elif self.rePhPBB.search(html):
+			self.linkRE = self.rePhPBB
+			self.forumType = 'pb'
+		elif self.reMyBB.search(html):
+			self.linkRE = self.reMyBB
+			self.forumType = 'mb'
+		self.feed(html)
+		self.reset()
+		if self.subsSet: return self.forums
+		if self.maxForumDepth == 0: return self.forums 
+		forums = []
+		for f in self.forums:
+			if self.maxForumDepth - f['depth'] < 2:
+				if f['depth'] == self.maxForumDepth: f['subforum'] = True
+				del f['depth']
+				forums.append(f)
+		return forums
+		
+	def handleStartTag(self,tag):
+		pass
+	
+	def handleData(self,tag,data):
+		pass
+				
+	def handleEndTag(self,tag):
+		if tag and tag.tag == 'a':
+			href = tag.getAttr('href')
+			if href:
+				m = self.linkRE.search(href)
+				if m:
+					forum = {'forumid':m.group(1),'title':''.join(tag.dataStack),'depth':self.forumDepth}
+					for t in reversed(self.stack):
+						if t.tag in ('td','li','div'):
+							t.callback = self.show
+							break
+					if 'sub' in tag.getAttr('class') or (self.lastTag and 'sub' in self.lastTag.getAttr('class')):
+							forum['subforum'] = True
+							self.subsSet = True
+					for t in reversed(self.stack):
+						if 'subforum' in t.getAttr('class'):
+							forum['subforum'] = True
+						if t.tag in ('td','li','div'):
+							if 'forum' in t.getAttr('class'):
+								t.callback = self.show
+								if 'sub' in t.getAttr('class') or t.main:
+									forum['subforum'] = True
+									self.subsSet = True
+								t.main = True
+								t.callback = self.show
+							if self.lastForumTag and self.lastForumTag.depth + 1 < tag.depth:
+								#forum['subforum'] = True
+								self.forumDepth +=1
+								if self.forumDepth > self.maxForumDepth:
+									self.maxForumDepth = self.forumDepth
+							elif self.lastForumTag and self.lastForumTag.depth - 1 > tag.depth: 
+								#forum['subforum'] = True
+								self.forumDepth -=1
+							forum['depth'] = self.forumDepth
+							break
+					self.lastForumTag = tag
+					self.lastForum = forum
+					self.forums.append(forum)
+					#print tag.depth, forum
+	
+	def show(self,tag):
+		if len(tag.dataStack) > 1:
+			self.lastForum['description'] = tag.dataStack[1]
+
+class GeneralThreadParser(AdvancedParser):
+	def __init__(self):
+		AdvancedParser.__init__(self)
+		self.threads = []
+		self.reVB = re.compile('showthread.php(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)')
+		self.rePhPBB = re.compile('viewtopic.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
+		self.reMyBB = re.compile('thread-(\d+).html')
+		self.linkRE = self.reVB
+		self.ids = {}
+		
+	def getThreads(self,html):
+		self.reset()
+		if self.reVB.search(html): pass
+		elif self.rePhPBB.search(html): self.linkRE = self.rePhPBB
+		elif self.reMyBB.search(html): self.linkRE = self.reMyBB
+		self.feed(html)
+		self.reset()
+		return self.threads
+		
+	def handleStartTag(self,tag):
+		pass
+	
+	def handleData(self,tag,data):
+		pass
+				
+	def handleEndTag(self,tag):
+		if tag and tag.tag == 'a':
+			href = tag.getAttr('href')
+			if href:
+				m = self.linkRE.search(href)
+				if m:
+					ID = m.group(1)
+					if not ID in self.ids:
+						self.ids[ID] = 1 
+						thread = {'threadid':ID,'title':''.join(tag.dataStack)}
+						self.threads.append(thread)
+						#print tag.depth, forum
+	
+	def show(self,tag):
+		if len(tag.dataStack) > 1:
+			self.lastForum['description'] = tag.dataStack[1]

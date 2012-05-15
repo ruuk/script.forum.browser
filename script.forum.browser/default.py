@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.45'
+__version__ = '0.9.46'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1000,9 +1000,13 @@ class RepliesWindow(PageWindow):
 			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR]' + data.error,success=False)
 			return
 		elif not data.data:
-			self.setFocusId(201)
-			LOG('NO REPLIES')
-			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR] No Posts Found',success=False)
+			if data.data == None:
+				self.setFocusId(201)
+				LOG('NO REPLIES')
+				showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR] No Posts Found',success=False)
+			else:
+				self.setFocusId(201)
+				self.getControl(104).setLabel(self.isPM() and __language__(30251) or __language__(30250))
 			return
 		
 		self.empty = False
@@ -1609,6 +1613,7 @@ class ForumsWindow(BaseWindow):
 		if os.path.exists(logopath): self.getControl(250).setImage(logopath)
 			
 	def setLogo(self,logo):
+		if not logo: return
 		if getSetting('save_logos',False):
 			root, ext = os.path.splitext(logo) #@UnusedVariable
 			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
@@ -1653,15 +1658,24 @@ class ForumsWindow(BaseWindow):
 		topic = __language__(30175)
 		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self)
 		self.setPMCounts(FB.getPMCounts())
-		
-	def changeForum(self):
-		forum = askForum()
+	
+	def getGeneralForumURL(self):
+		url = doKeyboard('Enter full forum url')
+		if not url: return
+		if not url.endswith('/'): url += '/'
+		return url	
+	
+	def changeForum(self,forum=None):
+		if not forum: forum = askForum()
 		if not forum: return False
+		url = None
+		if forum == 'general':
+			url = self.getGeneralForumURL()
 		self.stopThread()
 		fid = 'Unknown'
 		if FB: fid = FB.getForumID()
 		LOG('------------------ CHANGING FORUM FROM: %s TO: %s' % (fid,forum)) 
-		if not getForumBrowser(forum): return False
+		if not getForumBrowser(forum,url=url): return False
 		if not FB: return
 		self.resetForum()
 		self.fillForumList()
@@ -1745,7 +1759,9 @@ class ForumsWindow(BaseWindow):
 		
 	def openSettings(self):
 		oldLogin = self.getUsername() + self.getPassword()
-		doSettings()
+		exp = doSettings()
+		if exp:
+			self.changeForum('general')
 		if not oldLogin == self.getUsername() + self.getPassword():
 			self.resetForum(False)
 			self.setPMCounts()
@@ -1865,6 +1881,8 @@ def doSettings():
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
+	if getSetting('experimental',False):
+		dialog.addItem('experimental','Exprimental General Browser','forum-browser-info.png','')
 	result = dialog.getResult()
 	if not result: return
 	if result == 'addfavorite': addFavorite()
@@ -1887,7 +1905,9 @@ def doSettings():
 		DEBUG = getSetting('debug',False)
 		FB.MC.resetRegex()
 		checkForSkinMods()
-	
+	elif result == 'experimental':
+		return 'experimental'
+
 def loadHelp(helpfile,as_list=False):
 	lang = xbmc.getLanguage().split(' ',1)[0]
 	addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
@@ -2607,10 +2627,20 @@ def checkPasswordEncryption():
 		LOG('Encrypting password for: ' + f)
 		passmanager.savePassword(key, user, password)
 	
-def getForumBrowser(forum=None):
+def getForumBrowser(forum=None,url=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
 	global FB
-	if forum.startswith('TT.'):
+	if forum == 'general' and not url:
+		forum = 'TT.forum.xbmc.org'
+	if url:
+		try:
+			from forumbrowser import genericparserbrowser
+			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False),url=url)
+		except:
+			err = ERROR('getForumBrowser(): General')
+			showMessage(__language__(30050),__language__(30171),err,error=True)
+			return False
+	elif forum.startswith('TT.'):
 		try:
 			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 		except:

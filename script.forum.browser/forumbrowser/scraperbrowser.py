@@ -296,16 +296,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.password = password
 		self.alwaysLogin = always
 			
-	def login(self):
-		if not self.canLogin():
-			self._loggedIn = False
-			return False
-		LOG('LOGGING IN')
+	def checkBrowser(self):
 		if not self.mechanize:
 			from webviewer import mechanize #@UnresolvedImport
 			self.mechanize = mechanize
 		if not self.browser:
 			self.browser = self.mechanize.Browser()
+			self.browser.set_handle_robots(False)
 			self.browser.addheaders = [('User-Agent','Wget/1.12')]
 #			class SanitizeHandler(mechanize.BaseHandler):
 #				def http_response(self, request, response):
@@ -318,6 +315,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 #					return response
 #
 #			self.browser.add_handler(SanitizeHandler())
+
+	def login(self):
+		if not self.canLogin():
+			self._loggedIn = False
+			return False
+		LOG('LOGGING IN')
+		self.checkBrowser()
 		response = self.browser.open(self.getURL('login'))
 		html = response.read()
 		try:
@@ -369,7 +373,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def canLogin(self):
 		return self.user and self.password
 	
-	def readURL(self,url,callback=None,force_login=False,is_html=True):
+	def readURL(self,url,callback=None,force_login=False,is_html=True,force_browser=False):
 		if not url:
 			LOG('ERROR - EMPTY URL IN readURL()')
 			return ''
@@ -380,6 +384,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if self.forms.get('login_action','@%+#') in data:
 				self.login()
 				data = self.browserReadURL(url,callback)
+		elif force_browser:
+			self.checkBrowser()
+			data = self.browserReadURL(url,callback)
 		else:
 			if not callback(5,__language__(30101)): return ''
 			req = urllib2.urlopen(url)
@@ -497,7 +504,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				return self.finish(FBData(error=xml and 'CANCEL' or 'NO MESSAGES'),donecallback)
 			folders = re.search(self.filters.get('pm_xml_folders'),xml,re.S)
 			if not folders:
-				return self.finish(FBData(error='Unable to get folders'),donecallback)
+				#return self.finish(FBData(error='Unable to get folders'),donecallback)
+				return self.finish(FBData([]),donecallback)
 			messages = re.finditer(self.filters.get('pm_xml_messages'),folders.group('inbox'),re.S)
 			pms = []
 			for m in messages:
