@@ -32,22 +32,22 @@ TODO:
 
 Current Version : 0.9.46 RC4
 
-*** 0.9.46 RC4***
+*** 0.9.46 RC4 ***
 
 When no private messages, private messages view now shows "No messages" in the title bar instead of showing an error
 Added an option in settings: 'Experimental' which enables experimental stuff. Right now it enables a WIP general forum browser
 
-*** 0.9.45 RC3***
+*** 0.9.45 RC3 ***
 
 Now all pm's now show delete option, not just ones created by the user
 Boxee: fixed some issues with deleting PMs
 Changed 'Quote' to 'Reply/Forward' in contex menus for PMs, and auto fill recipient when selected
 
-*** 0.9.44 RC2***
+*** 0.9.44 RC2 ***
 
 Removed testing code
 
-*** 0.9.43 RC1***
+*** 0.9.43 RC1 ***
 
 Disabled the pulsing of the stop button over the progress bar
 Added dark overly when opening addon settings so XBMC skins with transparent settings windows are easier to see

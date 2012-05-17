@@ -1,6 +1,6 @@
-import sys, re
-import forumbrowser, scraperbrowser, texttransform
-from forumparsers import GeneralForumParser, GeneralThreadParser
+import sys
+import forumbrowser, scraperbrowser
+from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
 
 ERROR = sys.modules["__main__"].ERROR
@@ -24,6 +24,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.forumType = 'uk'
 		self.forumParser = GeneralForumParser()
 		self.threadParser = GeneralThreadParser()
+		self.postParser = GeneralPostParser()
 		self.initialize()
 		
 	def getForumType(self):
@@ -39,10 +40,14 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	def setURLS(self):
 		if self.forumParser.forumType == 'vb':
 			self.urls['threads'] = 'forumdisplay.php?f=!FORUMID!'
-		elif self.forumParser.forumType == 'pb':
-			self.urls['threads'] = 'viewtopic.php?f=!FORUMID!'
+			self.urls['replies'] = 'showthread.php?t=!THREADID!'
+		elif self.forumParser.forumType == 'fb':
+			self.urls['threads'] = 'viewforum.php?id=!FORUMID!'
+			self.urls['replies'] = 'viewtopic.php?id=!THREADID!'
 		elif self.forumParser.forumType == 'mb':
 			self.urls['threads'] = 'forum-!FORUMID!.html'
+			self.urls['replies'] = 'thread-!THREADID!.html'
+			
 	def getForums(self,callback=None,donecallback=None,url='',subs=False):
 		if not callback: callback = self.fakeCallback
 		try:
@@ -87,6 +92,34 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		#pd = self.getPageInfo(html,page,page_type='threads')
 		pd = None
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
+	
+	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
+		if not callback: callback = self.fakeCallback
+		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
+		print url
+		html = self.readURL(url,callback=callback,force_browser=True)
+		if not html or not callback(80,__language__(30103)):
+			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
+		replies = self.postParser.getPosts(html)
+		#topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
+		#if not threadid:
+		#	threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)
+		#	threadid = threadid and threadid.group(1) or ''
+		#topic = topic and topic.group(1) or ''
+		sreplies = []
+		for r in replies:
+			try:
+				post = self.getForumPost(r)
+				sreplies.append(post)
+			except:
+				post = self.getForumPost()
+				sreplies.append(post)
+		#pd = self.getPageInfo(html,page,page_type='replies')
+		#pd.setThreadData(topic,threadid)
+		pd = None
+		callback(100,__language__(30052))
+		
+		return self.finish(FBData(sreplies,pd),donecallback)
 	
 	def subscribeThread(self,tid): return False
 		

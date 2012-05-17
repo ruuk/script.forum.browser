@@ -35,7 +35,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.avatar = pdict.get('avatar','')
 		self.status = pdict.get('status','')
 		self.title = pdict.get('title','')
-		self.message = pdict.get('message','')
+		self.message = pdict.get('message','') or ''
 		self.signature = pdict.get('signature','') or ''
 		self.online = pdict.get('online')
 		self.postNumber = pdict.get('postnumber') or None

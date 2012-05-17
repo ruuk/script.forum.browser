@@ -1663,6 +1663,7 @@ class ForumsWindow(BaseWindow):
 		url = doKeyboard('Enter full forum url')
 		if not url: return
 		if not url.endswith('/'): url += '/'
+		if not url.startswith('http'): url = 'http://' + url
 		return url	
 	
 	def changeForum(self,forum=None):

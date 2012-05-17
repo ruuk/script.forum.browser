@@ -45,7 +45,7 @@ class DoneException(Exception): pass
 class BaseParser(HTMLParser.HTMLParser):
 	def __init__(self):
 		self.all = []
-		self.revertCodesRE = re.compile(r'(%)([\w\d]+;)')
+		self.revertCodesRE = re.compile(r'(%)(#?[\w\d]+;)')
 		self.imgSrcRE = re.compile(r'src="([^"]*?)"')
 		self.aHrefRE = re.compile(r'href="([^"]*?)"')
 		self.tagRE = re.compile(r'<[^>]*?>')
@@ -56,6 +56,7 @@ class BaseParser(HTMLParser.HTMLParser):
 		self.tagFixRE4 = re.compile(r'(")(\w+=")')
 		self.tagFixRE5 = re.compile(r'(?<!=)"" ')
 		self.badTagRE = re.compile(r'<(?P<tag>\w*)(?: |>)(?:[^>]*?>)?.*?</(?P=tag)(?!>)')
+		self.scriptRemover = re.compile(r'<script[^>]*?>.*?</script>(?s)')
 		self.current = None
 		self.mode = None
 		self.resetCurrent(False)
@@ -84,8 +85,9 @@ class BaseParser(HTMLParser.HTMLParser):
 		data = self.badCommentRE.sub('',data)
 		data = self.badTagRE.sub(r'\g<0>>',data)
 		data = self.tagRE.sub(self.cleanTag,data)
-		data = re.sub(r"(&)([\w\d]+;)(?=[^<]*?<)",r'%\2',data)
-		#open('/home/ruuk/test.text','w').write(data)
+		data = self.scriptRemover.sub('',data)
+		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
+		#open('/home/ruuk/test.txt','w').write(data)
 		HTMLParser.HTMLParser.feed(self,data)
 	
 	def revertCodes(self,data):
@@ -708,7 +710,14 @@ class VBForumParser(BaseParser):
 	def setFID(self,data):
 		ID = self.extractID('forumdisplay.php','f',data)
 		if ID: self.current['forumid'] = ID
-			
+		
+class HTMLData(unicode):
+	def __new__(self,value,tag):
+		return unicode.__new__(self, value)
+		
+	def __init__(self,value,tag):
+		self.tag = tag
+		
 class HTMLTag:
 	def __init__(self,tag,tag_text,attrs):
 		self.tag = tag
@@ -719,9 +728,11 @@ class HTMLTag:
 		self.parent = None
 		self.data = ''
 		self.dataStack = []
+		self.tagStack = []
+		self.stack = []
 		self.callback = None
 		self.main = False
-		self.data = None
+		self.postID = None
 		
 	def __str__(self):
 		return self.tag
@@ -748,6 +759,16 @@ class AdvancedParser(BaseParser):
 		self.lastTag = None
 		self.stack = []
 		
+	def getRE(self,re_list=(),html=''):
+		mx = 0
+		pick = None
+		for r in re_list:
+			ct = len(r.findall(html) or [])
+			if ct > mx:
+				mx = ct
+				pick = r
+		return pick
+	
 	def handle_starttag(self,tag,attrs):
 		tag = HTMLTag(tag,self.get_starttag_text(),attrs)
 		if self.stack: tag.parent = self.stack[-1]
@@ -760,8 +781,10 @@ class AdvancedParser(BaseParser):
 		if not data: return
 		data = self.revertCodes(data)
 		tag = self.stack and self.stack[-1] or None
+		data = HTMLData(data,tag)
 		if tag:
-			tag.data = data
+			tag.data = HTMLData(tag.data + data,tag)
+			tag.stack.append(data)
 			tag.dataStack.append(data)
 		self.handleData(tag, data)
 	
@@ -770,6 +793,10 @@ class AdvancedParser(BaseParser):
 		endTag = self.stack.pop()
 		if endTag.parent:
 			endTag.parent.dataStack += endTag.dataStack
+			endTag.parent.tagStack.append(endTag)
+			endTag.parent.tagStack += endTag.tagStack
+			endTag.parent.stack.append(endTag)
+			endTag.parent.stack += endTag.stack
 		if endTag.callback: endTag.callback(endTag)
 		self.handleEndTag(endTag)
 		self.lastTag = endTag
@@ -793,17 +820,19 @@ class GeneralForumParser(AdvancedParser):
 		self.subsSet = False
 		self.forums = []
 		self.reVB = re.compile('forumdisplay.php(?:\?|/)(?:[^"]*?f=)?(?P<id>\d+)')
-		self.rePhPBB = re.compile('viewforum.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
+		self.reFluxBB = re.compile('viewforum.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
 		self.reMyBB = re.compile('forum-(\d+).html')
 		self.linkRE = self.reVB
 		
 	def getForums(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
+		self.forums = []
 		self.reset()
 		if self.reVB.search(html):
 			self.forumType = 'vb'
-		elif self.rePhPBB.search(html):
-			self.linkRE = self.rePhPBB
-			self.forumType = 'pb'
+		elif self.reFluxBB.search(html):
+			self.linkRE = self.reFluxBB
+			self.forumType = 'fb'
 		elif self.reMyBB.search(html):
 			self.linkRE = self.reMyBB
 			self.forumType = 'mb'
@@ -874,16 +903,19 @@ class GeneralThreadParser(AdvancedParser):
 		AdvancedParser.__init__(self)
 		self.threads = []
 		self.reVB = re.compile('showthread.php(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)')
-		self.rePhPBB = re.compile('viewtopic.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
+		self.reFluxBB = re.compile('viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)')
 		self.reMyBB = re.compile('thread-(\d+).html')
 		self.linkRE = self.reVB
 		self.ids = {}
 		
 	def getThreads(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
+		self.threads = []
 		self.reset()
-		if self.reVB.search(html): pass
-		elif self.rePhPBB.search(html): self.linkRE = self.rePhPBB
-		elif self.reMyBB.search(html): self.linkRE = self.reMyBB
+		#if self.reVB.search(html): pass
+		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
+		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
+		self.linkRE = self.getRE((self.reVB,self.reFluxBB,self.reMyBB), html)
 		self.feed(html)
 		self.reset()
 		return self.threads
@@ -906,6 +938,180 @@ class GeneralThreadParser(AdvancedParser):
 						thread = {'threadid':ID,'title':''.join(tag.dataStack)}
 						self.threads.append(thread)
 						#print tag.depth, forum
+	
+	def show(self,tag):
+		if len(tag.dataStack) > 1:
+			self.lastForum['description'] = tag.dataStack[1]
+			
+class GeneralPostParser(AdvancedParser):
+	def __init__(self):
+		AdvancedParser.__init__(self)
+		self.posts = []
+		self.reVB = re.compile('showpost.php(?:\?|/)(?:[^"]*?p=)?(?P<id>\d+)')
+		self.reFluxBB = re.compile('viewtopic.php?[^"]*?(?<!;)pid=(?P<id>\d+)') # http://forum.xfce.org/viewtopic.php?pid=26254#p26254
+		self.reMyBB = re.compile('post-(?P<id>\d+).html') # http://community.mybb.com/thread-2663-post-16573.html#pid16573
+		self.linkRE = self.reVB
+		self.ids = {}
+		self.lastPost = None
+		self.bottom = 999
+		self.confirmedBottom = 999
+		self.bottomTag = None
+		self.bottomTagTag = ''
+		self.lastStack = []
+		self.postREs = [	(None,re.compile('^#?\d+$')),
+							('date',re.compile('\d+-\d+-\d+')),
+							('date',re.compile('\d+(?:\w\w), \d{4}')),
+							('date',re.compile('\w+ \d{1,2}:\d{2}')),
+							('date',re.compile('[\d\w]+ \w+ ago$(?i)')),
+							('user',re.compile('(^[\w_ \.]+$)')),
+							('postcount',re.compile('posts: (.+?)(?i)')),
+							('joindate',re.compile('(?:joined|registered|join date): (.+)(?i)')),
+							('location',re.compile('location: (.+)(?i)')),
+							('reputation',re.compile('reputation: (\d+)(?i)')),
+							('reputation',re.compile('reputation:()(?i)')),
+							('digit',re.compile('^(\d+)$')),
+							(None,re.compile('post:(?i)')),
+							('postcount',re.compile('\w+: ([\d,]+)(?i)')),
+							('title',re.compile('^re: (?i)'))
+						]
+		
+	def getPosts(self,html):
+		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
+		self.posts = []
+		self.reset()
+		#if self.reVB.search(html): pass
+		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
+		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
+		self.linkRE = self.getRE((self.reVB,self.reFluxBB,self.reMyBB), html)
+		self.feed(html)
+		if not self.posts[-1].get('data'):
+			self.getLastData(self.posts[-1])
+		for p in self.posts:
+			self.setDatas(p)
+			data = self.setDatas(p)
+			p['message'] = data and '\n'.join(data)
+			if 'data' in p: del p['data']
+		self.reset()
+		return self.posts
+		
+	def getLastData(self,p):
+		pn = p.get('postnumber')
+		if not pn in self.lastStack[-1].dataStack: pn = '#' + p.get('postnumber')
+		#print pn
+		last = None
+		while self.lastStack:
+			t = self.lastStack.pop()
+			#print t.dataStack.index(pn)
+			#print t
+			if t.dataStack and t.dataStack.index(pn) > 2:
+				#print "TESF"
+				#if last: print last.dataStack
+				p['data'] = last.stack
+				break
+			last = t
+	
+	def setDatas(self,p):
+		dREs = self.postREs[:]
+		newData = []
+		last = ''
+		for d in p.get('data',[]):
+			newData,last = self.handleDataItem(d, p, dREs, newData,last)
+		return newData
+					
+	def handleDataItem(self,d,p,dREs,newData, last):
+		if isinstance(d,HTMLTag):
+			if d.tag == 'img':
+				if 'avatar' in repr(d):
+					p['avatar'] = d.getAttr('src') or ''
+#			for x in d.stack:
+#				newData,last = self.handleDataItem(x, p, dREs, newData, last)
+		else:
+			if d:
+				for i in range(0,len(dREs)):
+					val,dre = dREs[i]
+					m = dre.search(d)
+					if m:
+						if not val:
+							d = ''
+							last = ''
+						elif val == 'digit':
+							#print "TTTEEESSSTTT",last
+							if last: p[last] = m.group(0)
+						elif m.groups():
+							if not val in p:
+								p[val] = m.group(1)
+								last = val
+						else:
+							#print val
+							if not val in p: p[val] = d
+						
+						dREs.pop(i)
+						newData = []
+						break
+				else:
+					if d.tag.tag.startswith('h') or d.tag.tag == 'strong':
+						if not p.get('title'): p['title'] = d
+					elif d.lower() == 'offline':
+						p['online'] = False
+					elif d.lower() == 'online':
+						p['online'] = True
+					else:
+						newData.append(d)	
+		return newData, last
+		
+	def handleStartTag(self,tag):
+		pass
+	
+	def handleData(self,tag,data):
+		pass
+				
+	def checkPost(self,tag):
+		href = tag.getAttr('href')
+		if href:
+			m = self.linkRE.search(href)
+			if m:
+				ID = m.group(1)
+				if not ID in self.ids:
+					postnumber = ''.join(tag.dataStack)
+					if not '#' in postnumber:
+						postnumber = ''.join(self.lastTag.dataStack)
+						if not '#' in postnumber and not postnumber.isdigit(): return
+					post = {'postid':ID,'postnumber':postnumber.replace('#','')}
+					self.lastStack = self.stack[:]
+					self.ids[ID] = post
+					self.posts.append(post)
+					if self.lastPost:
+						if self.bottomTag:
+							#print self.bottomTag.dataStack
+							#print self.bottomTag.getClasses(), self.bottomTag.tag, self.bottomTag.getAttr('id')
+							self.lastPost['data'] = self.bottomTag.stack
+							self.bottomTagTag = self.bottomTag.tag
+							#print 'TEST', self.bottomTagTag, self.bottom
+							self.confirmedBottom = self.bottom
+							self.bottomTag = None
+							self.bottom = 999
+					self.lastPost = post
+					return
+				
+	def handleEndTag(self,tag):
+		if tag and tag.tag == 'a':
+			self.checkPost(tag)
+		elif self.lastPost:
+			if tag.depth < self.bottom:
+				self.bottom = tag.depth
+				self.bottomTag = tag
+			if tag.depth <= self.confirmedBottom and self.confirmedBottom < 999:
+				#print tag.tag, tag.depth, tag.getAttr('class'), tag.dataStack
+				if tag.tag == self.bottomTagTag:
+					#print "TESTESTST"
+					if tag.dataStack:
+						if not self.lastPost.get('data'):
+							self.lastPost['data'] = tag.stack
+						self.bottomTag = None
+						self.lastPost = None
+						self.confirmedBottom = 999
+						self.bottom = 999
+		
 	
 	def show(self,tag):
 		if len(tag.dataStack) > 1:
