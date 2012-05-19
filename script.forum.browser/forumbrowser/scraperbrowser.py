@@ -86,10 +86,10 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.imageFilter.findall(self.getMessage(),re.S)
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
+		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message)
 		
 	def linkURLs(self):
-		return self.MC.linkFilter.finditer(self.getMessage(),re.S)
+		return self.MC.linkFilter.finditer(self.getMessage())
 		
 	def links(self):
 		links = []
@@ -140,6 +140,11 @@ class PageData:
 				self.next = True
 				self.nextStart = start
 				self.urlMode = 'START'
+		else:
+			try:
+				self.next = int(self.page) < int(self.totalPages)
+			except:
+				pass
 		if prev_match:
 			pdict = prev_match.groupdict()
 			page = pdict.get('page')
@@ -151,7 +156,12 @@ class PageData:
 				self.prev = True
 				self.prevStart = start
 				self.urlMode = 'START'
-	
+		else:
+			try:
+				self.prev = int(self.page) > 1
+			except:
+				pass
+			
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
 		if self.urlMode != 'PAGE':
@@ -239,6 +249,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def loadForumData(self,forum):
 		self.needsLogin = True
 		fname = os.path.join(FORUMS_STATIC_PATH,forum)
+		if not os.path.exists(fname): fname = forum
 		if not os.path.exists(fname): return False
 		f = open(fname,'r')
 		data = f.read()
@@ -551,6 +562,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return self.finish(FBData(threads,pd),donecallback)
 		
 	def getPageInfo(self,html,page,page_type=''):
+		if not self.filters.get('next'): return None
 		next_page = re.search(self.filters['next'],html,re.S)
 		prev_page= None
 		if page != '1':

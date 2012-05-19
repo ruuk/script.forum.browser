@@ -1,0 +1,4 @@
+#FluxBB
+
+url:threads=viewforum.php?f=!FORUMID!
+url:replies=viewtopic.php?f=!FORUMID!&t=!THREADID!

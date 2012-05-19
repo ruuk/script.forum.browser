@@ -18,7 +18,7 @@ Remove a forum from the list of forums. For built-in forums, the forum is hidden
 Set user name and password for forums.
 
 Passwords are stored encrypted.
-Encryption options are avaialable in the addon settings under 'Advanced'.
+Encryption options are available in the addon settings under 'Advanced'.
 @item:settings
 Open the addon settings.
 @item:help

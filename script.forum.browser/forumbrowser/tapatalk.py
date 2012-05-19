@@ -647,11 +647,15 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				sreplies = []
 				if pid:
 					test = self.server.get_thread_by_post(pid,20)
-					index = test.get('position')
-					start = int((index - 1) / 20) * 20
-					page = start
-					thread = self.server.get_thread(threadid,start,start + 19)
-				else:
+					if test.get('result'):
+						index = test.get('position')
+						start = int((index - 1) / 20) * 20
+						page = start
+						thread = self.server.get_thread(threadid,start,start + 19)
+					else:
+						pid = ''
+						page = -1
+				if not pid:
 					thread = None
 					if page < 0:
 						test = self.server.get_thread(threadid,0,19)

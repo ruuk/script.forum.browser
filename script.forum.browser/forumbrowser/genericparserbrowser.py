@@ -1,9 +1,10 @@
-import sys
-import forumbrowser, scraperbrowser
+import sys, os
+import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
 
 ERROR = sys.modules["__main__"].ERROR
+FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 __language__ = sys.modules["__main__"].__language__
 
 	
@@ -11,9 +12,8 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	browserType = 'GenericParserForumBrowser'
 	
 	def __init__(self,forum,always_login=False,ftype=None,url=''):
-		forumbrowser.ForumBrowser.__init__(self, forum, always_login)
-		self.urls['base'] = url
-		self.forum = forum
+		forumbrowser.ForumBrowser.__init__(self, forum, always_login,message_converter=texttransform.BBMessageConverter)
+		self.forum = 'general'
 		self._url = url
 		self.browser = None
 		self.mechanize = None
@@ -25,10 +25,32 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.forumParser = GeneralForumParser()
 		self.threadParser = GeneralThreadParser()
 		self.postParser = GeneralPostParser()
+		self.urls = {}
+		self.filters = {}
+		self.forms = {}
+		self.formats = {}
+		
+		self.urls['base'] = url
+		self.filters.update({	'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
+								'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
+								'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
+								'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
+								'image':'\[img\](?P<url>[^\[]+)\[/img\](?is)',
+								'link':'\[url="?(?P<url>[^\]]+?)"?\](?P<text>.*?)\[/url\](?is)',
+								'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
+								'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
+								'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
+								'color_start':'\[color=?#?(?P<color>\w+)\]'
+								})
 		self.initialize()
 		
+	def getForumID(self):
+		return 'general'
+	
 	def getForumType(self):
 		return self.forumType
+	
+	def isLoggedIn(self): return False
 	
 	def getQuoteStartFormat(self):
 		forumType = self.getForumType()
@@ -37,16 +59,9 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		else:
 			return scraperbrowser.ScraperForumBrowser.getQuoteStartFormat(self)
 	
-	def setURLS(self):
-		if self.forumParser.forumType == 'vb':
-			self.urls['threads'] = 'forumdisplay.php?f=!FORUMID!'
-			self.urls['replies'] = 'showthread.php?t=!THREADID!'
-		elif self.forumParser.forumType == 'fb':
-			self.urls['threads'] = 'viewforum.php?id=!FORUMID!'
-			self.urls['replies'] = 'viewtopic.php?id=!THREADID!'
-		elif self.forumParser.forumType == 'mb':
-			self.urls['threads'] = 'forum-!FORUMID!.html'
-			self.urls['replies'] = 'thread-!THREADID!.html'
+	def doLoadForumData(self):
+		path = os.path.join(FORUMS_STATIC_PATH,'general',self.forumParser.forumType)
+		self.loadForumData(path)
 			
 	def getForums(self,callback=None,donecallback=None,url='',subs=False):
 		if not callback: callback = self.fakeCallback
@@ -62,13 +77,13 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
 		forums = self.forumParser.getForums(html)
-		self.setURLS()
+		self.doLoadForumData()
 		for f in forums:
 			f['subscribed'] = subs
 			f['is_forum'] = True
 		
 		#logo = self.getLogo(html)
-		logo = ''
+		logo = 'http://%s/favicon.ico' % self.urls.get('base','').split('://')[-1].split('/')[0]
 		#pm_counts = self.getPMCounts(html)
 		pm_counts = None
 		callback(100,__language__(30052))
@@ -78,7 +93,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
-		print url
+		#print url
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
@@ -89,14 +104,13 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if subs:
 			for t in threads: t['subscribed'] = True
 		callback(100,__language__(30052))
-		#pd = self.getPageInfo(html,page,page_type='threads')
-		pd = None
+		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 	
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
-		print url
+		#print url
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
@@ -110,13 +124,14 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		for r in replies:
 			try:
 				post = self.getForumPost(r)
+				#print post.message.encode('ascii','replace')
 				sreplies.append(post)
 			except:
+				ERROR('ERROR CREATING POST - Using blank post')
 				post = self.getForumPost()
 				sreplies.append(post)
-		#pd = self.getPageInfo(html,page,page_type='replies')
-		#pd.setThreadData(topic,threadid)
-		pd = None
+		pd = self.getPageInfo(html,page,page_type='replies')
+		if pd: pd.setThreadData('',threadid)
 		callback(100,__language__(30052))
 		
 		return self.finish(FBData(sreplies,pd),donecallback)

@@ -35,5 +35,8 @@ The list of forums. Click on a forum to open the threads window.
 Subforums are in indented, in italics and a dimmer color.
 The forum description (if available) is shown below the forums list.
 The context menu button gives options to subscribe to/unsubscribe from the selected forum.
+@item:credits=Credits
+Special thanks to John Hanselman (hasselhof) for his huge volume of testing which helped to make Forum Browser better than would have been without it.
+Also, special thanks to dj_gerbil for his help and testing.
 @item:changelog=Changelog
 Click for the Forum Browser changelog

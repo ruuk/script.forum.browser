@@ -94,7 +94,7 @@ class HTMLPageInfo:
 		except:
 			LOG('HTMLPageInfo 2: FAILED')
 		
-	def getHTML(url):
+	def getHTML(self,url):
 		opener = urllib2.build_opener()
 		o = opener.open(urllib2.Request(url,None,{'User-Agent':'Wget/1.12'}))
 		html = o.read()

@@ -1,5 +1,7 @@
 Forum Browser Changelog
 
+Special thanks to John Hanselman for all his testing which helped make Forum Browser better than would have been without it.
+
 TODO:
  Short Term:
   Fix bugs/issues
@@ -30,7 +32,13 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.46 RC4
+Current Version : 0.9.47 RC5
+
+*** 0.9.47 RC5 ***
+
+Fixed some spelling errors in the help
+Fixed a bug (well, handled a Tapatalk plugin bug) that caused a 'No Posts' error after submitting a new post.
+Experimental: Now handles Forums/Threads/Posts on VBulletin/MyBB/FluxBB/PhpBB and pagination on Vbulletin - Use at your own risk
 
 *** 0.9.46 RC4 ***
 

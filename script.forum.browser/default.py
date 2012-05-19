@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.46'
+__version__ = '0.9.47'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -90,9 +90,17 @@ def getSetting(key,default=None):
 		return setting == 'true'
 	elif isinstance(default,int):
 		return int(float(setting))
+	elif isinstance(default,list):
+		if setting: return setting.split(':!,!:')
+		else: return default
 	
 	return setting
 
+def setSetting(key,value):
+	if isinstance(value,list):
+		value = ':!,!:'.join(value)
+	__addon__.setSetting(key,value)
+	
 ######################################################################################
 # Base Window Classes
 ######################################################################################
@@ -1521,10 +1529,7 @@ class ForumsWindow(BaseWindow):
 			self.started = True
 			self.getControl(105).setVisible(True)
 			self.setFocusId(105)
-			getForumBrowser()
-			self.getControl(112).setVisible(False)
-			self.resetForum()
-			self.fillForumList(True)
+			self.startGetForumBrowser()
 		except:
 			self.setStopControl(self.getControl(105)) #In case the error happens before we do this
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
@@ -1532,6 +1537,21 @@ class ForumsWindow(BaseWindow):
 			self.endProgress() #resets the status message to the forum name
 			self.setFocusId(202)
 			raise
+		
+	def startGetForumBrowser(self,forum=None,url=None):
+		self.getControl(201).setEnabled(False)
+		self.getControl(203).setEnabled(False)
+		t = self.getThread(getForumBrowser,finishedCallback=self.endGetForumBrowser,errorCallback=self.errorCallback,name='GETFORUMBROWSER')
+		t.setArgs(forum=forum,url=url,donecallback=t.finishedCallback)
+		t.start()
+		
+	def endGetForumBrowser(self,fb):
+		global FB
+		FB = fb
+		self.getControl(112).setVisible(False)
+		self.resetForum()
+		self.fillForumList(True)
+		__addon__.setSetting('last_forum',FB.getForumID())
 		
 	def setVersion(self):
 		self.getControl(109).setLabel('v' + __version__)
@@ -1546,6 +1566,7 @@ class ForumsWindow(BaseWindow):
 		self.endProgress()
 	
 	def fillForumList(self,first=False):
+		if not FB: return
 		self.setTheme()
 		self.setFocusId(105)
 		if first and __addon__.getSetting('auto_thread_subscriptions_window') == 'true':
@@ -1604,7 +1625,7 @@ class ForumsWindow(BaseWindow):
 		if not FB.guestOK() and not FB.isLoggedIn():
 			yes = xbmcgui.Dialog().yesno('Login Required','This forum does not allow guest access.','Login required.','Set login info now?')
 			if yes:
-				setLogins(FB.getForumID())
+				setLogins()
 				self.resetForum()
 				self.fillForumList()
 		
@@ -1614,7 +1635,7 @@ class ForumsWindow(BaseWindow):
 			
 	def setLogo(self,logo):
 		if not logo: return
-		if getSetting('save_logos',False):
+		if getSetting('save_logos',False) and not FB.getForumID() == 'general':
 			root, ext = os.path.splitext(logo) #@UnusedVariable
 			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
 			if os.path.exists(logopath):
@@ -1634,6 +1655,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(249).setImage(image)
 			
 	def setPMCounts(self,pm_counts=None):
+		if not FB: return
 		disp = ''
 		if not pm_counts: pm_counts = FB.getPMCounts()
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
@@ -1660,27 +1682,54 @@ class ForumsWindow(BaseWindow):
 		self.setPMCounts(FB.getPMCounts())
 	
 	def getGeneralForumURL(self):
-		url = doKeyboard('Enter full forum url')
-		if not url: return
+		forums = getSetting('exp_general_forums',[])
+		url = None
+		if forums:
+			d = ChoiceMenu('Choose forum')
+			for f in forums: d.addItem(f,f)
+			d.addItem('new','[COLOR FF00FF00]+Add New Forum[/COLOR]')
+			d.addItem('remove','[COLOR FFFF0000]-Remove A Forum[/COLOR]')
+			url = d.getResult()
+			if not url: return
+			if url == 'remove': return self.removeGeneralURL()
+		if not url or url == 'new':
+			url = doKeyboard('Enter full forum url')
+			if not url: return
+			self.addGeneralURL(url)
 		if not url.endswith('/'): url += '/'
 		if not url.startswith('http'): url = 'http://' + url
 		return url	
 	
+	def addGeneralURL(self,url):
+		forum = url.split('://')[-1]
+		if forum.endswith('/'): forum = forum[:-1]
+		forums = getSetting('exp_general_forums',[])
+		if forum in forums: return
+		forums.append(forum)
+		setSetting('exp_general_forums',forums)
+		
+	def removeGeneralURL(self):
+		forums = getSetting('exp_general_forums',[])
+		d = ChoiceMenu('Choose forum')
+		for f in forums: d.addItem(f,f)
+		forum = d.getResult()
+		if not forum: return
+		if forum in forums: forums.pop(forums.index(forum))
+		setSetting('exp_general_forums',forums)
+		
 	def changeForum(self,forum=None):
 		if not forum: forum = askForum()
 		if not forum: return False
 		url = None
-		if forum == 'general':
+		if forum == 'experimental.general':
 			url = self.getGeneralForumURL()
+			if not url: return
+			setSetting('exp_general_forums_last_url',url)
 		self.stopThread()
 		fid = 'Unknown'
 		if FB: fid = FB.getForumID()
-		LOG('------------------ CHANGING FORUM FROM: %s TO: %s' % (fid,forum)) 
-		if not getForumBrowser(forum,url=url): return False
-		if not FB: return
-		self.resetForum()
-		self.fillForumList()
-		__addon__.setSetting('last_forum',FB.getForumID())
+		LOG('------------------ CHANGING FORUM FROM: %s TO: %s' % (fid,forum))
+		self.startGetForumBrowser(forum,url=url)
 		return True
 
 	def onFocus( self, controlId ):
@@ -1727,6 +1776,7 @@ class ForumsWindow(BaseWindow):
 				else:
 					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
 			d.addItem('refresh',__language__(30054))
+			d.addItem('help',__language__(30244))
 		finally:
 			d.cancel()
 		result = d.getResult()
@@ -1735,13 +1785,19 @@ class ForumsWindow(BaseWindow):
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
 		elif result == 'refresh':
-			self.fillForumList()
+			if FB:
+				self.fillForumList()
+			else:
+				self.startGetForumBrowser()
+		elif result == 'help':
+			showHelp('forums')
 			
 	def preClose(self):
 		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
 		return xbmcgui.Dialog().yesno('Really Exit?','Really exit?')
 		
 	def resetForum(self,hidelogo=True):
+		if not FB: return
 		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
 		self.getControl(201).setEnabled(self.hasLogin() and FB.hasSubscriptions())
 		self.getControl(203).setEnabled(self.hasLogin() and FB.hasPM())
@@ -1759,11 +1815,10 @@ class ForumsWindow(BaseWindow):
 		self.getControl(112).setVisible(FB.SSL)
 		
 	def openSettings(self):
-		oldLogin = self.getUsername() + self.getPassword()
-		exp = doSettings()
-		if exp:
-			self.changeForum('general')
-		if not oldLogin == self.getUsername() + self.getPassword():
+		oldLogin = FB and self.getUsername() + self.getPassword() or ''
+		doSettings()
+		newLogin = FB and self.getUsername() + self.getPassword() or ''
+		if not oldLogin == newLogin:
 			self.resetForum(False)
 			self.setPMCounts()
 		self.setLoggedIn()
@@ -1810,7 +1865,7 @@ def getForumPath(forumID):
 	if os.path.exists(path): return path
 	return None
 	
-def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=None):
+def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=None,hide_extra=False):
 	favs = getFavorites()
 	ft = os.listdir(FORUMS_STATIC_PATH)
 	hidden = getHiddenForums()
@@ -1838,6 +1893,7 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 				continue
 			path = getForumPath(f)
 			if not path: continue
+			if not os.path.isfile(path): continue
 			ff = open(path,'r')
 			name = ff.readline().strip('\n')[1:]
 			desc = ff.readline().strip('\n')[1:]
@@ -1847,10 +1903,14 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			logo = line.strip('\n').split('=')[-1]
 			ff.close()
 			menu.addItem(f, name,logo,desc)
+	if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
+		menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
 	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
 	return forum
 
-def setLogins(forumID=None,force_ask=False):
+def setLogins(force_ask=False):
+	forumID = None
+	if FB: forumID = FB.getForumID()
 	if not forumID or force_ask: forumID = askForum(forumID=forumID)
 	if not forumID: return
 	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forumID.replace('.','_')))
@@ -1882,8 +1942,6 @@ def doSettings():
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
-	if getSetting('experimental',False):
-		dialog.addItem('experimental','Exprimental General Browser','forum-browser-info.png','')
 	result = dialog.getResult()
 	if not result: return
 	if result == 'addfavorite': addFavorite()
@@ -1892,7 +1950,7 @@ def doSettings():
 	elif result == 'addforum': addTapatalkForum()
 	elif result == 'addonline': addForumFromOnline()
 	elif result == 'removeforum': removeForum()
-	elif result == 'setlogins': setLogins(FB.getForumID(),True)
+	elif result == 'setlogins': setLogins(True)
 #	elif result == 'register': registerForum()
 	elif result == 'help': showHelp('forums')
 	elif result == 'settings':
@@ -1906,8 +1964,6 @@ def doSettings():
 		DEBUG = getSetting('debug',False)
 		FB.MC.resetRegex()
 		checkForSkinMods()
-	elif result == 'experimental':
-		return 'experimental'
 
 def loadHelp(helpfile,as_list=False):
 	lang = xbmc.getLanguage().split(' ',1)[0]
@@ -1960,6 +2016,7 @@ def registerForum():
 	webviewer.getWebResult(url,dialog=True)
 
 def addFavorite():
+	if not FB: return
 	forum = FB.getForumID()
 	favs = getFavorites()
 	if forum in favs: return
@@ -1985,6 +2042,7 @@ def getFavorites():
 	return favs
 	
 def addTapatalkForum(current=False):
+	if not FB: return
 	dialog = xbmcgui.DialogProgress()
 	dialog.create('Add Forum')
 	dialog.update(0,'Enter Name/Address')
@@ -2128,7 +2186,7 @@ def unHideForum(forum):
 	__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
 	
 def removeForum():
-	forum = askForum(caption='Choose Forum To Remove')
+	forum = askForum(caption='Choose Forum To Remove',hide_extra=True)
 	if not forum: return
 	path = os.path.join(FORUMS_STATIC_PATH,forum)
 	if os.path.exists(path):
@@ -2611,7 +2669,7 @@ def getForumList():
 	ft2 = os.listdir(FORUMS_PATH)
 	flist = []
 	for f in ft + ft2:
-		if not f.startswith('.'):
+		if not f.startswith('.') and not f == 'general':
 			if not f in flist: flist.append(f)
 	return flist
 
@@ -2628,11 +2686,12 @@ def checkPasswordEncryption():
 		LOG('Encrypting password for: ' + f)
 		passmanager.savePassword(key, user, password)
 	
-def getForumBrowser(forum=None,url=None):
+def getForumBrowser(forum=None,url=None,donecallback=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
-	global FB
+	#global FB
 	if forum == 'general' and not url:
-		forum = 'TT.forum.xbmc.org'
+		url = getSetting('exp_general_forums_last_url')
+		if not url: forum = 'TT.forum.xbmc.org'
 	if url:
 		try:
 			from forumbrowser import genericparserbrowser
@@ -2659,6 +2718,7 @@ def getForumBrowser(forum=None,url=None):
 	else:
 		from forumbrowser import parserbrowser
 		FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+	if donecallback: donecallback(FB)
 	return True
 
 ######################################################################################

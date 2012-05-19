@@ -753,22 +753,31 @@ class HTMLTag:
 		if not cls: return []
 		return cls.split(' ')
 
+class HTMLEndTag:
+	def __init__(self,tag):
+		self.tag = tag
+		
 class AdvancedParser(BaseParser):
 	def __init__(self):
 		BaseParser.__init__(self)
 		self.lastTag = None
 		self.stack = []
-		
-	def getRE(self,re_list=(),html=''):
+		self.linkRE = None
+		self.forumType = 'uk'
+	
+	def getRE(self,html):
 		mx = 0
 		pick = None
-		for r in re_list:
+		ftpick = 'uk'
+		for ft,r in self.linkREs.items():
 			ct = len(r.findall(html) or [])
 			if ct > mx:
 				mx = ct
 				pick = r
-		return pick
-	
+				ftpick = ft
+		self.linkRE = pick
+		self.forumType = ftpick[:2]
+		
 	def handle_starttag(self,tag,attrs):
 		tag = HTMLTag(tag,self.get_starttag_text(),attrs)
 		if self.stack: tag.parent = self.stack[-1]
@@ -797,6 +806,7 @@ class AdvancedParser(BaseParser):
 			endTag.parent.tagStack += endTag.tagStack
 			endTag.parent.stack.append(endTag)
 			endTag.parent.stack += endTag.stack
+			endTag.parent.stack.append(HTMLEndTag(endTag.tag))
 		if endTag.callback: endTag.callback(endTag)
 		self.handleEndTag(endTag)
 		self.lastTag = endTag
@@ -819,23 +829,18 @@ class GeneralForumParser(AdvancedParser):
 		self.maxForumDepth = 0
 		self.subsSet = False
 		self.forums = []
-		self.reVB = re.compile('forumdisplay.php(?:\?|/)(?:[^"]*?f=)?(?P<id>\d+)')
-		self.reFluxBB = re.compile('viewforum.php?[^"]*?(?<!;)(?:f|id)=?(?P<id>\d+)')
-		self.reMyBB = re.compile('forum-(\d+).html')
-		self.linkRE = self.reVB
-		
+		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
+							'fb': re.compile('(?:^|")viewforum.php?[^"\']*?(?<!;)(?:f|id)=?(?P<id>\d+)'),
+							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
+							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)')
+						}
+		self.linkRE = None
+	
 	def getForums(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.forums = []
 		self.reset()
-		if self.reVB.search(html):
-			self.forumType = 'vb'
-		elif self.reFluxBB.search(html):
-			self.linkRE = self.reFluxBB
-			self.forumType = 'fb'
-		elif self.reMyBB.search(html):
-			self.linkRE = self.reMyBB
-			self.forumType = 'mb'
+		self.getRE(html)
 		self.feed(html)
 		self.reset()
 		if self.subsSet: return self.forums
@@ -901,44 +906,76 @@ class GeneralForumParser(AdvancedParser):
 class GeneralThreadParser(AdvancedParser):
 	def __init__(self):
 		AdvancedParser.__init__(self)
-		self.threads = []
-		self.reVB = re.compile('showthread.php(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)')
-		self.reFluxBB = re.compile('viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)')
-		self.reMyBB = re.compile('thread-(\d+).html')
+		self.reVB = re.compile('(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)')
+		self.reFluxBB = re.compile('(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)')
+		self.reMyBB = re.compile('(?:^|")thread-(?P<id>\d+).html')
+		self.rePhpBB = re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)')
 		self.linkRE = self.reVB
-		self.ids = {}
 		
+	def setDefaults(self):
+		self.threads = []
+		self.ids = {}
+		self.sticky = False
+		self.stickyTag = None
+	
+	def getRE(self,re_list=(),html=''):
+		mx = 0
+		pick = None
+		for r in re_list:
+			ct = len(r.findall(html) or [])
+			if ct > mx:
+				mx = ct
+				pick = r
+		return pick
+	
 	def getThreads(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
-		self.threads = []
+		self.setDefaults()
 		self.reset()
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
-		self.linkRE = self.getRE((self.reVB,self.reFluxBB,self.reMyBB), html)
+		self.linkRE = self.getRE((self.reVB,self.rePhpBB,self.reFluxBB,self.reMyBB), html)
 		self.feed(html)
 		self.reset()
 		return self.threads
 		
 	def handleStartTag(self,tag):
-		pass
+		if re.search('(?:^|\W|_)sticky',tag.getAttr('class')):
+			self.stickyTag = tag
 	
 	def handleData(self,tag,data):
-		pass
+		if data.strip().lower() == 'sticky:':
+			self.sticky = True
 				
 	def handleEndTag(self,tag):
+		if tag == self.stickyTag:
+			thread = self.getLastThread()
+			if thread and not thread.get('sticky'):
+				ttag = thread.get('tag')
+				for s in self.stickyTag.stack:
+					#print repr(s), repr(ttag), ' -'
+					if s == ttag:
+						thread['sticky'] = True
+						break
+			self.stickyTag = None
 		if tag and tag.tag == 'a':
 			href = tag.getAttr('href')
 			if href:
 				m = self.linkRE.search(href)
 				if m:
-					ID = m.group(1)
+					ID = m.group('id')
 					if not ID in self.ids:
-						self.ids[ID] = 1 
-						thread = {'threadid':ID,'title':''.join(tag.dataStack)}
+						self.ids[ID] = 1
+						thread = {'threadid':ID,'title':''.join(tag.dataStack),'sticky':self.sticky,'tag':tag}
+						self.sticky = False
+						#self.stickyTag = None
 						self.threads.append(thread)
 						#print tag.depth, forum
 	
+	def getLastThread(self):
+		if self.threads: return self.threads[-1]
+		
 	def show(self,tag):
 		if len(tag.dataStack) > 1:
 			self.lastForum['description'] = tag.dataStack[1]
@@ -946,11 +983,41 @@ class GeneralThreadParser(AdvancedParser):
 class GeneralPostParser(AdvancedParser):
 	def __init__(self):
 		AdvancedParser.__init__(self)
+		self.setDefaults()
+		
+		self.wsRE = re.compile('[\r\t]')
+		self.excessiveNL = re.compile('\n{2,}')
+		self.numberRE = re.compile('^([\d,]+)$')
+		
+		self.linkREs = {	'vb': re.compile('(?:^|")showpost.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
+							'vb2': re.compile('(?:^|")threads/\d+[^"\']*?p=(?P<id>\d+)'),
+							'fb': re.compile('(?:^|")viewtopic.php?[^"\']*?(?<!;)pid=(?P<id>\d+)'),
+							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+).html'),
+							'pb': re.compile('(?:^|")#p(?P<id>\d+)')
+						}
+		
+		self.postREs = [	(None,re.compile('^#?\d+$')),
+							(None,re.compile('^by$')),
+							(None,re.compile('^#$')),
+							('joindate',re.compile('^(?:joined|registered|join date)(?! user):?( .+)?(?i)')),
+							('date',re.compile('\d+-\d+-\d+')),
+							('date',re.compile('\d+(?:\w\w), \d{4}')),
+							('date',re.compile('\w+ \d{1,2}:\d{2}')),
+							('date',re.compile('\d{1,2}:\d{2} \wm(?i)')),
+							('date',re.compile('[\d\w]+ \w+ ago$(?i)')),
+							(None,re.compile('^post:(?i)')),
+							('user',re.compile('^.*\w.*$')),
+							('postcount',re.compile('^posts:?( .+?)?(?i)')),
+							('location',re.compile('^(?:location|from):?( .+)?(?i)')),
+							('reputation',re.compile('^reputation:( \d+)?(?i)')),
+							('status',re.compile('(^.{1,40}$)')),
+							('postcount',re.compile('\w+: ([\d,]+)(?i)')),
+							('title',re.compile('^re: (?i)'))
+						]
+		
+	def setDefaults(self):
 		self.posts = []
-		self.reVB = re.compile('showpost.php(?:\?|/)(?:[^"]*?p=)?(?P<id>\d+)')
-		self.reFluxBB = re.compile('viewtopic.php?[^"]*?(?<!;)pid=(?P<id>\d+)') # http://forum.xfce.org/viewtopic.php?pid=26254#p26254
-		self.reMyBB = re.compile('post-(?P<id>\d+).html') # http://community.mybb.com/thread-2663-post-16573.html#pid16573
-		self.linkRE = self.reVB
+		self.linkRE = None
 		self.ids = {}
 		self.lastPost = None
 		self.bottom = 999
@@ -958,52 +1025,40 @@ class GeneralPostParser(AdvancedParser):
 		self.bottomTag = None
 		self.bottomTagTag = ''
 		self.lastStack = []
-		self.postREs = [	(None,re.compile('^#?\d+$')),
-							('date',re.compile('\d+-\d+-\d+')),
-							('date',re.compile('\d+(?:\w\w), \d{4}')),
-							('date',re.compile('\w+ \d{1,2}:\d{2}')),
-							('date',re.compile('[\d\w]+ \w+ ago$(?i)')),
-							('user',re.compile('(^[\w_ \.]+$)')),
-							('postcount',re.compile('posts: (.+?)(?i)')),
-							('joindate',re.compile('(?:joined|registered|join date): (.+)(?i)')),
-							('location',re.compile('location: (.+)(?i)')),
-							('reputation',re.compile('reputation: (\d+)(?i)')),
-							('reputation',re.compile('reputation:()(?i)')),
-							('digit',re.compile('^(\d+)$')),
-							(None,re.compile('post:(?i)')),
-							('postcount',re.compile('\w+: ([\d,]+)(?i)')),
-							('title',re.compile('^re: (?i)'))
-						]
+		self.forumType = 'uk'
+		self.lastUnset = ''
 		
 	def getPosts(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
-		self.posts = []
+		self.setDefaults()
 		self.reset()
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
-		self.linkRE = self.getRE((self.reVB,self.reFluxBB,self.reMyBB), html)
+		self.getRE(html)
 		self.feed(html)
 		if not self.posts[-1].get('data'):
 			self.getLastData(self.posts[-1])
 		for p in self.posts:
-			self.setDatas(p)
 			data = self.setDatas(p)
-			p['message'] = data and '\n'.join(data)
+			p['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
 			if 'data' in p: del p['data']
+			
 		self.reset()
 		return self.posts
 		
 	def getLastData(self,p):
-		pn = p.get('postnumber')
-		if not pn in self.lastStack[-1].dataStack: pn = '#' + p.get('postnumber')
+		tag = p.get('tag')
+		if not tag: return
+#		pn = p.get('postnumber')
+#		if not pn in self.lastStack[-1].dataStack: pn = '#' + p.get('postnumber')
+#		if not pn in self.lastStack[-1].dataStack: return #TODO: Need to fix this for Phpbb
 		#print pn
 		last = None
 		while self.lastStack:
 			t = self.lastStack.pop()
-			#print t.dataStack.index(pn)
 			#print t
-			if t.dataStack and t.dataStack.index(pn) > 2:
+			if t.stack and t.stack.index(tag) > 8:
 				#print "TESF"
 				#if last: print last.dataStack
 				p['data'] = last.stack
@@ -1012,8 +1067,10 @@ class GeneralPostParser(AdvancedParser):
 	
 	def setDatas(self,p):
 		dREs = self.postREs[:]
+		if self.forumType == 'pb': dREs.pop(0)
 		newData = []
 		last = ''
+		self.lastUnset = ''
 		for d in p.get('data',[]):
 			newData,last = self.handleDataItem(d, p, dREs, newData,last)
 		return newData
@@ -1021,40 +1078,112 @@ class GeneralPostParser(AdvancedParser):
 	def handleDataItem(self,d,p,dREs,newData, last):
 		if isinstance(d,HTMLTag):
 			if d.tag == 'img':
+				src = d.getAttr('src')
 				if 'avatar' in repr(d):
-					p['avatar'] = d.getAttr('src') or ''
+					p['avatar'] = src or ''
+				elif 'offline' in repr(d):
+					p['online'] = False
+				elif 'online' in src:
+					p['online'] = True
+				elif src.startswith('http'):
+					newData.append('[img]'+src+'[/img]')
+			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre'):
+				newData.append('\n')
+			elif d.tag == 'li':
+				newData.append('    * ') 
+				
 #			for x in d.stack:
 #				newData,last = self.handleDataItem(x, p, dREs, newData, last)
+		elif isinstance(d,HTMLEndTag):
+			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br'):
+				newData.append('\n')
 		else:
-			if d:
+			if d.strip():
+				if d.tag == p.get('usedtag'): return newData, last
+				#print d.encode('ascii','replace')
 				for i in range(0,len(dREs)):
 					val,dre = dREs[i]
-					m = dre.search(d)
+					dstrip = d.strip()
+					m = dre.search(dstrip)
 					if m:
+						#print d.encode('ascii','replace')
 						if not val:
+							#print 'n ' + d.encode('ascii','replace')
 							d = ''
 							last = ''
-						elif val == 'digit':
-							#print "TTTEEESSSTTT",last
-							if last: p[last] = m.group(0)
-						elif m.groups():
+						elif val == 'status':
+							#print 's ' + d.encode('ascii','replace')
+							user = m.group(1)
+							if last == 'user' and not val in p and re.search('\w',d) and not d.tag.tag == 'a' and user != p.get('user',''):
+								#print user.encode('ascii','replace') + ' : ' + p.get('user','').encode('ascii','replace')
+								p[val] = user
+							else:
+								if user == p.get('user'):
+									last = 'user'
+									break
+								continue
+#						elif val == 'user':
+#							if not val in p and not re.search('\d+-\d+-\d+',d) and not re.search('\d+:\d+',d):
+#								p[val] = d
+#							else:
+#								continue
+						elif val == 'date':
+							#print 'd ' + d.encode('ascii','replace')
 							if not val in p:
-								p[val] = m.group(1)
-								last = val
+								p[val] = dstrip
+							elif p[val].endswith(','):
+								p[val] += dstrip
+							elif self.lastUnset:
+								continue
+							else:
+								newData.append(d)
+								break
+						elif m.groups():
+							#print 'g ' + d.encode('ascii','replace')
+							if not val in p:
+								mg1 = m.group(1)
+								if mg1: mg1 = mg1.strip()
+								p[val] = mg1
+								if not p[val]: last = val
+								if not mg1: self.lastUnset = val
+							else:
+								continue
 						else:
-							#print val
-							if not val in p: p[val] = d
+							#print 'ng ' + d.encode('ascii','replace')
+							if not val in p:
+								p[val] = dstrip
+							else:
+								continue
 						
 						dREs.pop(i)
-						newData = []
+						#if self.forumType != 'pb': newData = []
+						#print d.encode('ascii','replace')
+						last = val
 						break
 				else:
-					if d.tag.tag.startswith('h') or d.tag.tag == 'strong':
-						if not p.get('title'): p['title'] = d
+					if self.lastUnset:
+							#print 'd ' + d.encode('ascii','replace')
+						#print d.encode('ascii','replace') + self.lastUnset
+						p[self.lastUnset] = d.strip()
+						self.lastUnset = ''
+					elif d.tag.tag.startswith('h') or d.tag.tag == 'strong':
+						if not p.get('title'):
+							p['title'] = d
+							#if self.forumType != 'pb': newData = []
+						else:
+							newData.append(d)
 					elif d.lower() == 'offline':
 						p['online'] = False
 					elif d.lower() == 'online':
 						p['online'] = True
+					elif d.tag.tag == 'a':
+						href = d.tag.getAttr('href')
+						if href:
+							newData.append('[url='+href+']'+d+'[/url]')
+						else:
+							newData.append(d)
+					elif d.tag.tag == 'li':
+						newData.append(d + '\n')
 					else:
 						newData.append(d)	
 		return newData, last
@@ -1072,11 +1201,23 @@ class GeneralPostParser(AdvancedParser):
 			if m:
 				ID = m.group(1)
 				if not ID in self.ids:
+					usedTag = None
 					postnumber = ''.join(tag.dataStack)
-					if not '#' in postnumber:
+					title = postnumber
+					if not '#' in postnumber and not postnumber.isdigit():
 						postnumber = ''.join(self.lastTag.dataStack)
-						if not '#' in postnumber and not postnumber.isdigit(): return
-					post = {'postid':ID,'postnumber':postnumber.replace('#','')}
+					if not '#' in postnumber and not postnumber.isdigit():
+						if self.forumType != 'pb': return
+						if not title:
+							title = postnumber
+							usedTag = self.lastTag
+						else:
+							usedTag = tag
+						postnumber = ''
+							
+					post = {'postid':ID,'postnumber':postnumber.replace('#',''),'usedtag':usedTag,'tag':tag}
+					if title and not postnumber: post['title'] = title
+					if self.forumType == 'pb': post['status'] = ' '
 					self.lastStack = self.stack[:]
 					self.ids[ID] = post
 					self.posts.append(post)
