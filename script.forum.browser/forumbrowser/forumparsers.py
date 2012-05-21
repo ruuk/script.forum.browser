@@ -87,7 +87,7 @@ class BaseParser(HTMLParser.HTMLParser):
 		data = self.tagRE.sub(self.cleanTag,data)
 		data = self.scriptRemover.sub('',data)
 		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
-		#open('/home/ruuk/test.txt','w').write(data)
+		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
 		HTMLParser.HTMLParser.feed(self,data)
 	
 	def revertCodes(self,data):
@@ -719,6 +719,7 @@ class HTMLData(unicode):
 		self.tag = tag
 		
 class HTMLTag:
+	revertCodesRE = re.compile(r'(%)(#?[\w\d]+;)')
 	def __init__(self,tag,tag_text,attrs):
 		self.tag = tag
 		self.tagText = tag_text
@@ -742,7 +743,7 @@ class HTMLTag:
 	
 	def processAttrs(self):
 		self.attrs = {}
-		for a in self.attrsList: self.attrs[a[0]] = a[1]
+		for a in self.attrsList: self.attrs[a[0]] = self.revertCodes(a[1])
 		
 	def getAttr(self,attr):
 		if self.attrs == None: self.processAttrs()
@@ -752,6 +753,9 @@ class HTMLTag:
 		cls = self.getAttr('class')
 		if not cls: return []
 		return cls.split(' ')
+
+	def revertCodes(self, data):
+		return self.revertCodesRE.sub(r'&\2', data or '')
 
 class HTMLEndTag:
 	def __init__(self,tag):
@@ -764,6 +768,8 @@ class AdvancedParser(BaseParser):
 		self.stack = []
 		self.linkRE = None
 		self.forumType = 'uk'
+		self.isGeneric = False
+		self.dataCleanerRE = re.compile('[\n\r\t]')
 	
 	def getRE(self,html):
 		mx = 0
@@ -775,8 +781,16 @@ class AdvancedParser(BaseParser):
 				mx = ct
 				pick = r
 				ftpick = ft
+		if not pick:
+			for ft,r in self.genericLinkREs.items():
+				ct = len(r.findall(html) or [])
+				if ct > mx:
+					mx = ct
+					pick = r
+					ftpick = ft
 		self.linkRE = pick
 		self.forumType = ftpick[:2]
+		self.isGeneric = self.forumType[1].isdigit()
 		
 	def handle_starttag(self,tag,attrs):
 		tag = HTMLTag(tag,self.get_starttag_text(),attrs)
@@ -786,9 +800,8 @@ class AdvancedParser(BaseParser):
 		self.handleStartTag(tag)
 	
 	def handle_data(self,data):
-		data = data.strip()
-		if not data: return
-		data = self.revertCodes(data)
+		if not data.strip(): return
+		data = self.dataCleanerRE.sub('',self.revertCodes(data))
 		tag = self.stack and self.stack[-1] or None
 		data = HTMLData(data,tag)
 		if tag:
@@ -832,8 +845,11 @@ class GeneralForumParser(AdvancedParser):
 		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
 							'fb': re.compile('(?:^|")viewforum.php?[^"\']*?(?<!;)(?:f|id)=?(?P<id>\d+)'),
 							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
-							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)')
+							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)'),
+							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
 						}
+		
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?:f|id|forumid|fid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
 		self.linkRE = None
 	
 	def getForums(self,html):
@@ -844,10 +860,13 @@ class GeneralForumParser(AdvancedParser):
 		self.feed(html)
 		self.reset()
 		if self.subsSet: return self.forums
-		if self.maxForumDepth == 0: return self.forums 
+		if self.maxForumDepth == 0: return self.forums
+		keepAll = False
+		if self.isGeneric:
+			keepAll = True
 		forums = []
 		for f in self.forums:
-			if self.maxForumDepth - f['depth'] < 2:
+			if self.maxForumDepth - f['depth'] < 2 or keepAll:
 				if f['depth'] == self.maxForumDepth: f['subforum'] = True
 				del f['depth']
 				forums.append(f)
@@ -865,7 +884,8 @@ class GeneralForumParser(AdvancedParser):
 			if href:
 				m = self.linkRE.search(href)
 				if m:
-					forum = {'forumid':m.group(1),'title':''.join(tag.dataStack),'depth':self.forumDepth}
+					mdict = m.groupdict()
+					forum = {'forumid':mdict.get('id',''),'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url','')}
 					for t in reversed(self.stack):
 						if t.tag in ('td','li','div'):
 							t.callback = self.show
@@ -906,27 +926,21 @@ class GeneralForumParser(AdvancedParser):
 class GeneralThreadParser(AdvancedParser):
 	def __init__(self):
 		AdvancedParser.__init__(self)
-		self.reVB = re.compile('(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)')
-		self.reFluxBB = re.compile('(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)')
-		self.reMyBB = re.compile('(?:^|")thread-(?P<id>\d+).html')
-		self.rePhpBB = re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)')
-		self.linkRE = self.reVB
+		self.linkREs = {	'vb':re.compile('(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)'),
+							'fb':re.compile('(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)'),
+							'mb':re.compile('(?:^|")thread-(?P<id>\d+).html'),
+							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
+							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
+						}
+		
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
+		self.linkRE = None
 		
 	def setDefaults(self):
 		self.threads = []
 		self.ids = {}
 		self.sticky = False
 		self.stickyTag = None
-	
-	def getRE(self,re_list=(),html=''):
-		mx = 0
-		pick = None
-		for r in re_list:
-			ct = len(r.findall(html) or [])
-			if ct > mx:
-				mx = ct
-				pick = r
-		return pick
 	
 	def getThreads(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
@@ -935,7 +949,7 @@ class GeneralThreadParser(AdvancedParser):
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
-		self.linkRE = self.getRE((self.reVB,self.rePhpBB,self.reFluxBB,self.reMyBB), html)
+		self.getRE(html)
 		self.feed(html)
 		self.reset()
 		return self.threads
@@ -945,7 +959,7 @@ class GeneralThreadParser(AdvancedParser):
 			self.stickyTag = tag
 	
 	def handleData(self,tag,data):
-		if data.strip().lower() == 'sticky:':
+		if data.strip().lower() == 'sticky:' or data.strip().lower() == 'pinned': #pinned for ipboard
 			self.sticky = True
 				
 	def handleEndTag(self,tag):
@@ -964,14 +978,21 @@ class GeneralThreadParser(AdvancedParser):
 			if href:
 				m = self.linkRE.search(href)
 				if m:
-					ID = m.group('id')
+					mdict = m.groupdict()
+					ID = mdict.get('id')
 					if not ID in self.ids:
 						self.ids[ID] = 1
-						thread = {'threadid':ID,'title':''.join(tag.dataStack),'sticky':self.sticky,'tag':tag}
+						thread = {'threadid':ID,'title':''.join(tag.dataStack),'sticky':self.sticky,'tag':tag,'url':mdict.get('url')}
 						self.sticky = False
 						#self.stickyTag = None
 						self.threads.append(thread)
 						#print tag.depth, forum
+					elif self.isGeneric:
+						if self.threads:
+							ds = ''.join(tag.dataStack)
+							if re.search('\w',ds) and not re.match('^[\d|W]+$',ds):
+								#print ds.encode('ascii','replace')
+								self.threads[-1]['title'] += ds
 	
 	def getLastThread(self):
 		if self.threads: return self.threads[-1]
@@ -989,11 +1010,17 @@ class GeneralPostParser(AdvancedParser):
 		self.excessiveNL = re.compile('\n{2,}')
 		self.numberRE = re.compile('^([\d,]+)$')
 		
-		self.linkREs = {	'vb': re.compile('(?:^|")showpost.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
-							'vb2': re.compile('(?:^|")threads/\d+[^"\']*?p=(?P<id>\d+)'),
-							'fb': re.compile('(?:^|")viewtopic.php?[^"\']*?(?<!;)pid=(?P<id>\d+)'),
-							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+).html'),
-							'pb': re.compile('(?:^|")#p(?P<id>\d+)')
+		self.linkREs = {	'vb': re.compile('(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
+							'vb2': re.compile('(?:^|")(?:showthread\.php\?|threads/)\d+[^"\']*?p=(?P<id>\d+)'),
+							'fb': re.compile('(?:^|")viewtopic\.php?[^"\']*?(?<!;)pid=(?P<id>\d+)'),
+							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
+							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
+							'ip':re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
+						}
+		
+		self.genericLinkREs = { 'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?post\w*\.php\?[^"\']*?(?:p|id|postid|pid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
+								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?member\.php\?\w=\d+[^"\']*?)(?:$|"|\')'),
+								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?pm\.php\?\w=\d+[^"\']*?)(?:$|"|\')')
 						}
 		
 		self.postREs = [	(None,re.compile('^#?\d+$')),
@@ -1005,9 +1032,11 @@ class GeneralPostParser(AdvancedParser):
 							('date',re.compile('\w+ \d{1,2}:\d{2}')),
 							('date',re.compile('\d{1,2}:\d{2} \wm(?i)')),
 							('date',re.compile('[\d\w]+ \w+ ago$(?i)')),
+							('date',re.compile('\d{1,2}\w\w \w+ \d+')),
 							(None,re.compile('^post:(?i)')),
 							('user',re.compile('^.*\w.*$')),
-							('postcount',re.compile('^posts:?( .+?)?(?i)')),
+							('postcount',re.compile('^posts:?( [\d,]+)?(?i)')),
+							('postcount',re.compile('^([\d,]+) posts(?i)')),
 							('location',re.compile('^(?:location|from):?( .+)?(?i)')),
 							('reputation',re.compile('^reputation:( \d+)?(?i)')),
 							('status',re.compile('(^.{1,40}$)')),
@@ -1036,6 +1065,7 @@ class GeneralPostParser(AdvancedParser):
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
 		self.getRE(html)
+		print self.forumType
 		self.feed(html)
 		if not self.posts[-1].get('data'):
 			self.getLastData(self.posts[-1])
@@ -1050,15 +1080,11 @@ class GeneralPostParser(AdvancedParser):
 	def getLastData(self,p):
 		tag = p.get('tag')
 		if not tag: return
-#		pn = p.get('postnumber')
-#		if not pn in self.lastStack[-1].dataStack: pn = '#' + p.get('postnumber')
-#		if not pn in self.lastStack[-1].dataStack: return #TODO: Need to fix this for Phpbb
-		#print pn
 		last = None
 		while self.lastStack:
 			t = self.lastStack.pop()
-			#print t
-			if t.stack and t.stack.index(tag) > 8:
+			#print t.stack.index(tag)
+			if last and t.stack and tag in t.stack and t.stack.index(tag) > 12:
 				#print "TESF"
 				#if last: print last.dataStack
 				p['data'] = last.stack
@@ -1079,14 +1105,14 @@ class GeneralPostParser(AdvancedParser):
 		if isinstance(d,HTMLTag):
 			if d.tag == 'img':
 				src = d.getAttr('src')
-				if 'avatar' in repr(d):
+				if 'avatar' in repr(d).lower():
 					p['avatar'] = src or ''
 				elif 'offline' in repr(d):
 					p['online'] = False
 				elif 'online' in src:
 					p['online'] = True
 				elif src.startswith('http'):
-					newData.append('[img]'+src+'[/img]')
+					newData.append(' [img]'+src+'[/img] ')
 			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre'):
 				newData.append('\n')
 			elif d.tag == 'li':
@@ -1207,7 +1233,7 @@ class GeneralPostParser(AdvancedParser):
 					if not '#' in postnumber and not postnumber.isdigit():
 						postnumber = ''.join(self.lastTag.dataStack)
 					if not '#' in postnumber and not postnumber.isdigit():
-						if self.forumType != 'pb': return
+						if self.forumType != 'pb' and not self.isGeneric: return
 						if not title:
 							title = postnumber
 							usedTag = self.lastTag

@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.47'
+__version__ = '0.9.48'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -843,7 +843,8 @@ class MessageWindow(BaseWindow):
 			pm = FB.getPostForEdit(self.post)
 			pm.tid = self.post.tid
 			if openPostDialog(editPM=pm):
-				self.action = forumbrowser.Action('REFRESH')
+				self.action = forumbrowser.Action('REFRESH-REOPEN')
+				self.action.pid = pm.pid
 				self.close()
 		elif idx == hlp:
 			showHelp('message')
@@ -919,6 +920,7 @@ class RepliesWindow(PageWindow):
 		PageWindow.__init__( self,total_items=int(kwargs.get('reply_count',0)),*args, **kwargs )
 		self.pageData.isReplies = True
 		self.threadItem = item = kwargs.get('item')
+		self.dontOpenPD = False
 		if item:
 			self.tid = item.getProperty('id')
 			self.lastid = item.getProperty('lastid')
@@ -1063,7 +1065,9 @@ class RepliesWindow(PageWindow):
 			showMessage(__language__(30050),__language__(30133),error=True)
 			raise
 		#xbmcgui.unlock()
-		if select > -1: self.postSelected(itemindex=select)
+		if select > -1 and not self.dontOpenPD:
+			self.dontOpenPD = False
+			self.postSelected(itemindex=select)
 		
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		self.pid = ''
@@ -1096,6 +1100,9 @@ class RepliesWindow(PageWindow):
 				if w.action.pid: self.showThread(nopage=True)
 				else: self.showThread()
 			elif w.action.action == 'REFRESH':
+				self.fillRepliesList(self.pageData.getPageNumber())
+			elif w.action.action == 'REFRESH-REOPEN':
+				self.pid = w.action.pid
 				self.fillRepliesList(self.pageData.getPageNumber())
 			elif w.action.action == 'GOTOPOST':
 				self.firstRun = True
@@ -1157,6 +1164,8 @@ class RepliesWindow(PageWindow):
 			pm = FB.getPostForEdit(post)
 			pm.tid = self.tid
 			if openPostDialog(editPM=pm):
+				self.pid = pm.pid
+				self.dontOpenPD = True
 				self.fillRepliesList(self.pageData.getPageNumber())
 		elif result == 'delete':
 			self.stopThread()
@@ -1558,7 +1567,7 @@ class ForumsWindow(BaseWindow):
 		
 	def setTheme(self):
 		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30170))
-		self.getControl(104).setLabel('[B]%s[/B]' % FB.forum)
+		self.getControl(104).setLabel('[B]%s[/B]' % FB.getDisplayName())
 		
 	def errorCallback(self,error):
 		showMessage(__language__(30050),__language__(30171),error.message,error=True)
@@ -1609,7 +1618,7 @@ class ForumsWindow(BaseWindow):
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
 				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
-				item.setProperty("id",fid)
+				item.setProperty("id",str(fid))
 				if fdict.get('new_post'): item.setProperty('unread','unread')
 				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)

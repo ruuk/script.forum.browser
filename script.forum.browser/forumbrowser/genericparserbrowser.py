@@ -3,6 +3,7 @@ import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
 
+LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 __language__ = sys.modules["__main__"].__language__
@@ -47,6 +48,11 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	def getForumID(self):
 		return 'general'
 	
+	def getDisplayName(self):
+		name = self._url.split('://')[-1].split('/')[0]
+		if name.startswith('www.'): name = name[4:]
+		return name
+	
 	def getForumType(self):
 		return self.forumType
 	
@@ -77,6 +83,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
 		forums = self.forumParser.getForums(html)
+		LOG('Detected Forum Type: ' + self.forumParser.forumType)
 		self.doLoadForumData()
 		for f in forums:
 			f['subscribed'] = subs
@@ -92,8 +99,19 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
 		if not callback: callback = self.fakeCallback
-		url = self.getPageUrl(page,'threads',fid=forumid)
-		#print url
+		url = None
+		if self.forumParser.isGeneric:
+			for f in self.forumParser.forums:
+				if forumid == f.get('forumid'):
+					url = f.get('url')
+					if not url: break
+					if not url.startswith('http'):
+						if url.startswith('/'): url = url[1:]
+						url = self._url + url
+					break
+					
+		if not url: url = self.getPageUrl(page,'threads',fid=forumid)
+		LOG('Forum URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
@@ -109,8 +127,18 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
-		#print url
+		url = None
+		if self.threadParser.isGeneric:
+			for f in self.threadParser.threads:
+				if threadid == f.get('threadid'):
+					url = f.get('url')
+					if not url: break
+					if not url.startswith('http'):
+						if url.startswith('/'): url = url[1:]
+						url = self._url + url
+					break
+		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
+		LOG('Thread URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)

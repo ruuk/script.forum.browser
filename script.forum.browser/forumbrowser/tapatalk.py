@@ -80,6 +80,7 @@ class CookieTransport(xmlrpclib.Transport):
 			except httplib.BadStatusLine: #close after we sent request
 				if i:
 					raise
+			self._connection = None #ADDED by ruuk - make new connection in case the old connection object is in a bad state
 
 	def single_request(self, host, handler, request_body, verbose=0):
 		# issue XML-RPC request
@@ -208,6 +209,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.signature = ''
 			
 	def setUserInfo(self,info):
+		if not info: return
 		self.userInfo = info
 		self.status = str(info.get('display_text',''))
 		self.activity = str(info.get('current_activity',''))
@@ -394,10 +396,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.forum = forum
 		self.transport = CookieTransport()
 		url = self._url
-		if __addon__.getSetting('enable_ssl') == 'true':
-			LOG('Enabling SSL')
-			url = url.replace('http://','https://')
-			self.SSL = True
+		#if __addon__.getSetting('enable_ssl') == 'true':
+		#	LOG('Enabling SSL')
+		#	url = url.replace('http://','https://')
+		#	self.SSL = True
 		self.server = xmlrpclib.ServerProxy(url,transport=self.transport)
 		self.getForumConfig()
 		return True
@@ -703,7 +705,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 		while True:
 			if not callback(20,self.lang(30102)): break
-			pmInfo = self.getPMCounts(20)
+			try:
+				pmInfo = self.getPMCounts(20)
+			except:
+				em = ERROR('ERROR GETTING PRIVATE MESSAGES - getPMCounts()')
+				callback(-1,'%s' % em)
+				return self.finish(FBData(error=em),donecallback)
 			if not pmInfo: break
 			boxid = pmInfo.get('boxid')
 			if not boxid: break
@@ -721,8 +728,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				p['boxid'] = boxid
 				fp = self.getForumPost(p)
 				if not fp.userName in infos:
-					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
-				fp.setUserInfo(infos[fp.userName])
+					try:
+						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+					except:
+						ERROR('Failed to get user info')
+						break
+				fp.setUserInfo(infos.get(fp.userName))
 				fp.isPM = True
 				pms.append(fp)
 			

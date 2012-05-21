@@ -545,6 +545,8 @@ class ForumBrowser:
 	def getForumID(self):
 		return self.prefix + self.forum
 	
+	def getDisplayName(self): return self.forum
+	
 	def resetBrowser(self): pass
 		
 	def loadForumData(self,fname):

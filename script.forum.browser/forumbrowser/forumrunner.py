@@ -164,19 +164,24 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		self.needsLogin = True
 		if not self._url:
 			self._url = 'http://%s/forumrunner/request.php' % self.forum
-		url = self._url
-		if __addon__.getSetting('enable_ssl') == 'true' and not __addon__.getSetting('forumrunner_disable_ssl') == 'true':
-			LOG('Enabling SSL')
-			url = url.replace('http://','https://')
-		self.client = ForumrunnerClient(url)
-		try:
-			result = self.client.version()
-			self.SSL = True
-		except urllib2.URLError:
-			LOG('Falling back to normal http')
-			self.client = ForumrunnerClient(self._url)
-			result = self.client.version()
-			self.SSL = False
+#		url = self._url
+#		self.client = None
+#		result = None
+#		if __addon__.getSetting('enable_ssl') == 'true' and not __addon__.getSetting('forumrunner_disable_ssl') == 'true':
+#			LOG('Enabling SSL')
+#			url = url.replace('http://','https://')
+#			self.client = ForumrunnerClient(url)
+#			try:
+#				result = self.client.version()
+#				self.SSL = True
+#			except urllib2.URLError:
+#				self.client = None
+#				LOG('Falling back to normal http')
+#		
+#		if not self.client:
+		self.client = ForumrunnerClient(self._url)
+		result = self.client.version()
+		self.SSL = False
 			
 		self.platform = result.get('platform')
 		self.charset = result.get('charset')

@@ -32,13 +32,23 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.47 RC5
+Current Version : 0.9.48 RC6
+
+*** 0.9.48 RC6 ***
+
+Removed 'Enable SSL' settings and SSL usage - I found it wasn't actually using an SSL connection, and when I fixed it found that none of the forums worked via SSL
+Experimental: Now handles Forums/Threads/Posts on IP.Board also added some generic forum type handling (still working on it).
+After editing a post from the posts view, returns focus to the same post after refresh. In full post view, re-opens the post after refresh.
+Improved error handling and error messages when viewing private messages
 
 *** 0.9.47 RC5 ***
 
 Fixed some spelling errors in the help
 Fixed a bug (well, handled a Tapatalk plugin bug) that caused a 'No Posts' error after submitting a new post.
+Made initial forum setup/connection threaded so it is stoppable like the rest
+
 Experimental: Now handles Forums/Threads/Posts on VBulletin/MyBB/FluxBB/PhpBB and pagination on Vbulletin - Use at your own risk
+Experimental: Moved 'General Forum Browser' option to bottom of 'Change Forum' menu, and added a saved list with add/remove options
 
 *** 0.9.46 RC4 ***
 
