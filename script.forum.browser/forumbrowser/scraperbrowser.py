@@ -65,7 +65,9 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.tagFilter.sub('',self.userName)
 	
 	def getMessage(self):
-		return self.message + self.signature
+		sig = ''
+		if self.signature: sig = '\n__________\n' + self.signature
+		return self.message + sig
 	
 	def messageAsText(self):
 		return self.messageToText(self.getMessage())

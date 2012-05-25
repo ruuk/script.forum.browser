@@ -423,6 +423,7 @@ class BBMessageConverter(MessageConverter):
 		self.bulletedFilter = re.compile('\[list\](.*?)\[/list\](?i)')
 		self.kissingTagFilter = re.compile('(\[/\w+\])(\[\w+\])')
 		self.listItemFilter = re.compile('\[\*\]')
+		self.underlineFilter = re.compile('\[/?u\](?i)')
 		self.setReplaces()
 		self.resetRegex()
 	
@@ -501,6 +502,7 @@ class BBMessageConverter(MessageConverter):
 		html = html.replace('[hr]',self.hrReplace)
 		html = self.removeNested(html,'\[/?B\]','[B]')
 		html = self.removeNested(html,'\[/?I\]','[I]')
+		html = self.underlineFilter.sub('_',html)
 		html = self.bulletedFilter.sub(self.processBulletedList,html)
 		html = self.numberedFilter.sub(self.processOrderedList,html)
 		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary

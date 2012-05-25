@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.48'
+__version__ = '0.9.49'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -82,7 +82,7 @@ from forumbrowser import forumbrowser
 from forumbrowser import texttransform
 from crypto import passmanager
 from forumbrowser import tapatalk
-
+from video import WebVideo
 def getSetting(key,default=None):
 	setting = __addon__.getSetting(key)
 	if not setting: return default
@@ -276,11 +276,10 @@ class ThreadWindow:
 			self._currentThread = None
 			if self._endCommand: self._endCommand()
 		
-class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
+class BaseWindowFunctions(ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''		
 		ThreadWindow.__init__(self)
-		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onClick( self, controlID ):
 		return False
@@ -309,7 +308,23 @@ class BaseWindow(xbmcgui.WindowXMLDialog,ThreadWindow):
 	def endProgress(self):
 		#self.getControl(310).setVisible(False)
 		self.getControl(104).setLabel(self._progMessageSave)
+		
+class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
+	def __init__(self, *args, **kwargs):
+		BaseWindowFunctions.__init__(self, *args, **kwargs)
+		xbmcgui.WindowXML.__init__( self )
+		
+	def onAction(self,action):
+		BaseWindowFunctions.onAction(self,action)
+		
+class BaseWindowDialog(xbmcgui.WindowXMLDialog,BaseWindowFunctions):
+	def __init__(self, *args, **kwargs):
+		BaseWindowFunctions.__init__(self, *args, **kwargs)
+		xbmcgui.WindowXMLDialog.__init__( self )
 	
+	def onAction(self,action):
+		BaseWindowFunctions.onAction(self,action)
+
 class PageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.next = ''
@@ -375,11 +390,11 @@ class PageWindow(BaseWindow):
 ######################################################################################
 # Image Dialog
 ######################################################################################
-class ImagesDialog(BaseWindow):
+class ImagesDialog(BaseWindowDialog):
 	def __init__( self, *args, **kwargs ):
 		self.images = kwargs.get('images')
 		self.index = 0
-		BaseWindow.__init__( self, *args, **kwargs )
+		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		self.getControl(200).setEnabled(len(self.images) > 1)
@@ -419,7 +434,7 @@ class ImagesDialog(BaseWindow):
 			self.prevImage()
 		elif action == ACTION_CONTEXT_MENU:
 			self.doMenu()
-		BaseWindow.onAction(self,action)
+		BaseWindowDialog.onAction(self,action)
 		
 	def doMenu(self):
 		d = ChoiceMenu('Options')
@@ -476,13 +491,13 @@ class ImagesDialog(BaseWindow):
 ######################################################################################
 # Post Dialog
 ######################################################################################
-class PostDialog(BaseWindow):
+class PostDialog(BaseWindowDialog):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
 		self.title = self.post.title
 		self.posted = False
 		self.display_base = '%s\n \n'
-		BaseWindow.__init__( self, *args, **kwargs )
+		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		self.getControl(122).setText(' ') #to remove scrollbar
@@ -501,6 +516,7 @@ class PostDialog(BaseWindow):
 				
 		self.updatePreview()
 		self.setTheme()
+		if self.isPM(): self.setFocusId(104)
 	
 	def setTheme(self):
 		if self.isPM():
@@ -524,7 +540,7 @@ class PostDialog(BaseWindow):
 		self.controlId = controlId
 		
 	def onAction(self,action):
-		BaseWindow.onAction(self,action)
+		BaseWindowDialog.onAction(self,action)
 		
 	def isPM(self):
 		return str(self.post.pid).startswith('PM') or self.post.to
@@ -707,6 +723,7 @@ class MessageWindow(BaseWindow):
 		self.imageReplace = 'IMG #%s'
 		self.action = None
 		self.started = False
+		self.videoHandler = WebVideo()
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -739,7 +756,10 @@ class MessageWindow(BaseWindow):
 		ulist = self.getControl(148)
 		for link in self.post.links():
 			item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
-			if link.isImage():
+			video = self.videoHandler.getVideoObject(link.url)
+			if video:
+				item.setIconImage(video.thumbnail)
+			elif link.isImage():
 				item.setIconImage(link.url)
 			elif link.textIsImage():
 				item.setIconImage(link.text)
@@ -776,14 +796,20 @@ class MessageWindow(BaseWindow):
 		elif controlID == 150:
 			self.showImage(self.getControl(150).getSelectedItem().getProperty('url'))
 	
+	def showVideo(self,source):
+		xbmc.executebuiltin('PlayMedia(%s)' % source)
+		
 	def linkSelected(self):
 		idx = self.getControl(148).getSelectedPosition()
 		if idx < 0: return
 		links = self.post.links()
 		if idx >= len(links): return
 		link = links[idx]
+		video = self.videoHandler.getVideoObject(link.url)
 		
-		if link.isImage():
+		if video:
+			self.showVideo(video.getPlayableURL())
+		elif link.isImage():
 			self.showImage(link.url)
 		elif link.isPost() or link.isThread():
 			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
@@ -1007,16 +1033,17 @@ class RepliesWindow(PageWindow):
 			self.setFocusId(201)
 			if data.error == 'CANCEL': return
 			LOG('GET REPLIES ERROR')
-			showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR]' + data.error,success=False)
+			showMessage(__language__(30050),self.isPM() and __language__(30135) or __language__(30131),__language__(30053),'[CR]' + data.error,success=False)
 			return
 		elif not data.data:
 			if data.data == None:
 				self.setFocusId(201)
 				LOG('NO REPLIES')
-				showMessage(__language__(30050),__language__(30131),__language__(30053),'[CR] No Posts Found',success=False)
+				showMessage(__language__(30050),self.isPM() and __language__(30135) or __language__(30131),__language__(30053),success=False)
 			else:
 				self.setFocusId(201)
 				self.getControl(104).setLabel(self.isPM() and __language__(30251) or __language__(30250))
+				self.getControl(120).reset()
 			return
 		
 		self.empty = False

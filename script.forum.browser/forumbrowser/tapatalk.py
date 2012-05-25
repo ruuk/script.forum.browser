@@ -80,6 +80,9 @@ class CookieTransport(xmlrpclib.Transport):
 			except httplib.BadStatusLine: #close after we sent request
 				if i:
 					raise
+			except httplib.CannotSendRequest:
+				if i:
+					raise
 			self._connection = None #ADDED by ruuk - make new connection in case the old connection object is in a bad state
 
 	def single_request(self, host, handler, request_body, verbose=0):
@@ -244,7 +247,9 @@ class ForumPost(forumbrowser.ForumPost):
 		elif raw and self.userName == self.FB.user:
 			m = self.FB.server.get_raw_post(self.getID())
 			self.message = str(m.get('post_content',self.message))
-		return self.message + self.signature
+		sig = ''
+		if self.signature: sig = '\n__________\n' + self.signature
+		return self.message + sig
 	
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage())
@@ -269,14 +274,14 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.imageFilter.findall(self.getMessage())
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message,re.S)
+		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message)
 		
 	def linkURLs(self):
-		return self.MC.linkFilter.finditer(self.getMessage(),re.S)
+		return self.MC.linkFilter.finditer(self.getMessage())
 	
 	def link2URLs(self):
 		if not self.MC.linkFilter2: return []
-		return self.MC.linkFilter2.finditer(self.getMessage(),re.S)
+		return self.MC.linkFilter2.finditer(self.getMessage())
 		
 	def links(self):
 		links = []

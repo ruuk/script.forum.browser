@@ -5,7 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Fix bugs/issues
-  Put seperator between message and signature
   
  Long Term:
   Use new option menus for context?
@@ -32,7 +31,19 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.48 RC6
+Current Version : 0.9.49 RC7
+
+*** 0.9.49 RC7 ***
+
+Fixed isuue with links not displaying in links list on full post view
+When creating a new private message, it now focuses the title button on startup
+Now puts a separator between message and signature (when it can even show a signature)
+[u] (underline) BB Code tags are now translated in the form of: _underlined_
+Video links (YouTube,Vimeo and Flickr) are now playable
+Fix for error handling on PM list refresh
+Fixed error messages in PM window to say private messages instead of posts
+Fixed a bug that caused the PM list not to be refreshed when deleting the last PM
+Experimental = General Browser: Lots of work done all over, mostly on post handling. Added some ability to handle forums types not specifically handled.
 
 *** 0.9.48 RC6 ***
 
