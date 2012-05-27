@@ -111,7 +111,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 						url = self._url + url
 					break
 			pagesURL = url
-			if page and not page.isdigit(): url = self._url + page
+			if page and not str(page).isdigit(): url = self._url + page
 					
 		if not url: url = self.getPageUrl(page,'threads',fid=forumid)
 		LOG('Forum URL: ' + url)

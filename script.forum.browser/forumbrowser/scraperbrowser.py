@@ -639,7 +639,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
-		if not page.isdigit(): return self.makeURL(page)
+		if page and not str(page).isdigit(): return self.makeURL(page)
 		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
 			page = self.URLSubs(gnp,pid=lastid)
