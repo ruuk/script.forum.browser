@@ -243,6 +243,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		return False
 		
 	def checkLogin(self,callback=None,callback_percent=5):
+		if self.loginError: return False
 		if not self.user or not self.password: return False
 		if not callback: callback = self.fakeCallback
 		if self.needsLogin or not self.isLoggedIn():

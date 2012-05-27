@@ -7,6 +7,7 @@ TODO:
   Fix bugs/issues
   
  Long Term:
+  Clipboard for posts/links/image urls?
   Use new option menus for context?
   Better 'Choose Forum' menu
   Option to PM author of selected post
@@ -31,11 +32,32 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.49 RC7
+Current Version : 0.9.50 RC8
+
+*** 0.9.50 RC8 ***
+
+Fixed Flickr video playback
+Removed Vimeo video handling (will still show thubmnails on link) - Getting Vimeo .flv link method is broken
+Added activity splash when getting video info
+Removed SSL refrences from help
+Fixed formatting for private messages (ie smilies show, etc)
+Reply/Forward PM now quotes the message and fills the title
+Added activity splash when opening PMs/Posts in full view
+Fixed error handling BB code url links with quotes ie. [url="http://www.google.com"]Google[/url]
+No longer continues trying to login after login error
+Subscriptions and Messages buttons now remain disabled until logged in
+Removed login error messages from threads and posts view
+Logged in indicator now turns red on login error
+Tapatalk: Added some code that may aleviate some connection related errors
+Possible fix for last post deletion failing to clear list
+
+Experimental:
+ - Thread starter and last poster for threads lists (all - more or less)
+ - Page handling for MyBB, PhBB, FluxBB, IPBoard (VBulletin was already working) + some generic page handling
 
 *** 0.9.49 RC7 ***
 
-Fixed isuue with links not displaying in links list on full post view
+Fixed issue with links not displaying in links list on full post view
 When creating a new private message, it now focuses the title button on startup
 Now puts a separator between message and signature (when it can even show a signature)
 [u] (underline) BB Code tags are now translated in the form of: _underlined_
@@ -43,7 +65,7 @@ Video links (YouTube,Vimeo and Flickr) are now playable
 Fix for error handling on PM list refresh
 Fixed error messages in PM window to say private messages instead of posts
 Fixed a bug that caused the PM list not to be refreshed when deleting the last PM
-Experimental = General Browser: Lots of work done all over, mostly on post handling. Added some ability to handle forums types not specifically handled.
+Experimental - General Browser: Lots of work done all over, mostly on post handling. Added some ability to handle forums types not specifically handled
 
 *** 0.9.48 RC6 ***
 

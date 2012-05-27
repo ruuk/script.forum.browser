@@ -1,4 +1,8 @@
-#FluxBB
+#MyBB
 
-url:threads=forum-!FORUMID!.html
-url:replies=thread-!THREADID!.html
+url:threads=forum-!FORUMID!!PAGE!.html
+url:replies=thread-!THREADID!!PAGE!.html
+
+url:page_arg=-page-!PAGE!
+
+filter:page=>Pages \((?P<total>\d+)\).*?class="pagination_current">(?P<page>\d+)<(?is)

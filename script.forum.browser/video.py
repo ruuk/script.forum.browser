@@ -32,7 +32,9 @@ class Video():
 	
 	def getPlayableURL(self):
 		if not self.playableCallback: return self.playableURL()
-		return self.playableCallback(self.ID)
+		url = self.playableCallback(self.ID)
+		LOG('Video URL: ' + url)
+		return url
 		
 class WebVideo():
 	alphabetB58 = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
@@ -41,8 +43,9 @@ class WebVideo():
 	def __init__(self):
 		self.modules = {}
 		
-	def getVideoObject(self,url):
+	def getVideoObject(self,url,just_test=False):
 		if 'youtu.be' in url or 'youtube.com' in url:
+			if just_test: return True
 			ID = self.extractYoutubeIDFromURL(url)
 			if not ID: return None
 			video = Video(ID)
@@ -51,6 +54,7 @@ class WebVideo():
 			video.playable = self.getYoutubePluginURL(ID)
 			video.swf = self.getYoutubeSWFUrl(ID)
 		elif 'vimeo.com' in url:
+			if just_test: return True
 			ID = self.extractVimeoIDFromURL(url)
 			if not ID: return None
 			video = Video(ID)
@@ -58,8 +62,10 @@ class WebVideo():
 			info = self.getVimeoInfo(ID)
 			video.thumbnail = info.get('thumbnail','')
 			video.title = info.get('title','')
-			video.playableCallback = self.getVimeoFLV
-		elif 'flic.kr/' in url:
+			#video.playableCallback = self.getVimeoFLV
+			video.isVideo = False #Vimeo support is broken
+		elif 'flic.kr/' in url or 'flickr.com/' in url:
+			if just_test: return True
 			ID = self.getFlickrIDFromURL(url)
 			if not ID: return None
 			info = self.getFlickrInfo(ID)
@@ -73,7 +79,11 @@ class WebVideo():
 			video.playable = self.getFlickrPluginURL(ID)
 		else:
 			return None
+		LOG('Video ID: ' + video.ID)
 		return video
+	
+	def mightBeVideo(self,url):
+		return self.getVideoObject(url, just_test=True)
 	
 	def getFlickrPluginURL(self,ID):
 		return 'plugin://plugin.image.flickr/?video_id=' + ID
@@ -108,8 +118,13 @@ class WebVideo():
 		#	return ''
 		#if longURL.endswith('/'): longURL = longURL[:-1]
 		#return longURL.rsplit('/',1)[-1]
-		end = url.rsplit('/',1)[-1]
-		return str(self.decodeBase58(end))
+		end = url
+		if end.endswith('/'): end = end[:-1]
+		end = end.rsplit('/',1)[-1]
+		if 'flic.kr/' in url:
+			return str(self.decodeBase58(end))
+		else:
+			return end
 		
 	def getFlickrInfo(self,ID):
 		fImport = self.doImport('plugin.image.flickr', '', 'default')
@@ -126,6 +141,7 @@ class WebVideo():
 		
 	def extractVimeoIDFromURL(self,url):
 		#TODO: Finish this :)
+		if url.endswith('/'): url = url[:-1]
 		ID = url.rsplit('/',1)[-1]
 		return ID
 	
@@ -144,13 +160,14 @@ class WebVideo():
 	def getVimeoFLV(self,ID):
 		#TODO: Make this better
 		infoURL = 'http://www.vimeo.com/moogaloop/load/clip:' + ID
-		o = urllib2.urlopen(infoURL)
-		info = o.read()
 		try:
+			o = urllib2.urlopen(infoURL)
+			info = o.read()
 			sig = re.search('<request_signature>([^<]*)</request_signature>',info).group(1)
 			exp = re.search('<request_signature_expires>([^<]*)</request_signature_expires>',info).group(1)
 			hd_or_sd = int(re.search('isHD>([^<]*)</isHD>',info).group(1)) and 'hd' or 'sd'
 		except:
+			ERROR('Failed to get vimeo URL')
 			return ''
 		flvURL = 'http://www.vimeo.com/moogaloop/play/clip:%s/%s/%s/?q=%s' % (ID,sig,exp,hd_or_sd)
 		try:

@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.49'
+__version__ = '0.9.50'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -297,7 +297,7 @@ class BaseWindowFunctions(ThreadWindow):
 	
 	def setProgress(self,pct,message=''):
 		if pct<0:
-			self.stop()
+			self.stopThread()
 			showMessage('ERROR',message,error=True)
 			return False
 		w = int((pct/100.0)*self.getControl(300).getWidth())
@@ -363,7 +363,7 @@ class PageWindow(BaseWindow):
 		idx = dialog.select(__language__(30114),options)
 		if idx < 0: return
 		if options[idx] == self._firstPage: self.gotoPage(self.pageData.getPageNumber(1))
-		elif options[idx] == self._lastPage: self.gotoPage(self.pageData.getPageNumber(9999))
+		elif options[idx] == self._lastPage: self.gotoPage(self.pageData.getPageNumber(-1))
 		elif options[idx] == self._newestPage:
 			self.firstRun = True #For replies window
 			self.gotoPage(self.pageData.getPageNumber(-1))
@@ -737,7 +737,11 @@ class MessageWindow(BaseWindow):
 #				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 #		else:
 #			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-		text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
+		s = showActivitySplash()
+		try:
+			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
+		finally:
+			s.close()
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
@@ -754,22 +758,34 @@ class MessageWindow(BaseWindow):
 		
 	def getLinks(self):
 		ulist = self.getControl(148)
-		for link in self.post.links():
-			item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
-			video = self.videoHandler.getVideoObject(link.url)
-			if video:
-				item.setIconImage(video.thumbnail)
-			elif link.isImage():
-				item.setIconImage(link.url)
-			elif link.textIsImage():
-				item.setIconImage(link.text)
-			elif link.isPost():
-				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
-			elif link.isThread():
-				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-thread.png'))
-			else:
-				item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-link.png'))
-			ulist.addItem(item)
+		links = self.post.links()
+		checkVideo = False
+		for link in links:
+			checkVideo = self.videoHandler.mightBeVideo(link.url)
+			if checkVideo: break
+		s = None
+		if checkVideo: s = showActivitySplash('Getting Video Info...')
+		try:
+			for link in links:
+				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
+				video = None
+				if checkVideo:
+					video = self.videoHandler.getVideoObject(link.url)
+				if video:
+					item.setIconImage(video.thumbnail)
+				elif link.isImage():
+					item.setIconImage(link.url)
+				elif link.textIsImage():
+					item.setIconImage(link.text)
+				elif link.isPost():
+					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
+				elif link.isThread():
+					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-thread.png'))
+				else:
+					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-link.png'))
+				ulist.addItem(item)
+		finally:
+			if s: s.close()
 
 	def getImages(self):
 		i=0
@@ -805,11 +821,17 @@ class MessageWindow(BaseWindow):
 		links = self.post.links()
 		if idx >= len(links): return
 		link = links[idx]
-		video = self.videoHandler.getVideoObject(link.url)
+		if self.videoHandler.mightBeVideo(link.url):
+			s = showActivitySplash()
+			try:
+				video = self.videoHandler.getVideoObject(link.url)
+				if video and video.isVideo:
+					self.showVideo(video.getPlayableURL())
+					return
+			finally:
+				s.close()
 		
-		if video:
-			self.showVideo(video.getPlayableURL())
-		elif link.isImage():
+		if link.isImage():
 			self.showImage(link.url)
 		elif link.isPost() or link.isThread():
 			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
@@ -899,7 +921,13 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 		pm = editPM
 	else:
 		pm = forumbrowser.PostMessage(pid,tid,fid,is_pm=(tid == 'private_messages'))
-		if post: pm.setQuote(post.userName,post.messageAsQuote())
+		if post:
+			s = showActivitySplash()
+			try:
+				pm.setQuote(post.userName,post.messageAsQuote())
+				pm.title = post.title
+			finally:
+				s.close()
 		if tid == 'private_messages':
 			default = ''
 			if post: default = post.userName
@@ -1029,6 +1057,7 @@ class RepliesWindow(PageWindow):
 		item.setProperty('message',post.messageAsDisplay(short))
 		
 	def doFillRepliesList(self,data):
+		if 'newthreadid' in data: self.tid = data['newthreadid']
 		if not data:
 			self.setFocusId(201)
 			if data.error == 'CANCEL': return
@@ -1043,7 +1072,9 @@ class RepliesWindow(PageWindow):
 			else:
 				self.setFocusId(201)
 				self.getControl(104).setLabel(self.isPM() and __language__(30251) or __language__(30250))
+				LOG('No messages/posts - clearing list')
 				self.getControl(120).reset()
+				self.getControl(120).addItems([])
 			return
 		
 		self.empty = False
@@ -1243,8 +1274,11 @@ class RepliesWindow(PageWindow):
 		if FB.isLoggedIn():
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
-			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(160).setLabel(FB.loginError)
+			if FB.loginError:
+				self.getControl(111).setColorDiffuse('FFFF0000')
+			else:
+				self.getControl(111).setColorDiffuse('FF555555')
+		#self.getControl(160).setLabel(FB.loginError)
 
 def subscribeThread(tid):
 	splash = showActivitySplash()
@@ -1346,6 +1380,7 @@ class ThreadsWindow(PageWindow):
 		t.start()
 		
 	def doFillThreadList(self,data):
+		if 'newforumid' in data: self.fid = data['newforumid']
 		if not data:
 			if data.error == 'CANCEL': return
 			LOG('GET THREADS ERROR')
@@ -1527,8 +1562,11 @@ class ThreadsWindow(PageWindow):
 		if FB.isLoggedIn():
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
-			self.getControl(111).setColorDiffuse('FF555555')
-		self.getControl(160).setLabel(FB.loginError)
+			if FB.loginError:
+				self.getControl(111).setColorDiffuse('FFFF0000')
+			else:
+				self.getControl(111).setColorDiffuse('FF555555')
+		#self.getControl(160).setLabel(FB.loginError)
 
 ######################################################################################
 #
@@ -1835,8 +1873,8 @@ class ForumsWindow(BaseWindow):
 	def resetForum(self,hidelogo=True):
 		if not FB: return
 		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
-		self.getControl(201).setEnabled(self.hasLogin() and FB.hasSubscriptions())
-		self.getControl(203).setEnabled(self.hasLogin() and FB.hasPM())
+		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
+		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
 		__addon__.setSetting('last_forum',FB.getForumID())
 		self.setLogoFromFile()
@@ -1846,9 +1884,14 @@ class ForumsWindow(BaseWindow):
 		if FB.isLoggedIn():
 			self.getControl(111).setColorDiffuse('FF00FF00')
 		else:
-			self.getControl(111).setColorDiffuse('FF555555')
+			if FB.loginError:
+				self.getControl(111).setColorDiffuse('FFFF0000')
+			else:
+				self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 		self.getControl(112).setVisible(FB.SSL)
+		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
+		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		
 	def openSettings(self):
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''

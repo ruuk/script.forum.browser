@@ -26,8 +26,6 @@ When getting data from the forum's server, the name will be replaced by status m
 @item:status=Status Area (Upper Right)
 The green/gray circle icon shows logged in status.
 
-A lock icon will appear if the current connection is using SSL.
-
 A close button will be visible if mouse support is enabled in XBMC.
 @item:list=Forums List
 The list of forums. Click on a forum to open the threads window.

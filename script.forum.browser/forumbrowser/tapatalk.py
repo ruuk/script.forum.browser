@@ -80,10 +80,12 @@ class CookieTransport(xmlrpclib.Transport):
 			except httplib.BadStatusLine: #close after we sent request
 				if i:
 					raise
-			except httplib.CannotSendRequest:
+			except httplib.CannotSendRequest or httplib.ResponseNotReady:
 				if i:
 					raise
+			LOG('xmlrpclib request error - retrying with a new connection...')
 			self._connection = None #ADDED by ruuk - make new connection in case the old connection object is in a bad state
+			time.sleep(0.5) #ADDED by ruuk - maybe this will help too
 
 	def single_request(self, host, handler, request_body, verbose=0):
 		# issue XML-RPC request
@@ -244,9 +246,11 @@ class ForumPost(forumbrowser.ForumPost):
 			m = self.FB.server.get_message(self.getID(),self.boxid)
 			self.message = str(m.get('text_body',self.message))
 			self.isShort = False
-		elif raw and self.userName == self.FB.user:
+			self.isRaw = True
+		elif raw and self.userName == self.FB.user and not self.isRaw:
 			m = self.FB.server.get_raw_post(self.getID())
 			self.message = str(m.get('post_content',self.message))
+			self.isRaw = True
 		sig = ''
 		if self.signature: sig = '\n__________\n' + self.signature
 		return self.message + sig
@@ -260,15 +264,19 @@ class ForumPost(forumbrowser.ForumPost):
 		else:
 			message = self.getMessage(raw=raw)
 		message = message.replace('\n','[CR]')
-		if self.isPM:
-			return self.MC.parseCodes(message)
-		else:
-			return self.MC.messageToDisplay(message)
+		#if self.isPM:
+		#	return self.MC.parseCodes(message)
+		#else:
+		return self.MC.messageToDisplay(message)
 		
 	def messageAsQuote(self):
-		qp = self.FB.server.get_quote_post(self.getID())
+		if self.isPM:
+			qp = self.FB.server.get_quote_pm(self.getID())
+			return str(qp.get('text_body',''))
+		else:
+			qp = self.FB.server.get_quote_post(self.getID())
 		#print qp.get('result_text')
-		return str(qp.get('post_content',''))
+			return str(qp.get('post_content',''))
 		
 	def imageURLs(self):
 		return self.MC.imageFilter.findall(self.getMessage())
@@ -335,7 +343,7 @@ class PageData:
 					return -1
 				page = self.totalPages
 			else:
-				return 0
+				page = self.totalPages
 		if page > self.totalPages: page = self.totalPages
 		return int((page - 1) * self.perPage)
 						
@@ -467,6 +475,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return False
 		
 	def checkLogin(self,callback=None,callback_percent=5):
+		if self.loginError: return False
 		if not self.user or not self.password: return False
 		if not callback: callback = self.fakeCallback
 		if self.needsLogin or not self.isLoggedIn():

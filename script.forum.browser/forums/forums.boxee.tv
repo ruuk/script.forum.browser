@@ -6,14 +6,15 @@ url:base=http://forums.boxee.tv/
 
 #The part after the slash on the base URL
 url:forums=index.php
-url:threads=forumdisplay.php?f=!FORUMID!
-url:replies=showthread.php?t=!THREADID!&p=!POSTID!&mode=linear
+url:threads=forumdisplay.php?f=!FORUMID!!PAGE!
+url:replies=showthread.php?t=!THREADID!!PAGE!&p=!POSTID!&mode=linear
+url:page_arg=&page=!PAGE!
+
 url:subscriptions=subscription.php
 url:login=index.php
 
 url:newpost=newreply.php?do=newreply&noquote=1&p=!POSTID!
 url:deletepost=editpost.php?do=editpost&p=!POSTID!
-url:page_arg=page
 url:gotonewpost=&goto=newpost
 url:avatar=image.php?u=!USERID!
 

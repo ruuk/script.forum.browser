@@ -1,4 +1,10 @@
 #FluxBB
 
-url:threads=viewforum.php?id=!FORUMID!
-url:replies=viewtopic.php?id=!THREADID!
+url:threads=viewforum.php?id=!FORUMID!!PAGE!
+url:replies=viewtopic.php?id=!THREADID!!PAGE!
+
+url:page_arg=&p=!PAGE!
+
+filter:page=>(?P<total>\d+)</a>\s*<a[^>]*?>Next
+filter:next=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)">Next</a>
+filter:prev=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)">Previous</a>

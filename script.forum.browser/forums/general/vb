@@ -1,9 +1,9 @@
 #VBulletin
 
-url:threads=forumdisplay.php?f=!FORUMID!
-url:replies=showthread.php?t=!THREADID!
+url:threads=forumdisplay.php?f=!FORUMID!!PAGE!
+url:replies=showthread.php?t=!THREADID!!PAGE!
 
-url:page_arg=page
+url:page_arg=&page=!PAGE!
 filter:next=Next Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Next Page - Results [\d,]+ to [\d,]+ of [\d,]+)
 filter:prev=Prev Page - Results ([\d,]+) to ([\d,]+) of ([\d,]+).*?(?P<page>Prev Page - Results [\d,]+ to [\d,]+ of [\d,]+)
 filter:page=>(?P<display>Page\s(?P<page>\d+)\sof\s(?P<total>\d+))<

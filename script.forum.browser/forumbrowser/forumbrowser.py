@@ -25,6 +25,9 @@ class FBData():
 	def __setitem__(self,key,value):
 		self.extra[key] = value
 	
+	def __contains__(self,key):
+		return key in self.extra
+	
 	def getExtra(self,key,default=None):
 		return self.extra.get(key,default)
 	
@@ -318,7 +321,7 @@ class PageData:
 				#return ret
 				page = self.totalPages
 			else:
-				return 0
+				return self.totalPages or 0
 		if page > self.totalPages: page = self.totalPages
 		if self.pageMode: return page
 		return int((page - 1) * self.perPage)
@@ -344,6 +347,7 @@ class ForumPost:
 		self.MC = fb.MC
 		self.to = ''
 		self.isShort = False
+		self.isRaw = False
 		self.isPM = False
 		self.postId = ''
 		self.date = ''
@@ -556,7 +560,7 @@ class ForumBrowser:
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 						'image':'\[img\](?P<url>[^\[]+?)\[/img\](?is)',
-						'link':'\[url=(?P<url>[^\]]+?)\](?P<text>.+?)\[/url\](?is)',
+						'link':'\[url="?(?P<url>[^\]]+?)\](?P<text>.+?)"?\[/url\](?is)',
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
@@ -633,6 +637,7 @@ class ForumBrowser:
 		self.user = user
 		self.password = password
 		self.alwaysLogin = always
+		self.loginError = ''
 		
 	def makeURL(self,url): return url
 	

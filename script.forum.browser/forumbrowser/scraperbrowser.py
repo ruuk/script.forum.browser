@@ -109,7 +109,7 @@ class ForumPost(forumbrowser.ForumPost):
 # PageData
 ################################################################################
 class PageData:
-	def __init__(self,fb,page_match=None,next_match=None,prev_match=None,page_type='',total_items=''):
+	def __init__(self,fb,page_match=None,next_match=None,prev_match=None,page_type='',total_items='',page_urls=None):
 		self.FB = fb
 		self.MC = fb.MC
 		self.next = False
@@ -125,19 +125,33 @@ class PageData:
 		self.pageType = page_type
 		self.isReplies = False
 		self.totalitems = total_items
-		
+		self.current = '0'
+		self.pageURLs = page_urls
+		self.useURLs = False
+		page_set = False
 		if page_match:
 			pdict = page_match.groupdict()
-			self.page = pdict.get('page','1')
+			if pdict.get('page'):
+				self.page = pdict.get('page')
+				page_set = True
 			self.totalPages = pdict.get('total','1')
-			self.pageDisplay = pdict.get('display','')
+			self.pageDisplay = self.MC.tagFilter.sub('',pdict.get('display',''))
 		if next_match:
+			#check for less greedy match by looking in the whole match for a smaller match
+			alld = next_match.group(0)
+			pre = re.compile(self.FB.filters.get('next'))
+			while alld:
+				alld = alld[1:]
+				test = pre.search(alld)
+				if not test: break
+				next_match = test
 			ndict = next_match.groupdict()
 			page = ndict.get('page')
-			start = ndict.get('start')
+			start = ndict.get('start','0')
 			if page:
 				self.next = True
 				self.urlMode = 'PAGE'
+				if not page_set and page.isdigit(): self.page = str(int(page) - 1)
 			elif start:
 				self.next = True
 				self.nextStart = start
@@ -146,14 +160,24 @@ class PageData:
 			try:
 				self.next = int(self.page) < int(self.totalPages)
 			except:
-				pass
+				self.next = bool(self.getNextPageURL())
+				self.useURLs = True
 		if prev_match:
+			#check for less greedy match by looking in the whole match for a smaller match
+			alld = prev_match.group(0)
+			pre = re.compile(self.FB.filters.get('prev'))
+			while alld:
+				alld = alld[1:]
+				test = pre.search(alld)
+				if not test: break
+				prev_match = test
 			pdict = prev_match.groupdict()
 			page = pdict.get('page')
-			start = pdict.get('start')
+			start = pdict.get('start','0')
 			if page:
 				self.prev = True
 				self.urlMode = 'PAGE'
+				if not page_set and page.isdigit(): self.page = str(int(page) + 1)
 			elif start:
 				self.prev = True
 				self.prevStart = start
@@ -162,18 +186,35 @@ class PageData:
 			try:
 				self.prev = int(self.page) > 1
 			except:
-				pass
+				self.prev = bool(self.getPrevPageURL())
+				self.useURLs = True
+				
+		if int(self.totalPages) < int(self.page): self.totalPages = self.page
 			
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
 		if self.urlMode != 'PAGE':
 			per_page = self.FB.formats.get('%s_per_page' % self.pageType)
-			if per_page:
-				try:
-					if int(page) < 0: page = 9999
-					page = str((int(page) - 1) * int(per_page))
-				except:
-					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
+			if not per_page:
+				nextp = int(self.nextStart)
+				prev = int(self.prevStart)
+				if nextp == 0:
+					if int(page) < 0: return self.current
+				elif prev == 0 and int(self.page) == 1:
+					per_page = nextp
+				else:
+					per_page = int((nextp - prev) / 2)
+			try:
+				if int(page) < 0: page = self.totalPages > 1 and self.totalPages or 9999
+				page = str((int(page) - 1) * int(per_page))
+				self.current = page
+			except:
+				ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
+		else:
+			try:
+				if int(page) < 0: page = int(self.totalPages) > 1 and self.totalPages or 9999
+			except:
+				ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 		return page
 		
 	def setThreadData(self,topic,threadid):
@@ -181,6 +222,7 @@ class PageData:
 		self.tid = threadid
 				
 	def getNextPage(self):
+		if self.useURLs: return self.getNextPageURL()
 		if self.urlMode == 'PAGE':
 			try:
 				return str(int(self.page) + 1)
@@ -190,6 +232,7 @@ class PageData:
 			return self.nextStart
 			
 	def getPrevPage(self):
+		if self.useURLs: return self.getPrevPageURL()
 		if self.urlMode == 'PAGE':
 			try:
 				return str(int(self.page) - 1)
@@ -197,7 +240,27 @@ class PageData:
 				return '1'
 		else:
 			return self.prevStart
-				
+		
+	def getNextPageURL(self):
+		if not self.pageURLs: return ''
+		try:
+			current = int(self.page)
+			for p in self.pageURLs:
+				if int(p) - current == 1: return self.pageURLs[p]
+		except:
+			ERROR('getNextPageURL()')
+			return ''
+	
+	def getPrevPageURL(self):
+		if not self.pageURLs: return ''
+		try:
+			current = int(self.page)
+			for p in self.pageURLs:
+				if current - int(p) == 1: return self.pageURLs[p]
+		except:
+			ERROR('getNextPageURL()')
+			return ''
+			
 	def getPageDisplay(self):
 		if self.pageDisplay: return self.pageDisplay
 		if self.page and self.totalPages:
@@ -214,6 +277,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login, texttransform.MessageConverter)
 		self.forum = forum
 		self._url = ''
+		self.lastURL = ''
 		self.browser = None
 		self.mechanize = None
 		self.needsLogin = True
@@ -380,6 +444,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def browserReadURL(self,url,callback):
 		if not callback(30,__language__(30101)): return ''
 		response = self.browser.open(url)
+		self.lastURL = response.geturl()
 		if not callback(60,__language__(30102)): return ''
 		return response.read()
 		
@@ -403,6 +468,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			if not callback(5,__language__(30101)): return ''
 			req = urllib2.urlopen(url)
+			self.lastURL = req.geturl()
 			encoding = req.info().get('content-type').split('charset=')[-1]
 			if not callback(50,__language__(30102)): return ''
 			data = unicode(req.read(),encoding).encode(ENCODING)
@@ -563,16 +629,17 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getPageInfo(self,html,page,page_type=''):
-		if not self.filters.get('next'): return None
-		next_page = re.search(self.filters['next'],html,re.S)
+	def getPageInfo(self,html,page,page_type='',page_urls=None):
+		if not self.filters.get('page') and not self.filters.get('next'): return None
+		next_page = self.filters.get('next') and re.search(self.filters['next'],html) or None
 		prev_page= None
 		if page != '1':
-			prev_page = re.search(self.filters['prev'],html,re.S)
+			prev_page = self.filters.get('prev') and re.search(self.filters['prev'],html) or None
 		page_disp = re.search(self.filters['page'],html)
-		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type)
+		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
+		if not page.isdigit(): return self.makeURL(page)
 		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
 			page = self.URLSubs(gnp,pid=lastid)
@@ -582,9 +649,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					if int(page) < 0: page = '9999'
 				except:
 					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
-				page = '&%s=%s' % (self.urls.get('page_arg',''),page)
-		sub = self.URLSubs(self.urls.get(sub,''),pid=pid,tid=tid,fid=fid)
-		return self._url + sub + page
+				page = str(page)
+				page = self.urls.get('page_arg','').replace('!PAGE!',page) or page
+		sub = self.URLSubs(self.urls.get(sub,''),pid=pid,tid=tid,fid=fid,page=page)
+		return self._url + sub
 		
 	def getURL(self,name):
 		return self._url + self.urls.get(name,'')
@@ -607,11 +675,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			ERROR('PARSE ERROR')
 			
-	def URLSubs(self,url,pid='',tid='',fid='',post=None):
+	def URLSubs(self,url,pid='',tid='',fid='',page='',post=None):
 		if post:
-			url = url.replace('!POSTID!',str(post.pid)).replace('!THREADID!',str(post.tid)).replace('!FORUMID!',str(post.fid))
+			url = url.replace('!POSTID!',str(post.pid)).replace('!THREADID!',str(post.tid)).replace('!FORUMID!',str(post.fid)).replace('!PAGE!',str(page))
 		else:
-			url = url.replace('!POSTID!',str(pid)).replace('!THREADID!',str(tid)).replace('!FORUMID!',str(fid))
+			url = url.replace('!POSTID!',str(pid)).replace('!THREADID!',str(tid)).replace('!FORUMID!',str(fid)).replace('!PAGE!',str(page))
 		#removes empty vars
 		return re.sub('(?:\w+=&)|(?:\w+=$)','',url)
 		

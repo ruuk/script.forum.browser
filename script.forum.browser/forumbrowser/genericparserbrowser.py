@@ -22,7 +22,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.alwaysLogin = always_login
 		self.lastHTML = ''
 		#self.reloadForumData(forum)
-		self.forumType = 'uk'
+		self.forumType = 'u0'
 		self.forumParser = GeneralForumParser()
 		self.threadParser = GeneralThreadParser()
 		self.postParser = GeneralPostParser()
@@ -66,7 +66,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return scraperbrowser.ScraperForumBrowser.getQuoteStartFormat(self)
 	
 	def doLoadForumData(self):
-		path = os.path.join(FORUMS_STATIC_PATH,'general',self.forumParser.forumType)
+		path = os.path.join(FORUMS_STATIC_PATH,'general',self.forumParser.getForumType())
 		self.loadForumData(path)
 			
 	def getForums(self,callback=None,donecallback=None,url='',subs=False):
@@ -100,6 +100,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
 		if not callback: callback = self.fakeCallback
 		url = None
+		pagesURL = url
 		if self.forumParser.isGeneric:
 			for f in self.forumParser.forums:
 				if forumid == f.get('forumid'):
@@ -109,20 +110,27 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 						if url.startswith('/'): url = url[1:]
 						url = self._url + url
 					break
+			pagesURL = url
+			if page and not page.isdigit(): url = self._url + page
 					
 		if not url: url = self.getPageUrl(page,'threads',fid=forumid)
 		LOG('Forum URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		threads = self.threadParser.getThreads(html)
+		threads = self.threadParser.getThreads(html,pagesURL)
 		#forums = self.forumParser.getList(html,in_threads=True)
-		extra = None
+		try:
+			newfid = self.forumParser.linkRE.search(self.lastURL.rsplit('/',1)[-1]).groupdict().get('id')
+			extra = newfid and {'newforumid':newfid} or None
+		except:
+			extra = None
 		#if forums: extra = {'forums':forums}
 		if subs:
 			for t in threads: t['subscribed'] = True
 		callback(100,__language__(30052))
-		pd = self.getPageInfo(html,page,page_type='threads')
+		pd = self.getPageInfo(html,page,page_type='threads',page_urls=self.threadParser.pages)
+		if self.threadParser.getForumType() == 'u0': pd.useURLs = True
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 	
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
@@ -160,9 +168,16 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				sreplies.append(post)
 		pd = self.getPageInfo(html,page,page_type='replies')
 		if pd: pd.setThreadData('',threadid)
+		
+		try:
+			newtid = self.threadParser.linkRE.search(self.lastURL.rsplit('/',1)[-1]).groupdict().get('id')
+			extra = newtid and {'newthreadid':newtid} or None
+		except:
+			extra = None
+			
 		callback(100,__language__(30052))
 		
-		return self.finish(FBData(sreplies,pd),donecallback)
+		return self.finish(FBData(sreplies,pd,extra=extra),donecallback)
 	
 	def subscribeThread(self,tid): return False
 		

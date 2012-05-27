@@ -850,15 +850,19 @@ class AdvancedParser(BaseParser):
 		self.stack = []
 		self.sequence = []
 		self.linkRE = None
-		self.forumType = 'uk'
+		self.forumType = 'u0'
 		self.isGeneric = False
 		self.dataCleanerRE = re.compile('[\n\r\t]')
 		self.tagIndex = 0
 	
+	def getForumType(self):
+		if self.forumType[-1].isdigit(): return 'u0'
+		return self.forumType
+	
 	def getRE(self,html):
 		mx = 0
 		pick = None
-		ftpick = 'uk'
+		ftpick = 'u0'
 		for ft,r in self.linkREs.items():
 			ct = len(r.findall(html) or [])
 			if ct > mx:
@@ -1062,17 +1066,28 @@ class GeneralThreadParser(AdvancedParser):
 		
 		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
 		self.linkRE = None
+		self.pages = {}
 		
 	def setDefaults(self):
 		self.threads = []
 		self.ids = {}
 		self.sticky = False
 		self.stickyTag = None
+		self.pages = None
 	
-	def getThreads(self,html):
+	def getPages(self,url,html):
+		if not url: return
+		url = url.rsplit('/',1)[-1]
+		self.pages = {}
+		for p in re.finditer('<a[^>]*?href="(?P<url>[^"]*?%s[^"]*?)"[^>]*?>[^<\d]*?(?P<page>\d+)[^<\d]*?</a>' % re.escape(url),html):
+			p = p.groupdict()
+			self.pages[p.get('page')] = p.get('url')
+		
+	def getThreads(self,html,url=''):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
 		self.reset()
+		self.getPages(url, html)
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
@@ -1081,13 +1096,31 @@ class GeneralThreadParser(AdvancedParser):
 		self.reset()
 		return self.threads
 		
+	def setUsers(self,dstrip):
+		if not dstrip: return
+		if dstrip.lower().startswith('view') or dstrip.lower().endswith('profile'): return
+		if self.threads:
+			t = self.threads[-1]
+			if not t.get('starter'):
+				t['starter'] = dstrip.split('by ')[-1]
+			elif not t.get('lastposter'):
+				t['lastposter'] = dstrip.split('by ')[-1]
+				
 	def handleStartTag(self,tag):
 		if re.search('(?:^|\W|_)sticky',tag.getAttr('class')):
 			self.stickyTag = tag
 	
 	def handleData(self,tag,data):
-		if data.strip().lower() == 'sticky:' or data.strip().lower() == 'pinned': #pinned for ipboard
+		dstrip = data.strip()
+		if not dstrip: return
+		if dstrip.lower() == 'sticky:' or dstrip.lower() == 'pinned': #pinned for ipboard
 			self.sticky = True
+		elif 'by ' in dstrip:
+			self.setUsers(dstrip)
+		else:
+			if self.threads:
+				t = self.threads[-1]
+				if not t.get('title'): t['title'] = dstrip
 				
 	def handleEndTag(self,tag):
 		if tag == self.stickyTag:
@@ -1120,6 +1153,12 @@ class GeneralThreadParser(AdvancedParser):
 							if re.search('\w',ds) and not re.match('^[\d|W]+$',ds):
 								#print ds.encode('ascii','replace')
 								self.threads[-1]['title'] += ds
+				elif 'member' in href or 'user' in href:
+					self.setUsers(''.join(tag.dataStack).strip())
+		else:
+			onclick = tag.getAttr('onclick')
+			if 'member' in onclick or 'user' in onclick:
+				self.setUsers(''.join(tag.dataStack).strip())
 	
 	def getLastThread(self):
 		if self.threads: return self.threads[-1]
@@ -1186,7 +1225,7 @@ class GeneralPostParser(AdvancedParser):
 		self.bottomTag = None
 		self.bottomTagTag = ''
 		self.lastStack = []
-		self.forumType = 'uk'
+		self.forumType = 'u0'
 		self.lastUnset = ''
 		self.mode = 'NORMAL'
 		self.pidTags = OrderedDict()
@@ -1356,18 +1395,20 @@ class GeneralPostParser(AdvancedParser):
 							last = ''
 						elif val == 'status':
 							#print 's ' + d.encode('ascii','replace')
-							user = m.group(1).strip()
-							if last == 'user' and re.search('\w',d) and not d.tag.tag == 'a' and user != p.get('user',''):
-								#print user.encode('ascii','replace') + ' : ' + p.get('user','').encode('ascii','replace')
-								if user: p[val] = user
-							else:
-								if user == p.get('user') and not p.get('status'):
-									last = 'user'
-									break
-								continue
+							if m.group(1):
+								user = m.group(1).strip()
+								if last == 'user' and re.search('\w',d) and not d.tag.tag == 'a' and user != p.get('user',''):
+									#print user.encode('ascii','replace') + ' : ' + p.get('user','').encode('ascii','replace')
+									if user: p[val] = user
+								else:
+									if user == p.get('user') and not p.get('status'):
+										last = 'user'
+										break
+									continue
 						elif val == 'labeledstatus':
-							status = m.group(1).strip()
-							if status: p['status'] = status
+							if m.group(1):
+								status = m.group(1).strip()
+								if status: p['status'] = status
 						elif val == 'date':
 							#print 'd ' + d.encode('ascii','replace')
 							if not val in p:
