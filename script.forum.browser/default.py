@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.50'
+__version__ = '0.9.51'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -763,6 +763,8 @@ class MessageWindow(BaseWindow):
 		for link in links:
 			checkVideo = self.videoHandler.mightBeVideo(link.url)
 			if checkVideo: break
+			checkVideo = self.videoHandler.mightBeVideo(link.text)
+			if checkVideo: break
 		s = None
 		if checkVideo: s = showActivitySplash('Getting Video Info...')
 		try:
@@ -770,7 +772,11 @@ class MessageWindow(BaseWindow):
 				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
 				video = None
 				if checkVideo:
-					video = self.videoHandler.getVideoObject(link.url)
+					try:
+						video = self.videoHandler.getVideoObject(link.url)
+						if not video: video = self.videoHandler.getVideoObject(link.text)
+					except:
+						LOG('Error getting video info')
 				if video:
 					item.setIconImage(video.thumbnail)
 				elif link.isImage():
@@ -821,10 +827,11 @@ class MessageWindow(BaseWindow):
 		links = self.post.links()
 		if idx >= len(links): return
 		link = links[idx]
-		if self.videoHandler.mightBeVideo(link.url):
+		if self.videoHandler.mightBeVideo(link.url) or self.videoHandler.mightBeVideo(link.text):
 			s = showActivitySplash()
 			try:
 				video = self.videoHandler.getVideoObject(link.url)
+				if not video: video = self.videoHandler.getVideoObject(link.text)
 				if video and video.isVideo:
 					self.showVideo(video.getPlayableURL())
 					return
@@ -873,28 +880,22 @@ class MessageWindow(BaseWindow):
 			self.doMenu()
 		
 	def doMenu(self):
-		options = [self.post.isPM and __language__(30249) or __language__(30134)]
-		delete = None
-		edit = None
-		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()):
-			delete = len(options)
-			options.append(__language__(30141))
-		if FB.canEditPost(self.post.cleanUserName()):
-			edit = len(options)
-			options.append(__language__(30232))
-		hlp = len(options)
-		options.append(__language__(30244))
-		idx = xbmcgui.Dialog().select(__language__(30051),options)
-		if idx == 0: self.openPostDialog(quote=True)
-		elif idx == delete: self.deletePost()
-		elif idx == edit:
+		d = ChoiceMenu(__language__(30051))
+		if FB.canPost(): d.addItem('quote',self.post.isPM and __language__(30249) or __language__(30134))
+		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()): d.addItem('delete',__language__(30141))
+		if FB.canEditPost(self.post.cleanUserName()): d.addItem('edit',__language__(30232))
+		d.addItem('help',__language__(30244))
+		result = d.getResult()
+		if result == 'quote': self.openPostDialog(quote=True)
+		elif result == 'delete': self.deletePost()
+		elif result == 'edit':
 			pm = FB.getPostForEdit(self.post)
 			pm.tid = self.post.tid
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH-REOPEN')
 				self.action.pid = pm.pid
 				self.close()
-		elif idx == hlp:
+		elif result == 'help':
 			showHelp('message')
 			
 	def deletePost(self):
@@ -1192,7 +1193,8 @@ class RepliesWindow(PageWindow):
 		try:
 			if item:
 				post = self.posts.get(item.getProperty('post'))
-				d.addItem('quote',self.isPM() and __language__(30249) or __language__(30134))
+				if FB.canPost():
+					d.addItem('quote',self.isPM() and __language__(30249) or __language__(30134))
 				if FB.canDelete(item.getLabel(),post.messageType()):
 					d.addItem('delete',__language__(30141))
 				if not self.isPM():
@@ -1201,7 +1203,7 @@ class RepliesWindow(PageWindow):
 						
 			if self.threadItem:
 				if FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
-					d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
+					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
 				else:
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
 				
@@ -1502,18 +1504,18 @@ class ThreadsWindow(PageWindow):
 			if item:
 				if item.getProperty("is_forum") == 'True':
 					if FB.isForumSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
-						d.addItem('unsubscribeforum', __language__(30242))
+						if FB.canUnSubscribeForum(item.getProperty('id')): d.addItem('unsubscribeforum', __language__(30242))
 					else:
 						if FB.canSubscribeForum(item.getProperty('id')): d.addItem('subscribeforum', __language__(30243))
 				else:
 					if FB.isThreadSubscribed(item.getProperty('id'),item.getProperty('subscribed')):
-						d.addItem('unsubscribe', __language__(30240))
+						if FB.canUnSubscribeThread(item.getProperty('id')): d.addItem('unsubscribe', __language__(30240))
 					else:
 						if FB.canSubscribeThread(item.getProperty('id')): d.addItem('subscribe', __language__(30236))
 				if self.fid != 'subscriptions':
 					if self.forumItem:
 						if FB.isForumSubscribed(self.forumItem.getProperty('id'),self.forumItem.getProperty('subscribed')):
-							d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getLabel()[:25])
+							if FB.canUnSubscribeForum(self.forumItem.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getLabel()[:25])
 						else:
 							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getLabel()[:25])
 			d.addItem('help',__language__(30244))
@@ -1709,7 +1711,7 @@ class ForumsWindow(BaseWindow):
 			
 	def setLogo(self,logo):
 		if not logo: return
-		if getSetting('save_logos',False) and not FB.getForumID() == 'general':
+		if getSetting('save_logos',False) and not FB.getForumID().startswith('GB.'):
 			root, ext = os.path.splitext(logo) #@UnusedVariable
 			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
 			if os.path.exists(logopath):
@@ -1763,9 +1765,11 @@ class ForumsWindow(BaseWindow):
 			for f in forums: d.addItem(f,f)
 			d.addItem('new','[COLOR FF00FF00]+Add New Forum[/COLOR]')
 			d.addItem('remove','[COLOR FFFF0000]-Remove A Forum[/COLOR]')
+			d.addItem('setlogin','Set Current Forum User/Pass')
 			url = d.getResult()
 			if not url: return
 			if url == 'remove': return self.removeGeneralURL()
+			if url == 'setlogin': return setLogins()
 		if not url or url == 'new':
 			url = doKeyboard('Enter full forum url')
 			if not url: return
@@ -1846,7 +1850,7 @@ class ForumsWindow(BaseWindow):
 			if item:
 				fid = item.getProperty('id')
 				if FB.isForumSubscribed(fid,item.getProperty('subscribed')):
-					d.addItem('unsubscribecurrentforum', __language__(30242))
+					if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
 				else:
 					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
 			d.addItem('refresh',__language__(30054))
@@ -2768,7 +2772,7 @@ def checkPasswordEncryption():
 def getForumBrowser(forum=None,url=None,donecallback=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
 	#global FB
-	if forum == 'general' and not url:
+	if forum.startswith('GB.') and not url:
 		url = getSetting('exp_general_forums_last_url')
 		if not url: forum = 'TT.forum.xbmc.org'
 	if url:

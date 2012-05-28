@@ -980,14 +980,24 @@ class GeneralForumParser(AdvancedParser):
 							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
 						}
 		
+		self.splits = {	'vb':[ (re.compile('<!--[^>]*?SUBSCRIBED FORUMS[^>]*?-->(?i)'),re.compile('<!--[^>]*?END SUBSCRIBED FORUMS[^>]*?-->(?i)')) ]
+					}
+		
 		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?:f|id|forumid|fid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
 		self.linkRE = None
+	
+	def splitHTML(self,html):
+		splits = self.splits.get(self.getForumType(),[])
+		for s,e in splits:
+			html = e.split(s.split(html,1)[-1],1)[0]	
+		return html
 	
 	def getForums(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.forums = []
 		self.reset()
 		self.getRE(html)
+		html = self.splitHTML(html)
 		self.feed(html)
 		self.reset()
 		if self.subsSet: return self.forums
@@ -1016,10 +1026,10 @@ class GeneralForumParser(AdvancedParser):
 				m = self.linkRE.search(href)
 				if m:
 					mdict = m.groupdict()
-					forum = {'forumid':mdict.get('id',''),'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url','')}
+					forum = {'forumid':mdict.get('id',''),'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag}
 					for t in reversed(self.stack):
 						if t.tag in ('td','li','div'):
-							t.callback = self.show
+							t.callback = self.checkDesc
 							break
 					if 'sub' in tag.getAttr('class') or (self.lastTag and 'sub' in self.lastTag.getAttr('class')):
 							forum['subforum'] = True
@@ -1029,12 +1039,11 @@ class GeneralForumParser(AdvancedParser):
 							forum['subforum'] = True
 						if t.tag in ('td','li','div'):
 							if 'forum' in t.getAttr('class'):
-								t.callback = self.show
+								t.callback = self.checkDesc
 								if 'sub' in t.getAttr('class') or t.main:
 									forum['subforum'] = True
 									self.subsSet = True
 								t.main = True
-								t.callback = self.show
 							if self.lastForumTag and self.lastForumTag.depth + 1 < tag.depth:
 								#forum['subforum'] = True
 								self.forumDepth +=1
@@ -1050,8 +1059,8 @@ class GeneralForumParser(AdvancedParser):
 					self.forums.append(forum)
 					#print tag.depth, forum
 	
-	def show(self,tag):
-		if len(tag.dataStack) > 1:
+	def checkDesc(self,tag):
+		if len(tag.dataStack) > 1 and not self.lastForum['tag'] == tag:
 			self.lastForum['description'] = tag.dataStack[1]
 
 class GeneralThreadParser(AdvancedParser):
@@ -1082,7 +1091,7 @@ class GeneralThreadParser(AdvancedParser):
 		for p in re.finditer('<a[^>]*?href="(?P<url>[^"]*?%s[^"]*?)"[^>]*?>[^<\d]*?(?P<page>\d+)[^<\d]*?</a>' % re.escape(url),html):
 			p = p.groupdict()
 			self.pages[p.get('page')] = p.get('url')
-		
+	
 	def getThreads(self,html,url=''):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
@@ -1178,7 +1187,7 @@ class GeneralPostParser(AdvancedParser):
 		self.pidModeRE = re.compile('["\'\(](\w*?)(\d+)["\'\)]')
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
-							'vb2': re.compile('(?:^|")(?:showthread\.php\?|threads/)\d+[^"\']*?p=(?P<id>\d+)'),
+							'vb2': re.compile('(?:^|")(?:showthread\.php\?(?:t=)?|threads/)\d+[^"\']*?p=(?P<id>\d+)'),
 							'fb': re.compile('(?:^|")viewtopic\.php?[^"\']*?(?<!;)pid=(?P<id>\d+)'),
 							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),

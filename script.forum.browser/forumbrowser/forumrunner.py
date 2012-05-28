@@ -514,7 +514,8 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			pm.error = result.message
 		return bool(result)
 	
-	def canSubscribeThread(self,tid): return True
+	def canSubscribeThread(self,tid): return self.isLoggedIn()
+	def canUnSubscribeThread(self,tid): return self.isLoggedIn()
 	
 	def subscribeThread(self,tid):
 		if not self.checkLogin(): return False
@@ -533,7 +534,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		return True
 		
 	def canEditPost(self,user):
-		if user == self.user: return True
+		if user == self.user and self.isLoggedIn(): return True
 		return False
 	
 	def doPrivateMessage(self,post,callback=None):
@@ -546,9 +547,11 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		return True
 	
+	def canPost(self): return self.isLoggedIn()
+	
 	def canDelete(self,user,target='POST'):
-		if target == 'PM': return True
-		return user == self.user
+		if target == 'PM' and self.isLoggedIn(): return True
+		return user == self.user and self.isLoggedIn()
 	
 	def deletePrivateMessage(self,post,callback=None):
 		if not self.checkLogin(): return False

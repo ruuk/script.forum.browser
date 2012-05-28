@@ -128,6 +128,7 @@ class PageData:
 		self.current = '0'
 		self.pageURLs = page_urls
 		self.useURLs = False
+		self.endPage = self.FB.formats.get('no_9999') == 'True' and 1 or 9999
 		page_set = False
 		if page_match:
 			pdict = page_match.groupdict()
@@ -205,14 +206,14 @@ class PageData:
 				else:
 					per_page = int((nextp - prev) / 2)
 			try:
-				if int(page) < 0: page = self.totalPages > 1 and self.totalPages or 9999
+				if int(page) < 0: page = self.totalPages > 1 and self.totalPages or self.endPage
 				page = str((int(page) - 1) * int(per_page))
 				self.current = page
 			except:
 				ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 		else:
 			try:
-				if int(page) < 0: page = int(self.totalPages) > 1 and self.totalPages or 9999
+				if int(page) < 0: page = int(self.totalPages) > 1 and self.totalPages or self.endPage
 			except:
 				ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 		return page
@@ -401,6 +402,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.checkBrowser()
 		response = self.browser.open(self.getURL('login'))
 		html = response.read()
+		#open('/home/ruuk/test.txt','w').write(html)
 		try:
 			self.browser.select_form(predicate=self.predicateLogin)
 		except:
@@ -417,7 +419,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		response = self.browser.submit()
 		html = response.read()
 		self.lastHTML = html
-		if not 'action="%s"' % self.forms.get('login_action','@%+#') in html:
+		if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
 			self._loggedIn = True
 			LOG('LOGGED IN')
 			return True
@@ -426,6 +428,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 	def checkLogin(self,callback=None):
 		#raise Exception('TEST')
+		if self.isLoggedIn(): return True
 		if not callback: callback = self.fakeCallback
 		if not self.canLogin():
 			self._loggedIn = False
@@ -435,11 +438,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(5,__language__(30100)): return False
 			if not self.login():
 				self._loggedIn = False
-				return False
 			else:
 				self._loggedIn = True
 		
-		return True
+		return self._loggedIn
 		
 	def browserReadURL(self,url,callback):
 		if not callback(30,__language__(30101)): return ''
@@ -456,15 +458,16 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			LOG('ERROR - EMPTY URL IN readURL()')
 			return ''
 		if not callback: callback = self.fakeCallback
-		if self.canLogin() and (self.isLoggedIn() or self.formats.get('login_required') == 'True' or force_login or self.alwaysLogin):
+		
+		if force_browser:
+			self.checkBrowser()
+			data = self.browserReadURL(url,callback)
+		elif self.canLogin() and (self.isLoggedIn() or self.formats.get('login_required') == 'True' or force_login or self.alwaysLogin):
 			if not self.checkLogin(callback=callback): return ''
 			data = self.browserReadURL(url,callback)
 			if self.forms.get('login_action','@%+#') in data:
 				self.login()
 				data = self.browserReadURL(url,callback)
-		elif force_browser:
-			self.checkBrowser()
-			data = self.browserReadURL(url,callback)
 		else:
 			if not callback(5,__language__(30101)): return ''
 			req = urllib2.urlopen(url)
@@ -663,7 +666,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def getForm(self,html,action,name=None):
 		if not action: return None
 		try:
-			forms = self.mechanize.ParseString(''.join(re.findall('<form\saction="%s.+?</form>' % re.escape(action),html,re.S)),self._url)
+			forms = self.mechanize.ParseString(''.join(re.findall('<form.*?action="%s[^>]*?>.+?</form>(?s)' % re.escape(action),html)),self._url)
 			if name:
 				for f in forms:
 					if f.name == name:
@@ -914,12 +917,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			elif ctype == 'checkbox':
 				control.items[0].selected = value == 'True'
 			x+=1
-			
+		
+	def canPost(self): return self.isLoggedIn()
+	
 	def canDelete(self,user,target='POST'):
 		if target == 'POST':
-			return self.user == user and self.urls.get('deletepost')
+			return self.user == user and self.urls.get('deletepost') and self.isLoggedIn()
 		else:
-			return bool(self.urls.get('private_messages_delete'))
+			return bool(self.urls.get('private_messages_delete')) and self.isLoggedIn()
 	
 	def getQuoteFormat(self):
 		return None
@@ -932,7 +937,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def editPost(self,pm,callback=None):
 		return self.post(pm,callback,edit=True)
 	
-	def canEditPost(self,user): return True
+	def canEditPost(self,user): return user == self.user and self.isLoggedIn() and self.canPost()
 	
 	def getQuoteStartFormat(self):
 		return self.filters.get('quote_start','[QUOTE]')

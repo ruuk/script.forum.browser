@@ -560,7 +560,7 @@ class ForumBrowser:
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 						'image':'\[img\](?P<url>[^\[]+?)\[/img\](?is)',
-						'link':'\[url="?(?P<url>[^\]]+?)\](?P<text>.+?)"?\[/url\](?is)',
+						'link':'\[(?:url|video)="?(?P<url>[^\]]+?)\](?P<text>.+?)"?\[/(?:url|video)\](?is)',
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
@@ -644,16 +644,16 @@ class ForumBrowser:
 	def getPMCounts(self,pct=0): return None
 	
 	def canSubscribeThread(self,tid): return False
+	def canUnSubscribeThread(self,tid): return False
 	
 	def subscribeThread(self,tid): return False
-	
-	def subscribeForum(self,fid): return False
-	
 	def unSubscribeThread(self,tid): return False
 	
+	def subscribeForum(self,fid): return False
 	def unSubscribeForum(self,fid): return False
 	
 	def canSubscribeForum(self,fid): return False
+	def canUnSubscribeForum(self,fid): return False
 	
 	def isForumSubscribed(self,fid,default=False): return default
 	
@@ -662,6 +662,8 @@ class ForumBrowser:
 	def hasPM(self): return False
 	
 	def hasSubscriptions(self): return False
+	
+	def canPost(self): return False
 	
 	def canDelete(self,user,target='POST'): return False
 			

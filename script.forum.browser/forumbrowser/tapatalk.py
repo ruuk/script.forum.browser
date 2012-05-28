@@ -867,17 +867,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Failed to delete post: %s (%s)' % (post.error,soft_hard == 1 and 'Soft' or 'Hard'))
 			return False
 		return True
-			
+	
+	def canPost(self): return self.isLoggedIn()
+	
 	def canDelete(self,user,target='POST'):
-		if target == 'PM': return True
-		if self.forumConfig.get('can_moderate'): return True
+		if self.isLoggedIn():
+			if target == 'PM': return True
+			if self.forumConfig.get('can_moderate'): return True
 		return False
 	
-	def canSubscribeThread(self,tid):
-		return True
-	
-	def canSubscribeForum(self,fid):
-		return True
+	def canSubscribeThread(self,tid): return self.isLoggedIn()
+	def canSubscribeForum(self,fid): return self.isLoggedIn()
+	def canUnSubscribeThread(self,tid): return self.isLoggedIn()
+	def canUnSubscribeForum(self,fid): return self.isLoggedIn()
 	
 	def subscribeThread(self,tid):
 		result = self.server.subscribe_topic(tid)
