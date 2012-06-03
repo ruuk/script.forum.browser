@@ -11,7 +11,6 @@ TODO:
   Use new option menus for context?
   Better 'Choose Forum' menu
   Option to PM author of selected post
-  Remember SSL Fail?
   View online users list
   Access to other PM boxes
   View video links
@@ -32,13 +31,28 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.51 RC9
+Current Version : 0.9.52 RC10
 
-*** 0.9.51 RC8 ***
+*** 0.9.52 RC10 ***
+
+Experimental:
+ - FluxBB: logins, view thread subscriptions
+ - MyBB: logins, view forum and thread subscriptions
+ - PhpBB: logins, view forum and thread subscriptions
+ - IPBoard: logins, view forum and thread subscriptions
+ - Generic: logins, view thread subscriptions
+ - Captcha handling
+ - Pre-forum-list login page handling 
+ - Now handles <object> tags as links (mainly for embedded video)
+ - Better login handling
+ - New backend html parser based on html5lib (should now handle most html well)
+ - Cookies now saved to file so FB won't re-login if unnecessary
+
+*** 0.9.51 RC9 ***
 
 Context menus no longer show options that are not available when not logged in or not available for the parser type
 Error when getting video info will no longer cause links not to be displayed
-Now plays emebedded video (ie [video] tags) - shows them as links
+Now plays embedded video (ie [video] tags) - shows them as links
 
 Experimental:
  - VBulletin: Added logins and viewing of subscriptions (only tested with Boxee) 

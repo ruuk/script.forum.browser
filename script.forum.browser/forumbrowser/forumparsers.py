@@ -717,7 +717,215 @@ class VBForumParser(BaseParser):
 	def setFID(self,data):
 		ID = self.extractID('forumdisplay.php','f',data)
 		if ID: self.current['forumid'] = ID
+
+from html5lib.constants import voidElements, spaceCharacters
+from html5lib import treebuilders
+from html5lib.treewalkers.dom import TreeWalker
+from html5lib import HTMLParser as html5lib_HTMLParser
+spaceCharacters = u"".join(spaceCharacters)
+from xml.dom import Node
+
+DOCUMENT = Node.DOCUMENT_NODE
+DOCTYPE = Node.DOCUMENT_TYPE_NODE
+TEXT = Node.TEXT_NODE
+ELEMENT = Node.ELEMENT_NODE
+COMMENT = Node.COMMENT_NODE
+ENTITY = Node.ENTITY_NODE
+UNKNOWN = "<#UNKNOWN#>"
+
+class HTML5Parser(TreeWalker):
+	def reset(self): pass
+	
+	def feed(self,data):
+		data = re.sub('(?<=[^\s])&nbsp;(?=[^\s])',' ',data)
+		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
+		self.tree = currentNode = html5lib_HTMLParser(tree=treebuilders.getTreeBuilder('dom')).parse(data)
+		while currentNode is not None:
+			details = self.getNodeDetails(currentNode)
+			type, details = details[0], details[1:]
+			hasChildren = False
+			endTag = None
+
+			if type == TEXT:
+				self.handle_data(unicode(details[0]))
+				#for token in self.text(*details):
+				#	if token['type'] == 'Characters': self.handle_data(token['data'])
+
+			elif type == ELEMENT:
+				namespace, name, attributes, hasChildren = details
+				self.lastTagText = '<' + str(name) + ' ' + str(attributes) + '>'
+				if name in voidElements:
+					for token in self.emptyTag(namespace, name, attributes, 
+											   hasChildren):
+						self.handle_starttag(name, attributes)
+						self.handle_endtag(name)
+					hasChildren = False
+				else:
+					endTag = name
+					self.handle_starttag(name, attributes)
+
+			#elif type == COMMENT:
+			#	yield self.comment(details[0])
+
+			#elif type == ENTITY:
+			#	yield self.entity(details[0])
+
+			elif type == DOCUMENT:
+				hasChildren = True
+
+			#else:
+			#	yield self.unknown(details[0])
+			
+			if hasChildren:
+				firstChild = self.getFirstChild(currentNode)
+			else:
+				firstChild = None
+			
+			if firstChild is not None:
+				currentNode = firstChild
+			else:
+				while currentNode is not None:
+					details = self.getNodeDetails(currentNode)
+					type, details = details[0], details[1:]
+					if type == ELEMENT:
+						namespace, name, attributes, hasChildren = details
+						if name not in voidElements:
+							self.handle_endtag(name)
+					if self.tree is currentNode:
+						currentNode = None
+						break
+					nextSibling = self.getNextSibling(currentNode)
+					if nextSibling is not None:
+						currentNode = nextSibling
+						break
+					else:
+						currentNode = self.getParentNode(currentNode)
+						
+	def handle_starttag(self,tag,attrs): pass
+	def handle_endtag(self,tag): pass
+	def handle_data(self,data): pass
 		
+	def get_starttag_text(self):
+		return self.lastTagText
+	
+	def __init__(self):
+		self.tree = None
+		self.lastTagText = ''
+		self.all = []
+		self.revertCodesRE = re.compile(r'(%)(#?[\w\d]+;)')
+		self.imgSrcRE = re.compile(r'src="([^"]*?)"')
+		self.aHrefRE = re.compile(r'href="([^"]*?)"')
+		self.tagRE = re.compile(r'<[^>]*?>')
+		self.badCommentRE = re.compile(r"<\!(?!-)[^>]*?>")
+		self.tagFixRE1 = re.compile(r'(="[^"]*?)"(?! )([^"]*?" )')
+		self.tagFixRE2 = re.compile(r'(="[^"]*?" )([^"]*?)(?<!=)"(\w+=)(\w+)')
+		self.tagFixRE3 = re.compile(r"(='[^']*?)'([^'=]*?' )")
+		self.tagFixRE4 = re.compile(r'(")(\w+=")')
+		self.tagFixRE5 = re.compile(r'(?<!=)"" ')
+		self.badTagRE = re.compile(r'<(?P<tag>\w{2,})(?: |>)(?:[^>]*?>)?.*?</(?P=tag)(?!>)')
+		self.scriptRemover = re.compile(r'<script[^>]*?>.*?</script>(?s)')
+		self.styleRemover = re.compile(r'<style[^>]*?>.*?</style>(?s)')
+		self.bodyTagRE = re.compile(r'<body[^>]*?>(?i)')
+		self.bodyEndTagRE = re.compile(r'</body>(?i)')
+		self.emptyTagRE = re.compile(r'(<(?:area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)[^>]*?(?<!/))(>)')
+		self.current = None
+		self.mode = None
+		self.resetCurrent(False)
+	
+	def badQuoteFix(self,m):
+		w = m.group(0)
+		new = re.sub(r'( \w+=")',r'"\1',w)
+		if new == w: new = m.group(1) + m.group(2)
+		return new
+	
+	def cleanTag(self,m):
+		data = m.group(0)
+		data = self.tagFixRE1.sub(self.badQuoteFix,data)
+		data = self.tagFixRE2.sub(r'\1\2\3"\4',data)
+		data = self.tagFixRE3.sub(r'\1&#39;\2',data)
+		data = self.tagFixRE4.sub(r'\1 \2',data)
+		data = self.tagFixRE5.sub('" ',data)
+		return data
+	
+	def done(self):
+		raise DoneException()
+	
+	def feedOld(self,data):
+		#open('/home/ruuk/test2.txt','w').write(data.encode('ascii','replace'))
+		data = self.bodyEndTagRE.split(self.bodyTagRE.split(data,1)[-1],1)[0]
+		data = self.badCommentRE.sub('',data)
+		data = self.badTagRE.sub(r'\g<0>>',data)
+		data = self.tagRE.sub(self.cleanTag,data)
+		data = self.scriptRemover.sub('',data)
+		data = self.styleRemover.sub('',data)
+		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
+		data = self.emptyTagRE.sub(r'\1/\2',data)
+		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
+		HTMLParser.HTMLParser.feed(self,data)
+	
+	def revertCodes(self,data):
+		return convertHTMLCodes(self.revertCodesRE.sub(r'&\2',data))
+	
+	def resetCurrent(self,add=True):
+		if add:
+			if self.current:				
+				self.all.append(self.current)
+		self.mode = None
+		self.subMode = None
+		self.depth = 0
+		self.current = {}
+		
+	def getAttr(self,name,attrs):
+		for a in attrs:
+			if a[0] == name:
+				return a[1]
+		return ''
+		
+	def getList(self,data,*args,**kwargs):
+		if not isinstance(data,unicode): data = unicode(data,'utf8','replace')
+		self.resetCurrent()
+		self.all = []
+		try:
+			self.feed(data,*args,**kwargs)
+		except DoneException:
+			print 'PB HTMLParser terminated early'
+		self.reset()
+		return self.all
+	
+	def extractID(self,pre,var,data):
+		m = re.search(pre + '(?:\?|/)(?:[^"]*?'+var+'=)?(?P<id>\d+)',data)
+		if m: return m.groupdict().get('id')
+		
+	def check_for_whole_start_tag_save(self, i):
+		rawdata = self.rawdata
+		m = HTMLParser.locatestarttagend.match(rawdata, i)
+		if m:
+			j = m.end()
+			next = rawdata[j:j+1] #@ReservedAssignment
+			if next == ">":
+				return j + 1
+			if next == "/":
+				if rawdata.startswith("/>", j):
+					return j + 2
+				if rawdata.startswith("/", j):
+					# buffer boundary
+					return -1
+				# else bogus input
+				self.updatepos(i, j + 1)
+				self.error("malformed empty start tag")
+			if next == "":
+				# end of input
+				return -1
+			if next in ("abcdefghijklmnopqrstuvwxyz=/"
+						"ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+				# end of input in or before attribute value, or we have the
+				# '/' from a '/>' ending
+				return -1
+			self.updatepos(i, j)
+			#self.error("malformed start tag")
+			return
+		raise AssertionError("we should not get here!")
+
 class HTMLData(unicode):
 	def __new__(self,value,tag):
 		return unicode.__new__(self, value)
@@ -754,7 +962,9 @@ class HTMLTag:
 	
 	def processAttrs(self):
 		self.attrs = {}
-		for a in self.attrsList: self.attrs[a[0]] = self.revertCodes(a[1])
+		for a in self.attrsList:
+			if a and a[1]:
+				self.attrs[a[1]] = self.revertCodes(self.attrsList[a])
 		
 	def getAttr(self,attr):
 		if self.attrs == None: self.processAttrs()
@@ -843,9 +1053,9 @@ class ListSlice(list):
 		self._setSelf()
 		return list.index(self, *args, **kwargs)
 	
-class AdvancedParser(BaseParser):
+class AdvancedParser(HTML5Parser):
 	def __init__(self):
-		BaseParser.__init__(self)
+		HTML5Parser.__init__(self)
 		self.lastTag = None
 		self.stack = []
 		self.sequence = []
@@ -862,7 +1072,7 @@ class AdvancedParser(BaseParser):
 	def getRE(self,html):
 		mx = 0
 		pick = None
-		ftpick = 'u0'
+		ftpick = self.forumType
 		for ft,r in self.linkREs.items():
 			ct = len(r.findall(html) or [])
 			if ct > mx:
@@ -892,14 +1102,13 @@ class AdvancedParser(BaseParser):
 		self.handleStartTag(tag)
 	
 	def handle_data(self,data):
-		if not data.strip(): return
+		#if not data.strip(): return
 		data = self.dataCleanerRE.sub('',self.revertCodes(data))
 		tag = self.stack and self.stack[-1] or None
 		data = HTMLData(data,tag)
 		self.sequence.append(data)
 		if tag:
 			tag.data = HTMLData(tag.data + data,tag)
-		#	tag.stack.append(data)
 			tag.dataStack.append(data)
 		self.handleData(tag, data)
 	
@@ -910,47 +1119,12 @@ class AdvancedParser(BaseParser):
 		endT = HTMLEndTag(endTag)
 		endTag.stack = ListSlice(self.sequence,endTag.sequenceIndex+1,len(self.sequence))
 		self.sequence.append(endT)
-		#print repr(endTag)
-#		if not endTag.tag == tag:
-#			print 'UNMATCHED ENDTAGS AT (INDEX: ' + str(self.tagIndex) + ') - GOT: ' + tag + ' EXPECTED: ' + endTag.tag
-#			if self.stack and self.stack[-1].tag == tag:
-#				self.handle_broken_endtag(tag)
-#			else:
-#				self.stack.append(endTag)
-#				return
-			
-			#if self.stack: self.stack.pop()
-		endTag.endIndex = self.tagIndex
-		self.tagIndex += 1
-		if endTag.parent:
-			#print 'parent ' + repr(endTag.parent)
-			endTag.parent.dataStack += endTag.dataStack
-			endTag.parent.tagStack.append(endTag)
-			endTag.parent.tagStack += endTag.tagStack
-			#endTag.parent.stack.append(endTag)
-			#endTag.parent.stack += endTag.stack
-			#endTag.parent.stack.append(endT)
-		if endTag.callback: endTag.callback(endTag)
-		self.handleEndTag(endTag)
-		self.lastTag = endTag
-		
-	def handle_broken_endtag(self,tag):
-		if not self.stack: return
-		endTag = self.stack.pop()
-		if not endTag.tag == tag:
-			print '2nd UNMATCHED ENDTAGS AT (INDEX: ' + str(self.tagIndex) + ') - GOT: ' + tag + ' EXPECTED: ' + endTag.tag
-#			if self.stack:
-#				print self.stack[-1].tag
-#				self.stack.pop()
 		endTag.endIndex = self.tagIndex
 		self.tagIndex += 1
 		if endTag.parent:
 			endTag.parent.dataStack += endTag.dataStack
 			endTag.parent.tagStack.append(endTag)
 			endTag.parent.tagStack += endTag.tagStack
-			endTag.parent.stack.append(endTag)
-			endTag.parent.stack += endTag.stack
-			endTag.parent.stack.append(HTMLEndTag(endTag.tag))
 		if endTag.callback: endTag.callback(endTag)
 		self.handleEndTag(endTag)
 		self.lastTag = endTag
@@ -976,16 +1150,23 @@ class GeneralForumParser(AdvancedParser):
 		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
 							'fb': re.compile('(?:^|")viewforum.php?[^"\']*?(?<!;)(?:f|id)=?(?P<id>\d+)'),
 							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
+							'mb2': re.compile('(?:^|")forumdisplay\.php\?(?!from=)[^"\']*?fid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)'),
 							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
 						}
 		
-		self.splits = {	'vb':[ (re.compile('<!--[^>]*?SUBSCRIBED FORUMS[^>]*?-->(?i)'),re.compile('<!--[^>]*?END SUBSCRIBED FORUMS[^>]*?-->(?i)')) ]
+		self.splits = {	'vb':[ (re.compile('<!--[^>]*?SUBSCRIBED FORUMS[^>]*?-->(?i)'),re.compile('<!--[^>]*?END SUBSCRIBED FORUMS[^>]*?-->(?i)')) ],
+						'pb':[ (re.compile('<h[^>]+?>manage subscriptions<[^>]+?>(?i)'),re.compile('')) ],
 					}
 		
-		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?:f|id|forumid|fid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
+		#http://www.torrentday.com/forums.php?action=viewforum&subforumid=1&forumid=26
 		self.linkRE = None
 	
+	def getRE(self, html):
+		if self.linkRE: return
+		AdvancedParser.getRE(self, html)
+		
 	def splitHTML(self,html):
 		splits = self.splits.get(self.getForumType(),[])
 		for s,e in splits:
@@ -997,7 +1178,9 @@ class GeneralForumParser(AdvancedParser):
 		self.forums = []
 		self.reset()
 		self.getRE(html)
+		if not self.linkRE: return self.forums
 		html = self.splitHTML(html)
+		#open('/home/ruuk/test.txt','w').write(html.encode('ascii','replace'))
 		self.feed(html)
 		self.reset()
 		if self.subsSet: return self.forums
@@ -1024,7 +1207,7 @@ class GeneralForumParser(AdvancedParser):
 			href = tag.getAttr('href')
 			if href:
 				m = self.linkRE.search(href)
-				if m:
+				if m and not 'topicid' in href:
 					mdict = m.groupdict()
 					forum = {'forumid':mdict.get('id',''),'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag}
 					for t in reversed(self.stack):
@@ -1069,11 +1252,14 @@ class GeneralThreadParser(AdvancedParser):
 		self.linkREs = {	'vb':re.compile('(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)'),
 							'fb':re.compile('(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)'),
 							'mb':re.compile('(?:^|")thread-(?P<id>\d+).html'),
+							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=(?P<id>\d+)'),
 							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
 							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
 						}
 		
-		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
+								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?\w*\.php\?[^"\']*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')')
+							 }
 		self.linkRE = None
 		self.pages = {}
 		
@@ -1101,6 +1287,8 @@ class GeneralThreadParser(AdvancedParser):
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
 		self.getRE(html)
+		#open('/home/ruuk/test.txt','w').write(html.encode('ascii','replace'))
+		if not self.linkRE: return self.threads
 		self.feed(html)
 		self.reset()
 		return self.threads
@@ -1184,16 +1372,20 @@ class GeneralPostParser(AdvancedParser):
 		self.wsRE = re.compile('[\r\t]')
 		self.excessiveNL = re.compile('\n{2,}')
 		self.numberRE = re.compile('^([\d,]+)$')
-		self.pidModeRE = re.compile('["\'\(](\w*?)(\d+)["\'\)]')
+		self.pidModeRE = re.compile('(\w*?=?)(\d+)["\'\)]')
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
 							'vb2': re.compile('(?:^|")(?:showthread\.php\?(?:t=)?|threads/)\d+[^"\']*?p=(?P<id>\d+)'),
 							'fb': re.compile('(?:^|")viewtopic\.php?[^"\']*?(?<!;)pid=(?P<id>\d+)'),
 							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
+							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
-							'ip':re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
+							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
 						}
-		self.genericLinkREs = {}
+		
+		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)') }
+		
+		#self.genericLinkREs = {}
 #		self.genericLinkREs = { 'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?post\w*\.php\?[^"\']*?(?:p|id|postid|pid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
 #								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?member\.php\?\w=\d+[^"\']*?)(?:$|"|\')'),
 #								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?pm\.php\?\w=\d+[^"\']*?)(?:$|"|\')')
@@ -1201,6 +1393,7 @@ class GeneralPostParser(AdvancedParser):
 		
 		self.postREs = [	#(None,re.compile('^#?\d+$')),
 							('postnumber',re.compile('^#?(\d+)?$')),
+							('postnumber',re.compile('^#?(\d+)? ')),
 							(None,re.compile('^by$')),
 							#(None,re.compile('^#$')),
 							('joindate',re.compile('^(?:joined|registered|join date)(?! user):?( .+)?(?i)')),
@@ -1221,7 +1414,7 @@ class GeneralPostParser(AdvancedParser):
 							('reputation',re.compile('^reputation:( \d+)?(?i)')),
 							('status',re.compile('^group:?( .+)?(?i)')),
 							('status',re.compile('(^.{1,40}$)')),
-							('postcount',re.compile('\w+: ([\d,]+)(?i)')),
+							('postcount',re.compile('\w+: ([\d,]+)$(?i)')),
 							('title',re.compile('^re: (?i)'))
 						]
 		
@@ -1238,8 +1431,12 @@ class GeneralPostParser(AdvancedParser):
 		self.lastUnset = ''
 		self.mode = 'NORMAL'
 		self.pidTags = OrderedDict()
+		self.callback = self.fakeCallback
 		
-	def getPosts(self,html):
+	def fakeCallback(self,pct,msg): return True
+	
+	def getPosts(self,html,callback=None):
+		self.callback = callback or self.fakeCallback
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
 		self.reset()
@@ -1255,22 +1452,43 @@ class GeneralPostParser(AdvancedParser):
 			return self.getPIDPosts()
 		if not self.posts:
 			raise Exception('Couldn\'t parse any posts')
-		if not self.posts[-1].get('data'):
-			self.getLastData(self.posts[-1])
-		for p in self.posts:
-			data = self.setDatas(p)
-			p['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
-			if 'data' in p: del p['data']
+		if self.isGeneric:
+			lastP = None
+			for p in self.posts:
+				if lastP:
+					lastP['data'] = self.sequence[self.sequence.index(lastP['bottom']):self.sequence.index(p['bottom'])]
+					data = self.setDatas(lastP)
+					lastP['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
+					if 'data' in lastP: del lastP['data']
+				lastP = p
+				
+			seq = self.sequence[self.sequence.index(lastP['bottom']):]
+			firstTag = self.posts[0].get('bottom')
+			for s in seq:
+				if hasattr(s,'stack') and firstTag in s.stack: break
+			seq = seq[:seq.index(s)]	
+			lastP['data'] = seq
+			data = self.setDatas(lastP)
+			lastP['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
+			if 'data' in lastP: del lastP['data']
+		else:
+			if not self.posts[-1].get('data'): self.getLastData(self.posts[-1])
+			for p in self.posts:
+				data = self.setDatas(p)
+				p['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
+				if 'data' in p: del p['data']
 			
 		self.reset()
 		return self.posts
 		
 	def getPIDPosts(self):
 		maxct = 0
+		self.pidTags['0'] = []
 		for k,v in self.pidTags.items():
 			#print k + ': ' + str(len(v))
 			#print v
 			ct = len(v)
+			#print '%s %s' % (k,ct)
 			if ct > maxct: maxct = ct
 		for k,v in self.pidTags.items():
 			ct = len(v)
@@ -1278,6 +1496,7 @@ class GeneralPostParser(AdvancedParser):
 				tags = []
 				for t in v:
 					if not t in tags: tags.append(t)
+				print k
 				self.posts.append({'postid':k,'tags':tags})
 		for p in self.posts:
 			tags = p['tags']
@@ -1286,6 +1505,7 @@ class GeneralPostParser(AdvancedParser):
 			for t in tags:
 				parent = t
 				while not parent.tag in ['div','tr','dl','li']:
+					if not self.callback(95,'Parsing Post'): return []
 					if not parent.parent:
 						parent = None
 						break
@@ -1326,6 +1546,7 @@ class GeneralPostParser(AdvancedParser):
 		ct = stack.index(tag)
 		point = 0
 		while ct > 0:
+			if not self.callback(95,'Parsing Post'): return
 			s = stack[ct]
 			if hasattr(s,'depth') and s.depth <= self.bottom:
 				#print repr(s) + ' ' + str(s.depth)
@@ -1335,6 +1556,7 @@ class GeneralPostParser(AdvancedParser):
 		bottom = stack[point]
 		#print repr(bottom)
 		while not hasattr(bottom,'stack'):
+			if not self.callback(95,'Parsing Post'): return
 			point += 1
 			bottom = stack[point]
 			#print repr(bottom)
@@ -1378,6 +1600,11 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'embed':
 				src = d.getAttr('src')
 				if src: newData.append('[url='+src+']'+(d.data or 'EMBED')+'[/url]')
+			elif d.tag == 'object':
+				val = d.getAttr('value')
+				if not val or not val.startswith('http'): val = d.getAttr('data')
+				if val and val.startswith('http'):
+					newData.append('[url='+val+']'+(d.data or 'EMBED')+'[/url]')
 			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre'):
 				newData.append('\n')
 			elif d.tag == 'li':
@@ -1386,7 +1613,7 @@ class GeneralPostParser(AdvancedParser):
 #			for x in d.stack:
 #				newData,last = self.handleDataItem(x, p, dREs, newData, last)
 		elif isinstance(d,HTMLEndTag):
-			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br'):
+			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br','li'):
 				newData.append('\n')
 		else:
 			if d.strip():
@@ -1414,6 +1641,9 @@ class GeneralPostParser(AdvancedParser):
 										last = 'user'
 										break
 									continue
+						#elif val =='user':
+						#	if dstrip == 'by' or p.get('postid','%$#@!') in dstrip:
+						#		continue
 						elif val == 'labeledstatus':
 							if m.group(1):
 								status = m.group(1).strip()
@@ -1439,8 +1669,10 @@ class GeneralPostParser(AdvancedParser):
 							if self.lastUnset:
 								p[self.lastUnset] = dstrip
 								self.lastUnset = None
+							elif not p.get('postnumber'):
+								p[val] = m.group(1)
 							else:
-								break #Eat the postnumber if already set and don't remove in case we just got #
+								if not m.group(1) == '#': break #Eat the postnumber if already set and don't remove in case we just got #
 						elif m.groups():
 							#print 'g ' + d.encode('ascii','replace')
 							if not val in p:
@@ -1485,8 +1717,8 @@ class GeneralPostParser(AdvancedParser):
 						href = d.tag.getAttr('href')
 						if href and not 'javascript:' in href and not href.startswith('#'):
 							newData.append('[url='+href+']'+d+'[/url]')
-					elif d.tag.tag == 'li':
-						newData.append(d + '\n')
+#					elif d.tag.tag == 'li':
+#						newData.append(d + '\n')
 					else:
 						newData.append(d)	
 		return newData, last
@@ -1546,16 +1778,28 @@ class GeneralPostParser(AdvancedParser):
 			if tag.tag in ['div','tr','dl','li','table'] and self.lastPost['tag'] in tag.stack:
 				#print repr(tag)
 				bottom = self.lastPost.get('bottom')
-				if not bottom or not bottom.tag in ['dl','li','table']: self.lastPost['bottom'] = tag
+				if not bottom or not bottom.tag in ['dl','li','table']:
+#					for p in self.posts:
+#						#print str(p.get('postid')) + ' ' + str(self.lastPost.get('postid'))
+#						if not p.get('postid') == self.lastPost.get('postid'):
+#							if p.get('tag') in tag.stack:
+#								break
+#					else:
+					self.lastPost['bottom'] = tag
+				#print '-------'
 			
 	
 	def pidHandleEndTag(self,tag):
 		for w,pid in self.pidModeRE.findall(repr(tag)):
+			#print w + ' ' + pid
 			if pid in self.pidTags:
 				self.pidTags[pid].append(tag)
 			else:
 				self.pidTags[pid] = [tag]
-			if w == 'p': self.pidTags[pid].append(tag)
+			if w == 'p':
+				self.pidTags[pid].append(tag)
+			elif w == 'pid=' or w == 'p=' or w == 'postid=':
+				self.pidTags[pid] += [tag]*20
 	
 	def show(self,tag):
 		if len(tag.dataStack) > 1:

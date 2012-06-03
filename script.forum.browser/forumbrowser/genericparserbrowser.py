@@ -73,16 +73,17 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		path = os.path.join(FORUMS_STATIC_PATH,'general',self.forumParser.getForumType())
 		self.loadForumData(path)
 			
-	def getForums(self,callback=None,donecallback=None,url='',subs=False):
+	def getForums(self,callback=None,donecallback=None,url='',html='',subs=False):
 		if not callback: callback = self.fakeCallback
-		try:
-			url = url or self.urls.get('base','')
-			LOG('Forums List URL: ' + url)
-			html = self.readURL(url,callback=callback,force_browser=True)
-		except:
-			em = ERROR('ERROR GETTING FORUMS')
-			callback(-1,'%s' % em)
-			return self.finish(FBData(error=em or 'ERROR'),donecallback)
+		if not html:
+			try:
+				url = url or self.urls.get('base','')
+				LOG('Forums List URL: ' + url)
+				html = self.readURL(url,callback=callback,force_browser=True)
+			except:
+				em = ERROR('ERROR GETTING FORUMS')
+				callback(-1,'%s' % em)
+				return self.finish(FBData(error=em or 'ERROR'),donecallback)
 		
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
@@ -91,6 +92,14 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		LOG('Detected Forum Type: ' + self.forumParser.forumType)
 		self.doLoadForumData()
 		self.checkLogin(callback)
+		if not forums and self.isLoggedIn():
+			try:
+				html = self.readURL(url,callback=callback,force_browser=True)
+			except:
+				em = ERROR('ERROR GETTING FORUMS')
+				callback(-1,'%s' % em)
+				return self.finish(FBData(error=em or 'ERROR'),donecallback)
+			forums = self.forumParser.getForums(html)
 		for f in forums:
 			f['subscribed'] = subs
 			f['is_forum'] = True
@@ -123,6 +132,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		threads = self.threadParser.getThreads(html,pagesURL)
+		LOG('Detected Threads Type: ' + self.threadParser.forumType)
 		#forums = self.forumParser.getList(html,in_threads=True)
 		try:
 			newfid = self.forumParser.linkRE.search(self.lastURL.rsplit('/',1)[-1]).groupdict().get('id')
@@ -138,11 +148,27 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 	
 	def getSubscriptions(self,page='',callback=None,donecallback=None):
-		url = self.getPageUrl(page,'subscriptions')
+		if self.forumParser.isGeneric:
+			#import codecs
+			#codecs.open('/home/ruuk/test.txt','w','utf8').write(self.lastHTML.decode('utf8'))
+			urls = self.urls.get('subscriptions','').split('|')
+			for u in urls:
+				#print u
+				if u in self.lastHTML:
+					print u
+					url = self.getPageUrl(page,'subscriptions',suburl=u)
+					break
+			else:
+				return self.finish(FBData(error='Generic Browser: Could not find subscriptions :('),donecallback)
+		else:
+			url = self.getPageUrl(page,'subscriptions')
 		url2 = self.getPageUrl(page,'forum_subscriptions')
 		data = self.getThreads(None, page,url=url,subs=True)
-		forums = self.getForums(url=url2,subs=True)
-		data.extra['forums'] = forums.data
+		if url2:
+			html = ''
+			if url2 == url: html = self.lastHTML
+			forums = self.getForums(url=url2,html=html,subs=True)
+			data.extra['forums'] = forums.data
 		return self.finish(data, donecallback)
 	
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
@@ -162,7 +188,8 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		replies = self.postParser.getPosts(html)
+		replies = self.postParser.getPosts(html,callback=callback)
+		LOG('Detected Posts Type: ' + self.postParser.forumType)
 		#topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		#if not threadid:
 		#	threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)

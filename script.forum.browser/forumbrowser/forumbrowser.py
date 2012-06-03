@@ -69,7 +69,7 @@ class FBOnlineDatabase():
 		return final
 
 class HTMLPageInfo:
-	def __init__(self,url):
+	def __init__(self,url,html=''):
 		self.url = url
 		
 		self.base = url
@@ -80,7 +80,11 @@ class HTMLPageInfo:
 		self.base2 += '/'
 		
 		self.isValid = True
-		self._getHTML()
+		if html:
+			self.html = html
+			self.html2 = html
+		else:
+			self._getHTML()
 		
 	def _getHTML(self):
 		try:
@@ -127,6 +131,12 @@ class HTMLPageInfo:
 		for i in images2 + images3 + images4:
 			if not i in images: images.append(i)
 		return images
+	
+	def pageImages(self):
+		return self._images(self.html, self.base)
+			
+	def baseImages(self):
+		return self._images(self.html2, self.base2)
 		
 	def _images(self,html,base):
 		urlList = re.findall('<img[^>]*?src="([^"]+?)"[^>]*?>',html) #Image tags

@@ -284,6 +284,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.needsLogin = True
 		self.alwaysLogin = always_login
 		self.lastHTML = ''
+		self.cookieJar = None
 		
 		self.reloadForumData(forum)
 		self.initialize()
@@ -292,10 +293,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return self.forum
 	
 	def isLoggedIn(self):
-		check = self.forms.get('login_action','@%+#').split('?')[0]
-		if check and self.lastHTML:
-			#open('/home/ruuk/test3.txt','w').write(self.lastHTML)
-			return not 'action="' + check in self.lastHTML
+		#check = self.forms.get('login_action','@%+#').split('?')[0]
+		#if check and self.lastHTML:
+		#	#open('/home/ruuk/test3.txt','w').write(self.lastHTML)
+		#	return not 'action="' + check in self.lastHTML
+		if self.lastHTML:
+			return bool(re.search('log[\s-]?out(?i)',self.lastHTML))
 		return self._loggedIn
 	
 	def resetBrowser(self):
@@ -377,9 +380,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def checkBrowser(self):
 		if not self.mechanize:
 			from webviewer import mechanize #@UnresolvedImport
+			import xbmc
+			cookiesPath = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'cache','cookies')
+			LOG('Cookies will be saved to: ' + cookiesPath)
+			cookies = mechanize.LWPCookieJar(cookiesPath)
+			if os.path.exists(cookiesPath): cookies.load()
+			self.cookieJar = cookies
+			opener = mechanize.build_opener(mechanize.HTTPCookieProcessor(cookies))
+			mechanize.install_opener(opener)
 			self.mechanize = mechanize
 		if not self.browser:
 			self.browser = self.mechanize.Browser()
+			self.browser.set_cookiejar(self.cookieJar)
 			self.browser.set_handle_robots(False)
 			self.browser.addheaders = [('User-Agent','Wget/1.12')]
 #			class SanitizeHandler(mechanize.BaseHandler):
@@ -394,33 +406,132 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 #
 #			self.browser.add_handler(SanitizeHandler())
 
-	def login(self):
+	def setSecurityControl(self,c,url,html):
+		images = forumbrowser.HTMLPageInfo(url,html).baseImages()
+		for i in images:
+			if '.php?' in i:
+				sec = self.doCaptcha(i)
+				if sec: c.value = sec
+			
+	def doCaptcha(self,url):
+		cachePath = sys.modules["__main__"].CACHE_PATH
+		captchaPath = os.path.join(cachePath,'captcha')
+		open(captchaPath,'w').write(self.browser.open_novisit(url).read())
+		url = captchaPath
+		import xbmcgui, xbmc
+		class CaptchaWindow(xbmcgui.WindowXML):
+			def __init__(self,*args,**kwargs):
+				self.url = kwargs.get('url')
+				
+			def init(self):
+				LOG('Showing Captch: ' + self.url)
+				self.getControl(100).setImage(self.url)
+				
+			def update(self,url):
+				self.getControl(100).setImage(url)
+				
+		w = CaptchaWindow('script-forumbrowser-captcha.xml',xbmc.translatePath(__addon__.getAddonInfo('path')),'Default','720p',url=url)
+		w.show()
+		w.update(url)
+		try:
+			return sys.modules["__main__"].doKeyboard('Enter security code')
+		finally:
+			w.close()
+			del w
+			
+	def login(self,url=''):
 		if not self.canLogin():
 			self._loggedIn = False
 			return False
 		LOG('LOGGING IN')
 		self.checkBrowser()
-		response = self.browser.open(self.getURL('login'))
+		response = self.browser.open(url or self.getURL('login'))
 		html = response.read()
 		#open('/home/ruuk/test.txt','w').write(html)
 		try:
 			self.browser.select_form(predicate=self.predicateLogin)
+			self.browser[self.forms['login_user']] = self.user
+			self.browser[self.forms['login_pass']] = self.password
 		except:
-			ERROR('LOGIN FORM SELECT ERROR')
-			LOG('TRYING ALTERNATE METHOD')
-			form = self.getForm(html,self.forms.get('login_action'))
-			if form:
+			ERROR('LOGIN FORM SELECT ERROR',hide_tb=True)
+			LOG('TRYING ALTERNATE METHOD 1')
+			try:
+				form = self.getForm(html,self.forms.get('login_action'))
+				if not form: raise Exception('NO FORM')
 				self.browser.form = form
-			else:
-				LOG('FAILED')
-				return False
-		self.browser[self.forms['login_user']] = self.user
-		self.browser[self.forms['login_pass']] = self.password
+				self.browser[self.forms['login_user']] = self.user
+				self.browser[self.forms['login_pass']] = self.password
+			except:
+				ERROR('LOGIN FORM SELECT ERROR',hide_tb=True)
+				LOG('TRYING ALTERNATE METHOD 2')
+				try:
+					ct=0
+					userset = False
+					passset = False
+					while True:
+						self.browser.select_form(nr=ct) #Will error out after last form
+						ct+=1
+						try:
+							for c in self.browser.form.controls:
+								if not userset and self.forms['login_user'] in str(c.name):
+									print c
+									userset = True
+									c.value = self.user
+								elif not passset and self.forms['login_pass'] in str(c.name):
+									passset = True
+									c.value = self.password
+								elif userset and ('sec' in str(c.name).lower() or 'captcha' in str(c.name).lower()) and not c.readonly:
+									LOG('Found Security Control')
+									self.setSecurityControl(c,response.geturl(),html)
+								#self.browser[self.forms['login_user']] = self.user
+								#self.browser[self.forms['login_pass']] = self.password
+							if not userset and not passset: raise Exception('No User/Pass Controls')
+							break
+						except:
+							LOG('WRONG FORM: %s' % ct)
+					if not userset or not passset:
+						if userset:
+							response = self.browser.submit()
+							html = response.read()
+							#import codecs
+							#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
+							ct=0
+							while True:
+								self.browser.select_form(nr=ct) #Will error out after last form
+								ct+=1
+								try:
+									for c in self.browser.form.controls:
+										if not passset and self.forms['login_pass'] in str(c.name):
+											passset = True
+											c.value = self.password
+										elif passset and 'sec' in str(c.name).lower() and not c.readonly:
+											LOG('Found Security Control')
+											self.setSecurityControl(c,response.geturl(),html)
+									if not passset: raise Exception('No Pass Control')
+									break
+								except:
+									ERROR('WRONG FORM (Password): %s' % ct,hide_tb=True)
+										
+					if not userset or not passset:
+						LOG('FAILED TO FIND USER AND/OR PASSWORD CONTROLS')
+						return False
+				except:
+					LOG('FAILED')
+					return False
 		response = self.browser.submit()
 		html = response.read()
-		self.lastHTML = html
-		if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
-			self._loggedIn = True
+		import codecs
+		codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
+		self.lastHTML = html + 'logout'
+		#if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
+		print self.cookieJar
+		print self.browser._ua_handlers['_cookies'].cookiejar
+		if self.cookieJar is not None:
+			self.cookieJar.save()
+			
+			print 'tttttest'
+		self._loggedIn = True
+		if self.isLoggedIn():
 			LOG('LOGGED IN')
 			return True
 		LOG('FAILED TO LOGIN')
@@ -428,6 +539,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 	def checkLogin(self,callback=None):
 		#raise Exception('TEST')
+		loginURL = ''
+		print self.lastURL
+		if 'login.php?' in self.lastURL:
+			loginURL = self.lastURL
 		if self.isLoggedIn(): return True
 		if not callback: callback = self.fakeCallback
 		if not self.canLogin():
@@ -436,7 +551,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not self.browser or self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
 			if not callback(5,__language__(30100)): return False
-			if not self.login():
+			if not self.login(loginURL):
 				self._loggedIn = False
 			else:
 				self._loggedIn = True
@@ -641,7 +756,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		page_disp = re.search(self.filters['page'],html)
 		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		
-	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid=''):
+	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl=''):
+		suburl = suburl or self.urls.get(sub,'')
+		if not suburl: return None
 		if page and not str(page).isdigit(): return self.makeURL(page)
 		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
@@ -654,7 +771,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 				page = str(page)
 				page = self.urls.get('page_arg','').replace('!PAGE!',page) or page
-		sub = self.URLSubs(self.urls.get(sub,''),pid=pid,tid=tid,fid=fid,page=page)
+		sub = self.URLSubs(suburl,pid=pid,tid=tid,fid=fid,page=page)
 		return self._url + sub
 		
 	def getURL(self,name):

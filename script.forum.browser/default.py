@@ -61,11 +61,15 @@ CACHE_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'
 if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
 
-def ERROR(message):
+def ERROR(message,hide_tb=False):
 	LOG('ERROR: ' + message)
-	import traceback #@Reimport
-	traceback.print_exc()
-	return str(sys.exc_info()[1])
+	short = str(sys.exc_info()[1])
+	if hide_tb:
+		LOG('ERROR Message: ' + short)
+	else:
+		import traceback #@Reimport
+		traceback.print_exc()
+	return short
 	
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -1105,10 +1109,10 @@ class RepliesWindow(PageWindow):
 				item.setProperty('status',texttransform.convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
 				item.setProperty('online',post.online and 'online' or '')
-				item.setProperty('postcount',post.postCount and str(post.postCount) or '')
+				item.setProperty('postcount',post.postCount and unicode(post.postCount) or '')
 				item.setProperty('activity',post.activity)
-				item.setProperty('postnumber',post.postNumber and str(post.postNumber) or '')
-				item.setProperty('joindate',str(post.joinDate))
+				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
+				item.setProperty('joindate',unicode(post.joinDate))
 				
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
@@ -1416,7 +1420,7 @@ class ThreadsWindow(PageWindow):
 			last = tdict.get('lastposter','')
 			fid = tdict.get('forumid','')
 			sticky = tdict.get('sticky') and 'sticky' or ''
-			reply_count = str(tdict.get('reply_number','0') or '0')
+			reply_count = unicode(tdict.get('reply_number','0') or '0')
 			if starter == self.me: starterbase = self.highBase
 			else: starterbase = self.textBase
 			#title = (tdict.get('new_post') and self.newBase or self.textBase) % title
@@ -1425,8 +1429,8 @@ class ThreadsWindow(PageWindow):
 			item.setInfo('video',{"Genre":sticky})
 			item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
 			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
-			item.setProperty("id",str(tid))
-			item.setProperty("fid",str(fid))
+			item.setProperty("id",unicode(tid))
+			item.setProperty("fid",unicode(fid))
 			if last:
 				last = self.desc_base % last
 				short = tdict.get('short_content','')
@@ -1436,7 +1440,7 @@ class ThreadsWindow(PageWindow):
 			item.setProperty("last",last)
 			item.setProperty("lastid",tdict.get('lastid',''))
 			item.setProperty('title',title)
-			item.setProperty('announcement',str(tdict.get('announcement','')))
+			item.setProperty('announcement',unicode(tdict.get('announcement','')))
 			item.setProperty('reply_count',reply_count)
 			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
 			self.getControl(120).addItem(item)
@@ -1685,7 +1689,7 @@ class ForumsWindow(BaseWindow):
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
 				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
-				item.setProperty("id",str(fid))
+				item.setProperty("id",unicode(fid))
 				if fdict.get('new_post'): item.setProperty('unread','unread')
 				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)
