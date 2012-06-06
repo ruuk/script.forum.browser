@@ -381,6 +381,7 @@ class ForumPost:
 		self.postNumber = 0
 		self.joinDate = ''
 		self.userInfo = {}
+		self.extras = {}
 		if pdict: self.setVals(pdict)
 			
 	def setVals(self,pdict): pass

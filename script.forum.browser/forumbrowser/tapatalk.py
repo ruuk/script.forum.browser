@@ -282,7 +282,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.imageFilter.findall(self.getMessage())
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message)
+		return re.findall('<a.+?href="(http://.+?\.(?:jpg|jpeg|png|gif|bmp))".+?</a>',self.message)
 		
 	def linkURLs(self):
 		return self.MC.linkFilter.finditer(self.getMessage())
@@ -636,7 +636,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		for n in normal: self.createThreadDict(n)
 		return normal, pd
 	
-	def getThreads(self,forumid,page=0,callback=None,donecallback=None):
+	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		try:
 			if forumid:
@@ -651,7 +651,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,self.lang(30052))
 		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None):
+	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		while True:
 			try:
@@ -762,7 +762,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def hasForumSubscriptions(self):
 		return True
 	
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		if not self.checkLogin(callback=callback): return (None,None)
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():

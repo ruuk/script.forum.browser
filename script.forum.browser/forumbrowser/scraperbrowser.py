@@ -41,6 +41,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.postNumber = pdict.get('postnumber') or None
 		self.postCount = pdict.get('postcount') or None
 		self.joinDate = pdict.get('joindate') or ''
+		self.extras = pdict.get('extras') or self.extras
 	
 	def messageToText(self,html):
 		html = self.MC.lineFilter.sub('',html)
@@ -85,10 +86,10 @@ class ForumPost(forumbrowser.ForumPost):
 		return self.MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
-		return self.MC.imageFilter.findall(self.getMessage(),re.S)
+		return self.MC.imageFilter.findall(self.getMessage())
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|png|gif|bmp))".+?</a>',self.message)
+		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|jpeg|png|gif|bmp))".+?</a>',self.message)
 		
 	def linkURLs(self):
 		return self.MC.linkFilter.finditer(self.getMessage())
@@ -122,12 +123,21 @@ class PageData:
 		self.prevStart = '0'
 		self.topic = ''
 		self.tid = ''
-		self.pageType = page_type
 		self.isReplies = False
-		self.totalitems = total_items
 		self.current = '0'
-		self.pageURLs = page_urls
 		self.useURLs = False
+		self.pageType = page_type
+		self.totalitems = total_items
+		self.pageURLs = page_urls
+		self.first = True
+		self.doInit(page_match, next_match, prev_match, page_type, total_items, page_urls)
+		self.first = False
+		
+	def doInit(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items='',page_urls=None):
+		self.pageType = page_type or self.pageType
+		self.totalitems = total_items or self.totalitems
+		self.pageURLs = page_urls or self.pageURLs
+		
 		self.endPage = self.FB.formats.get('no_9999') == 'True' and 1 or 9999
 		page_set = False
 		if page_match:
@@ -159,11 +169,12 @@ class PageData:
 				self.urlMode = 'START'
 		else:
 			try:
+				if not page_match and self.pageURLs: raise Exception('NO_PAGE_MATCH')
 				self.next = int(self.page) < int(self.totalPages)
 			except:
-				self.next = bool(self.getNextPageURL())
 				self.useURLs = True
 		if prev_match:
+			self.useURLs = False
 			#check for less greedy match by looking in the whole match for a smaller match
 			alld = prev_match.group(0)
 			pre = re.compile(self.FB.filters.get('prev'))
@@ -185,16 +196,58 @@ class PageData:
 				self.urlMode = 'START'
 		else:
 			try:
+				if not page_match and self.pageURLs: raise Exception('NO_PAGE_MATCH')
 				self.prev = int(self.page) > 1
 			except:
+				if not next_match: self.useURLs = True
+				
+		if self.useURLs:
+			if self.pageURLs:
+				totalPages = self.totalPages
+				for p in self.pageURLs:
+					if int(p) > int(totalPages): totalPages = p
+				self.totalPages = totalPages
+				if '1' in self.pageURLs and not page_match:
+					self.page = self.getCurrentFromMissing()
+					if int(self.page) > int(self.totalPages): self.totalPages = self.page
 				self.prev = bool(self.getPrevPageURL())
-				self.useURLs = True
+				self.next = bool(self.getNextPageURL())
 				
 		if int(self.totalPages) < int(self.page): self.totalPages = self.page
+		
+	def update(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items='',page_urls=None):
+		self.doInit(page_match, next_match, prev_match, page_type, total_items, page_urls)
+		return self
+		
+	def getCurrentFromMissing(self):
+		if not self.first: return self.page
+		missing = []
+		for x in range(1,int(self.totalPages) + 1):
+			if not str(x) in self.pageURLs:
+				missing.append(x)
+		if '1' in missing: return '1'
+		if not missing: return str(int(self.totalPages) + 1) 
+		for m in missing:
+			under = m - 1
+			over = m + 1
+			if not under in missing and not over in missing: return str(m)
+		else:
+			return str(missing[-1] + 1)
 			
+	
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
-		if self.urlMode != 'PAGE':
+		if self.useURLs:
+			if int(page) < 0:
+				if self.pageURLs and str(self.totalPages) in self.pageURLs:
+					self.page = self.totalPages
+					return self.pageURLs[str(self.totalPages)]
+			else:
+				if self.pageURLs and str(page) in self.pageURLs:
+					self.page = page
+					return self.pageURLs[str(page)]
+			return page
+		elif self.urlMode != 'PAGE':
 			per_page = self.FB.formats.get('%s_per_page' % self.pageType)
 			if not per_page:
 				nextp = int(self.nextStart)
@@ -223,7 +276,7 @@ class PageData:
 		self.tid = threadid
 				
 	def getNextPage(self):
-		if self.useURLs: return self.getNextPageURL()
+		if self.useURLs: return self.getNextPageURL(set_page=True)
 		if self.urlMode == 'PAGE':
 			try:
 				return str(int(self.page) + 1)
@@ -233,7 +286,7 @@ class PageData:
 			return self.nextStart
 			
 	def getPrevPage(self):
-		if self.useURLs: return self.getPrevPageURL()
+		if self.useURLs: return self.getPrevPageURL(set_page=True)
 		if self.urlMode == 'PAGE':
 			try:
 				return str(int(self.page) - 1)
@@ -242,30 +295,40 @@ class PageData:
 		else:
 			return self.prevStart
 		
-	def getNextPageURL(self):
+	def getNextPageURL(self,set_page=False):
 		if not self.pageURLs: return ''
 		try:
 			current = int(self.page)
 			for p in self.pageURLs:
-				if int(p) - current == 1: return self.pageURLs[p]
+				if int(p) - current == 1:
+					if set_page: self.page = p
+					return self.pageURLs[p]
 		except:
 			ERROR('getNextPageURL()')
 			return ''
 	
-	def getPrevPageURL(self):
+	def getPrevPageURL(self,set_page=False):
 		if not self.pageURLs: return ''
 		try:
 			current = int(self.page)
 			for p in self.pageURLs:
-				if current - int(p) == 1: return self.pageURLs[p]
+				if current - int(p) == 1:
+					if set_page: self.page = p
+					return self.pageURLs[p]
 		except:
 			ERROR('getNextPageURL()')
 			return ''
 			
 	def getPageDisplay(self):
 		if self.pageDisplay: return self.pageDisplay
+		totalPages = self.totalPages
+		if self.useURLs and self.pageURLs:
+			for p in self.pageURLs:
+				if int(p) > int(totalPages): totalPages = p
+			self.totalPages = totalPages
+			totalPages = str(totalPages) + '?'
 		if self.page and self.totalPages:
-			return 'Page %s of %s' % (self.page,self.totalPages)
+			return 'Page %s of %s' % (self.page,totalPages)
 		
 ######################################################################################
 # Forum Browser API
@@ -298,7 +361,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		#	#open('/home/ruuk/test3.txt','w').write(self.lastHTML)
 		#	return not 'action="' + check in self.lastHTML
 		if self.lastHTML:
-			return bool(re.search('log[\s-]?out(?i)',self.lastHTML))
+			return bool(re.search('log[\s-]?out(?i)',self.lastHTML)) and not self.needsLogin
 		return self._loggedIn
 	
 	def resetBrowser(self):
@@ -419,7 +482,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		open(captchaPath,'w').write(self.browser.open_novisit(url).read())
 		url = captchaPath
 		import xbmcgui, xbmc
-		class CaptchaWindow(xbmcgui.WindowXML):
+		class CaptchaWindow(xbmcgui.WindowXMLDialog):
 			def __init__(self,*args,**kwargs):
 				self.url = kwargs.get('url')
 				
@@ -434,7 +497,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		w.show()
 		w.update(url)
 		try:
-			return sys.modules["__main__"].doKeyboard('Enter security code')
+			return sys.modules["__main__"].doModKeyboard('Enter security code')
 		finally:
 			w.close()
 			del w
@@ -443,6 +506,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not self.canLogin():
 			self._loggedIn = False
 			return False
+		if self.isLoggedIn():
+			self._loggedIn = True
+			return True
 		LOG('LOGGING IN')
 		self.checkBrowser()
 		response = self.browser.open(url or self.getURL('login'))
@@ -474,7 +540,6 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						try:
 							for c in self.browser.form.controls:
 								if not userset and self.forms['login_user'] in str(c.name):
-									print c
 									userset = True
 									c.value = self.user
 								elif not passset and self.forms['login_pass'] in str(c.name):
@@ -520,16 +585,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					return False
 		response = self.browser.submit()
 		html = response.read()
-		import codecs
-		codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
+		#import codecs
+		#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
 		self.lastHTML = html + 'logout'
 		#if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
-		print self.cookieJar
-		print self.browser._ua_handlers['_cookies'].cookiejar
 		if self.cookieJar is not None:
 			self.cookieJar.save()
 			
-			print 'tttttest'
 		self._loggedIn = True
 		if self.isLoggedIn():
 			LOG('LOGGED IN')
@@ -540,7 +602,6 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def checkLogin(self,callback=None):
 		#raise Exception('TEST')
 		loginURL = ''
-		print self.lastURL
 		if 'login.php?' in self.lastURL:
 			loginURL = self.lastURL
 		if self.isLoggedIn(): return True
@@ -646,7 +707,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 		
-	def getThreads(self,forumid,page='',callback=None,donecallback=None):
+	def getThreads(self,forumid,page='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
 		html = self.readURL(url,callback=callback)
@@ -661,7 +722,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
+	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
 		html = self.readURL(url,callback=callback)
@@ -735,7 +796,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def hasSubscriptions(self):
 		return bool(self.urls.get('subscriptions'))
 	
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		#if not self.checkLogin(callback=callback): return None
 		url = self.getPageUrl(page,'subscriptions')
@@ -747,14 +808,17 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getPageInfo(self,html,page,page_type='',page_urls=None):
+	def getPageInfo(self,html,page,page_type='',page_urls=None,page_data=None):
 		if not self.filters.get('page') and not self.filters.get('next'): return None
 		next_page = self.filters.get('next') and re.search(self.filters['next'],html) or None
 		prev_page= None
 		if page != '1':
 			prev_page = self.filters.get('prev') and re.search(self.filters['prev'],html) or None
 		page_disp = re.search(self.filters['page'],html)
-		return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
+		if page_data:
+			return page_data.update(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
+		else:
+			return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl=''):
 		suburl = suburl or self.urls.get(sub,'')

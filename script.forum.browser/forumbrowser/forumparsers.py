@@ -737,9 +737,13 @@ class HTML5Parser(TreeWalker):
 	def reset(self): pass
 	
 	def feed(self,data):
+		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
 		data = re.sub('(?<=[^\s])&nbsp;(?=[^\s])',' ',data)
 		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
+		data = self.scriptRemover.sub('',data)
+		data = self.styleRemover.sub('',data)
 		self.tree = currentNode = html5lib_HTMLParser(tree=treebuilders.getTreeBuilder('dom')).parse(data)
+		currentText = ''
 		while currentNode is not None:
 			details = self.getNodeDetails(currentNode)
 			type, details = details[0], details[1:]
@@ -747,34 +751,37 @@ class HTML5Parser(TreeWalker):
 			endTag = None
 
 			if type == TEXT:
-				self.handle_data(unicode(details[0]))
+				currentText += unicode(details[0])
 				#for token in self.text(*details):
 				#	if token['type'] == 'Characters': self.handle_data(token['data'])
-
-			elif type == ELEMENT:
-				namespace, name, attributes, hasChildren = details
-				self.lastTagText = '<' + str(name) + ' ' + str(attributes) + '>'
-				if name in voidElements:
-					for token in self.emptyTag(namespace, name, attributes, 
-											   hasChildren):
+			else:
+				if currentText:
+					for t in re.split('[\n\r\t]',currentText): self.handle_data(t)
+					currentText = ''
+				if type == ELEMENT:
+					namespace, name, attributes, hasChildren = details
+					self.lastTagText = '<' + str(name) + ' ' + str(attributes) + '>'
+					if name in voidElements:
+						for token in self.emptyTag(namespace, name, attributes, 
+												   hasChildren):
+							self.handle_starttag(name, attributes)
+							self.handle_endtag(name)
+						hasChildren = False
+					else:
+						endTag = name
 						self.handle_starttag(name, attributes)
-						self.handle_endtag(name)
-					hasChildren = False
-				else:
-					endTag = name
-					self.handle_starttag(name, attributes)
-
-			#elif type == COMMENT:
-			#	yield self.comment(details[0])
-
-			#elif type == ENTITY:
-			#	yield self.entity(details[0])
-
-			elif type == DOCUMENT:
-				hasChildren = True
-
-			#else:
-			#	yield self.unknown(details[0])
+	
+				#elif type == COMMENT:
+				#	yield self.comment(details[0])
+	
+				#elif type == ENTITY:
+				#	yield self.entity(details[0])
+	
+				elif type == DOCUMENT:
+					hasChildren = True
+	
+				#else:
+				#	yield self.unknown(details[0])
 			
 			if hasChildren:
 				firstChild = self.getFirstChild(currentNode)
@@ -788,6 +795,9 @@ class HTML5Parser(TreeWalker):
 					details = self.getNodeDetails(currentNode)
 					type, details = details[0], details[1:]
 					if type == ELEMENT:
+						if currentText:
+							for t in re.split('[\n\r\t]',currentText): self.handle_data(t)
+							currentText = ''
 						namespace, name, attributes, hasChildren = details
 						if name not in voidElements:
 							self.handle_endtag(name)
@@ -800,6 +810,10 @@ class HTML5Parser(TreeWalker):
 						break
 					else:
 						currentNode = self.getParentNode(currentNode)
+		
+		if currentText:
+			self.handle_data(currentText)
+			currentText = ''
 						
 	def handle_starttag(self,tag,attrs): pass
 	def handle_endtag(self,tag): pass
@@ -856,8 +870,6 @@ class HTML5Parser(TreeWalker):
 		data = self.badCommentRE.sub('',data)
 		data = self.badTagRE.sub(r'\g<0>>',data)
 		data = self.tagRE.sub(self.cleanTag,data)
-		data = self.scriptRemover.sub('',data)
-		data = self.styleRemover.sub('',data)
 		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
 		data = self.emptyTagRE.sub(r'\1/\2',data)
 		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
@@ -953,6 +965,7 @@ class HTMLTag:
 		self.startIndex = -1
 		self.endIndex = -1
 		self.sequenceIndex = 0
+		self.info = None
 		
 	def __str__(self):
 		return self.tag
@@ -1064,6 +1077,7 @@ class AdvancedParser(HTML5Parser):
 		self.isGeneric = False
 		self.dataCleanerRE = re.compile('[\n\r\t]')
 		self.tagIndex = 0
+		self.pages = {}
 	
 	def getForumType(self):
 		if self.forumType[-1].isdigit(): return 'u0'
@@ -1129,6 +1143,22 @@ class AdvancedParser(HTML5Parser):
 		self.handleEndTag(endTag)
 		self.lastTag = endTag
 	
+	def getPages(self,url,html,linkRE):
+		#open('/home/ruuk/test.txt','w').write(html.encode('ascii','replace'))
+		if not url: return
+		url = url.rsplit('/',1)[-1]
+		self.pages = {}
+		for p in re.finditer('<a[^>]*?href="?(?P<url>[^ ">]*?%s[^ ">]*?)(?="| |>)[^>]*?>[^<\d]*?(?P<page>\d+)[^<\d]*?</a>' % re.escape(url).replace('id\\=','(?:id)?\\='),html):
+			p = p.groupdict()
+			self.pages[p.get('page')] = p.get('url')
+		if not self.pages:
+			for l in linkRE.finditer(html):
+				url = l.groupdict().get('url','')
+				if 'page=' in url:
+					m = re.search('page=(\d+)',url)
+					if m: self.pages[m.group(1)] = url
+				
+			
 	def handleStartTag(self,tag):
 		pass
 	
@@ -1257,32 +1287,24 @@ class GeneralThreadParser(AdvancedParser):
 							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
 						}
 		
-		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
-								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?\w*\.php\?[^"\']*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')')
+		self.genericLinkREs = {	'u0':re.compile('(?:href=|^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\'| |>)'),
+								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)')
 							 }
 		self.linkRE = None
-		self.pages = {}
+		self.forumParser = None
 		
 	def setDefaults(self):
 		self.threads = []
 		self.ids = {}
 		self.sticky = False
 		self.stickyTag = None
-		self.pages = None
-	
-	def getPages(self,url,html):
-		if not url: return
-		url = url.rsplit('/',1)[-1]
 		self.pages = {}
-		for p in re.finditer('<a[^>]*?href="(?P<url>[^"]*?%s[^"]*?)"[^>]*?>[^<\d]*?(?P<page>\d+)[^<\d]*?</a>' % re.escape(url),html):
-			p = p.groupdict()
-			self.pages[p.get('page')] = p.get('url')
 	
 	def getThreads(self,html,url=''):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
 		self.reset()
-		self.getPages(url, html)
+		self.getPages(url, html,self.forumParser.linkRE)
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
@@ -1373,6 +1395,7 @@ class GeneralPostParser(AdvancedParser):
 		self.excessiveNL = re.compile('\n{2,}')
 		self.numberRE = re.compile('^([\d,]+)$')
 		self.pidModeRE = re.compile('(\w*?=?)(\d+)["\'\)]')
+		self.lastSplitRE = re.compile('<<?\s?prev|next\s?>>?|quick reply(?i)')
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
 							'vb2': re.compile('(?:^|")(?:showthread\.php\?(?:t=)?|threads/)\d+[^"\']*?p=(?P<id>\d+)'),
@@ -1383,7 +1406,10 @@ class GeneralPostParser(AdvancedParser):
 							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
 						}
 		
-		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)') }
+		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)'),
+								'u9': re.compile('(?:^|>)#(?P<pid>\d+)')
+							
+								}
 		
 		#self.genericLinkREs = {}
 #		self.genericLinkREs = { 'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?post\w*\.php\?[^"\']*?(?:p|id|postid|pid)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
@@ -1393,30 +1419,35 @@ class GeneralPostParser(AdvancedParser):
 		
 		self.postREs = [	#(None,re.compile('^#?\d+$')),
 							('postnumber',re.compile('^#?(\d+)?$')),
-							('postnumber',re.compile('^#?(\d+)? ')),
+							('postnumber',re.compile('^#(\d+) ')),
 							(None,re.compile('^by$')),
 							#(None,re.compile('^#$')),
 							('joindate',re.compile('^(?:joined|registered|join date)(?! user):?( .+)?(?i)')),
-							('labeledstatus',re.compile('^group:?( .+)?(?i)')),
+							('labeledstatus',re.compile('^(?:group|class):?( .+)?(?i)')),
 							('date',re.compile('\d+-\d+-\d+')),
 							('date',re.compile('\d+(?:\w\w), \d{4}')),
 							('date',re.compile('\w+ \d{1,2}:\d{2}')),
 							('date',re.compile('\d{1,2}:\d{2} \wm(?i)')),
-							('date',re.compile('[\d\w]+ \w+ ago$(?i)')),
+							('date',re.compile('\w+ \w+ ago$(?i)')),
 							('date',re.compile('\d{1,2}\w\w \w+ \d+')),
 							('date',re.compile('\w+ \d{1,2}(?:\w{2})?, \d{4}')),
 							('date',re.compile('\w+day, \d{1,2}:\d{1,2}')),
+							('date',re.compile('^(?:today|yesterday),(?i)')),
 							(None,re.compile('^post:(?i)')),
 							('user',re.compile('^.*\w.*$')),
 							('postcount',re.compile('^posts:?( [\d,]+)?(?i)')),
 							('postcount',re.compile('^([\d,]+) posts(?i)')),
-							('location',re.compile('^(?:location|from):?( .+)?(?i)')),
-							('reputation',re.compile('^reputation:( \d+)?(?i)')),
-							('status',re.compile('^group:?( .+)?(?i)')),
+							('extra.location',re.compile('^(?:location|from):?( .+)?(?i)')),
+							('extra.reputation',re.compile('^reputation:( \d+)?(?i)')),
 							('status',re.compile('(^.{1,40}$)')),
 							('postcount',re.compile('\w+: ([\d,]+)$(?i)')),
-							('title',re.compile('^re: (?i)'))
+							('title',re.compile('^re: (?i)')),
+							('extra.uploaded',re.compile('^uploaded: ?(.+)$(?i)')),
+							('extra.downloaded',re.compile('^downloaded: ?(.+)$(?i)')),
+							('extra.ratio',re.compile('^ratio: ?(.+)$(?i)')),
+							('extra.karma',re.compile('^karma: ?(.+)$(?i)'))
 						]
+		self.threadParser = None
 		
 	def setDefaults(self):
 		self.posts = []
@@ -1432,14 +1463,16 @@ class GeneralPostParser(AdvancedParser):
 		self.mode = 'NORMAL'
 		self.pidTags = OrderedDict()
 		self.callback = self.fakeCallback
+		self.pages = {}
 		
 	def fakeCallback(self,pct,msg): return True
 	
-	def getPosts(self,html,callback=None):
+	def getPosts(self,html,url='',callback=None):
 		self.callback = callback or self.fakeCallback
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
 		self.reset()
+		self.getPages(url, html,self.threadParser.linkRE)
 		#if self.reVB.search(html): pass
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
@@ -1450,6 +1483,17 @@ class GeneralPostParser(AdvancedParser):
 		self.feed(html)
 		if self.mode == 'PID':
 			return self.getPIDPosts()
+		#TODO: See if I want to uncomment this
+#		if self.mode != 'PID':
+#			for p in self.posts:
+#				print p.get('user'),p.get('message')
+#				if p.get('user') or p.get('message'): break
+#			else:
+#				print 'Changin Post Parsing Mode To PID'
+#				self.mode = 'PID'
+#				self.feed(html)
+#				return self.getPIDPosts()
+			
 		if not self.posts:
 			raise Exception('Couldn\'t parse any posts')
 		if self.isGeneric:
@@ -1469,7 +1513,7 @@ class GeneralPostParser(AdvancedParser):
 			seq = seq[:seq.index(s)]	
 			lastP['data'] = seq
 			data = self.setDatas(lastP)
-			lastP['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
+			lastP['message'] = data and self.lastSplitRE.split(self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data))).split(self.getLowestPageURLSplit(),1)[0].strip(),1)[0]
 			if 'data' in lastP: del lastP['data']
 		else:
 			if not self.posts[-1].get('data'): self.getLastData(self.posts[-1])
@@ -1481,6 +1525,18 @@ class GeneralPostParser(AdvancedParser):
 		self.reset()
 		return self.posts
 		
+	def getLowestPageURLSplit(self):
+		if not self.pages: return '\r\r\r\r\r\r'
+		lowest = 999
+		for p in self.pages:
+			if p.isdigit() and int(p) < lowest:
+				lowest = int(p)
+		
+		if lowest == 999:
+			return '\r\r\r\r\r\r'
+		return '[url=' + self.pages[str(lowest)]
+		
+			
 	def getPIDPosts(self):
 		maxct = 0
 		self.pidTags['0'] = []
@@ -1496,7 +1552,6 @@ class GeneralPostParser(AdvancedParser):
 				tags = []
 				for t in v:
 					if not t in tags: tags.append(t)
-				print k
 				self.posts.append({'postid':k,'tags':tags})
 		for p in self.posts:
 			tags = p['tags']
@@ -1534,7 +1589,7 @@ class GeneralPostParser(AdvancedParser):
 			del p['tags']
 			del p['data']
 			#print '--------------------------------------------------------------------'		
-					
+			
 		return self.posts
 			
 	def getLastData(self,p):
@@ -1581,6 +1636,7 @@ class GeneralPostParser(AdvancedParser):
 		newData = []
 		last = ''
 		self.lastUnset = ''
+		p['extras'] = {}
 		for d in p.get('data',[]):
 			newData,last = self.handleDataItem(d, p, dREs, newData,last)
 		return newData
@@ -1595,6 +1651,8 @@ class GeneralPostParser(AdvancedParser):
 					p['online'] = False
 				elif 'online' in src:
 					p['online'] = True
+				elif d.getAttr('width') and not p.get('avatar'):
+					p['avatar'] = src or ''
 				elif src.startswith('http'):
 					newData.append(' [img]'+src+'[/img] ')
 			elif d.tag == 'embed':
@@ -1607,21 +1665,54 @@ class GeneralPostParser(AdvancedParser):
 					newData.append('[url='+val+']'+(d.data or 'EMBED')+'[/url]')
 			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre'):
 				newData.append('\n')
-			elif d.tag == 'li':
-				newData.append('    * ') 
+			elif d.tag == 'p':
+				newData.append('\n\n') #TODO: maybe do this for other tags
+			elif d.tag == 'font':
+				color = d.getAttr('color')
+				if color:
+					color = color.upper()
+					if color.startswith('#'):
+						color = 'FF' + color[1:]
+					elif re.match('[123456789abcdef]+(i)',color):
+						color = 'FF' + color
+					else:
+						color = color.lower()
+					newData.append('[COLOR %s]' % color)
+					d.info = 'COLOR'
 				
 #			for x in d.stack:
 #				newData,last = self.handleDataItem(x, p, dREs, newData, last)
 		elif isinstance(d,HTMLEndTag):
-			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br','li'):
+			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br','cite'):
 				newData.append('\n')
+			if d.tag == 'a':
+				href = d.startTag.getAttr('href')
+				if href and not 'javascript:' in href and not href.startswith('#'):
+					ds = ''.join(d.startTag.dataStack)
+					if ds.endswith(newData[-1]): newData.pop() #If we missed the text because it was inside another tag
+					#TODO: Maybe we need to do this more than once in a while, in case the text was in multiple tags
+					if not ds.lower() in ('quote','pm','profile','email','private message'):
+						if ds != p.get('user') and not 'user' in href and not 'member' in href and not p.get('postid') in href: 
+							newData.append('[url='+href+']'+ds+'[/url]')
+						elif newData and ds == p.get('user') and newData[-1].strip().endswith('edited by'):
+							newData.append(ds) #So the username stays in the last edited by part
+			elif d.tag == 'li':
+				ds = ''.join(d.startTag.dataStack)
+				dslower = ds.lower()
+				if not dslower in ('report','quote','private message','add as contact','send email'):
+					if not dslower.startswith('view') and not dslower.endswith('posts') and not dslower.endswith('profile'):
+						newData.append('    * ' + ds + '\n')
+			elif d.tag == 'font':
+				if d.startTag.info == 'COLOR':
+					newData.append('[/COLOR]')
 		else:
-			if d.strip():
+			dstrip = d.strip()
+			if d:
 				if d.tag == p.get('usedtag'): return newData, last
 				#print d.encode('ascii','replace')
 				for i in range(0,len(dREs)):
+					if not dstrip: continue
 					val,dre = dREs[i]
-					dstrip = d.strip()
 					m = dre.search(dstrip)
 					if m:
 						#print d.encode('ascii','replace')
@@ -1645,6 +1736,7 @@ class GeneralPostParser(AdvancedParser):
 						#	if dstrip == 'by' or p.get('postid','%$#@!') in dstrip:
 						#		continue
 						elif val == 'labeledstatus':
+							#print 'ls ' + d.encode('ascii','replace')
 							if m.group(1):
 								status = m.group(1).strip()
 								if status: p['status'] = status
@@ -1653,7 +1745,7 @@ class GeneralPostParser(AdvancedParser):
 							if not val in p:
 								p[val] = dstrip
 							elif p[val].endswith(','):
-								p[val] += dstrip
+								p[val] += ' ' + dstrip
 							elif self.lastUnset:
 								p[self.lastUnset] = dstrip
 								self.lastUnset = None
@@ -1666,6 +1758,7 @@ class GeneralPostParser(AdvancedParser):
 							last = val
 							break #leave the re to skip other dates
 						elif val == 'postnumber' and val in p:
+							#print 'pn ' + d.encode('ascii','replace')
 							if self.lastUnset:
 								p[self.lastUnset] = dstrip
 								self.lastUnset = None
@@ -1673,6 +1766,14 @@ class GeneralPostParser(AdvancedParser):
 								p[val] = m.group(1)
 							else:
 								if not m.group(1) == '#': break #Eat the postnumber if already set and don't remove in case we just got #
+						elif val.startswith('extra.'):
+							#print 'e ' + d.encode('ascii','replace')
+							data = m.group(1)
+							if data:
+								extra = val.split('.',1)[-1]
+								if not extra in p['extras']: p['extras'][extra] = data
+							else:
+								self.lastUnset = val
 						elif m.groups():
 							#print 'g ' + d.encode('ascii','replace')
 							if not val in p:
@@ -1696,14 +1797,18 @@ class GeneralPostParser(AdvancedParser):
 						last = val
 						break
 				else:
-					if self.lastUnset:
-							#print 'd ' + d.encode('ascii','replace')
-						#print d.encode('ascii','replace') + self.lastUnset
-						p[self.lastUnset] = dstrip
+					#print 'x ' + d.encode('ascii','replace')
+					if self.lastUnset and dstrip:
+						if self.lastUnset.startswith('extra.'):
+							extra = self.lastUnset.split('.',1)[-1]
+							if not extra in p['extras']: p['extras'][extra] = dstrip
+						else:
+							p[self.lastUnset] = dstrip
 						self.lastUnset = ''
 					elif d.tag.tag.startswith('h') or d.tag.tag == 'strong':
-						if not p.get('title'):
-							p['title'] = dstrip
+						if not p.get('title') and not p.get('joindate') and not p.get('postcount'):
+							if not (newData and 'posted by' in newData[-1].lower()):
+								p['title'] = dstrip
 							#if self.forumType != 'pb': newData = []
 						else:
 							newData.append(d)
@@ -1713,10 +1818,8 @@ class GeneralPostParser(AdvancedParser):
 						p['online'] = False
 					elif d.lower() == 'online':
 						p['online'] = True
-					elif d.tag.tag == 'a':
-						href = d.tag.getAttr('href')
-						if href and not 'javascript:' in href and not href.startswith('#'):
-							newData.append('[url='+href+']'+d+'[/url]')
+					elif d.tag.tag == 'a' or d.tag.tag == 'li':
+						pass #We'll show this when we get to the end tag
 #					elif d.tag.tag == 'li':
 #						newData.append(d + '\n')
 					else:
@@ -1727,10 +1830,13 @@ class GeneralPostParser(AdvancedParser):
 		pass
 	
 	def handleData(self,tag,data):
-		pass
+		if self.forumType == 'u9':
+			m = self.linkRE.search(data)
+			if m:
+				self.checkPost(tag,data)
 				
-	def checkPost(self,tag):
-		href = tag.getAttr('href')
+	def checkPost(self,tag,href=''):
+		href = tag.getAttr('href') or href
 		if href:
 			m = self.linkRE.search(href)
 			if m:
@@ -1749,6 +1855,7 @@ class GeneralPostParser(AdvancedParser):
 						else:
 							usedTag = tag
 						postnumber = ''
+					if title.lower() in ('quote','pm','profile'): title = ''
 							
 					post = {'postid':ID,'postnumber':postnumber.replace('#',''),'usedtag':usedTag,'tag':tag}
 					if title and not postnumber: post['title'] = title

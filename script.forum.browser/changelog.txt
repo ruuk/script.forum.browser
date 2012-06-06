@@ -5,6 +5,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Fix bugs/issues
+  Show indicator for extra info available
   
  Long Term:
   Clipboard for posts/links/image urls?
@@ -47,6 +48,8 @@ Experimental:
  - Better login handling
  - New backend html parser based on html5lib (should now handle most html well)
  - Cookies now saved to file so FB won't re-login if unnecessary
+ - Post context menu now has 'User Extra Info Option' for collected info not listed under username
+ - Some colored text handling
 
 *** 0.9.51 RC9 ***
 

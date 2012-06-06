@@ -665,10 +665,7 @@ class LinePostDialog(PostDialog):
 					.replace('[/COLOR]','[/color]')
 	
 	def doKeyboard(self,caption,text):
-		if __addon__.getSetting('use_skin_mods') == 'true':
-			return doModKeyboard(caption,text)
-		else:
-			return doKeyboard(caption,text)
+		return doModKeyboard(caption,text)
 			
 	def addLineSingle(self,before=False,update=True):
 		line = self.doKeyboard(__language__(30123),'')
@@ -800,6 +797,7 @@ class MessageWindow(BaseWindow):
 	def getImages(self):
 		i=0
 		for url in self.post.imageURLs():
+			print url
 			i+=1
 			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
 			item.setProperty('url',url)
@@ -888,6 +886,7 @@ class MessageWindow(BaseWindow):
 		if FB.canPost(): d.addItem('quote',self.post.isPM and __language__(30249) or __language__(30134))
 		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()): d.addItem('delete',__language__(30141))
 		if FB.canEditPost(self.post.cleanUserName()): d.addItem('edit',__language__(30232))
+		if self.post.extras: d.addItem('extras','User Extra Info')
 		d.addItem('help',__language__(30244))
 		result = d.getResult()
 		if result == 'quote': self.openPostDialog(quote=True)
@@ -899,6 +898,8 @@ class MessageWindow(BaseWindow):
 				self.action = forumbrowser.Action('REFRESH-REOPEN')
 				self.action.pid = pm.pid
 				self.close()
+		elif result == 'extras':
+			showUserExtras(self.post.extras)
 		elif result == 'help':
 			showHelp('message')
 			
@@ -968,6 +969,12 @@ def deletePost(post,is_pm=False):
 	finally:
 		splash.close()
 	return result
+
+def showUserExtras(extras):
+	data = ''
+	for k,v in extras.items():
+		data += k.title() + ': ' + v + '\n'
+	showMessage('User Info',data)
 
 ######################################################################################
 #
@@ -1053,7 +1060,7 @@ class RepliesWindow(PageWindow):
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
 		else:
 			t = self.getThread(FB.getReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='POSTS')
-			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid or pid,callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid or pid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		t.start()
 		
 	def setMessageProperty(self,post,item,short=False):
@@ -1210,7 +1217,8 @@ class RepliesWindow(PageWindow):
 					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
 				else:
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
-				
+			if post.extras:
+				d.addItem('extras','User Extra Info')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -1238,6 +1246,8 @@ class RepliesWindow(PageWindow):
 			if subscribeThread(self.tid): self.threadItem.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribe':
 			if unSubscribeThread(self.tid): self.threadItem.setProperty('subscribed','')
+		elif result == 'extras':
+			showUserExtras(post.extras)
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -1379,10 +1389,10 @@ class ThreadsWindow(PageWindow):
 		self.setFocusId(106)
 		if self.fid == 'subscriptions':
 			t = self.getThread(FB.getSubscriptions,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SUBSCRIPTIONS')
-			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		else:
 			t = self.getThread(FB.getThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='THREADS')
-			t.setArgs(self.fid,page,callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.setArgs(self.fid,page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		t.start()
 		
 	def doFillThreadList(self,data):
@@ -2676,6 +2686,8 @@ def checkForSkinMods():
 	doModKeyboard('',no_keyboard=True)
 
 def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
+	if __addon__.getSetting('use_skin_mods') != 'true': return doKeyboard(prompt,default,hidden) 
+		
 	#restart = False
 	fbPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
 	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')

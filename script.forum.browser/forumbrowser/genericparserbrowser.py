@@ -25,7 +25,9 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.forumType = 'u0'
 		self.forumParser = GeneralForumParser()
 		self.threadParser = GeneralThreadParser()
+		self.threadParser.forumParser = self.forumParser
 		self.postParser = GeneralPostParser()
+		self.postParser.threadParser = self.threadParser
 		self.urls = {}
 		self.filters = {}
 		self.forms = {}
@@ -112,7 +114,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 	
-	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
+	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False,page_data=None):
 		if not callback: callback = self.fakeCallback
 		pagesURL = url
 		if self.forumParser.isGeneric:
@@ -143,21 +145,24 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if subs:
 			for t in threads: t['subscribed'] = True
 		callback(100,__language__(30052))
-		pd = self.getPageInfo(html,page,page_type='threads',page_urls=self.threadParser.pages)
+		pd = self.getPageInfo(html,page,page_type='threads',page_urls=self.threadParser.pages,page_data=page_data)
 		if self.threadParser.getForumType() == 'u0': pd.useURLs = True
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 	
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
+	def getSubscriptionSub(self):
+		urls = self.urls.get('subscriptions','').split('|')
+		for u in urls:
+			#print u
+			if u in self.lastHTML: return u
+		return None
+
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		if self.forumParser.isGeneric:
 			#import codecs
 			#codecs.open('/home/ruuk/test.txt','w','utf8').write(self.lastHTML.decode('utf8'))
-			urls = self.urls.get('subscriptions','').split('|')
-			for u in urls:
-				#print u
-				if u in self.lastHTML:
-					print u
-					url = self.getPageUrl(page,'subscriptions',suburl=u)
-					break
+			sub = self.getSubscriptionSub()
+			if sub:
+				url = self.getPageUrl(page,'subscriptions',suburl=sub)
 			else:
 				return self.finish(FBData(error='Generic Browser: Could not find subscriptions :('),donecallback)
 		else:
@@ -171,9 +176,10 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			data.extra['forums'] = forums.data
 		return self.finish(data, donecallback)
 	
-	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
+	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = None
+		pagesURL = url
 		if self.threadParser.isGeneric:
 			for f in self.threadParser.threads:
 				if threadid == f.get('threadid'):
@@ -183,12 +189,14 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 						if url.startswith('/'): url = url[1:]
 						url = self._url + url
 					break
+			pagesURL = url
+			if page and not str(page).replace('-','').isdigit(): url = self._url + page
 		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
 		LOG('Thread URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		replies = self.postParser.getPosts(html,callback=callback)
+		replies = self.postParser.getPosts(html,pagesURL,callback=callback)
 		LOG('Detected Posts Type: ' + self.postParser.forumType)
 		#topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		#if not threadid:
@@ -205,7 +213,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				ERROR('ERROR CREATING POST - Using blank post')
 				post = self.getForumPost()
 				sreplies.append(post)
-		pd = self.getPageInfo(html,page,page_type='replies')
+		pd = self.getPageInfo(html,page,page_type='replies',page_urls=self.postParser.pages)
 		if pd: pd.setThreadData('',threadid)
 		
 		try:
@@ -218,6 +226,12 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		
 		return self.finish(FBData(sreplies,pd,extra=extra),donecallback)
 	
+	def hasSubscriptions(self):
+		if self.forumParser.isGeneric:
+			return bool(self.getSubscriptionSub() and scraperbrowser.ScraperForumBrowser.hasSubscriptions(self))
+		else:
+			return scraperbrowser.ScraperForumBrowser.hasSubscriptions(self)
+		
 	def subscribeThread(self,tid): return False
 		
 	def unSubscribeThread(self, tid): return False

@@ -8,8 +8,8 @@ url:page_arg=&p=!PAGE!
 url:subscriptions=search.php?action=show_subscriptions
 
 filter:page=>(?P<total>\d+)</a>\s*<a[^>]*?>Next
-filter:next=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)">Next</a>
-filter:prev=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)">Previous</a>
+filter:next=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)[^"]*?">Next</a>
+filter:prev=href="view(?:forum|topic)\.php\?[^"]*?p=(?P<page>\d+)[^"]*?">Previous</a>
 
 url:login=login.php
 form:login_action=login.php?

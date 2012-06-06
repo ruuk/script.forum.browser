@@ -324,7 +324,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	
 	def hasSubscriptions(self): return True
 	
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		if not self.checkLogin(callback=callback): return (None,None)
 		return self.getThreads(None, page, callback, donecallback)
 	
@@ -349,7 +349,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			if n.get('thread_id') == tid: return True
 		return False
 	
-	def getThreads(self,forumid,page=1,callback=None,donecallback=None):
+	def getThreads(self,forumid,page=1,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		try:
 			if forumid:
@@ -383,7 +383,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				ERROR('Error getting online users')
 		return self.online
 	
-	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None,announcement=False):
+	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None,announcement=False,page_data=None):
 		if not callback: callback = self.fakeCallback
 		while True:
 			try: page = int(page)
