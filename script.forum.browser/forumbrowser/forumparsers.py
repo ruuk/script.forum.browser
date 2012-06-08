@@ -1394,7 +1394,8 @@ class GeneralPostParser(AdvancedParser):
 		self.wsRE = re.compile('[\r\t]')
 		self.excessiveNL = re.compile('\n{2,}')
 		self.numberRE = re.compile('^([\d,]+)$')
-		self.pidModeRE = re.compile('(\w*?=?)(\d+)["\'\)]')
+		self.pidModeRE0 = re.compile('(?:&|\?)((?:postid|pid|p))=(\d+)')
+		self.pidModeRE1 = re.compile('["\'\)&=][a-zA-Z]*?([a-zA-Z]?)(\d+)["\'\)]')
 		self.lastSplitRE = re.compile('<<?\s?prev|next\s?>>?|quick reply(?i)')
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<id>\d+)'), # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
@@ -1468,9 +1469,9 @@ class GeneralPostParser(AdvancedParser):
 	def fakeCallback(self,pct,msg): return True
 	
 	def getPosts(self,html,url='',callback=None):
-		self.callback = callback or self.fakeCallback
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
+		self.callback = callback or self.fakeCallback
 		self.reset()
 		self.getPages(url, html,self.threadParser.linkRE)
 		#if self.reVB.search(html): pass
@@ -1539,21 +1540,22 @@ class GeneralPostParser(AdvancedParser):
 			
 	def getPIDPosts(self):
 		maxct = 0
-		self.pidTags['0'] = []
+		self.pidTags['0'] = [[],0]
 		for k,v in self.pidTags.items():
-			#print k + ': ' + str(len(v))
+			#if v[1] > 1: print k + ': ' + str(v[1])
 			#print v
-			ct = len(v)
+			ct = v[1]
 			#print '%s %s' % (k,ct)
 			if ct > maxct: maxct = ct
 		for k,v in self.pidTags.items():
-			ct = len(v)
+			ct = v[1]
 			if ct + 1 >= maxct:
 				tags = []
-				for t in v:
+				for t in v[0]:
 					if not t in tags: tags.append(t)
 				self.posts.append({'postid':k,'tags':tags})
 		for p in self.posts:
+			#print p
 			tags = p['tags']
 			#print tags
 			new = []
@@ -1570,12 +1572,11 @@ class GeneralPostParser(AdvancedParser):
 				new.append(t)
 			newnew = []
 			for t in new:
-				for s in t.stack:
-					for n in new:
-						if not t in newnew and n == s:
-							#print t
+				if not self.callback(95,'Parsing Post'): return []
+				if not t in newnew:
+					for s in t.stack:
+						if s in new:
 							newnew.append(t)
-							break
 							break
 					
 			p['data'] = []
@@ -1640,7 +1641,10 @@ class GeneralPostParser(AdvancedParser):
 		for d in p.get('data',[]):
 			newData,last = self.handleDataItem(d, p, dREs, newData,last)
 		return newData
-					
+		
+	def rindex(self,alist,a):
+		return len(alist) - alist[-1::-1].index(a) - 1
+			
 	def handleDataItem(self,d,p,dREs,newData, last):
 		if isinstance(d,HTMLTag):
 			if d.tag == 'img':
@@ -1651,10 +1655,20 @@ class GeneralPostParser(AdvancedParser):
 					p['online'] = False
 				elif 'online' in src:
 					p['online'] = True
-				elif d.getAttr('width') and not p.get('avatar'):
+				elif d.getAttr('width') and not p.get('avatar'): #user added images won't have size attributes set, at least that's the theory
 					p['avatar'] = src or ''
 				elif src.startswith('http'):
-					newData.append(' [img]'+src+'[/img] ')
+					style = d.getAttr('style')
+					if 'width' in style  and not p.get('avatar'): #user added images won't have size attributes set, at least that's the theory
+						p['avatar'] = src or ''
+					else:
+						newData.append(' [img]'+src+'[/img] ')
+			elif d.tag == 'a':
+				href = d.getAttr('href')
+				if href and not 'javascript:' in href and not href.startswith('#'):
+					tag = '[url='+href+']'
+					newData.append(tag)
+					d.info = tag
 			elif d.tag == 'embed':
 				src = d.getAttr('src')
 				if src: newData.append('[url='+src+']'+(d.data or 'EMBED')+'[/url]')
@@ -1687,15 +1701,21 @@ class GeneralPostParser(AdvancedParser):
 				newData.append('\n')
 			if d.tag == 'a':
 				href = d.startTag.getAttr('href')
-				if href and not 'javascript:' in href and not href.startswith('#'):
+				if d.startTag.info: # and href and not 'javascript:' in href and not href.startswith('#'):
 					ds = ''.join(d.startTag.dataStack)
 					if ds.endswith(newData[-1]): newData.pop() #If we missed the text because it was inside another tag
 					#TODO: Maybe we need to do this more than once in a while, in case the text was in multiple tags
 					if not ds.lower() in ('quote','pm','profile','email','private message'):
 						if ds != p.get('user') and not 'user' in href and not 'member' in href and not p.get('postid') in href: 
-							newData.append('[url='+href+']'+ds+'[/url]')
-						elif newData and ds == p.get('user') and newData[-1].strip().endswith('edited by'):
+							newData.append('[/url]')
+						elif len(newData) > 1 and ds == p.get('user') and newData[-2].strip().endswith('edited by'):
+							if d.startTag.info in newData: newData.pop(self.rindex(newData,d.startTag.info))
 							newData.append(ds) #So the username stays in the last edited by part
+						else:
+							if d.startTag.info in newData: newData.pop(self.rindex(newData,d.startTag.info))
+					else:
+						if d.startTag.info in newData:
+							newData.pop(self.rindex(newData,d.startTag.info))
 			elif d.tag == 'li':
 				ds = ''.join(d.startTag.dataStack)
 				dslower = ds.lower()
@@ -1843,10 +1863,10 @@ class GeneralPostParser(AdvancedParser):
 				ID = m.group(1)
 				if not ID in self.ids:
 					usedTag = None
-					postnumber = ''.join(tag.dataStack)
+					postnumber = ''.join(tag.dataStack).split(' ')[0]
 					title = postnumber
 					if not '#' in postnumber and not postnumber.isdigit():
-						postnumber = ''.join(self.lastTag.dataStack)
+						postnumber = ''.join(self.lastTag.dataStack).split(' ')[0]
 					if not '#' in postnumber and not postnumber.isdigit():
 						if self.forumType != 'pb' and not self.isGeneric: return
 						if not title:
@@ -1897,16 +1917,23 @@ class GeneralPostParser(AdvancedParser):
 			
 	
 	def pidHandleEndTag(self,tag):
-		for w,pid in self.pidModeRE.findall(repr(tag)):
+		for w,pid in self.pidModeRE0.findall(repr(tag)):
 			#print w + ' ' + pid
 			if pid in self.pidTags:
-				self.pidTags[pid].append(tag)
+				self.pidTags[pid][0].append(tag)
+				self.pidTags[pid][1] += 10
 			else:
-				self.pidTags[pid] = [tag]
+				self.pidTags[pid] = [[tag],10]
+				
+		for w,pid in self.pidModeRE1.findall(repr(tag)):
+			#print w + ' ' + pid
+			if pid in self.pidTags:
+				self.pidTags[pid][0].append(tag)
+				self.pidTags[pid][1] += 1
+			else:
+				self.pidTags[pid] = [[tag],1]
 			if w == 'p':
-				self.pidTags[pid].append(tag)
-			elif w == 'pid=' or w == 'p=' or w == 'postid=':
-				self.pidTags[pid] += [tag]*20
+				self.pidTags[pid][1] += 10
 	
 	def show(self,tag):
 		if len(tag.dataStack) > 1:

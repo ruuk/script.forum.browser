@@ -619,6 +619,15 @@
 						<aspectratio>keep</aspectratio>
 						<visible>true</visible>
 					</control>
+					<control type="image">
+						<posx>175</posx>
+						<posy>177</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-dark-info.png</texture>
+						<aspectratio>keep</aspectratio>
+						<visible>!StringCompare(ListItem.Property(extras),)</visible>
+					</control>
 					<control type="label">
 						<posx>210</posx>
 						<posy>7</posy>

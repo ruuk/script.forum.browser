@@ -5,7 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Fix bugs/issues
-  Show indicator for extra info available
   
  Long Term:
   Clipboard for posts/links/image urls?
@@ -14,10 +13,8 @@ TODO:
   Option to PM author of selected post
   View online users list
   Access to other PM boxes
-  View video links
   Improve the database and database management
   Skip forward on remote causes XBMC dialog
-  Fallback to non SSL on SSL fail on tapatalk?
   Adjustable text size
   signature maybe with future tapatalk plugin update
   reputation maybe with future tapatalk plugin update
@@ -36,6 +33,9 @@ Current Version : 0.9.52 RC10
 
 *** 0.9.52 RC10 ***
 
+Improved thread termination
+Set focused color on stop button to possibly fix some issues with it changing to white on some skins
+
 Experimental:
  - FluxBB: logins, view thread subscriptions
  - MyBB: logins, view forum and thread subscriptions
@@ -48,7 +48,7 @@ Experimental:
  - Better login handling
  - New backend html parser based on html5lib (should now handle most html well)
  - Cookies now saved to file so FB won't re-login if unnecessary
- - Post context menu now has 'User Extra Info Option' for collected info not listed under username
+ - Post context menu now has 'User Extra Info Option' for collected info not listed under username (info icon shows in user info area when available)
  - Some colored text handling
 
 *** 0.9.51 RC9 ***

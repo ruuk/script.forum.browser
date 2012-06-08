@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '0.9.51'
+__version__ = '0.9.52'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -108,6 +108,25 @@ def setSetting(key,value):
 ######################################################################################
 # Base Window Classes
 ######################################################################################
+def _async_raise(tid, exctype):
+	try:
+		LOG('Trying to kill thread...')
+		import inspect,ctypes
+		'''Raises an exception in the threads with id tid'''
+		if not inspect.isclass(exctype):
+			raise TypeError("Only types can be raised (not instances)")
+		res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid,
+													  ctypes.py_object(exctype))
+		if res == 0:
+			raise ValueError("invalid thread id")
+		elif res != 1:
+			# "if it returns a number greater than one, you're in trouble,
+			# and you should call it again with exc=NULL to revert the effect"
+			ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, 0)
+			raise SystemError("PyThreadState_SetAsyncExc failed")
+	except:
+		ERROR('Error killing thread')
+
 class StoppableThread(threading.Thread):
 	def __init__(self,group=None, target=None, name=None, args=(), kwargs=None):
 		kwargs = kwargs or {}
@@ -119,6 +138,56 @@ class StoppableThread(threading.Thread):
 		
 	def stopped(self):
 		return self._stop.isSet()
+	
+	def _get_my_tid(self):
+		"""determines this (self's) thread id
+
+		CAREFUL : this function is executed in the context of the caller
+		thread, to get the identity of the thread represented by this
+		instance.
+		"""
+		if not self.isAlive():
+			raise threading.ThreadError("the thread is not active")
+
+		# do we have it cached?
+		if hasattr(self, "_thread_id"):
+			return self._thread_id
+
+		# no, look for it in the _active dict
+		for tid, tobj in threading._active.items():
+			if tobj is self:
+				self._thread_id = tid
+				return tid
+
+		# TODO: in python 2.6, there's a simpler way to do : self.ident
+
+		raise AssertionError("could not determine the thread's id")
+
+	def raiseExc(self, exctype):
+		"""Raises the given exception type in the context of this thread.
+
+		If the thread is busy in a system call (time.sleep(),
+		socket.accept(), ...), the exception is simply ignored.
+
+		If you are sure that your exception should terminate the thread,
+		one way to ensure that it works is:
+
+			t = ThreadWithExc( ... )
+			...
+			t.raiseExc( SomeException )
+			while t.isAlive():
+				time.sleep( 0.1 )
+				t.raiseExc( SomeException )
+
+		If the exception is to be caught by the thread, you need a way to
+		check that your thread has caught it.
+
+		CAREFUL : this function is executed in the context of the
+		caller thread, to raise an excpetion in the context of the
+		thread represented by this instance.
+		"""
+		_async_raise( self._get_my_tid(), exctype )
+
 		
 class ThreadError:
 	def __init__(self,message='Unknown'):
@@ -235,8 +304,12 @@ class ThreadWindow:
 	def stopThreads(self):
 		for t in threading.enumerate():
 			if isinstance(t,StoppableThread): t.stop()
-		for t in threading.enumerate():
-			if t != threading.currentThread(): t.join()
+		time.sleep(1)
+		while len(threading.enumerate()) > 1:
+			for t in threading.enumerate():
+				#if t != threading.currentThread(): t.join()
+				if isinstance(t,StoppableThread): t.raiseExc(Exception)
+			time.sleep(1)
 		
 	def getFunction(self):
 		func = self._function
@@ -289,7 +362,7 @@ class BaseWindowFunctions(ThreadWindow):
 		return False
 			
 	def onAction(self,action):
-		if action == ACTION_PARENT_DIR:
+		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if ThreadWindow.onAction(self,action): return
 		if action == ACTION_PREVIOUS_MENU: self.close()
@@ -430,7 +503,7 @@ class ImagesDialog(BaseWindowDialog):
 			self.prevImage()
 	
 	def onAction(self,action):
-		if action == ACTION_PARENT_DIR:
+		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		elif action == ACTION_NEXT_ITEM:
 			self.nextImage()
@@ -627,7 +700,7 @@ class LinePostDialog(PostDialog):
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
-		elif action == ACTION_PARENT_DIR:
+		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		PostDialog.onAction(self,action)
 		
@@ -797,7 +870,6 @@ class MessageWindow(BaseWindow):
 	def getImages(self):
 		i=0
 		for url in self.post.imageURLs():
-			print url
 			i+=1
 			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
 			item.setProperty('url',url)
@@ -1120,7 +1192,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('activity',post.activity)
 				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 				item.setProperty('joindate',unicode(post.joinDate))
-				
+				if post.extras: item.setProperty('extras','extras')
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
 			if select > -1:
@@ -2407,7 +2479,7 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 		return not self.canceled
 		
 	def onAction(self,action):
-		if action == ACTION_PARENT_DIR: action = ACTION_PREVIOUS_MENU
+		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2: action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
 			self.canceled = True
 	

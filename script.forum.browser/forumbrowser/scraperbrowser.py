@@ -200,7 +200,9 @@ class PageData:
 				self.prev = int(self.page) > 1
 			except:
 				if not next_match: self.useURLs = True
-				
+			
+		if not self.FB.urls.get('page_arg'): self.useURLs = True
+			
 		if self.useURLs:
 			if self.pageURLs:
 				totalPages = self.totalPages
