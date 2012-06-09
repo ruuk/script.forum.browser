@@ -29,7 +29,12 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.52 RC10
+Current Version : 0.9.53 RC11
+
+*** 0.9.53 RC11 ***
+
+Fixed a youtube url parsing issue
+Stop button text should now stay black
 
 *** 0.9.52 RC10 ***
 

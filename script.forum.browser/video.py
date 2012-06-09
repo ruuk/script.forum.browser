@@ -98,7 +98,7 @@ class WebVideo():
 		return 'http://www.youtube.com/v/' + ID
 		
 	def extractYoutubeIDFromURL(self,url):
-		if 'youtu.be' in url:
+		if '//youtu.be' in url:
 			#http://youtu.be/sSMbOuNBV0s
 			sp = url.split('.be/',1)
 			if len(sp) == 2: return sp[1]

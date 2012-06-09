@@ -188,6 +188,7 @@
 					<ondown>120</ondown>
 					<font>ForumBrowser-font12</font>
 					<textcolor>FF000000</textcolor>
+					<focusedcolor>FF000000</focusedcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 					<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
