@@ -29,7 +29,11 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.53 RC11
+Current Version : 0.9.54 RC12
+
+*** 0.9.54 RC12 ***
+
+Added clipbboard functionality for post images and links (link, video and image)
 
 *** 0.9.53 RC11 ***
 

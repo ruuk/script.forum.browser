@@ -80,6 +80,14 @@ DEBUG = __addon__.getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
 LOG('Skin: ' + THEME)
 
+CLIPBOARD = None
+try:
+	import Clipboard #@UnresolvedImport
+	CLIPBOARD = Clipboard.Clipboard()
+	LOG('Clipboard Enabled')
+except:
+	pass
+
 FB = None
 
 from forumbrowser import forumbrowser
@@ -710,12 +718,36 @@ class LinePostDialog(PostDialog):
 		if item:
 			d.addItem('addbefore',__language__(30128))
 			d.addItem('delete',__language__(30122))
+			if CLIPBOARD and CLIPBOARD.hasData(('link','image','video')):
+				d.addItem('pastebefore','Paste From Clipboard Before: ' + CLIPBOARD.hasData().title())
+		if CLIPBOARD and CLIPBOARD.hasData(('link','image','video')):
+			d.addItem('paste','Paste From Clipboard: ' + CLIPBOARD.hasData().title())
 		d.addItem('help',__language__(30244))
 		result = d.getResult()
 		if result == 'addbefore': self.addLineSingle(before=True)
 		elif result == 'delete': self.deleteLine()
+		elif result == 'paste': self.paste()
+		elif result == 'pastebefore': self.paste(before=True)
 		elif result == 'help': showHelp('editor')
 		
+	def paste(self,before=False):
+		share = CLIPBOARD.getClipboard()
+		if share.shareType == 'link':
+			text = doKeyboard('Enter Link Text')
+			if not text: text = share.page
+			paste = '[url=%s]%s[/url]' % (share.page,text)
+		elif share.shareType == 'image':
+			paste = '[img]%s[/img]' % share.url
+		elif share.shareType == 'video':
+			source = WebVideo().getVideoObject(share.page).sourceName.lower()
+			paste = '[video=%s]%s[/video]' % (source,share.page)
+			
+		if before:
+			self.addLineSingle(paste,True,False)
+		else:
+			self.addLine(paste)
+		self.updatePreview()
+			
 	def getOutput(self):
 		llist = self.getControl(120)
 		out = ''
@@ -740,8 +772,8 @@ class LinePostDialog(PostDialog):
 	def doKeyboard(self,caption,text):
 		return doModKeyboard(caption,text)
 			
-	def addLineSingle(self,before=False,update=True):
-		line = self.doKeyboard(__language__(30123),'')
+	def addLineSingle(self,line=None,before=False,update=True):
+		if line == None: line = self.doKeyboard(__language__(30123),'')
 		if line == None: return False
 		if before:
 			clist = self.getControl(120)
@@ -895,12 +927,16 @@ class MessageWindow(BaseWindow):
 	def showVideo(self,source):
 		xbmc.executebuiltin('PlayMedia(%s)' % source)
 		
-	def linkSelected(self):
+	def getSelectedLink(self):
 		idx = self.getControl(148).getSelectedPosition()
-		if idx < 0: return
+		if idx < 0: return None
 		links = self.post.links()
-		if idx >= len(links): return
-		link = links[idx]
+		if idx >= len(links): return None
+		return links[idx]
+		
+	def linkSelected(self):
+		link = self.getSelectedLink()
+		if not link: return
 		if self.videoHandler.mightBeVideo(link.url) or self.videoHandler.mightBeVideo(link.text):
 			s = showActivitySplash()
 			try:
@@ -951,8 +987,56 @@ class MessageWindow(BaseWindow):
 	def onAction(self,action):
 		BaseWindow.onAction(self,action)
 		if action == ACTION_CONTEXT_MENU:
-			self.doMenu()
+			if self.getFocusId() == 148:
+				self.doLinkMenu()
+			elif self.getFocusId() == 150:
+				self.doImageMenu()
+			else:
+				self.doMenu()
 		
+	def doLinkMenu(self):
+		link = self.getSelectedLink()
+		if not link: return
+		d = ChoiceMenu('Link Options')
+		if CLIPBOARD:
+			d.addItem('copy','Copy Link To Clipboard')
+			if link.isImage():
+				d.addItem('copyimage','Copy Image URL To Clipboard')
+			video = self.videoHandler.getVideoObject(link.url)
+			if not video: video = self.videoHandler.getVideoObject(link.text)
+			if video and video.isVideo: d.addItem('copyvideo','Copy Video URL To Clipboard')
+				
+		if d.isEmpty(): return
+		result = d.getResult()
+		if result == 'copy':
+			share = CLIPBOARD.getShare('script.evernote','link')
+			share.page = link.url
+			CLIPBOARD.setClipboard(share)
+		elif result == 'copyimage':
+			share = CLIPBOARD.getShare('script.evernote','image')
+			share.url = link.url
+			CLIPBOARD.setClipboard(share)
+		elif result == 'copyvideo':
+			share = CLIPBOARD.getShare('script.evernote','video')
+			video = self.videoHandler.getVideoObject(link.url)
+			if video:
+				share.page = link.url
+			else:
+				share.page = link.text
+			CLIPBOARD.setClipboard(share)
+				
+	def doImageMenu(self):
+		img = self.getControl(150).getSelectedItem().getProperty('url')
+		d = ChoiceMenu('Image Options')
+		if CLIPBOARD:
+			d.addItem('copy','Copy Image URL To Clipboard')
+		if d.isEmpty(): return
+		result = d.getResult()
+		if result == 'copy':
+			share = CLIPBOARD.getShare('script.evernote','image')
+			share.url = img
+			CLIPBOARD.setClipboard(share)
+	
 	def doMenu(self):
 		d = ChoiceMenu(__language__(30051))
 		if FB.canPost(): d.addItem('quote',self.post.isPM and __language__(30249) or __language__(30134))
@@ -2512,6 +2596,9 @@ class ChoiceMenu():
 		self.splash = None
 		if with_splash: self.showSplash()
 		
+	def isEmpty(self):
+		return not self.items
+	
 	def showSplash(self):
 		self.splash = showActivitySplash()
 		
