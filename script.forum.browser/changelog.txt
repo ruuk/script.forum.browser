@@ -7,7 +7,6 @@ TODO:
   Fix bugs/issues
   
  Long Term:
-  Clipboard for posts/links/image urls?
   Use new option menus for context?
   Better 'Choose Forum' menu
   Option to PM author of selected post
@@ -29,11 +28,12 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 0.9.54 RC12
+Current Version : 1.0.0
 
-*** 0.9.54 RC12 ***
+*** 1.0.0 ***
 
-Added clipbboard functionality for post images and links (link, video and image)
+Added clipbboard functionality for post images and links (link, video and image) via ShareSocial clipboard
+Added help for 'User Extra Info' option in posts and full post view
 
 *** 0.9.53 RC11 ***
 
