@@ -1101,7 +1101,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				control.items[0].selected = value == 'True'
 			x+=1
 		
-	def canPost(self): return self.isLoggedIn()
+	def canPost(self): return bool(self.isLoggedIn() and self.urls.get('newpost'))
 	
 	def canDelete(self,user,target='POST'):
 		if target == 'POST':
@@ -1120,7 +1120,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def editPost(self,pm,callback=None):
 		return self.post(pm,callback,edit=True)
 	
-	def canEditPost(self,user): return user == self.user and self.isLoggedIn() and self.canPost()
+	def canEditPost(self,user): return bool(user == self.user and self.isLoggedIn() and self.urls.get('editpost'))
 	
 	def getQuoteStartFormat(self):
 		return self.filters.get('quote_start','[QUOTE]')

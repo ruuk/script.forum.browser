@@ -1648,7 +1648,7 @@ class GeneralPostParser(AdvancedParser):
 	def handleDataItem(self,d,p,dREs,newData, last):
 		if isinstance(d,HTMLTag):
 			if d.tag == 'img':
-				src = d.getAttr('src')
+				src = self.revertCodes(d.getAttr('src'))
 				if 'avatar' in repr(d).lower():
 					p['avatar'] = src or ''
 				elif 'offline' in repr(d):
@@ -1666,7 +1666,7 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'a':
 				href = d.getAttr('href')
 				if href and not 'javascript:' in href and not href.startswith('#'):
-					tag = '[url='+href+']'
+					tag = '[url='+self.revertCodes(href)+']'
 					newData.append(tag)
 					d.info = tag
 			elif d.tag == 'embed':
@@ -1826,7 +1826,7 @@ class GeneralPostParser(AdvancedParser):
 							p[self.lastUnset] = dstrip
 						self.lastUnset = ''
 					elif d.tag.tag.startswith('h') or d.tag.tag == 'strong':
-						if not p.get('title') and not p.get('joindate') and not p.get('postcount'):
+						if not p.get('title'): # and not p.get('joindate') and not p.get('postcount'):
 							if not (newData and 'posted by' in newData[-1].lower()):
 								p['title'] = dstrip
 							#if self.forumType != 'pb': newData = []

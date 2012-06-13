@@ -15,3 +15,22 @@ url:login=login.php?do=login
 form:login_action=login.php
 form:login_user=vb_login_username
 form:login_pass=vb_login_password
+
+#-- Posting ---------------------------------
+url:newpost=newreply.php?do=newreply&noquote=1&p=!POSTID!
+
+form:post_action=newreply.php
+form:post_title=title
+form:post_message=message
+form:post_submit_wait=1
+
+url:editpost=editpost.php?p=!POSTID!&do=editpost
+
+form:edit_post_action=do=updatepost
+form:edit_post_title=title
+form:edit_post_message=message
+form:edit_post_submit_wait=1
+
+url:deletepost=editpost.php?do=editpost&p=!POSTID!
+form:delete_action=editpost.php?do=deletepost
+form:delete_control1=radio:name.deletepost=delete

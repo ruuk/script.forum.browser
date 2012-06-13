@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -885,10 +885,10 @@ class MessageWindow(BaseWindow):
 						LOG('Error getting video info')
 				if video:
 					item.setIconImage(video.thumbnail)
-				elif link.isImage():
-					item.setIconImage(link.url)
 				elif link.textIsImage():
 					item.setIconImage(link.text)
+				elif link.isImage():
+					item.setIconImage(link.url)
 				elif link.isPost():
 					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
 				elif link.isThread():
@@ -948,7 +948,7 @@ class MessageWindow(BaseWindow):
 			finally:
 				s.close()
 		
-		if link.isImage():
+		if link.isImage() and not link.textIsImage():
 			self.showImage(link.url)
 		elif link.isPost() or link.isThread():
 			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
@@ -976,7 +976,7 @@ class MessageWindow(BaseWindow):
 		#if not image_files: return
 		image_files = self.post.imageURLs()
 		for l in self.post.links():
-			if l.isImage(): image_files.append(l.url)
+			if l.isImage() and not l.textIsImage(): image_files.append(l.url)
 		if url in image_files:
 			image_files.pop(image_files.index(url))
 			image_files.insert(0,url)
@@ -1178,7 +1178,7 @@ class RepliesWindow(PageWindow):
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.postSelected()
 		self.setTheme()
-		self.getControl(201).setEnabled(self.parent.parent.hasLogin())
+		self.getControl(201).setEnabled(FB.canPost())
 		self.showThread()
 		#self.setFocusId(120)
 	

@@ -5,6 +5,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Fix bugs/issues
+  Help for clipboard
   
  Long Term:
   Use new option menus for context?
@@ -28,7 +29,16 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 1.0.0
+Current Version : 1.0.1
+
+*** 1.0.1 ***
+
+Links list will now show images from the link 'text' (ie thumbnail) in preference to an image the link points to
+Links that are detected as images that have images in the link 'text' (ie thumbnail) will now open in Web Viewer
+ 
+Experimental:
+- Posting options will no longer show if not available
+- VBulletin: Can now create a post, edit a post and delete a post (only tested on forum.boxee.tv)
 
 *** 1.0.0 ***
 
