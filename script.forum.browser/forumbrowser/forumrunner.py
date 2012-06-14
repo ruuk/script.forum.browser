@@ -570,3 +570,14 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			post.error = result.message
 			return False
 		return True
+	
+	def canCreateThread(self,fid): return self.isLoggedIn()
+	
+	def createThread(self,fid,title,message):
+		if not self.checkLogin(): return False
+		result = self.client.post_message(forumid=str(fid),subject=title,message=message)
+		if not result:
+			LOG('Failed to create new thread: ' + result.message)
+			return result.message
+		return True
+	

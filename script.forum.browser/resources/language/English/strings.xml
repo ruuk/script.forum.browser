@@ -140,6 +140,8 @@
     <string id="30249">Reply/Forward</string>
     <string id="30250">No posts</string>
     <string id="30251">No messages</string>
+    <string id="30252">Create New Thread</string>
+    <string id="30253">Send PM to %s</string>
     
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>

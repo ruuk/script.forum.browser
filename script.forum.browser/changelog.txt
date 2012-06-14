@@ -6,11 +6,11 @@ TODO:
  Short Term:
   Fix bugs/issues
   Help for clipboard
+  Help for create thread and pm author
   
  Long Term:
   Use new option menus for context?
   Better 'Choose Forum' menu
-  Option to PM author of selected post
   View online users list
   Access to other PM boxes
   Improve the database and database management
@@ -29,7 +29,14 @@ TODO:
   Today's New Posts?
   Make a million dollars
 
-Current Version : 1.0.1
+Current Version : 1.0.2
+
+*** 1.0.2 ***
+
+Added ability to create threads with Tapatalk and Forumrunner forums from context menu on threads view
+When creating a PM or new thread, the Post Editor will now OPEN the set title dialog instead of just focusing the button
+Added ability to PM author of selected post from the context menu
+Now, when post or PM fails do to error (such as timeout), the post/PM will be saved and when next attempting to PM the same user or post in the same thread, FB will ask if you want to re-use that post/PM 
 
 *** 1.0.1 ***
 

@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -577,8 +577,10 @@ class ImagesDialog(BaseWindowDialog):
 # Post Dialog
 ######################################################################################
 class PostDialog(BaseWindowDialog):
+	failedPM = None
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
+		self.doNotPost = kwargs.get('donotpost') or False
 		self.title = self.post.title
 		self.posted = False
 		self.display_base = '%s\n \n'
@@ -586,6 +588,16 @@ class PostDialog(BaseWindowDialog):
 	
 	def onInit(self):
 		self.getControl(122).setText(' ') #to remove scrollbar
+		if self.failedPM:
+			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
+				yes = xbmcgui.Dialog().yesno('Failed post found','Re-use previous failed post?')
+				if yes:
+					self.post = self.failedPM
+					for line in self.post.message.split('\n'): self.addQuote(line)
+					self.updatePreview()
+					self.setTheme()
+					PostDialog.failedPM = None
+					return
 		if self.post.quote:
 			qformat = FB.getQuoteReplace()
 			pid = self.post.pid
@@ -601,7 +613,7 @@ class PostDialog(BaseWindowDialog):
 				
 		self.updatePreview()
 		self.setTheme()
-		if self.isPM(): self.setFocusId(104)
+		if self.isPM() or self.doNotPost: self.setTitle() #We're creating a thread
 	
 	def setTheme(self):
 		if self.isPM():
@@ -644,9 +656,12 @@ class PostDialog(BaseWindowDialog):
 		
 	def postReply(self):
 		message = self.getOutput()
-		splash = showActivitySplash('Posting')
 		self.post.setMessage(self.title,message)
 		self.posted = True
+		if self.doNotPost:
+			self.close()
+			return
+		splash = showActivitySplash('Posting')
 		try:
 			if self.post.isPM:
 				if not FB.doPrivateMessage(self.post,callback=splash.update):
@@ -663,6 +678,7 @@ class PostDialog(BaseWindowDialog):
 			self.posted = False
 			err = ERROR('Error creating post')
 			showMessage('ERROR','Error creating post:',err,error=True)
+			PostDialog.failedPM = self.post
 		finally:
 			splash.close()
 		self.close()
@@ -1078,7 +1094,7 @@ class MessageWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 
-def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
+def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False):
 	if editPM:
 		pm = editPM
 	else:
@@ -1096,7 +1112,7 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None):
 			to = doKeyboard('Enter Receipient(s)',default=default)
 			if not to: return
 			pm.to = to
-	w = openWindow(LinePostDialog,"script-forumbrowser-post.xml" ,post=pm,return_window=True)
+	w = openWindow(LinePostDialog,"script-forumbrowser-post.xml" ,post=pm,return_window=True,donotpost=donotpost)
 	posted = w.posted
 	del w
 	if posted: return pm
@@ -1375,6 +1391,8 @@ class RepliesWindow(PageWindow):
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
 			if post.extras:
 				d.addItem('extras','User Extra Info')
+			if FB.canPrivateMessage():
+				d.addItem('pm',__language__(30253) % item.getLabel())
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -1404,6 +1422,8 @@ class RepliesWindow(PageWindow):
 			if unSubscribeThread(self.tid): self.threadItem.setProperty('subscribed','')
 		elif result == 'extras':
 			showUserExtras(post.extras)
+		elif result == 'pm':
+			self.openPostDialog(post,force_pm=True)
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -1419,7 +1439,11 @@ class RepliesWindow(PageWindow):
 		if deletePost(post,is_pm=self.isPM()):
 			self.fillRepliesList(self.pageData.getPageNumber())
 		
-	def openPostDialog(self,post=None):
+	def openPostDialog(self,post=None,force_pm=False):
+		tid = self.tid
+		if force_pm:
+			tid = 'private_messages'
+			
 		if post:
 			item = self.getControl(120).getSelectedItem()
 		else:
@@ -1433,8 +1457,8 @@ class RepliesWindow(PageWindow):
 			pid = item.getProperty('post')
 		else:
 			pid = 0
-		pm = openPostDialog(post,pid,self.tid,self.fid)
-		if pm:
+		pm = openPostDialog(post,pid,tid,self.fid)
+		if pm and not force_pm:
 			self.firstRun = True
 			self.fillRepliesList(self.pageData.getPageNumber('-1'),pid=pm.pid)
 	
@@ -1688,6 +1712,8 @@ class ThreadsWindow(PageWindow):
 							if FB.canUnSubscribeForum(self.forumItem.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getLabel()[:25])
 						else:
 							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getLabel()[:25])
+					if FB.canCreateThread(item.getProperty('id')):
+						d.addItem('createthread',__language__(30252))
 			d.addItem('help',__language__(30244))
 		finally:
 			d.cancel()
@@ -1709,11 +1735,28 @@ class ThreadsWindow(PageWindow):
 			if subscribeForum(self.fid): self.forumItem.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(self.fid): self.forumItem.setProperty('subscribed','')
+		elif result == 'createthread':
+			self.createThread()
 		elif result == 'help':
 			if self.fid == 'subscriptions':
 				showHelp('subscriptions')
 			else:
 				showHelp('threads')
+	
+	def createThread(self):
+		pm = openPostDialog(fid=self.fid,donotpost=True)
+		if pm:
+			splash = showActivitySplash('Creating Thread...')
+			try:
+				result = FB.createThread(self.fid,pm.title,pm.message)
+				if result == True:
+					showMessage('Success','Thread created: ','\n',pm.title,success=True)
+					self.fillThreadList()
+				else:
+					showMessage('Failed','Failed create thread:','\n',str(result),success=False)
+			finally:
+				splash.close()
+			
 	
 	def removeItem(self,item):
 		clist = self.getControl(120)
@@ -1723,8 +1766,6 @@ class ThreadsWindow(PageWindow):
 			if item != i: items.append(i)
 		clist.reset()
 		clist.addItems(items)
-			
-			
 		
 	def gotoPage(self,page):
 		self.stopThread()

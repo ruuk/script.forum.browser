@@ -916,3 +916,15 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			text = result.get('result_text')
 			LOG('Failed to unsubscribe from forum: ' + text)
 			return text
+
+	def canCreateThread(self, fid): return self.isLoggedIn()
+	
+	def createThread(self,fid,title,message):
+		result = self.server.new_topic(fid,xmlrpclib.Binary(title),xmlrpclib.Binary(message))
+		if result.get('result'):
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to create thread: ' + str(text))
+			return text
+	

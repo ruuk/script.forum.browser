@@ -1,5 +1,5 @@
 #Forum browser common
-import sys, re, urllib, urllib2, texttransform
+import sys, re, urllib, urllib2, texttransform, binascii
 
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -259,10 +259,10 @@ class PostMessage(Action):
 		self.isPM = is_pm
 		self.isEdit = isEdit
 		self.error = ''
-		self.tagFilter = re.compile('<[^<>]+?>',re.S)
 		
 	def setQuote(self,user,quote):
-		self.quser = self.tagFilter.sub('',user)
+		tagFilter = re.compile('<[^<>]+?>',re.S)
+		self.quser = tagFilter.sub('',user)
 		self.quote = quote
 		
 	def setMessage(self,title,message):
@@ -276,6 +276,61 @@ class PostMessage(Action):
 		self.message = post.message
 		self.title = post.title
 		return self
+	
+	def toString(self):
+		return dictToString(self.__dict__)
+	
+	def fromString(self,data):
+		self.__dict__.update(dictFromString(data))
+		return self
+
+def valToString(val):
+	if hasattr(val,'encode'):
+		try:
+			return val.encode('utf-8')
+		except:
+			LOG('valToString() encode error')
+			return val
+	return str(val).encode('utf-8')
+
+def dictToString(data_dict):
+	if not data_dict: return ''
+	ret = []
+	try:
+		for key,val in data_dict.items():
+			if val == None:
+				continue
+			elif isinstance(val,dict):
+				val = dictToString(val)
+				key = 'dict___' + key
+			elif isinstance(val,list):
+				val = ','.join(val)
+				key = 'list___' + key
+			ret.append('%s=%s' % (key,binascii.hexlify(valToString(val))))
+	except:
+		print data_dict
+		raise
+	return ','.join(ret)
+
+def dictFromString(data,val_is_hex=True):
+	if not data: return {}
+	theDict = {}
+	for keyval in data.split(','):
+		key,val = keyval.split('=',1)
+		if key.startswith('dict___'):
+			key = key[7:]
+			val = dictFromString(binascii.unhexlify(val),val_is_hex)
+			theDict[key] = val
+		elif key.startswith('list___'):
+			key = key[7:]
+			val = binascii.unhexlify(val).split(',')
+			theDict[key] = val
+		else:
+			if val_is_hex:
+				theDict[key] = binascii.unhexlify(val)
+			else:
+				theDict[key] = val.decode('utf-8')
+	return theDict
 
 ################################################################################
 # PageData
@@ -666,6 +721,8 @@ class ForumBrowser:
 	def canSubscribeForum(self,fid): return False
 	def canUnSubscribeForum(self,fid): return False
 	
+	def canCreateThread(self,fid): return False
+	
 	def isForumSubscribed(self,fid,default=False): return default
 	
 	def isThreadSubscribed(self,tid,default=False): return default
@@ -675,6 +732,8 @@ class ForumBrowser:
 	def hasSubscriptions(self): return False
 	
 	def canPost(self): return False
+	
+	def canPrivateMessage(self): return self.canPost()
 	
 	def canDelete(self,user,target='POST'): return False
 			
