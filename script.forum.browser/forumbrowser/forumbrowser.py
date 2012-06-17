@@ -141,6 +141,7 @@ class HTMLPageInfo:
 	def _images(self,html,base):
 		urlList = re.findall('<img[^>]*?src="([^"]+?)"[^>]*?>',html) #Image tags
 		urlList2 = re.findall('<meta[^>]*?property="[^"]*image"[^>]*?content="([^"]*?)"',html) #Meta tag images
+		#<link rel="Shortcut Icon" href="favicon.ico" type="image/x-icon" />
 		final = []
 		for u in urlList + urlList2:
 			u = self.fullURL(u, base)
@@ -259,6 +260,7 @@ class PostMessage(Action):
 		self.isPM = is_pm
 		self.isEdit = isEdit
 		self.error = ''
+		self.boxid = ''
 		
 	def setQuote(self,user,quote):
 		tagFilter = re.compile('<[^<>]+?>',re.S)
@@ -275,6 +277,7 @@ class PostMessage(Action):
 		self.fid = post.fid
 		self.message = post.message
 		self.title = post.title
+		self.boxid = post.boxid
 		return self
 	
 	def toString(self):
@@ -590,6 +593,7 @@ class ForumBrowser:
 		self.altQuoteStartFilter = '\r\r\r\r\r\r'
 		self.smilies = {}
 		self.MC = None
+		self.pmBoxes = []
 		self.messageConvertorClass=message_converter
 		
 	def initialize(self):
@@ -723,6 +727,8 @@ class ForumBrowser:
 	
 	def canCreateThread(self,fid): return False
 	
+	def canGetOnlineUsers(self): return False
+	
 	def isForumSubscribed(self,fid,default=False): return default
 	
 	def isThreadSubscribed(self,tid,default=False): return default
@@ -744,6 +750,8 @@ class ForumBrowser:
 	def guestOK(self): return True
 	
 	def getAnnouncement(self,aid): return None
+	
+	def getPMBoxes(self,update=True): return None
 	
 	
 		

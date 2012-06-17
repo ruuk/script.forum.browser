@@ -31,6 +31,8 @@ form:edit_post_title=title
 form:edit_post_message=message
 form:edit_post_submit_wait=1
 
+url:quotepost=newreply.php?do=newreply&p=!POSTID!
+
 url:deletepost=editpost.php?do=editpost&p=!POSTID!
 form:delete_action=editpost.php?do=deletepost
 form:delete_control1=radio:name.deletepost=delete

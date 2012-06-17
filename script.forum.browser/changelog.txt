@@ -7,17 +7,16 @@ TODO:
   Fix bugs/issues
   Help for clipboard
   Help for create thread and pm author
+  Make quoting an option when sending PM from posts list
+  Ask for confirmation when closing post/pm editor.
+  Experimental: when editing a post, get edit text from the form
   
  Long Term:
   Use new option menus for context?
   Better 'Choose Forum' menu
-  View online users list
-  Access to other PM boxes
   Improve the database and database management
   Skip forward on remote causes XBMC dialog
   Adjustable text size
-  signature maybe with future tapatalk plugin update
-  reputation maybe with future tapatalk plugin update
   Logo url from field in forum config data?
   Add missing smilies for Phpbb (and others)
   Add missing quote formats for other forum systems
@@ -28,8 +27,25 @@ TODO:
   Latest Threads
   Today's New Posts?
   Make a million dollars
+ 
+ Awaiting Future Developments:
+  signature maybe with future tapatalk plugin update
+  reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.2
+Current Version : 1.0.3
+
+*** 1.0.3 ***
+
+Now removes "forum." and "forums." when adding a forum
+Added 'View Online Users' option to forums view context menu
+Made changes to accommodate clipboard name change from Clipboard to SSClipboard
+Fixed a bug when displaying context menu on PM list when list is empty
+Added ability to select and view other private message boxes/folders to PM list context menu
+
+Experimental:
+- FluxBB: Added the ability to create, edit and delete posts
+- MyBB: Added the ability to create, edit and delete posts
+- When editing or quoting, the message and title are now taken from the form. (so now it will be the same as if you were doing it via a browser)
 
 *** 1.0.2 ***
 
@@ -49,7 +65,7 @@ Experimental:
 
 *** 1.0.0 ***
 
-Added clipbboard functionality for post images and links (link, video and image) via ShareSocial clipboard
+Added clipboard functionality for post images and links (link, video and image) via ShareSocial clipboard
 Added help for 'User Extra Info' option in posts and full post view
 
 *** 0.9.53 RC11 ***
@@ -144,7 +160,7 @@ Added an option in settings: 'Experimental' which enables experimental stuff. Ri
 
 Now all pm's now show delete option, not just ones created by the user
 Boxee: fixed some issues with deleting PMs
-Changed 'Quote' to 'Reply/Forward' in contex menus for PMs, and auto fill recipient when selected
+Changed 'Quote' to 'Reply/Forward' in context menus for PMs, and auto fill recipient when selected
 
 *** 0.9.44 RC2 ***
 
@@ -394,7 +410,7 @@ Add option in settings to select 'Dark' skin (and obviously added a dark skin)
 
 *** 0.9.18 ***
 
-Removed red highliting of name for posts by user - instead darken the background of the post
+Removed red highlighting of name for posts by user - instead darken the background of the post
 
 *** 0.9.17 ***
 
@@ -496,7 +512,7 @@ Small skin changes
 
 *** 0.9.2 ***
 
-Fixed a bug stopping logins from occuring
+Fixed a bug stopping logins from occurring
 Fixed bug causing no focus when forum loading failed
 Hide categories (which contain no threads)
 Added ability to add share forums to the online database
@@ -507,7 +523,7 @@ Improved the forum chooser with logos and description
 *** 0.9.1 ***
 
 Added ability to delete added forums
-Added the ablity to add/remove forums from favorites (favorites will be at the top of the list)
+Added the ability to add/remove forums from favorites (favorites will be at the top of the list)
 Fixed the settings menu
 Fixed the ign.com forum def
 
@@ -580,7 +596,7 @@ Experimental: Added an option in settings to use a text editor instead of the cu
 
 *** 0.7.9 ***
 
-Modifed theme in replies for highlighted users
+Modified theme in replies for highlighted users
 Added default avatar for users without avatar
 Fix dialogs and displays for private messages to match the context
 Got avatars working for boxee.tv and member status working for boxee.tv and xbmc4xbox.org
@@ -593,7 +609,7 @@ Added avatars to private messages
 Fixed avatar image updating issue
 Added theme coloring to post message window
 Changed colors for xbmc.org
-Forums, threads and posts now load in a background thread and are interruptable/cancelable
+Forums, threads and posts now load in a background thread and are interruptible/cancelable
 Fixed bug with xbmc4xboc paging
 Improved Forums and Threads window interface.
 Fixed handling of nested display tags.
@@ -621,7 +637,7 @@ Fixed some color handling in posts
 Fixed some code box handling in posts
 Improved post editing preview
 Added forum.dvhk.pl
-Added ability to handle fourms which require login
+Added ability to handle forums which require login
 Add ability to translate posts with Google Translate
 Added language option in settings
 Added progress indicators for all windows

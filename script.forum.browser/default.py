@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -82,11 +82,11 @@ LOG('Skin: ' + THEME)
 
 CLIPBOARD = None
 try:
-	import Clipboard #@UnresolvedImport
-	CLIPBOARD = Clipboard.Clipboard()
+	import SSClipboard #@UnresolvedImport
+	CLIPBOARD = SSClipboard.Clipboard()
 	LOG('Clipboard Enabled')
 except:
-	pass
+	LOG('Clipboard Disabled: No SSClipboard')
 
 FB = None
 
@@ -1064,7 +1064,11 @@ class MessageWindow(BaseWindow):
 		if result == 'quote': self.openPostDialog(quote=True)
 		elif result == 'delete': self.deletePost()
 		elif result == 'edit':
-			pm = FB.getPostForEdit(self.post)
+			splash = showActivitySplash('Getting post for edit...')
+			try:
+				pm = FB.getPostForEdit(self.post)
+			finally:
+				splash.close()
 			pm.tid = self.post.tid
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH-REOPEN')
@@ -1109,7 +1113,7 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False):
 		if tid == 'private_messages':
 			default = ''
 			if post: default = post.userName
-			to = doKeyboard('Enter Receipient(s)',default=default)
+			to = doKeyboard('Enter Recipient(s)',default=default)
 			if not to: return
 			pm.to = to
 	w = openWindow(LinePostDialog,"script-forumbrowser-post.xml" ,post=pm,return_window=True,donotpost=donotpost)
@@ -1119,7 +1123,7 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False):
 	return None
 
 def deletePost(post,is_pm=False):
-	pm = forumbrowser.PostMessage(post.postId,post.tid,post.fid)
+	pm = forumbrowser.PostMessage().fromPost(post)
 	if not pm.pid: return
 	yes = xbmcgui.Dialog().yesno('Really Delete?','Are you sure you want to delete this message?')
 	if not yes: return
@@ -1136,7 +1140,7 @@ def deletePost(post,is_pm=False):
 			showMessage('Success',pm.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 	except:
 		err = ERROR('Delete post error.')
-		LOG('Error deleteing post/pm: ' % err)
+		LOG('Error deleting post/pm: ' % err)
 		showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
 	finally:
 		splash.close()
@@ -1184,6 +1188,7 @@ class RepliesWindow(PageWindow):
 		self.ignoreSelect = False
 		self.firstRun = True
 		self.started = False
+		self.currentPMBox = {}
 	
 	def onInit(self):
 		if self.started: return
@@ -1193,13 +1198,30 @@ class RepliesWindow(PageWindow):
 		self.setStopControl(self.getControl(106))
 		self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 		self.postSelected()
+		self.setPMBox()
 		self.setTheme()
 		self.getControl(201).setEnabled(FB.canPost())
 		self.showThread()
 		#self.setFocusId(120)
 	
+	def setPMBox(self,boxid=None):
+		if not self.isPM(): return
+		boxes = FB.getPMBoxes(update=False)
+		self.currentPMBox = {}
+		if not boxes: return
+		if not boxid:
+			for b in boxes:
+				if b.get('default'):
+					self.currentPMBox = b
+					return
+		else:
+			for b in boxes:
+				if b.get('id') == boxid:
+					self.currentPMBox = b
+					return
+		
 	def setTheme(self):
-		mtype = self.isPM() and __language__(30151) or __language__(30130)
+		mtype = self.isPM() and self.currentPMBox.get('name','Inbox') or __language__(30130)
 		if self.isPM(): self.getControl(201).setLabel(__language__(30177))
 		self.getControl(103).setLabel('[B]%s[/B]' % mtype)
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
@@ -1226,7 +1248,7 @@ class RepliesWindow(PageWindow):
 		self.setFocusId(106)
 		if self.tid == 'private_messages':
 			t = self.getThread(FB.getPrivateMessages,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='PRIVATE MESSAGES')
-			t.setArgs(callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.setArgs(callback=t.progressCallback,donecallback=t.finishedCallback,boxid=self.currentPMBox.get('id'))
 		elif self.isAnnouncement:
 			t = self.getThread(FB.getAnnouncement,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='ANNOUNCEMENT')
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
@@ -1369,11 +1391,27 @@ class RepliesWindow(PageWindow):
 			self.doMenu()
 		PageWindow.onAction(self,action)
 	
+	def selectNewPMBox(self):
+		boxes = FB.getPMBoxes(update=False)
+		if not boxes: return #TODO: Show message
+		d = ChoiceMenu('Select Box')
+		for b in boxes:
+			d.addItem(b,b.get('name','?'))
+		box = d.getResult()
+		if not box: return
+		self.currentPMBox = box
+		self.setTheme()
+		self.fillRepliesList()
+		
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
 		d = ChoiceMenu(__language__(30051),with_splash=True)
 		post = None
 		try:
+			if self.isPM():
+				boxes = FB.getPMBoxes(update=False)
+				if boxes and len(boxes) > 1:
+					d.addItem('changebox','Change PM Box')
 			if item:
 				post = self.posts.get(item.getProperty('post'))
 				if FB.canPost():
@@ -1389,9 +1427,9 @@ class RepliesWindow(PageWindow):
 					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
 				else:
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
-			if post.extras:
+			if post and post.extras:
 				d.addItem('extras','User Extra Info')
-			if FB.canPrivateMessage():
+			if item and FB.canPrivateMessage():
 				d.addItem('pm',__language__(30253) % item.getLabel())
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
@@ -1400,14 +1438,21 @@ class RepliesWindow(PageWindow):
 		
 		result = d.getResult()
 		if not result: return
-		if result == 'quote':
+		if result == 'changebox':
+			self.selectNewPMBox()
+			return
+		elif result == 'quote':
 			self.stopThread()
 			self.openPostDialog(post)
 		elif result == 'refresh':
 			self.stopThread()
 			self.fillRepliesList(self.pageData.getPageNumber())
 		elif result == 'edit':
-			pm = FB.getPostForEdit(post)
+			splash = showActivitySplash('Getting post for edit...')
+			try:
+				pm = FB.getPostForEdit(post)
+			finally:
+				splash.close()
 			pm.tid = self.tid
 			if openPostDialog(editPM=pm):
 				self.pid = pm.pid
@@ -1968,6 +2013,16 @@ class ForumsWindow(BaseWindow):
 		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self)
 		self.setPMCounts(FB.getPMCounts())
 	
+	def showOnlineUsers(self):
+		users = FB.getOnlineUsers()
+		if hasattr(users, 'encode'):
+			showMessage('Failed','Failed to get online users','\n',users,success=False)
+		else:
+			d = OptionsChoiceMenu('Online Users')
+			for u in users:
+				d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or 'forum-browser-avatar-none.png',u.get('status'))
+			d.getResult()
+		
 	def getGeneralForumURL(self):
 		forums = getSetting('exp_general_forums',[])
 		url = None
@@ -2064,6 +2119,8 @@ class ForumsWindow(BaseWindow):
 					if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
 				else:
 					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
+			if FB.canGetOnlineUsers():
+				d.addItem('online','View Online Users')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2078,6 +2135,8 @@ class ForumsWindow(BaseWindow):
 				self.fillForumList()
 			else:
 				self.startGetForumBrowser()
+		elif result == 'online':
+			self.showOnlineUsers()
 		elif result == 'help':
 			showHelp('forums')
 			
@@ -2196,6 +2255,12 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			if not 'url:logo=' in line: line = ff.readline()
 			logo = line.strip('\n').split('=')[-1]
 			ff.close()
+			if f.startswith('TT.'):
+				desc += '\n\nForum Interface: Tapatalk'
+			elif f.startswith('FR.'):
+				desc += '\n\nForum Interface: Forumrunner'
+			elif f.startswith('GB.'):
+				desc += '\n\nForum Interface: Parser Browser'
 			menu.addItem(f, name,logo,desc)
 	if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
 		menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
@@ -2396,6 +2461,8 @@ def addTapatalkForum(current=False):
 		LOG('Adding Forum: %s at URL: %s' % (forum,url))
 		name = forum
 		if name.startswith('www.'): name = name[4:]
+		if name.startswith('forum.'): name = name[6:]
+		if name.startswith('forums.'): name = name[7:]
 		saveForum(ftype,ftype + '.' + forum,name,desc,url,logo)
 		dialog.update(60,'Add To Online Database')
 		addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)

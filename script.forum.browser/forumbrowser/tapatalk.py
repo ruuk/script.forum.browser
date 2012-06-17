@@ -205,7 +205,7 @@ class ForumPost(forumbrowser.ForumPost):
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
 				date = time.strftime('%I:%M %p - %A %B %d, %Y',iso8601.parse_date(date).timetuple())
 			self.date = date
-			self.userName = str(pdict.get('msg_from') or 'UERROR')
+			self.userName = str(pdict.get('msg_from') or str(pdict.get('msg_to',[{}])[0].get('username')) or 'UERROR')
 			self.avatar = pdict.get('icon_url','')
 			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('msg_subject',''))
@@ -485,21 +485,41 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				return False
 		return True
 		
-	def getPMCounts(self,callback_percent=5):
+	def getPMBoxes(self,update=True,callback_percent=5):
+		if not update and self.pmBoxes: return self.pmBoxes
 		if not self.hasPM(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
 		result = self.server.get_box_info()
 		if not result.get('result'):
-			LOG('Failed to get PM counts: ' + str(result.get('result_text')))
+			LOG('Failed to get PM boxes: ' + str(result.get('result_text')))
 			return None
+		self.pmBoxes = []
+		defaultSet = False
+		for b in result.get('list',[]):
+			box = {	'id':b.get('box_id',''),
+					'name':str(b.get('box_name','?')),
+					'count':b.get('msg_count',0),
+					'unread':b.get('unread_count',0),
+					'type':b.get('box_type','') or str(b.get('box_name','?')).upper()
+			}
+			if box.get('type') == 'INBOX' and not defaultSet:
+				box['default'] = True
+				defaultSet = True
+			self.pmBoxes.append(box)
+		if not defaultSet and self.pmBoxes: self.pmBoxes[0]['default'] = True
+		return self.pmBoxes
+	
+	def getPMCounts(self,callback_percent=5):
+		boxes = self.getPMBoxes(callback_percent=callback_percent)
+		if not boxes: return None
 		unread = 0
 		total = 0
 		boxid = None
-		for l in result.get('list',[]):
-			if l.get('box_type') == 'INBOX':
-				if not boxid: boxid = l.get('box_id')
-				total += l.get('msg_count',0)
-				unread += l.get('unread_count',0)
+		for l in boxes:
+			if l.get('type') == 'INBOX':
+				if l.get('default'): boxid = l.get('id')
+				total += l.get('count',0)
+				unread += l.get('unread',0)
 		return {'unread':unread,'total':total,'boxid':boxid}
 		
 	def makeURL(self,url):
@@ -714,19 +734,20 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def hasPM(self):
 		return not self.forumConfig.get('disable_pm','0') == '1'
 	
-	def getPrivateMessages(self,callback=None,donecallback=None):
+	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None):
 		if not callback: callback = self.fakeCallback
 		
 		while True:
 			if not callback(20,self.lang(30102)): break
-			try:
-				pmInfo = self.getPMCounts(20)
-			except:
-				em = ERROR('ERROR GETTING PRIVATE MESSAGES - getPMCounts()')
-				callback(-1,'%s' % em)
-				return self.finish(FBData(error=em),donecallback)
-			if not pmInfo: break
-			boxid = pmInfo.get('boxid')
+			if not boxid:
+				try:
+					pmInfo = self.getPMCounts(20)
+				except:
+					em = ERROR('ERROR GETTING PRIVATE MESSAGES - getPMCounts()')
+					callback(-1,'%s' % em)
+					return self.finish(FBData(error=em),donecallback)
+				if not pmInfo: break
+				boxid = pmInfo.get('boxid')
 			if not boxid: break
 			if not callback(50,self.lang(30102)): break
 			try:
@@ -744,6 +765,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				if not fp.userName in infos:
 					try:
 						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+						fp.online = False #Because at least on sent items, we can't trust this value returned with the list
 					except:
 						ERROR('Failed to get user info')
 						break
@@ -848,8 +870,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return True
 		
 	def deletePrivateMessage(self,post,callback=None):
-		pmInfo = self.getPMCounts()
-		boxid = pmInfo.get('boxid')
+		boxid = post.boxid
+		if not boxid:
+			pmInfo = self.getPMCounts()
+			boxid = pmInfo.get('boxid')
 		if not boxid: return
 		result = self.server.delete_message(post.pid,boxid)
 		if not result.get('result'):
@@ -928,3 +952,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Failed to create thread: ' + str(text))
 			return text
 	
+	def canGetOnlineUsers(self): return True
+	
+	def getOnlineUsers(self):
+		result = self.server.get_online_users()
+		if 'list' in result:
+			ret = []
+			for u in result.get('list',[]):
+				ret.append({'user':str(u.get('user_name','')),'userid':u.get('user_id',''),'avatar':u.get('icon_url',''),'status':str(u.get('display_text',''))})
+			return ret
+		else:
+			text = result.get('result_text')
+			LOG('Failed to get online users: ' + str(text))
+			return text
+			

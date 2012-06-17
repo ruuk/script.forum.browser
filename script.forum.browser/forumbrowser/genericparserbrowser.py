@@ -207,6 +207,8 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		for r in replies:
 			try:
 				post = self.getForumPost(r)
+				post.tid = threadid
+				post.fid = forumid
 				#print post.message.encode('ascii','replace')
 				sreplies.append(post)
 			except:

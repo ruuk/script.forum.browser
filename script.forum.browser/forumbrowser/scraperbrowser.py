@@ -83,7 +83,8 @@ class ForumPost(forumbrowser.ForumPost):
 		return message
 		
 	def messageAsQuote(self):
-		return self.MC.messageAsQuote(self.message)
+		return self.FB.getPostAsQuote(self).message
+		#return self.MC.messageAsQuote(self.message)
 		
 	def imageURLs(self):
 		return self.MC.imageFilter.findall(self.getMessage())
@@ -875,6 +876,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def editURL(self,post):
 		return self.URLSubs(self.getURL('editpost'),post=post)
 	
+	def quoteURL(self,post):
+		return self.URLSubs(self.getURL('quotepost'),post=post)
+	
 	def predicatePost(self,formobj):
 		return self.forms.get('post_action','@%+#') in formobj.action
 	
@@ -883,18 +887,26 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 	def fakeCallback(self,pct,message=''): return True
 	
-	def post(self,post,callback=None,edit=False):
+	def selectForm(self,action_sub):
+		for f in self.browser.forms():
+			if action_sub in f.action:
+				self.browser.form = f
+				return
+		raise Exception('No Matching Form Found')
+			
+	def post(self,post,callback=None,edit=False,get_for_edit=False,quote=False):
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback):
 			post.error = 'Could not log in'
 			return False
 		pre = ''
-		if edit or post.isEdit:
+		if quote:
+			url = self.quoteURL(post)
+		elif edit or post.isEdit:
 			pre = 'edit_'
 			url = self.editURL(post)
 		else:
 			url = self.postURL(post)
-			
 		res = self.browser.open(url)
 		#print res.info()
 		html = res.read()
@@ -914,9 +926,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				LOG('FORM SELECTED BY NAME')
 			else:
 				if edit or post.isEdit:
-					self.browser.select_form(predicate=self.predicateEditPost)
+					self.selectForm(self.forms.get('edit_post_action', '@%+#'))
 				else:
-					self.browser.select_form(predicate=self.predicatePost)
+					self.selectForm(self.forms.get('post_action', '@%+#'))
 				LOG('FORM SELECTED BY ACTION')
 			selected = True
 		except:
@@ -929,8 +941,15 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			else:
 				post.error = 'Could not find form.'
 				return False
+		#print self.browser.form
 		try:
-			if post.title: self.browser[self.forms[pre + 'post_title']] = post.title
+			if get_for_edit:
+				title = ''
+				if self.forms.get(pre + 'post_title'): title = self.browser[self.forms[pre + 'post_title']]
+				message = self.browser[self.forms[pre + 'post_message']]
+				return (title,message)
+			
+			if post.title and self.forms.get(pre + 'post_title'): self.browser[self.forms[pre + 'post_title']] = post.title
 			self.browser[self.forms[pre + 'post_message']] = post.message
 			self.setControls(pre + 'post_controls%s')
 			wait = int(self.forms.get(pre + 'post_submit_wait',0))
@@ -1058,7 +1077,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			
 		selected = False
 		try:
-			self.browser.select_form(predicate=self.predicateDeletePost)
+			self.selectForm(self.forms.get('delete_action', '@%+#'))
+			#self.browser.select_form(predicate=self.predicateDeletePost)
 			selected = True
 		except:
 			ERROR('DELETE NO FORM 1')
@@ -1071,12 +1091,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				LOG('DELETE NO FORM 2')
 				post.error = 'Could not find form'
 				return False
-		
 		try:
 			#self.browser.find_control(name="deletepost").value = ["delete"]
 			self.setControls('delete_control%s')
 			#self.browser["reason"] = reason[:50]
-			self.browser.submit()
+			res = self.browser.submit()
+			#print res.read()
+		except self.mechanize.HTTPError, e:
+			LOG('HTTPError on delete submit: ' + e.msg)
+			post.error = 'HTTPError: ' + e.msg
+			#print e.__dict__
+			#print e.read()
+			return False
 		except:
 			ERROR('DELETE NO CONTROL')
 			post.error = 'Could not find form controls'
@@ -1113,10 +1139,25 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return None
 	
 	def getPostForEdit(self,post):
+		result = self.post(post, edit=True, get_for_edit=True)
+		if not result: return None
+		title,message = result
 		pm =  forumbrowser.PostMessage().fromPost(post)
+		pm.title = title
+		pm.message = message
 		pm.isEdit = True
 		return pm
 		
+	def getPostAsQuote(self,post):
+		pm =  forumbrowser.PostMessage().fromPost(post)
+		result = self.post(pm, get_for_edit=True,quote=True)
+		if not result: return None
+		title,message = result
+		pm.title = title
+		pm.message = message
+		pm.isEdit = True
+		return pm
+	
 	def editPost(self,pm,callback=None):
 		return self.post(pm,callback,edit=True)
 	

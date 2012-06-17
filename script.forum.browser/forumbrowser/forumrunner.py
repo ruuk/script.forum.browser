@@ -64,10 +64,17 @@ class ForumrunnerClient():
 		return handler
 	
 	def _callMethod(self,method,**args):
-		url = self.url + 'request.php?cmd=' + method
+		url = self.url #+ 'request.php?cmd=' + method
+		if url.endswith('/'): url = url[:-1]
+		args['cmd'] = method
 		#url = '&'.join((url,urllib.urlencode(args)))
 		encArgs = urllib.urlencode(args)
-		obj = self.opener.open(url,encArgs)
+		try:
+			obj = self.opener.open(url,encArgs)
+		except urllib2.HTTPError,e:
+			data = e.read()
+			return FRCFail({'message':e.msg + '\n\n' + data})
+			
 		if DEBUG: LOG('Response Headers: ' + str(obj.info()))
 		encoding = obj.info().get('content-type').split('charset=')[-1]
 		if '/' in encoding: encoding = 'utf8'
@@ -155,6 +162,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		self.lang = sys.modules["__main__"].__language__
 		self.online = {}
 		self.lastOnlineCheck = 0
+		self.pmBoxes = []
 		self.loadForumFile()
 		self.setupClient()
 		self.setFilters()
@@ -364,24 +372,39 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,self.lang(30052))
 		return self.finish(FBData(threads,pd),donecallback)
 		
-	def getOnlineUsers(self):
+	def canGetOnlineUsers(self): return True
+	
+	def getOnlineUsers(self,for_replies=False):
 		#lets not hammer the server. Only get online user list every five minutes
 		now = time.time()
-		if now - self.lastOnlineCheck > 300:
+		ret = []
+		err = None
+		if now - self.lastOnlineCheck > 300 or not for_replies:
 			self.lastOnlineCheck = now
 			try:
 				oDict = {}
 				online = self.client.online()
 				if not online:
 					LOG('Could not get online users: ' + online.message)
-					return self.online
+					if for_replies:
+						return self.online
+					else:
+						return online.message
 				for o in online.get('users',online.get('online_users',[])): #online_users is the documented key but not found in practice
 					oDict[o.get('username','?')] = o.get('userid','?')
+					ret.append({'user':str(o.get('username','')),'userid':o.get('userid',''),'avatar':o.get('avatarurl',''),'status':'Online'})
 				self.online = oDict
 				#print self.online
 			except:
-				ERROR('Error getting online users')
-		return self.online
+				err = ERROR('Error getting online users')
+				
+		if for_replies:
+			return self.online
+		else:
+			if err:
+				return err
+			else:
+				return ret
 	
 	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None,announcement=False,page_data=None):
 		if not callback: callback = self.fakeCallback
@@ -390,7 +413,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			except: page = 1
 			
 			if not callback(20,self.lang(30102)): break
-			oDict = self.getOnlineUsers()
+			oDict = self.getOnlineUsers(for_replies=True)
 			if not callback(40,self.lang(30102)): break
 			try:
 				sreplies = []
@@ -443,6 +466,39 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def getAnnouncement(self,aid,callback=None,donecallback=None):
 		return self.getReplies(aid, None, callback=callback, donecallback=donecallback,announcement=True)
 		
+	
+	def getPMBoxes(self,update=True,callback_percent=5):
+		if not update and self.pmBoxes: return self.pmBoxes
+		if not self.hasPM(): return None
+		if not self.checkLogin(callback_percent=callback_percent): return None
+		result = self.client.get_pm_folders()
+		if not result or result.get('folders') == None:
+			LOG('Failed to get PM boxes')
+			return None
+		self.pmBoxes = []
+		defaultSet = False
+		boxes = result.get('folders')
+		if not boxes: return None
+		if isinstance(boxes,list): #Not sure if this is necessary because I've only gotten empty lists
+			temp = boxes
+			boxes = {}
+			for b in temp:
+				boxes[b] = b
+			
+		for boxid,name in boxes.items():
+			box = {	'id':boxid,
+					'name':name,
+					'count':0,
+					'unread':0,
+					'type':name.upper()
+			}
+			if box.get('id') == 0 or box.get('type') == 'INBOX' and not defaultSet:
+				box['default'] = True
+				defaultSet = True
+			self.pmBoxes.append(box)
+		if not defaultSet and self.pmBoxes: self.pmBoxes[0]['default'] = True
+		return self.pmBoxes
+		
 	def getPMCounts(self,callback_percent=5):
 		if not self.hasPM(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
@@ -457,14 +513,17 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	
 	def hasPM(self): return True
 		
-	def getPrivateMessages(self,callback=None,donecallback=None):
+	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None):
 		if not callback: callback = self.fakeCallback
 		
 		while True:
-			oDict = self.getOnlineUsers()
+			oDict = self.getOnlineUsers(for_replies=True)
 			if not callback(30,self.lang(30102)): break
 			try:
-				messages = self.client.get_pms(page=1,perpage=50)
+				if boxid:
+					messages = self.client.get_pms(folderid=boxid,page=1,perpage=50)
+				else:
+					messages = self.client.get_pms(page=1,perpage=50)
 			except:
 				em = ERROR('ERROR GETTING PRIVATE MESSAGES')
 				callback(-1,'%s' % em)
