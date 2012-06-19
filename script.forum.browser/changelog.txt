@@ -4,12 +4,12 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Fix bugs/issues
   Help for clipboard
   Help for create thread and pm author
-  Make quoting an option when sending PM from posts list
-  Ask for confirmation when closing post/pm editor.
-  Experimental: when editing a post, get edit text from the form
+  Help for view online users
+  Help for other PM boxes
+  Help for extras
+  Find out how forums are being added to the DB without a name
   
  Long Term:
   Use new option menus for context?
@@ -33,6 +33,19 @@ TODO:
   reputation maybe with future tapatalk plugin update
 
 Current Version : 1.0.3
+
+*** 1.0.4 ***
+
+If you're closing the post/pm window when a title or message has been entered, it will now ask if you are sure to prevent accidental exit and loss of all your hard work :)
+When sending a PM from the posts list, FB will now ask if you want to quote the message instead of doing it automatically
+Fixed a bug caused by local forum.xbmc.org forum def causing duplicate entries by changing to xbmc.org
+Fixed a bug in 'add to online database' code that was causing it to fail in some instances
+ 
+Experimental:
+- PhpBB: Added the ability to create and edit posts
+- Can now detect some forum posting error messages (ie you are not allowed to post in this forum, your post is too short)
+- Can now (sometimes at least) handle forums that link to an alternate login page from the standard login page for the forum type
+- Added some code that should alert you (at least some of the time) if posting is moderated
 
 *** 1.0.3 ***
 

@@ -1220,6 +1220,7 @@ class GeneralForumParser(AdvancedParser):
 			keepAll = True
 		forums = []
 		for f in self.forums:
+			#print f['title'] + ' ' + str(f['depth'])
 			if self.maxForumDepth - f['depth'] < 2 or keepAll:
 				if f['depth'] == self.maxForumDepth: f['subforum'] = True
 				del f['depth']
@@ -1448,6 +1449,9 @@ class GeneralPostParser(AdvancedParser):
 							('extra.ratio',re.compile('^ratio: ?(.+)$(?i)')),
 							('extra.karma',re.compile('^karma: ?(.+)$(?i)'))
 						]
+		
+		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote')
+		
 		self.threadParser = None
 		
 	def setDefaults(self):
@@ -1705,21 +1709,26 @@ class GeneralPostParser(AdvancedParser):
 					ds = ''.join(d.startTag.dataStack)
 					if ds.endswith(newData[-1]): newData.pop() #If we missed the text because it was inside another tag
 					#TODO: Maybe we need to do this more than once in a while, in case the text was in multiple tags
-					if not ds.lower() in ('quote','pm','profile','email','private message'):
+					if not ds.lower() in self.ignores: #('quote','pm','profile','email','private message','edit post','delete post','report this post','reply with quote'):
 						if ds != p.get('user') and not 'user' in href and not 'member' in href and not p.get('postid') in href: 
 							newData.append('[/url]')
 						elif len(newData) > 1 and ds == p.get('user') and newData[-2].strip().endswith('edited by'):
 							if d.startTag.info in newData: newData.pop(self.rindex(newData,d.startTag.info))
 							newData.append(ds) #So the username stays in the last edited by part
 						else:
+							if ds == p.get('user') and not p.get('status','').strip():
+								last = 'user'
 							if d.startTag.info in newData: newData.pop(self.rindex(newData,d.startTag.info))
 					else:
 						if d.startTag.info in newData:
-							newData.pop(self.rindex(newData,d.startTag.info))
+							#ds = ''.join(d.startTag.dataStack)
+							newData = newData[:self.rindex(newData,d.startTag.info)] #TODO: make sure this method isn't breaking anything
+							#if ds in newData[-1]: print newData.pop()
+							#newData.pop(self.rindex(newData,d.startTag.info))
 			elif d.tag == 'li':
 				ds = ''.join(d.startTag.dataStack)
 				dslower = ds.lower()
-				if not dslower in ('report','quote','private message','add as contact','send email'):
+				if not dslower in self.ignores: #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
 					if not dslower.startswith('view') and not dslower.endswith('posts') and not dslower.endswith('profile'):
 						newData.append('    * ' + ds + '\n')
 			elif d.tag == 'font':
@@ -1804,6 +1813,11 @@ class GeneralPostParser(AdvancedParser):
 								if not mg1: self.lastUnset = val
 							else:
 								continue
+						elif val == 'user':
+							if not p.get('user') and not dstrip.lower() in self.ignores:
+								p[val] = dstrip
+							else:
+								continue
 						else:
 							#print 'ng ' + d.encode('ascii','replace')
 							if not val in p:
@@ -1864,13 +1878,13 @@ class GeneralPostParser(AdvancedParser):
 				if not ID in self.ids:
 					usedTag = None
 					postnumber = ''.join(tag.dataStack).split(' ')[0]
-					title = postnumber
+					title = ''.join(tag.dataStack)
 					if not '#' in postnumber and not postnumber.isdigit():
 						postnumber = ''.join(self.lastTag.dataStack).split(' ')[0]
 					if not '#' in postnumber and not postnumber.isdigit():
 						if self.forumType != 'pb' and not self.isGeneric: return
 						if not title:
-							title = postnumber
+							title = ''.join(self.lastTag.dataStack)
 							usedTag = self.lastTag
 						else:
 							usedTag = tag

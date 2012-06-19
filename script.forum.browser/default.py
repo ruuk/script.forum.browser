@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -583,6 +583,7 @@ class PostDialog(BaseWindowDialog):
 		self.doNotPost = kwargs.get('donotpost') or False
 		self.title = self.post.title
 		self.posted = False
+		self.moderated = False
 		self.display_base = '%s\n \n'
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
@@ -613,6 +614,9 @@ class PostDialog(BaseWindowDialog):
 				
 		self.updatePreview()
 		self.setTheme()
+		if self.post.moderated:
+			self.moderated = True
+			showMessage('Note','Posting appears to be moderated.','Your message may not appear right away.')
 		if self.isPM() or self.doNotPost: self.setTitle() #We're creating a thread
 	
 	def setTheme(self):
@@ -637,10 +641,18 @@ class PostDialog(BaseWindowDialog):
 		self.controlId = controlId
 		
 	def onAction(self,action):
+		if action == ACTION_PREVIOUS_MENU:
+			if not self.confirmExit(): return
 		BaseWindowDialog.onAction(self,action)
 		
+	def confirmExit(self):
+		if not self.getOutput() and not self.title: return True
+		return xbmcgui.Dialog().yesno('Are You Sure?','Really close?','Changes will be lost.')
+	
 	def isPM(self):
 		return str(self.post.pid).startswith('PM') or self.post.to
+	
+	def getOutput(self): pass
 	
 	def setTitle(self):
 		keyboard = xbmc.Keyboard(self.title,__language__(30125))
@@ -666,14 +678,14 @@ class PostDialog(BaseWindowDialog):
 			if self.post.isPM:
 				if not FB.doPrivateMessage(self.post,callback=splash.update):
 					self.posted = False
-					showMessage(__language__(30050),__language__(30246),self.post.error or '?',success=False)
+					showMessage(__language__(30050),__language__(30246),' ',self.post.error or '?',success=False)
 					return
 			else:
 				if not FB.post(self.post,callback=splash.update):
 					self.posted = False
-					showMessage(__language__(30050),__language__(30227),self.post.error or '?',success=False)
+					showMessage(__language__(30050),__language__(30227),' ',self.post.error or '?',success=False)
 					return
-			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.',success=True)
+			showMessage('Success',self.post.isPM and 'Message sent.' or 'Message posted.',' ',str(self.post.successMessage),success=True)
 		except:
 			self.posted = False
 			err = ERROR('Error creating post')
@@ -681,6 +693,8 @@ class PostDialog(BaseWindowDialog):
 			PostDialog.failedPM = self.post
 		finally:
 			splash.close()
+		if not self.moderated and self.post.moderated:
+			showMessage('Note','Posting appears to be moderated.','Your message may not appear right away.')
 		self.close()
 		
 	def parseCodes(self,text):
@@ -1098,12 +1112,12 @@ class MessageWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 
-def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False):
+def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False,no_quote=False):
 	if editPM:
 		pm = editPM
 	else:
 		pm = forumbrowser.PostMessage(pid,tid,fid,is_pm=(tid == 'private_messages'))
-		if post:
+		if post and not no_quote:
 			s = showActivitySplash()
 			try:
 				pm.setQuote(post.userName,post.messageAsQuote())
@@ -1468,7 +1482,8 @@ class RepliesWindow(PageWindow):
 		elif result == 'extras':
 			showUserExtras(post.extras)
 		elif result == 'pm':
-			self.openPostDialog(post,force_pm=True)
+			quote = xbmcgui.Dialog().yesno('Quote?','Quote the message?')
+			self.openPostDialog(post,force_pm=True,no_quote=not quote)
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -1484,7 +1499,7 @@ class RepliesWindow(PageWindow):
 		if deletePost(post,is_pm=self.isPM()):
 			self.fillRepliesList(self.pageData.getPageNumber())
 		
-	def openPostDialog(self,post=None,force_pm=False):
+	def openPostDialog(self,post=None,force_pm=False,no_quote=False):
 		tid = self.tid
 		if force_pm:
 			tid = 'private_messages'
@@ -1502,7 +1517,7 @@ class RepliesWindow(PageWindow):
 			pid = item.getProperty('post')
 		else:
 			pid = 0
-		pm = openPostDialog(post,pid,tid,self.fid)
+		pm = openPostDialog(post,pid,tid,self.fid,no_quote=no_quote)
 		if pm and not force_pm:
 			self.firstRun = True
 			self.fillRepliesList(self.pageData.getPageNumber('-1'),pid=pm.pid)
@@ -3053,11 +3068,14 @@ def checkPasswordEncryption():
 		passmanager.savePassword(key, user, password)
 	
 def getForumBrowser(forum=None,url=None,donecallback=None):
-	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.forum.xbmc.org'
+	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
 	#global FB
 	if forum.startswith('GB.') and not url:
 		url = getSetting('exp_general_forums_last_url')
-		if not url: forum = 'TT.forum.xbmc.org'
+		if not url: forum = 'TT.xbmc.org'
+		
+	if not getForumPath(forum): forum = 'TT.xbmc.org'
+	
 	if url:
 		try:
 			from forumbrowser import genericparserbrowser

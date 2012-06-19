@@ -79,6 +79,9 @@ class HTMLPageInfo:
 		self.base2 = base2
 		self.base2 += '/'
 		
+		self.html = ''
+		self.html2 = ''
+		
 		self.isValid = True
 		if html:
 			self.html = html
@@ -260,7 +263,9 @@ class PostMessage(Action):
 		self.isPM = is_pm
 		self.isEdit = isEdit
 		self.error = ''
+		self.successMessage = ''
 		self.boxid = ''
+		self.moderated = False
 		
 	def setQuote(self,user,quote):
 		tagFilter = re.compile('<[^<>]+?>',re.S)
