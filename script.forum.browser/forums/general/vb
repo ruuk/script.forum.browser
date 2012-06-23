@@ -36,3 +36,6 @@ url:quotepost=newreply.php?do=newreply&p=!POSTID!
 url:deletepost=editpost.php?do=editpost&p=!POSTID!
 form:delete_action=editpost.php?do=deletepost
 form:delete_control1=radio:name.deletepost=delete
+
+url:private_messages_csv=private.php?do=downloadpm&dowhat=csv
+format:pm_csv_columns=date,boxid,title,user,to,message

@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1214,7 +1214,10 @@ class RepliesWindow(PageWindow):
 		self.postSelected()
 		self.setPMBox()
 		self.setTheme()
-		self.getControl(201).setEnabled(FB.canPost())
+		if self.isPM():
+			self.getControl(201).setEnabled(FB.canPrivateMessage())
+		else:
+			self.getControl(201).setEnabled(FB.canPost())
 		self.showThread()
 		#self.setFocusId(120)
 	
@@ -1443,7 +1446,7 @@ class RepliesWindow(PageWindow):
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
 			if post and post.extras:
 				d.addItem('extras','User Extra Info')
-			if item and FB.canPrivateMessage():
+			if item and FB.canPrivateMessage() and not self.isPM():
 				d.addItem('pm',__language__(30253) % item.getLabel())
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))

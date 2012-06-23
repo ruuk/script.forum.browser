@@ -599,6 +599,7 @@ class ForumBrowser:
 		self.smilies = {}
 		self.MC = None
 		self.pmBoxes = []
+		self.lastURL = ''
 		self.messageConvertorClass=message_converter
 		
 	def initialize(self):
@@ -691,6 +692,19 @@ class ForumBrowser:
 					dup = data.split('=')[-1]
 					data = self.smilies[dup]
 				self.smilies[key] = data
+	
+	def sortDictList(self,dlist,key):
+		ct = 0
+		srt = {}
+		for d in dlist:
+			srt[str(d.get(key)) + str(ct)] = d
+			ct+=1
+		keys = srt.keys()
+		keys.sort(reverse=True)
+		dlist = []
+		for k in keys:
+			dlist.append(srt[k])
+		return dlist
 	
 	def getForumType(self): return ''
 

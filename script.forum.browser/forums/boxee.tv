@@ -37,7 +37,7 @@ filter:pm_xml_messages=<privatemessage>\s*<datestamp>(?P<date>.+?)</datestamp>\s
 
 url:private_messages_csv=private.php?do=downloadpm&dowhat=csv
 
-format:pm_csv_columns=date,folder,title,user,to,message
+format:pm_csv_columns=date,boxid,title,user,to,message
 format:pm_csv_folder=Inbox
 
 filter:pm_counts1=<a href="private.php">(?P<display>Private Messages</a>: Unread (?:<strong>)?(?P<unread>\d+)(?:</strong>)?, Total (?P<total>\d+)).</div>

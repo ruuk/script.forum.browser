@@ -4,14 +4,9 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Help for clipboard
-  Help for create thread and pm author
-  Help for view online users
-  Help for other PM boxes
-  Help for extras
-  Find out how forums are being added to the DB without a name
   
  Long Term:
+  Option to save posts when exiting and not posting
   Use new option menus for context?
   Better 'Choose Forum' menu
   Improve the database and database management
@@ -32,7 +27,14 @@ TODO:
   signature maybe with future tapatalk plugin update
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.3
+Current Version : 1.0.5
+
+*** 1.0.5 ***
+
+Tapatalk: Thread subscriptions now sort with recently updated on top down to least recently updated on the bottom
+Fixed a bug causing errors with Boxee
+Removed "Send PM To ..." from Private Messages view, as it is already there in the form of Reply/Forward
+Updated the online help with new features and changes
 
 *** 1.0.4 ***
 

@@ -41,6 +41,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.postNumber = pdict.get('postnumber') or None
 		self.postCount = pdict.get('postcount') or None
 		self.joinDate = pdict.get('joindate') or ''
+		self.boxid = pdict.get('boxid') or ''
 		self.extras = pdict.get('extras') or self.extras
 	
 	def messageToText(self,html):
@@ -75,7 +76,8 @@ class ForumPost(forumbrowser.ForumPost):
 		
 	def messageAsDisplay(self,short=False,raw=False):
 		if self.isPM:
-			message =  self.MC.parseCodes(self.getMessage())
+			self.MC = texttransform.BBMessageConverter(self.FB)
+			message = self.MC.messageToDisplay(re.sub('(?<!\n)(\[quote)(?i)',r'\n\1',self.message)) #self.MC.parseCodes(self.getMessage())
 		else:
 			message = self.MC.messageToDisplay(self.getMessage())
 		message = re.sub('\[(/?)b\]',r'[\1B]',message)
@@ -793,7 +795,23 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def hasPM(self):
 		return bool(self.urls.get('private_messages_xml') or self.urls.get('private_messages_csv'))
 	
-	def getPrivateMessages(self,callback=None,donecallback=None):
+	def getPMBoxes(self,update=True):
+		boxes = self.getPrivateMessages(get_boxes=True)
+		if not boxes: return None
+		ret = []
+		for b,c in boxes.items():
+			print b
+			box = {	'id':b.lower(),
+					'name':b,
+					'count':c,
+					'unread':0,
+					'type':b.upper()
+					}
+			ret.append(box)
+			
+		return ret
+					
+	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None,get_boxes=False):
 		if not callback: callback = self.fakeCallback
 		#if not self.checkLogin(callback=callback): return None, None
 		pms = None
@@ -823,13 +841,23 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			import csv
 			cdata = csv.DictReader(csvstring.splitlines()[1:],fieldnames=columns)
 			pms = []
-			folder = self.formats.get('pm_csv_folder')
+			folder = boxid and boxid.lower() or 'inbox' #self.formats.get('pm_csv_folder')
+			boxes = {}
 			for d in cdata:
-				if folder and folder == d.get('folder'):
+				if d.get('boxid'):
+					if d.get('boxid') in boxes:
+						boxes[d.get('boxid')] += 1
+					else:
+						boxes[d.get('boxid')] = 0
+					
+				if folder and folder == d.get('boxid').lower():
 					p = self.getForumPost(pdict=d)
-					p.isPM = True
 					p.setPostID(len(pms))
+					p.isPM = True
 					pms.append(p)
+			if get_boxes: return boxes
+		if get_boxes: return None
+			
 		callback(100,__language__(30052))
 		pms.reverse()
 		return self.finish(FBData(pms),donecallback)
@@ -1048,6 +1076,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 							self.forms.get('pm_action'),
 							{self.forms.get('pm_recipient'):post.to,self.forms.get('pm_title'):post.title,self.forms.get('pm_message'):post.message},
 							callback=callback)
+		
+	def canPrivateMessage(self):
+		return bool(self.isLoggedIn() and self.urls.get('pm_new_message'))
 		
 	def deletePrivateMessage(self,post,callback=None):
 		return self.deletePrivateMessageViaIndex(post, callback)

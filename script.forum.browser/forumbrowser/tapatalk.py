@@ -654,8 +654,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if donecallback: donecallback(None,None)
 			return (None,None)
 		for n in normal: self.createThreadDict(n)
+		normal = self.sortDictList(normal, 'post_time')
 		return normal, pd
-	
+			
 	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		try:

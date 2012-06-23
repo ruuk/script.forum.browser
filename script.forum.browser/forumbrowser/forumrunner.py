@@ -345,6 +345,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		normal = sub.get('threads',[])
 		if not callback(70,self.lang(30103)): return None,None
 		for n in normal:
+			print n
 			self.createThreadDict(n)
 			n['subscribed'] = True
 		return normal, pd
