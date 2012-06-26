@@ -12,6 +12,12 @@ def ERROR(message):
 
 class Error(Exception): pass
 
+class BrokenForumException(Exception): pass
+
+class ForumMovedException(Exception): pass
+
+class ForumNotFoundException(Exception): pass
+
 class FBData():
 	def __init__(self,data=None,pagedata=None,extra=None,error=None):
 		self.data = data
@@ -120,7 +126,9 @@ class HTMLPageInfo:
 		
 		
 	def description(self,default=''):
-		try: return re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html).group(1)
+		try:
+			desc = re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html).group(1)
+			if desc: return desc
 		except: pass
 		try: return re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html2).group(1)
 		except: pass
@@ -316,7 +324,6 @@ def dictToString(data_dict):
 				key = 'list___' + key
 			ret.append('%s=%s' % (key,binascii.hexlify(valToString(val))))
 	except:
-		print data_dict
 		raise
 	return ','.join(ret)
 
@@ -445,6 +452,7 @@ class ForumPost:
 		self.joinDate = ''
 		self.userInfo = {}
 		self.extras = {}
+		self.isSent = False
 		if pdict: self.setVals(pdict)
 			
 	def setVals(self,pdict): pass

@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1319,7 +1319,7 @@ class RepliesWindow(PageWindow):
 				if post.avatar: url = FB.makeURL(post.avatar)
 				post.avatarFinal = url
 				user = re.sub('<.*?>','',post.userName)
-				item = xbmcgui.ListItem(label=user)
+				item = xbmcgui.ListItem(label=post.isSent and 'To: ' + user or user)
 				if user == self.me: item.setInfo('video',{"Director":'me'})
 				self.setMessageProperty(post,item,True)
 				item.setProperty('post',post.postId)
@@ -2236,6 +2236,10 @@ def getForumPath(forumID):
 	if os.path.exists(path): return path
 	return None
 	
+def fidSortFunction(fid):
+	if fid[:3] in ['TT.','FR.','GB.']: return fid[3:]
+	return fid
+
 def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=None,hide_extra=False):
 	favs = getFavorites()
 	ft = os.listdir(FORUMS_STATIC_PATH)
@@ -2244,7 +2248,7 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 	for f in ft:
 		if not f in hidden: flist_tmp.append(f)
 	flist2_tmp = os.listdir(FORUMS_PATH)
-	rest = flist_tmp + flist2_tmp
+	rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
 	if favs:
 		for f in favs:
 			if f in rest: rest.pop(rest.index(f))
@@ -2257,7 +2261,10 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 	else:
 		whole = favs + rest
 	menu = ImageChoiceMenu(caption)
+	final = []
 	for f in whole:
+		if not f in final: final.append(f)
+	for f in final:
 		if not f.startswith('.'):
 			if not f:
 				menu.addSep()
@@ -2481,7 +2488,7 @@ def addTapatalkForum(current=False):
 		if name.startswith('www.'): name = name[4:]
 		if name.startswith('forum.'): name = name[6:]
 		if name.startswith('forums.'): name = name[7:]
-		saveForum(ftype,ftype + '.' + forum,name,desc,url,logo)
+		saveForum(ftype,ftype + '.' + name,name,desc,url,logo)
 		dialog.update(60,'Add To Online Database')
 		addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
@@ -2531,7 +2538,7 @@ def addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=None):
 	if msg == 'OK':
 		showMessage('Added','Forum added successfully',success=True)
 	else:
-		showMessage('Not Added','Forum not added:',str(msg).title(),success=False)
+		showMessage('Not Added','Forum not added:',str(msg),success=False)
 		LOG('Forum Not Added: ' + str(msg))
 	
 def chooseLogo(forum,image_urls):
@@ -3070,6 +3077,19 @@ def checkPasswordEncryption():
 		LOG('Encrypting password for: ' + f)
 		passmanager.savePassword(key, user, password)
 	
+def checkForInterface(url):
+	url = url.split('/forumrunner')[0].split('/mobiquo')[0]
+	LOG('Checking for forum type at URL: ' + url)
+	try:
+		html = urllib2.urlopen(url).read()
+		if 'tapatalkdetect.js' in html:
+			return 'TT'
+		elif '/detect.js' in html:
+			return 'FR'
+		return None
+	except:
+		return None
+		
 def getForumBrowser(forum=None,url=None,donecallback=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
 	#global FB
@@ -3078,33 +3098,49 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 		if not url: forum = 'TT.xbmc.org'
 		
 	if not getForumPath(forum): forum = 'TT.xbmc.org'
-	
-	if url:
-		try:
+	err = ''
+	try:
+		if url:
+			err = ERROR('getForumBrowser(): General')
 			from forumbrowser import genericparserbrowser
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False),url=url)
-		except:
-			err = ERROR('getForumBrowser(): General')
-			showMessage(__language__(30050),__language__(30171),err,error=True)
-			return False
-	elif forum.startswith('TT.'):
-		try:
-			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-		except:
+		elif forum.startswith('TT.'):
 			err = ERROR('getForumBrowser(): Tapatalk')
-			showMessage(__language__(30050),__language__(30171),err,error=True)
-			return False
-	elif forum.startswith('FR.'):
-		try:
+			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		elif forum.startswith('FR.'):
+			err = ERROR('getForumBrowser(): Forumrunner')
 			from forumbrowser import forumrunner
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-		except:
-			err = ERROR('getForumBrowser(): Forumrunner')
-			showMessage(__language__(30050),__language__(30171),err,error=True)
-			return False
-	else:
-		from forumbrowser import parserbrowser
-		FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		else:
+			err = ERROR('getForumBrowser(): Boxee')
+			from forumbrowser import parserbrowser
+			FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+	except forumbrowser.ForumMovedException,e:
+		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL.\n',e.message,error=True)
+		return False
+	except forumbrowser.ForumNotFoundException,e:
+		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum interface (%s) is no longer installed, is missing or has moved.\n\nVerify the forum\'s URL in a browser and then try re-adding it.' % e.message,error=True)
+		return False
+	except forumbrowser.BrokenForumException,e:
+		url = e.message
+		ftype = checkForInterface(url)
+		currentType = forum[:2]
+		if ftype and ftype != currentType:
+			LOG('Forum type changed to: ' + ftype)
+			if ftype == 'TT':
+				fromType = 'Forumrunner'
+				toType = 'Tapatalk'
+			else:
+				toType = 'Forumrunner'
+				fromType = 'Tapatalk'
+			showMessage(__language__(30050),'Error accessing forum.\n\nForum interface appears to have changed from %s to %s.\n\nTry re-adding it.' % (fromType,toType),error=True)
+		else:
+			showMessage(__language__(30050),'Error accessing forum.\n\nPlease contact the forum administrator if this problem continues.',error=True)
+		return False
+	except:
+		showMessage(__language__(30050),__language__(30171),err,error=True)
+		return False
+	
 	if donecallback: donecallback(FB)
 	return True
 

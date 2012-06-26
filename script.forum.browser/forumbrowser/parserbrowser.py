@@ -99,7 +99,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 
-	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False):
+	def getThreads(self,forumid,page='',callback=None,donecallback=None,url=None,subs=False,page_data=None):
 		if not self.threadParser: return scraperbrowser.ScraperForumBrowser.getThreads(self, forumid, page, callback, donecallback)
 		if not callback: callback = self.fakeCallback
 		if url:
@@ -121,7 +121,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
 		
-	def getSubscriptions(self,page='',callback=None,donecallback=None):
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		url = self.getPageUrl(page,'subscriptions')
 		url2 = self.getPageUrl(page,'forum_subscriptions')
 		data = self.getThreads(None, page,url=url,subs=True)
@@ -130,7 +130,7 @@ class ParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		return self.finish(data, donecallback)
 		
 		
-	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None):
+	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not self.postParser: return scraperbrowser.ScraperForumBrowser.getReplies(self, threadid, forumid, page, lastid, pid, callback, donecallback)
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)

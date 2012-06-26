@@ -4,6 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Handle when forum changes from FR to TT or the reverse and update DB
   
  Long Term:
   Option to save posts when exiting and not posting
@@ -27,7 +28,20 @@ TODO:
   signature maybe with future tapatalk plugin update
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.5
+Current Version : 1.0.6
+
+*** 1.0.6 ***
+
+Fixed some more bugs causing errors with boxee
+Tapatalk: Added handling for errors messages returned from the plugin (ie Forum is in maintenance mode)
+Forumrunner: Fixed encoding issue
+Added 'To:' in front of username when private messages are sent messages
+Tapatalk: Fixed bug with online status displaying incorrectly in other PM boxes/folders (sent?)
+Forumrunner: Added 'Contact admin if continues' message when failing to connect to plugin
+Tapatalk: Notify users on "Moved Permanently" errors that the forum may have moved
+Tatatalk & Forumrunner: Notify users on "404 Not Found" errors that the interface is removed, missing or moved etc
+Tatatalk & Forumrunner: Now in some instances, when forum interface is broken, FB can detect a change of interface (ie from Forumrunner to Tapatalk) and notify the user
+Forum lists are now sorted alphabetically (ie choose forum, remove forum, set logins)
 
 *** 1.0.5 ***
 

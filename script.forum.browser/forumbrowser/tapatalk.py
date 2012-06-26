@@ -126,6 +126,7 @@ class CookieTransport(xmlrpclib.Transport):
 			if response.status == 200:
 				self.verbose = verbose
 				return self.parse_response(response)
+			
 		except xmlrpclib.Fault:
 			raise
 		except Exception:
@@ -137,8 +138,12 @@ class CookieTransport(xmlrpclib.Transport):
 		#discard any response data and raise exception
 		if (response.getheader("content-length", 0)):
 			response.read()
-			
-		raise httplib.HTTPException(response.reason)
+		if response.status == 301:
+			raise forumbrowser.ForumMovedException(response.getheader('location'))
+		elif response.status == 404:
+			raise forumbrowser.ForumNotFoundException('Tapatalk')
+		else:
+			raise httplib.HTTPException(response.reason)
 	
 	def send_content(self, connection, request_body):
 		connection.putheader("Content-Type", "text/xml")
@@ -205,7 +210,11 @@ class ForumPost(forumbrowser.ForumPost):
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
 				date = time.strftime('%I:%M %p - %A %B %d, %Y',iso8601.parse_date(date).timetuple())
 			self.date = date
-			self.userName = str(pdict.get('msg_from') or str(pdict.get('msg_to',[{}])[0].get('username')) or 'UERROR')
+			if 'msg_from' in pdict:
+				self.userName = str(pdict.get('msg_from') or 'UERROR')
+			else:
+				self.userName = str(str(pdict.get('msg_to',[{}])[0].get('username')) or 'UERROR')
+				self.isSent = True
 			self.avatar = pdict.get('icon_url','')
 			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('msg_subject',''))
@@ -424,6 +433,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
 			if DEBUG: LOG(self.forumConfig)
+		except (forumbrowser.ForumMovedException, forumbrowser.ForumNotFoundException):
+			raise
 		except:
 			ERROR('Failed to get forum config')
 		
@@ -546,7 +557,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				em = ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
-			
+			if 'result_text' in flist:
+				em = unicode(str(flist.get('result_text')),'utf-8')
+				callback(-1,'%s' % em)
+				return self.finish(FBData(error=em),donecallback)
 			if not callback(40,self.lang(30103)): break
 			forums = []
 			for general in flist:
@@ -763,10 +777,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			for p in messages.get('list',[]):
 				p['boxid'] = boxid
 				fp = self.getForumPost(p)
+				fp.online = False #Because at least on sent items, we can't trust this value returned with the list
 				if not fp.userName in infos:
 					try:
-						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
-						fp.online = False #Because at least on sent items, we can't trust this value returned with the list
+						info = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+						if info.get('is_online'): info['is_online'] = bool(info.get('current_activity')) 
+						infos[fp.userName] = info
 					except:
 						ERROR('Failed to get user info')
 						break

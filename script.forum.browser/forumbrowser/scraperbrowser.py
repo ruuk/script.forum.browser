@@ -800,7 +800,6 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not boxes: return None
 		ret = []
 		for b,c in boxes.items():
-			print b
 			box = {	'id':b.lower(),
 					'name':b,
 					'count':c,
@@ -834,10 +833,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				pms.append(p)
 				
 		elif self.urls.get('private_messages_csv'):
-			csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
+			if self.forms.get('private_messages_csv_action'):
+				csvstring = self.getPMCSVFromForm(self.getURL('private_messages_csv'))
+			else:
+				csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
 			if not csvstring or not callback(80,__language__(30103)):
 				return self.finish(FBData(error=csvstring and 'CANCEL' or 'NO MESSAGES'),donecallback)
-			columns = self.formats.get('pm_csv_columns').split(',')
+			columns = self.formats.get('pm_csv_columns','').split(',')
 			import csv
 			cdata = csv.DictReader(csvstring.splitlines()[1:],fieldnames=columns)
 			pms = []
@@ -850,7 +852,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					else:
 						boxes[d.get('boxid')] = 0
 					
-				if folder and folder == d.get('boxid').lower():
+				if folder and folder == d.get('boxid','').lower():
 					p = self.getForumPost(pdict=d)
 					p.setPostID(len(pms))
 					p.isPM = True
@@ -861,6 +863,20 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,__language__(30052))
 		pms.reverse()
 		return self.finish(FBData(pms),donecallback)
+		
+	def getPMCSVFromForm(self,url):
+		res = self.browser.open(url)
+		html = res.read()
+		self.selectForm(self.forms.get('private_messages_csv_action'))
+		res = self.browser.submit()
+		html = res.read()
+		if self.forms.get('private_messages_csv_submit2'):
+			self.selectForm(self.forms.get('private_messages_csv_action'))
+			res = self.browser.submit()
+			html = res.read()
+		#open('/home/ruuk/test.txt','w').write(html)
+		return html
+		
 			
 	def hasSubscriptions(self):
 		return bool(self.urls.get('subscriptions'))

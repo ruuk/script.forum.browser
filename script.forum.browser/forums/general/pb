@@ -46,3 +46,8 @@ form:edit_post_submit_wait=1
 #form:delete_action=mode=edit
 #form:delete_control1=checkbox:name.delete=True
 #This wasn't working either. Same thing
+
+url:private_messages_csv=ucp.php?i=pm&folder=inbox
+form:private_messages_csv_action=action=view_folder
+form:private_messages_csv_submit1=submit_export
+form:private_messages_csv_submit2=submit_export

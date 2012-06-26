@@ -72,6 +72,7 @@ class ForumrunnerClient():
 		try:
 			obj = self.opener.open(url,encArgs)
 		except urllib2.HTTPError,e:
+			if e.code == 404: raise forumbrowser.ForumNotFoundException('Forumrunner')
 			data = e.read()
 			return FRCFail({'message':e.msg + '\n\n' + data})
 			
@@ -188,7 +189,18 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 #		
 #		if not self.client:
 		self.client = ForumrunnerClient(self._url)
-		result = self.client.version()
+		try:
+			result = self.client.version()
+		except forumbrowser.ForumNotFoundException:
+			raise
+		except:
+			ERROR('Error getting version info')
+			raise forumbrowser.BrokenForumException(self._url)
+		if not result:
+			LOG(result.message)
+			raise Exception(result.message)
+			return False
+		
 		self.SSL = False
 			
 		self.platform = result.get('platform')
@@ -196,6 +208,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		
 		LOG('Forum Type: ' + self.platform)
 		LOG('Plugin Version: ' + result.get('version'))
+		return True
 		
 	def setFilters(self):
 		self.filters['quote'] = self.getQuoteFormat()
@@ -221,8 +234,8 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			
 	def createForumDict(self,data,sub=False):
 		data['forumid'] = data.get('id')
-		data['title'] = str(data.get('name'))
-		data['description'] = str(data.get('desc'))
+		data['title'] = unicode(data.get('name'))
+		data['description'] = unicode(data.get('desc'))
 		data['subforum'] = sub
 		return data
 	
