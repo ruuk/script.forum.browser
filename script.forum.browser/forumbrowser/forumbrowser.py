@@ -10,6 +10,19 @@ def ERROR(message):
 	traceback.print_exc()
 	return str(sys.exc_info()[1])
 
+def durationToShortText(unixtime):
+	days = int(unixtime/86400)
+	if days: return '%sd' % days
+	left = unixtime % 86400
+	hours = int(left/3600)
+	if hours: return '%sh' % hours
+	left = left % 3600
+	mins = int(left/60)
+	if mins: return '%sm' % mins
+	sec = int(left % 60)
+	if sec: return '%ss' % sec
+	return ''
+
 class Error(Exception): pass
 
 class BrokenForumException(Exception): pass
@@ -446,6 +459,7 @@ class ForumPost:
 		self.boxid = ''
 		self.status = ''
 		self.activity = ''
+		self.activityUnix = None
 		self.online = False
 		self.postCount = 0
 		self.postNumber = 0
@@ -462,6 +476,8 @@ class ForumPost:
 		
 	def setUserInfo(self,info): pass
 		
+	def getActivity(self): return self.activity
+	
 	def setPostID(self,pid):
 		self.postId = pid
 		self.pid = pid
@@ -511,6 +527,22 @@ class ForumPost:
 	def makeAvatarURL(self): return self.avatar
 	
 	def cleanUserName(self): return self.userName
+	
+######################################################################################
+# ForumUser
+######################################################################################
+class ForumUser:
+	def __init__(self,ID,name):
+		self.name = name
+		self.ID = ID
+		self.postCount = ''
+		self.joinDate = ''
+		self.activity = ''
+		self.online = False
+		self.lastActivityDate = ''
+		self.avatar = ''
+		self.status = ''
+		self.extras = {}
 			
 ######################################################################################
 # Forum Browser API
@@ -779,6 +811,10 @@ class ForumBrowser:
 	def getAnnouncement(self,aid): return None
 	
 	def getPMBoxes(self,update=True): return None
+	
+	def canGetUserInfo(self): return False
+	
+	def getUserInfo(self,uid=None,uname=None): return None
 	
 	
 		

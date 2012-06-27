@@ -221,7 +221,17 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = str(pdict.get('short_content',''))
 			self.boxid = pdict.get('boxid','')
 			self.signature = ''
-			
+		
+	def getActivity(self):
+		if not self.activity: return ''
+		if not self.activityUnix: return self.activity
+		now = time.time()
+		if time.daylight: now += 3600
+		print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
+		print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
+		d = now - self.activityUnix
+		return self.activity + ' - ' + forumbrowser.durationToShortText(d) + ' ago'
+	
 	def setUserInfo(self,info):
 		if not info: return
 		self.userInfo = info
@@ -233,7 +243,14 @@ class ForumPost(forumbrowser.ForumPost):
 		if date:
 			date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
 			date = time.strftime('%b %d, %Y',iso8601.parse_date(date).timetuple())
-		self.joinDate = date
+		date = str(info.get('last_activity_time',''))
+		if date:
+			date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
+			date = time.mktime(iso8601.parse_date(date).timetuple())
+		self.activityUnix = date
+		for e in info.get('custom_fields_list',[]):
+			val = str(e['value'])
+			if val: self.extras[str(e['name'])] = val
 		
 	def setPostID(self,pid):
 		self.postId = pid
@@ -366,7 +383,34 @@ class PageData:
 		if self.pageDisplay: return self.pageDisplay
 		if self.page is not None and self.totalPages is not None:
 			return 'Page %s of %s' % (self.page,self.totalPages)
-	
+
+######################################################################################
+# ForumUser
+######################################################################################
+class ForumUser(forumbrowser.ForumUser):
+	def __init__(self,ID,name,info):
+		forumbrowser.ForumUser.__init__(self,ID,name)
+		self.avatar = info.get('icon_url','')
+		self.status = str(info.get('display_text',''))
+		self.activity = str(info.get('current_activity',''))
+		self.online = info.get('is_online',False) or self.online
+		self.postCount = info.get('post_count',0)
+		date = str(info.get('reg_time',''))
+		if date:
+			date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
+			date = time.strftime('%b %d, %Y',iso8601.parse_date(date).timetuple())
+		self.joinDate = date
+		date = str(info.get('last_activity_time',''))
+		if date:
+			date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
+			date = time.strftime('%b %d, %Y %H:%M %p',iso8601.parse_date(date).timetuple())
+		self.lastActivityDate = date
+		extras = info.get('custom_fields_list')
+		if extras:
+			for e in extras:
+				val = str(e['value'])
+				if val: self.extras[str(e['name'])] = val
+		
 ######################################################################################
 # Forum Browser API for TapaTalk
 ######################################################################################
@@ -547,6 +591,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
+		if not self.guestOK(): self.checkLogin(callback, 5)
 		logo = None
 		while True:
 			if not callback(20,self.lang(30102)): break
@@ -624,7 +669,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def createThreadDict(self,data,sticky=False):
 		data['threadid'] = data.get('topic_id','')
-		data['starter'] = str(data.get('topic_author_name',self.user))
+		data['starter'] = str(data.get('topic_author_name',data.get('post_author_name',self.user)))
 		data['title'] = str(data.get('topic_title',''))
 		data['short_content'] = str(data.get('short_content',''))
 		data['subscribed'] = data.get('is_subscribed',False)
@@ -969,17 +1014,31 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Failed to create thread: ' + str(text))
 			return text
 	
-	def canGetOnlineUsers(self): return True
+	def canGetOnlineUsers(self): return self.forumConfig.get('get_online_users',True)
 	
 	def getOnlineUsers(self):
 		result = self.server.get_online_users()
 		if 'list' in result:
 			ret = []
+			dups = []
 			for u in result.get('list',[]):
-				ret.append({'user':str(u.get('user_name','')),'userid':u.get('user_id',''),'avatar':u.get('icon_url',''),'status':str(u.get('display_text',''))})
+				name = str(u.get('user_name',''))
+				if not name in dups: #because at least in MyBB v2 the list returns name duplicates with user ids of offline users
+					ret.append({'user':name,'userid':u.get('user_id',''),'avatar':u.get('icon_url',''),'status':str(u.get('display_text',''))})
+					dups.append(name)
 			return ret
 		else:
-			text = result.get('result_text')
-			LOG('Failed to get online users: ' + str(text))
+			text = str(result.get('result_text'))
+			LOG('Failed to get online users: ' + text)
 			return text
-			
+	
+	def canGetUserInfo(self): return True
+	
+	def getUserInfo(self,uid=None,uname=None):
+		result = self.server.get_user_info(xmlrpclib.Binary(uname))
+		if not result.get('result_text'):
+			return ForumUser(uid,uname,result)
+		else:
+			text = result.get('result_text')
+			LOG('Failed to user info: ' + str(text))
+			return None

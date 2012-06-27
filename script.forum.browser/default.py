@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1112,7 +1112,7 @@ class MessageWindow(BaseWindow):
 			self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 
-def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False,no_quote=False):
+def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False,no_quote=False,to=''):
 	if editPM:
 		pm = editPM
 	else:
@@ -1125,7 +1125,7 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False,no
 			finally:
 				s.close()
 		if tid == 'private_messages':
-			default = ''
+			default = to
 			if post: default = post.userName
 			to = doKeyboard('Enter Recipient(s)',default=default)
 			if not to: return
@@ -1161,10 +1161,10 @@ def deletePost(post,is_pm=False):
 	return result
 
 def showUserExtras(extras):
-	data = ''
+	out = ''
 	for k,v in extras.items():
-		data += k.title() + ': ' + v + '\n'
-	showMessage('User Info',data)
+		out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + v + '[/COLOR]\n'
+	showMessage('User Info',out)
 
 ######################################################################################
 #
@@ -1328,7 +1328,7 @@ class RepliesWindow(PageWindow):
 				item.setProperty('date',post.date)
 				item.setProperty('online',post.online and 'online' or '')
 				item.setProperty('postcount',post.postCount and unicode(post.postCount) or '')
-				item.setProperty('activity',post.activity)
+				item.setProperty('activity',post.getActivity())
 				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 				item.setProperty('joindate',unicode(post.joinDate))
 				if post.extras: item.setProperty('extras','extras')
@@ -1918,6 +1918,17 @@ class ForumsWindow(BaseWindow):
 	def fillForumList(self,first=False):
 		if not FB: return
 		self.setTheme()
+		if not FB.guestOK() and not self.hasLogin():
+			yes = xbmcgui.Dialog().yesno('Login Required','This forum does not allow guest access.','Login required.','Set login info now?')
+			if yes:
+				setLogins()
+				if not self.hasLogin():
+					self.setFocusId(202)
+					return
+				self.resetForum()
+			else:
+				self.setFocusId(202)
+				return
 		self.setFocusId(105)
 		if first and __addon__.getSetting('auto_thread_subscriptions_window') == 'true':
 			if self.hasLogin() and FB.hasSubscriptions():
@@ -2032,14 +2043,49 @@ class ForumsWindow(BaseWindow):
 		self.setPMCounts(FB.getPMCounts())
 	
 	def showOnlineUsers(self):
-		users = FB.getOnlineUsers()
-		if hasattr(users, 'encode'):
-			showMessage('Failed','Failed to get online users','\n',users,success=False)
-		else:
-			d = OptionsChoiceMenu('Online Users')
-			for u in users:
-				d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or 'forum-browser-avatar-none.png',u.get('status'))
-			d.getResult()
+		s = showActivitySplash('Getting List')
+		try:
+			users = FB.getOnlineUsers()
+		finally:
+			s.close()
+		if isinstance(users,str):
+			showMessage('Not Available',users,success=False)
+			return
+		users.sort(key=lambda u: u['user'].lower())
+		d = OptionsChoiceMenu('Online Users')
+		d.setContextCallback(self.showOnlineContext)
+		for u in users:
+			d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or 'forum-browser-avatar-none.png',u.get('status'))
+		d.getResult(close_on_context=False)
+		
+	def showOnlineContext(self,menu,item):
+		d = ChoiceMenu('Options')
+		if FB.canPrivateMessage(): d.addItem('pm',__language__(30253) % item.get('disp'))
+		if FB.canGetUserInfo(): d.addItem('info','View User Info')
+		result = d.getResult()
+		if not result: return
+		if result == 'pm':
+			menu.close()
+			openPostDialog(tid='private_messages',to=item.get('disp'))
+		elif result == 'info':
+			self.showUserInfo(item.get('id'),item.get('disp'))
+
+	def showUserInfo(self,uid,uname):
+		s = showActivitySplash('Getting Info')
+		try:
+			user = FB.getUserInfo(uid,uname)
+			if not user: return
+			out = '[B]Name:[/B] [COLOR FF550000]' + user.name + '[/COLOR]\n'
+			out += '[B]Status:[/B] [COLOR FF550000]' + user.status + '[/COLOR]\n'
+			out += '[B]Post Count:[/B] [COLOR FF550000]' + str(user.postCount) + '[/COLOR]\n'
+			out += '[B]Join Date:[/B] [COLOR FF550000]' + user.joinDate + '[/COLOR]\n'
+			if user.activity: out += '[B]Current Activity:[/B] [COLOR FF550000]' + user.activity + '[/COLOR]\n'
+			if user.lastActivityDate: out += '[B]Last Activity Date:[/B] [COLOR FF550000]' + user.lastActivityDate + '[/COLOR]\n'
+			for k,v in user.extras.items():
+				out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + v + '[/COLOR]\n'
+			showMessage('Info',out)
+		finally:
+			s.close()
 		
 	def getGeneralForumURL(self):
 		forums = getSetting('exp_general_forums',[])
@@ -2647,6 +2693,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.items = kwargs.get('items')
 		self.caption = kwargs.get('caption')
 		self.select = kwargs.get('select')
+		self.menu = kwargs.get('menu')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
@@ -2672,10 +2719,19 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 			self.close()
 		elif action == 7:
 			self.finish()
+		elif action == ACTION_CONTEXT_MENU:
+			self.doMenu()
 	
 	def onClick( self, controlID ):
 		if controlID == 120:
 			self.finish()
+		
+	def doMenu(self):
+		if self.menu.contextCallback:
+			pos = self.getControl(120).getSelectedPosition()
+			if pos < 0: return
+			if self.menu.closeContext: self.close()
+			self.menu.contextCallback(self,self.items[pos])
 			
 	def finish(self):
 		self.result = self.getControl(120).getSelectedPosition()
@@ -2727,7 +2783,12 @@ class ChoiceMenu():
 		self.caption = caption
 		self.items = []
 		self.splash = None
+		self.contextCallback = None
+		self.closeContext = True
 		if with_splash: self.showSplash()
+		
+	def setContextCallback(self,callback):
+		self.contextCallback = callback
 		
 	def isEmpty(self):
 		return not self.items
@@ -2754,15 +2815,17 @@ class ChoiceMenu():
 		for i in self.items: options.append(i.get('disp'))
 		return xbmcgui.Dialog().select(self.caption,options)
 	
-	def getResult(self):
+	def getResult(self,close_on_context=True):
+		self.closeContext = close_on_context
 		self.hideSplash()
 		idx = self.getChoiceIndex()
 		if idx < 0: return None
 		return self.items[idx]['id']
 
 class OptionsChoiceMenu(ChoiceMenu):
-	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None):
-		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',items=self.items,caption=self.caption,select=select)
+	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None,close_on_context=True):
+		self.closeContext = close_on_context
+		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
 		result = w.result
 		del w
 		if result == None: return None
@@ -2770,7 +2833,7 @@ class OptionsChoiceMenu(ChoiceMenu):
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None):
-		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',items=self.items,caption=self.caption,select=select)
+		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
 		result = w.result
 		del w
 		if result == None: return None
@@ -3101,25 +3164,25 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 	err = ''
 	try:
 		if url:
-			err = ERROR('getForumBrowser(): General')
+			err = 'getForumBrowser(): General'
 			from forumbrowser import genericparserbrowser
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False),url=url)
 		elif forum.startswith('TT.'):
-			err = ERROR('getForumBrowser(): Tapatalk')
+			err = 'getForumBrowser(): Tapatalk'
 			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 		elif forum.startswith('FR.'):
-			err = ERROR('getForumBrowser(): Forumrunner')
+			err = 'getForumBrowser(): Forumrunner'
 			from forumbrowser import forumrunner
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 		else:
-			err = ERROR('getForumBrowser(): Boxee')
+			err = 'getForumBrowser(): Boxee'
 			from forumbrowser import parserbrowser
 			FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 	except forumbrowser.ForumMovedException,e:
 		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL.\n',e.message,error=True)
 		return False
 	except forumbrowser.ForumNotFoundException,e:
-		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum interface (%s) is no longer installed, is missing or has moved.\n\nVerify the forum\'s URL in a browser and then try re-adding it.' % e.message,error=True)
+		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum interface (%s) is no longer installed, is missing or has moved.\n\nVerify the forum\'s URL in a browser and then try re-adding it.\n\nCheck with the forum administrator if the problem persists.' % e.message,error=True)
 		return False
 	except forumbrowser.BrokenForumException,e:
 		url = e.message
@@ -3138,6 +3201,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 			showMessage(__language__(30050),'Error accessing forum.\n\nPlease contact the forum administrator if this problem continues.',error=True)
 		return False
 	except:
+		err = ERROR(err)
 		showMessage(__language__(30050),__language__(30171),err,error=True)
 		return False
 	

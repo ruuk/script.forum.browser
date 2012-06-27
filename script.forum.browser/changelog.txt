@@ -1,17 +1,16 @@
 Forum Browser Changelog
 
-Special thanks to John Hanselman for all his testing which helped make Forum Browser better than would have been without it.
+Special thanks to John Hanselman for all his testing which helped make Forum Browser better than it would have been without it.
 
 TODO:
  Short Term:
-  Handle when forum changes from FR to TT or the reverse and update DB
+  Show more extra info in tapatalk (ie likes,followers)
   
  Long Term:
   Option to save posts when exiting and not posting
   Use new option menus for context?
   Better 'Choose Forum' menu
   Improve the database and database management
-  Skip forward on remote causes XBMC dialog
   Adjustable text size
   Logo url from field in forum config data?
   Add missing smilies for Phpbb (and others)
@@ -23,12 +22,26 @@ TODO:
   Latest Threads
   Today's New Posts?
   Make a million dollars
+  
+ Investigated And Possibly Unfixable:
+  Skip forward on remote causes XBMC dialog
  
  Awaiting Future Developments:
   signature maybe with future tapatalk plugin update
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.6
+Current Version : 1.0.7
+
+*** 1.0.7 ***
+
+Tapatalk: "Get Online Users" availability is now checked in the initial forum config info
+Tapatalk: Now checks if guest is ok before displaying forums, and if not, and no login details are set, asks if you want to set them now
+Tapatalk: Fix for 'Simple Machines Forum' forums giving 'bad boolean error' value and not showing thread authors
+Added activity splash when getting online users list
+Added context menu to 'Online Users' list with option to PM selected user and an option to view user info
+Online users now sorted alphabetically
+Show how long ago users activity was in posts list
+Show extra info on tapatalk forums
 
 *** 1.0.6 ***
 

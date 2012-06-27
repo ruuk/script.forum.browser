@@ -1,6 +1,6 @@
 <window>
 	<defaultcontrol always="true">120</defaultcontrol>
-	<zorder>2</zorder>
+	<zorder>1</zorder>
 	<type>dialog</type>
 	<coordinates>
 		<system>1</system>

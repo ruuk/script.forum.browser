@@ -35,7 +35,7 @@ The forum description (if available) is shown below the forums list.
 @item:context=Context Menu
 [B]Subscribe To/Unsubscribe From Forum[/B]: Subscribe to/unsubscribe from the selected forum.
 
-[B]View Online Users[/B]: View a list of the online users with their avatars and some status info in the info box.
+[B]View Online Users[/B]: View a list of the online users with their avatars and some status info in the info box. The context menu has options to PM the selected user and view info on the selected user.
 
 [B]Refresh[/B]: Refresh the forums list. This is especially useful if there was an error displaying the list (timeout, etc).
 @item:credits=Credits

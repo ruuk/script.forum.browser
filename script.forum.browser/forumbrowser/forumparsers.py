@@ -1407,6 +1407,9 @@ class GeneralPostParser(AdvancedParser):
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
 							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
 						}
+		#sm    SMF: Simple Machines Forum
+		#ub    UBB
+		#ez    Ezboard/Yuku:
 		
 		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)'),
 								'u9': re.compile('(?:^|>)#(?P<pid>\d+)')
