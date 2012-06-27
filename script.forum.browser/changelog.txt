@@ -41,7 +41,7 @@ Added activity splash when getting online users list
 Added context menu to 'Online Users' list with option to PM selected user and an option to view user info
 Online users now sorted alphabetically
 Show how long ago users activity was in posts list
-Show extra info on tapatalk forums
+Show extra info in posts list context menu for tapatalk forums
 
 *** 1.0.6 ***
 
