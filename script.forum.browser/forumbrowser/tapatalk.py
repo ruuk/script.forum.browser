@@ -227,8 +227,8 @@ class ForumPost(forumbrowser.ForumPost):
 		if not self.activityUnix: return self.activity
 		now = time.time()
 		if time.daylight: now += 3600
-		print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
-		print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
+		#print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
+		#print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
 		d = now - self.activityUnix
 		return self.activity + ' - ' + forumbrowser.durationToShortText(d) + ' ago'
 	
@@ -249,8 +249,12 @@ class ForumPost(forumbrowser.ForumPost):
 			date = time.mktime(iso8601.parse_date(date).timetuple())
 		self.activityUnix = date
 		for e in info.get('custom_fields_list',[]):
+			name = str(e['name'])
 			val = str(e['value'])
-			if val: self.extras[str(e['name'])] = val
+			if name.lower() == 'signature':
+				self.signature = val
+			else:
+				if val: self.extras[name] = val
 		
 	def setPostID(self,pid):
 		self.postId = pid
@@ -278,7 +282,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = str(m.get('post_content',self.message))
 			self.isRaw = True
 		sig = ''
-		if self.signature: sig = '\n__________\n' + self.signature
+		if self.signature and not self.hideSignature: sig = '\n__________\n' + self.signature
 		return self.message + sig
 	
 	def messageAsText(self):
@@ -615,7 +619,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					for sub in forum.get('child',[]):
 						if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
 			if not callback(80,self.lang(30231)): break
-			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
+			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
 				pm_counts = self.getPMCounts(80)
 			except:

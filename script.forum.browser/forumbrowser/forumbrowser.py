@@ -21,7 +21,7 @@ def durationToShortText(unixtime):
 	if mins: return '%sm' % mins
 	sec = int(left % 60)
 	if sec: return '%ss' % sec
-	return ''
+	return '0s'
 
 class Error(Exception): pass
 
@@ -175,17 +175,18 @@ class HTMLPageInfo:
 		return final
 
 	def getStyleImages(self,html,base):
-		styles = ''
+		urls = []
 		for url in re.findall('<link[^>]*?href="(?P<url>[^"]*?)"[^>]*?"text/css"[^>]*?>',html) + re.findall('<link[^>]*?"text/css"[^>]*?href="(?P<url>[^"]*?)"[^>]*?>',html):
 			#print url
 			url = self.fullURL(url, base)
+			sbase = url.rsplit('/',1)[0] + '/'
 			try:
-				styles += self.getHTML(url)
+				style = self.getHTML(url)
+				for url in re.findall("background(?:-image)?:[^\(]*?url\(['\"]?(?P<url>[^\"']+?)['\"]?\)",style):
+					urls.append(self.fullURL(url, sbase))
 			except:
 				LOG('Failed to get stylesheet')
-		urls = []
-		for url in re.findall("background(?:-image)?:[^\(]+?url\(['\"](?P<url>[^\"']+?)['\"]\)",styles):
-			urls.append(self.fullURL(url, base))
+		
 		#print urls
 		return urls
 	
@@ -435,7 +436,9 @@ class PageData:
 # ForumPost
 ################################################################################
 class ForumPost:
+	hideSignature = False
 	def __init__(self,fb,pdict=None):
+		self.browser = None
 		self.FB = fb
 		self.MC = fb.MC
 		self.to = ''
@@ -491,6 +494,7 @@ class ForumPost:
 		return self.getMessage(True)
 	
 	def getMessage(self,skip=False,raw=False):
+		if self.hideSignature: return self.message
 		return self.message + self.signature
 	
 	def messageAsText(self):
@@ -649,6 +653,10 @@ class ForumBrowser:
 		if callback: callback(data)
 		return data
 	
+	def domain(self):
+		domain = self._url.split('://',1)[-1]
+		return domain.split('/')[0]
+	
 	def getForumPost(self,pdict=None):
 		return self.ForumPost(self,pdict=pdict)
 		
@@ -669,9 +677,15 @@ class ForumBrowser:
 	
 	def resetBrowser(self): pass
 		
-	def loadForumData(self,fname):
+	def clearForumData(self):
 		self.urls = {}
-		self.filters = {'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
+		self.filters = {}
+		self.theme = {}
+		self.forms = {}
+		self.formats = {}
+		
+	def loadForumData(self,fname):
+		self.filters.update({'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
 						'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
@@ -680,12 +694,10 @@ class ForumBrowser:
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
-						'color_start':'\[color=?#?(?P<color>\w+)\]'}
+						'color_start':'\[color=?#?(?P<color>\w+)\]'})
+		return self.parseForumData(fname)
 		
-		self.theme = {}
-		self.forms = {}
-		self.formats = {}
-		
+	def parseForumData(self,fname):
 		f = open(fname,'r')
 		data = f.read()
 		f.close()

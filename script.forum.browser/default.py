@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -985,8 +985,9 @@ class MessageWindow(BaseWindow):
 			self.close()
 		else:
 			try:
-				webviewer.getWebResult(link.url,dialog=True)
+				webviewer.getWebResult(link.url,dialog=True,browser=FB.browser)
 			except:
+				raise
 				#We're in Boxee
 				wvPath = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'webviewer'))
 				webviewer.getWebResult(link.url,dialog=True,runFromSubDir=wvPath)
@@ -1154,8 +1155,9 @@ def deletePost(post,is_pm=False):
 			showMessage('Success',pm.isPM and 'Message deleted.' or 'Post deleted.',success=True)
 	except:
 		err = ERROR('Delete post error.')
-		LOG('Error deleting post/pm: ' % err)
+		LOG('Error deleting post/pm: ' + err)
 		showMessage('ERROR','Error while deleting post: [CR]',err,error=True)
+		return None
 	finally:
 		splash.close()
 	return result
@@ -1164,7 +1166,7 @@ def showUserExtras(extras):
 	out = ''
 	for k,v in extras.items():
 		out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + v + '[/COLOR]\n'
-	showMessage('User Info',out)
+	showMessage('User Info',out,scroll=True)
 
 ######################################################################################
 #
@@ -2083,56 +2085,56 @@ class ForumsWindow(BaseWindow):
 			if user.lastActivityDate: out += '[B]Last Activity Date:[/B] [COLOR FF550000]' + user.lastActivityDate + '[/COLOR]\n'
 			for k,v in user.extras.items():
 				out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + v + '[/COLOR]\n'
-			showMessage('Info',out)
+			showMessage('Info',out,scroll=True)
 		finally:
 			s.close()
 		
-	def getGeneralForumURL(self):
-		forums = getSetting('exp_general_forums',[])
-		url = None
-		if forums:
-			d = ChoiceMenu('Choose forum')
-			for f in forums: d.addItem(f,f)
-			d.addItem('new','[COLOR FF00FF00]+Add New Forum[/COLOR]')
-			d.addItem('remove','[COLOR FFFF0000]-Remove A Forum[/COLOR]')
-			d.addItem('setlogin','Set Current Forum User/Pass')
-			url = d.getResult()
-			if not url: return
-			if url == 'remove': return self.removeGeneralURL()
-			if url == 'setlogin': return setLogins()
-		if not url or url == 'new':
-			url = doKeyboard('Enter full forum url')
-			if not url: return
-			self.addGeneralURL(url)
-		if not url.endswith('/'): url += '/'
-		if not url.startswith('http'): url = 'http://' + url
-		return url	
-	
-	def addGeneralURL(self,url):
-		forum = url.split('://')[-1]
-		if forum.endswith('/'): forum = forum[:-1]
-		forums = getSetting('exp_general_forums',[])
-		if forum in forums: return
-		forums.append(forum)
-		setSetting('exp_general_forums',forums)
-		
-	def removeGeneralURL(self):
-		forums = getSetting('exp_general_forums',[])
-		d = ChoiceMenu('Choose forum')
-		for f in forums: d.addItem(f,f)
-		forum = d.getResult()
-		if not forum: return
-		if forum in forums: forums.pop(forums.index(forum))
-		setSetting('exp_general_forums',forums)
+#	def getGeneralForumURL(self):
+#		forums = getSetting('exp_general_forums',[])
+#		url = None
+#		if forums:
+#			d = ChoiceMenu('Choose forum')
+#			for f in forums: d.addItem(f,f)
+#			d.addItem('new','[COLOR FF00FF00]+Add New Forum[/COLOR]')
+#			d.addItem('remove','[COLOR FFFF0000]-Remove A Forum[/COLOR]')
+#			d.addItem('setlogin','Set Current Forum User/Pass')
+#			url = d.getResult()
+#			if not url: return
+#			if url == 'remove': return self.removeGeneralURL()
+#			if url == 'setlogin': return setLogins()
+#		if not url or url == 'new':
+#			url = doKeyboard('Enter full forum url')
+#			if not url: return
+#			self.addGeneralURL(url)
+#		if not url.endswith('/'): url += '/'
+#		if not url.startswith('http'): url = 'http://' + url
+#		return url	
+#	
+#	def addGeneralURL(self,url):
+#		forum = url.split('://')[-1]
+#		if forum.endswith('/'): forum = forum[:-1]
+#		forums = getSetting('exp_general_forums',[])
+#		if forum in forums: return
+#		forums.append(forum)
+#		setSetting('exp_general_forums',forums)
+#		
+#	def removeGeneralURL(self):
+#		forums = getSetting('exp_general_forums',[])
+#		d = ChoiceMenu('Choose forum')
+#		for f in forums: d.addItem(f,f)
+#		forum = d.getResult()
+#		if not forum: return
+#		if forum in forums: forums.pop(forums.index(forum))
+#		setSetting('exp_general_forums',forums)
 		
 	def changeForum(self,forum=None):
 		if not forum: forum = askForum()
 		if not forum: return False
 		url = None
-		if forum == 'experimental.general':
-			url = self.getGeneralForumURL()
-			if not url: return
-			setSetting('exp_general_forums_last_url',url)
+#		if forum == 'experimental.general':
+#			url = self.getGeneralForumURL()
+#			if not url: return
+#			setSetting('exp_general_forums_last_url',url)
 		self.stopThread()
 		fid = 'Unknown'
 		if FB: fid = FB.getForumID()
@@ -2191,7 +2193,7 @@ class ForumsWindow(BaseWindow):
 			d.cancel()
 		result = d.getResult()
 		if result == 'subscribecurrentforum':
-			if subscribeForum(fid): item.setProperty('subscribed','subscribed')
+			if subscribeForum(fid): pass #item.setProperty('subscribed','subscribed') #commented out because can't change if we unsubscribe from subs view
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
 		elif result == 'refresh':
@@ -2243,6 +2245,7 @@ class ForumsWindow(BaseWindow):
 		skin = SKINS[getSetting('skin',0)]
 		if skin != THEME:
 			showMessage('Skin Changed','Skin changed. Restart Forum Browser to apply.')
+		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2333,8 +2336,8 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			elif f.startswith('GB.'):
 				desc += '\n\nForum Interface: Parser Browser'
 			menu.addItem(f, name,logo,desc)
-	if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
-		menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
+	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
+	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
 	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
 	return forum
 
@@ -2491,10 +2494,10 @@ def addTapatalkForum(current=False):
 				showMessage('Failed','Forum not found or not compatible',success=False)
 				return
 		else:
-			forum = doKeyboard('Enter forum name or address')
+			forum = doKeyboard('Enter forum URL')
 			if forum == None: return
-			dialog.update(10,'Testing Forum')
-			
+			dialog.update(10,'Testing Forum: Tapatalk')
+			info = None
 			url = tapatalk.testForum(forum)
 			ftype = ''
 			label = ''
@@ -2503,12 +2506,28 @@ def addTapatalkForum(current=False):
 				label = 'Tapatalk'
 				pageURL = url.split('/mobiquo/',1)[0]
 			else:
+				dialog.update(13,'Testing Forum: Forumrunner')
 				from forumbrowser import forumrunner #@Reimport
 				url = forumrunner.testForum(forum)
 				if url:
 					ftype = 'FR'
 					label = 'Forumrunner'
 					pageURL = url.split('/forumrunner/',1)[0]
+					
+			if not url:
+				dialog.update(16,'Testing Forum: Parser Browser')
+				from forumbrowser import genericparserbrowser
+				url,info,parser = genericparserbrowser.testForum(forum)
+				if url:
+					ftype = 'GB'
+					label = 'Parser Browser (%s)' % parser.getForumTypeName()
+					if url.startswith('http'):
+						pre,post = url.split('://',1)
+					else:
+						pre = 'http'
+						post = url
+					post = post.split('/',1)[0]
+					pageURL = pre + '://' + post
 			
 			if not url:
 				showMessage('Failed','Forum not found or not compatible',success=False)
@@ -2518,7 +2537,7 @@ def addTapatalkForum(current=False):
 			forum = url.split('http://',1)[-1].split('/',1)[0]
 			
 		dialog.update(20,'Getting Description And Images')
-		info = forumbrowser.HTMLPageInfo(pageURL)
+		if not info: info = forumbrowser.HTMLPageInfo(pageURL)
 		images = []
 		if info.isValid:
 			tmp_desc = info.description(info.title(''))
@@ -2536,15 +2555,17 @@ def addTapatalkForum(current=False):
 		if name.startswith('forums.'): name = name[7:]
 		saveForum(ftype,ftype + '.' + name,name,desc,url,logo)
 		dialog.update(60,'Add To Online Database')
-		addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
+		if ftype != 'GB': addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
 		dialog.close()
 	
 def saveForum(ftype,forumID,name,desc,url,logo):
 	if ftype == 'TT':
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s' % (name,desc,url,logo))
-	else:
+	elif ftype == 'FR':
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s' % (name,desc,url,logo))
+	else:
+		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s' % (name,desc,url,logo))
 	
 def addForumFromOnline():
 	odb = forumbrowser.FBOnlineDatabase()
@@ -2564,7 +2585,7 @@ def addForumFromOnline():
 		logo = line.strip('\n').split('=')[-1]
 		ff.close()
 		name = f
-		if f.startswith('TT.') or f.startswith('FR.'): name = f[3:]
+		if f[:3] in ('TT.','FR.','GB'): name = f[3:]
 		menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc)
 		
 	f = menu.getResult('script-forumbrowser-forum-select.xml')
@@ -2631,10 +2652,10 @@ def removeForum():
 	os.remove(path)
 	showMessage('Removed','Forum removed.')
 
-def showMessage(caption,text,text2='',text3='',error=False,success=None):
+def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
-	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success)
+	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success,scroll=scroll)
 	w.doModal()
 	del w
 
@@ -2644,9 +2665,13 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 		self.caption = kwargs.get('caption') or ''
 		self.error = kwargs.get('error')
 		self.success = kwargs.get('success')
+		self.scroll = kwargs.get('scroll')
+		self.started = False
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
+		if self.started: return
+		self.started = True
 		self.getControl(104).setLabel(self.caption)
 		textbox = self.getControl(122)
 		textbox.reset()
@@ -2658,7 +2683,11 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 				self.getControl(250).setColorDiffuse('FF009900')
 			else:
 				self.getControl(250).setColorDiffuse('FF999900')
-		self.setFocusId(111)
+		if self.scroll:
+			self.getControl(112).setVisible(False)
+			self.setFocusId(123)
+		else:
+			self.setFocusId(111)
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
@@ -3156,17 +3185,17 @@ def checkForInterface(url):
 def getForumBrowser(forum=None,url=None,donecallback=None):
 	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
 	#global FB
-	if forum.startswith('GB.') and not url:
-		url = getSetting('exp_general_forums_last_url')
-		if not url: forum = 'TT.xbmc.org'
+	#if forum.startswith('GB.') and not url:
+	#	url = getSetting('exp_general_forums_last_url')
+	#	if not url: forum = 'TT.xbmc.org'
 		
 	if not getForumPath(forum): forum = 'TT.xbmc.org'
 	err = ''
 	try:
-		if url:
+		if forum.startswith('GB.'):
 			err = 'getForumBrowser(): General'
 			from forumbrowser import genericparserbrowser
-			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False),url=url)
+			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('TT.'):
 			err = 'getForumBrowser(): Tapatalk'
 			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
@@ -3174,10 +3203,10 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 			err = 'getForumBrowser(): Forumrunner'
 			from forumbrowser import forumrunner
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
-		else:
-			err = 'getForumBrowser(): Boxee'
-			from forumbrowser import parserbrowser
-			FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		#else:
+		#	err = 'getForumBrowser(): Boxee'
+		#	from forumbrowser import parserbrowser
+		#	FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 	except forumbrowser.ForumMovedException,e:
 		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL.\n',e.message,error=True)
 		return False
@@ -3216,6 +3245,7 @@ if sys.argv[-1] == 'settings':
 elif sys.argv[-1] == 'settingshelp':
 	showHelp('settings')
 else:
+	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	checkForSkinMods()
 	checkPasswordEncryption()
 

@@ -68,7 +68,7 @@ class ForumPost(forumbrowser.ForumPost):
 	
 	def getMessage(self):
 		sig = ''
-		if self.signature: sig = '\n__________\n' + self.signature
+		if self.signature and not self.hideSignature: sig = '\n__________\n' + self.signature
 		return self.message + sig
 	
 	def messageAsText(self):
@@ -337,6 +337,11 @@ class PageData:
 			totalPages = str(totalPages) + '?'
 		if self.page and self.totalPages:
 			return 'Page %s of %s' % (self.page,totalPages)
+		
+class ForumMessage:
+	def __init__(self,message,is_error=False):
+		self.message = message
+		self.isError = is_error
 		
 ######################################################################################
 # Forum Browser API
@@ -1037,7 +1042,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				self.browser.form = form
 			else:
 				error = self.checkForError(html)
-				post.error = error or 'Could not find form.'
+				post.error = error and error.message or 'Could not find form.'
 				return False
 		#print self.browser.form
 		try:
@@ -1061,15 +1066,19 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			#open('/home/ruuk/test.txt','w').write(html)
 			err = self.checkForError(html)
 			if err:
-				post.error = err
-				return False
+				if err.isError:
+					post.error = err.message
+					return False
+				else:
+					post.successMessage = err.message
+					
 			callback(100,__language__(30052))
 		except:
 			post.error = ERROR('FORM ERROR')
 			return False
 			
-		message = self.checkForError(html)
-		if message: post.successMessage = message
+		#message = self.checkForError(html)
+		#if message: post.successMessage = message
 		moderated = False
 		if re.search('approv\w+[^<]*?moderat\w+',html) or re.search('moderat\w+[^<]*?approv\w+',html): moderated = True
 		post.moderated = moderated
@@ -1081,9 +1090,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if errm:
 			if 'hidden' in errm.group(1):
 				return None
-			error = re.sub('[\n\t\r]','',errm.group(2))
-			error = re.sub('<[^>]*?>','\n',error).replace('\n\n','\n').strip().replace('\n','[CR]')
-			return error
+			message = re.sub('[\n\t\r]','',errm.group(2))
+			message = re.sub('<[^>]*?>','\n',message).replace('\n\n','\n').strip().replace('\n','[CR]')
+			if 'error' in errm.group(1).lower() or 'error' in message.lower():
+				return ForumMessage(message,is_error=True)
+			else:
+				if re.search('[^_\w]message[^_\w]',errm.group(1).lower()): #To catch only real messages (hopefully) and not things like post_message
+					return ForumMessage(message,is_error=False)
 		return None
 	
 	def doPrivateMessage(self,post,callback=None):
@@ -1136,11 +1149,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				LOG('FORM SELECTED BY NAME')
 			else:
 				predicate = lambda formobj: action_match in formobj.action
-				self.browser.select_form(predicate=predicate)
+				try:
+					self.browser.select_form(predicate=predicate)
+					selected = True
+				except:
+					ERROR('browser.select_form() failed. Trying self.selectForm()...',hide_tb=True)
+					
+				if not selected:
+					self.selectForm(action_match)
 				LOG('FORM SELECTED BY ACTION')
 			selected = True
 		except:
-			ERROR('NO FORM 1')
+			ERROR('NO FORM 1',hide_tb=True)
 			
 		if not selected:
 			form = self.getForm(html,action_match,form_name)
@@ -1278,5 +1298,5 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def canEditPost(self,user): return bool(user == self.user and self.isLoggedIn() and self.urls.get('editpost'))
 	
 	def getQuoteStartFormat(self):
-		return self.filters.get('quote_start','[QUOTE]')
+		return self.quoteStartFormats.get(self.getForumType(),self.filters.get('quote_start','\[quote[^\]]*?\]'))
 	

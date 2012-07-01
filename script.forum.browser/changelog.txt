@@ -4,7 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Show more extra info in tapatalk (ie likes,followers)
+  When adding a forum, ask for logo background color (or image?)
   
  Long Term:
   Option to save posts when exiting and not posting
@@ -27,10 +27,28 @@ TODO:
   Skip forward on remote causes XBMC dialog
  
  Awaiting Future Developments:
-  signature maybe with future tapatalk plugin update
+  Show more extra info in tapatalk (ie likes,followers) - TTv4
+  signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.7
+Current Version : 1.0.8
+
+*** 1.0.8 ***
+
+Tapatalk: Signatures will now show in posts when available (ie xbmchub.com)
+Added settings option 'Hide Signatures In Posts'
+Made user info windows scrollable
+Tapatalk: How long ago on activity now shows 0s ago when less than one second ago
+Improved logo detecting when adding a forum
+Removed Parser Browser from experimental and integrated it into normal 'Add Forum' process
+Removed Boxee from the included forums and added it to the online database
+Removed old VBulletin parserbrowser code
+
+Experimental:
+ - FB now passes the web session to WebViewer preserving logged in status and such
+ - Fix for relative URLs in posts not passing properly to WebViewer
+ - VBulletin: Full post formatting, PM create/delete and subscribe/unSubscribe threads/forums
+ - Fix for over-eager error message detection after creating a post
 
 *** 1.0.7 ***
 

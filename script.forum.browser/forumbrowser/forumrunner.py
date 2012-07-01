@@ -301,7 +301,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			for forum,sub in flist:
 				forums.append(self.createForumDict(forum,sub))
 			if not callback(80,self.lang(30231)): break
-			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.forum
+			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
 				pm_counts = self.getPMCounts(80)
 			except:

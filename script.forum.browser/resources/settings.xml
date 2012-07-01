@@ -6,6 +6,7 @@
     <setting id="open_thread_to_newest" type="bool" label="30001" default="true" />
     <setting id="auto_thread_subscriptions_window" type="bool" label="30009" default="false" />
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
+    <setting id="hide_signatures" type="bool" label="30013" default="false" />
     <setting id="use_skin_mods" type="bool" label="30234" default="true" />
     <setting id="enable_ssl" type="bool" label="30235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="30245" default="false" />

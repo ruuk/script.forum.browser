@@ -1077,6 +1077,7 @@ class AdvancedParser(HTML5Parser):
 		self.isGeneric = False
 		self.dataCleanerRE = re.compile('[\n\r\t]')
 		self.tagIndex = 0
+		self.isValid = False
 		self.pages = {}
 	
 	def getForumType(self):
@@ -1100,6 +1101,7 @@ class AdvancedParser(HTML5Parser):
 					mx = ct
 					pick = r
 					ftpick = ft
+		self.isValid = bool(pick)
 		self.linkRE = pick
 		self.forumType = ftpick[:2]
 		self.isGeneric = self.forumType[1].isdigit()
@@ -1177,6 +1179,14 @@ class GeneralForumParser(AdvancedParser):
 		self.maxForumDepth = 0
 		self.subsSet = False
 		self.forums = []
+		self.typeNames = {	'vb': 'VBulletin',
+							'fb': 'FluxBB',
+							'mb': 'MyBB',
+							'mb2': 'MyBB',
+							'pb': 'PhpBB',
+							'ip': 'Invision Power Board'
+						}
+		
 		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
 							'fb': re.compile('(?:^|")viewforum.php?[^"\']*?(?<!;)(?:f|id)=?(?P<id>\d+)'),
 							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
@@ -1192,6 +1202,9 @@ class GeneralForumParser(AdvancedParser):
 		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
 		#http://www.torrentday.com/forums.php?action=viewforum&subforumid=1&forumid=26
 		self.linkRE = None
+	
+	def getForumTypeName(self):
+		return self.typeNames.get(self.forumType,'Generic')
 	
 	def getRE(self, html):
 		if self.linkRE: return
@@ -1453,7 +1466,7 @@ class GeneralPostParser(AdvancedParser):
 							('extra.karma',re.compile('^karma: ?(.+)$(?i)'))
 						]
 		
-		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote')
+		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote','visit homepage','edit','delete')
 		
 		self.threadParser = None
 		
@@ -1468,16 +1481,37 @@ class GeneralPostParser(AdvancedParser):
 		self.lastStack = []
 		self.forumType = 'u0'
 		self.lastUnset = ''
+		self.base = ''
 		self.mode = 'NORMAL'
 		self.pidTags = OrderedDict()
 		self.callback = self.fakeCallback
 		self.pages = {}
+		self.filters = {}
+		self.BLOCK = None
+		self.BLOCKSUB = None
+		self.BLOCKMODE = None
 		
 	def fakeCallback(self,pct,msg): return True
 	
-	def getPosts(self,html,url='',callback=None):
+	def setBaseURL(self,url):
+		self.base = url.rsplit('/',1)[0] + '/'
+		
+	def fixURL(self,url):
+		if url.startswith('http'): return url
+		url = url.split('/',1)[-1]
+		return self.base + url
+	
+	def setFilters(self,filters):
+		if filters: self.filters = filters
+		self.quoteUserPrefix = self.filters.get('quote_user_prefix','posted by')
+		self.quoteFormat = self.filters.get('quote_tag','=%s')
+		self.postURLPrefix = self.filters.get('post_url_prefix','@@**&&++')
+				
+	def getPosts(self,html,url='',callback=None,filters=None,page_url=''):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
+		self.setBaseURL(page_url)
+		self.setFilters(filters)
 		self.callback = callback or self.fakeCallback
 		self.reset()
 		self.getPages(url, html,self.threadParser.linkRE)
@@ -1646,11 +1680,37 @@ class GeneralPostParser(AdvancedParser):
 		self.lastUnset = ''
 		p['extras'] = {}
 		for d in p.get('data',[]):
-			newData,last = self.handleDataItem(d, p, dREs, newData,last)
+			last = self.handleDataItem(d, p, dREs, newData,last)
 		return newData
 		
 	def rindex(self,alist,a):
 		return len(alist) - alist[-1::-1].index(a) - 1
+		
+	def checkClasses(self,tag,newData):
+		classes = tag.getClasses()
+		if classes:
+			if self.filters.get('quote_class') and self.filters['quote_class'] in classes:
+				newData.append('[quote]')
+				tag.info = 'QUOTE'
+				self.BLOCK = 'QUOTE'
+				return True
+			elif self.BLOCKMODE == 'QUOTE' and 'quote' in repr(classes):
+				self.BLOCKMODE = None
+				self.BLOCK = 'QUOTE'
+				tag.info = 'QUOTE'
+				return True
+		return False
+		
+	def clearFirstNonEmptyMatch(self,newData,match):
+		if not match: return
+		idx = -1
+		while not newData[idx].strip():
+			idx -= 1
+		if match.lower() in newData[idx].lower():
+			newData.pop(idx)
+			return True
+		return False
+			
 			
 	def handleDataItem(self,d,p,dREs,newData, last):
 		if isinstance(d,HTMLTag):
@@ -1673,7 +1733,7 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'a':
 				href = d.getAttr('href')
 				if href and not 'javascript:' in href and not href.startswith('#'):
-					tag = '[url='+self.revertCodes(href)+']'
+					tag = '[url='+self.fixURL(self.revertCodes(href))+']'
 					newData.append(tag)
 					d.info = tag
 			elif d.tag == 'embed':
@@ -1684,8 +1744,18 @@ class GeneralPostParser(AdvancedParser):
 				if not val or not val.startswith('http'): val = d.getAttr('data')
 				if val and val.startswith('http'):
 					newData.append('[url='+val+']'+(d.data or 'EMBED')+'[/url]')
-			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre'):
-				newData.append('\n')
+			elif d.tag in ('div','tr','table','ul','ol','blockquote','pre','cite','code'):
+				if d.tag in ('pre','code'):
+					self.BLOCKSUB = 'PRE'
+					#if self.BLOCKMODE and self.BLOCKMODE in newData[-1].upper():
+					#	newData.pop()
+					#elif self.BLOCKMODE and self.BLOCKMODE in newData[-2].upper():
+					#	newData.pop(-2)
+					self.clearFirstNonEmptyMatch(newData, self.BLOCKMODE)
+				else:
+					if not self.checkClasses(d, newData) and not self.BLOCK: newData.append('\n')
+			elif d.tag == 'td':
+				self.checkClasses(d, newData)
 			elif d.tag == 'p':
 				newData.append('\n\n') #TODO: maybe do this for other tags
 			elif d.tag == 'font':
@@ -1704,16 +1774,46 @@ class GeneralPostParser(AdvancedParser):
 #			for x in d.stack:
 #				newData,last = self.handleDataItem(x, p, dREs, newData, last)
 		elif isinstance(d,HTMLEndTag):
-			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br','cite'):
-				newData.append('\n')
+			if d.tag in ('div','tr','table','ul','ol','blockquote','pre','br','cite','code'):
+				if d.startTag.info == 'QUOTE':
+					newData.append('[/quote]')
+					self.BLOCK = None
+				ds = ''.join(d.startTag.dataStack)
+				dslower = ds.lower()
+				if d.tag == 'pre' or d.tag == 'code':
+					self.BLOCKSUB = None
+					if self.BLOCKMODE:
+						if d.tag == 'pre':
+							newData.append('['+self.BLOCKMODE.lower()+']'+'\n'.join(d.startTag.dataStack)+'[/'+self.BLOCKMODE.lower()+']')
+						elif d.tag == 'code':
+							#TODO: Remove empty datas before join
+							newData.append('['+self.BLOCKMODE.lower()+']'+'\n'.join(filter(lambda a: a, d.startTag.dataStack))+'[/'+self.BLOCKMODE.lower()+']')
+						self.BLOCKMODE = None
+				elif dslower.startswith('code'):
+					self.BLOCKMODE = 'CODE'
+				elif dslower.startswith('html'):
+					self.BLOCKMODE = 'HTML'
+				elif dslower.startswith('php'):
+					self.BLOCKMODE = 'PHP'
+				elif dslower == 'quote:':
+					self.BLOCKMODE = 'QUOTE'
+					newData.pop()
+				if not self.BLOCK: newData.append('\n')
+			elif d.tag == 'td':
+				if d.startTag.info == 'QUOTE':
+					newData.append('[/quote]')
+					self.BLOCK = None
+				
 			if d.tag == 'a':
 				href = d.startTag.getAttr('href')
+				ds = ''.join(d.startTag.dataStack)
 				if d.startTag.info: # and href and not 'javascript:' in href and not href.startswith('#'):
-					ds = ''.join(d.startTag.dataStack)
 					if ds.endswith(newData[-1]): newData.pop() #If we missed the text because it was inside another tag
 					#TODO: Maybe we need to do this more than once in a while, in case the text was in multiple tags
-					if not ds.lower() in self.ignores: #('quote','pm','profile','email','private message','edit post','delete post','report this post','reply with quote'):
-						if ds != p.get('user') and not 'user' in href and not 'member' in href and not p.get('postid') in href: 
+					dslower = ds.lower()
+					if not dslower in self.ignores and not href.startswith(self.postURLPrefix): #('quote','pm','profile','email','private message','edit post','delete post','report this post','reply with quote'):
+						if (ds != p.get('user') and not 'user' in href and not 'member' in href and not p.get('postid') in href) or 'edited by' in dslower:
+							newData.append(ds)
 							newData.append('[/url]')
 						elif len(newData) > 1 and ds == p.get('user') and newData[-2].strip().endswith('edited by'):
 							if d.startTag.info in newData: newData.pop(self.rindex(newData,d.startTag.info))
@@ -1725,7 +1825,8 @@ class GeneralPostParser(AdvancedParser):
 					else:
 						if d.startTag.info in newData:
 							#ds = ''.join(d.startTag.dataStack)
-							newData = newData[:self.rindex(newData,d.startTag.info)] #TODO: make sure this method isn't breaking anything
+							#newData = newData[:self.rindex(newData,d.startTag.info)] #TODO: make sure this method isn't breaking anything
+							del newData[self.rindex(newData,d.startTag.info):] #Modify list without replacing as above
 							#if ds in newData[-1]: print newData.pop()
 							#newData.pop(self.rindex(newData,d.startTag.info))
 			elif d.tag == 'li':
@@ -1737,10 +1838,12 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'font':
 				if d.startTag.info == 'COLOR':
 					newData.append('[/COLOR]')
+		elif self.BLOCKSUB == 'PRE':
+			pass
 		else:
 			dstrip = d.strip()
 			if d:
-				if d.tag == p.get('usedtag'): return newData, last
+				if d.tag == p.get('usedtag'): return last
 				#print d.encode('ascii','replace')
 				for i in range(0,len(dREs)):
 					if not dstrip: continue
@@ -1842,13 +1945,8 @@ class GeneralPostParser(AdvancedParser):
 						else:
 							p[self.lastUnset] = dstrip
 						self.lastUnset = ''
-					elif d.tag.tag.startswith('h') or d.tag.tag == 'strong':
-						if not p.get('title'): # and not p.get('joindate') and not p.get('postcount'):
-							if not (newData and 'posted by' in newData[-1].lower()):
-								p['title'] = dstrip
-							#if self.forumType != 'pb': newData = []
-						else:
-							newData.append(d)
+					elif (d.tag.tag.startswith('h') or d.tag.tag == 'strong') and not p.get('title') and not (newData and self.quoteUserPrefix in newData[-1].lower()):
+						p['title'] = dstrip
 					elif d.tag.tag == 'embed':
 						pass
 					elif d.lower() == 'offline':
@@ -1860,8 +1958,19 @@ class GeneralPostParser(AdvancedParser):
 #					elif d.tag.tag == 'li':
 #						newData.append(d + '\n')
 					else:
-						newData.append(d)	
-		return newData, last
+						pre='';post=''
+						if d.tag.tag == 'b': pre='[b]';post='[/b]'
+						elif d.tag.tag == 'i': pre='[i]';post='[/i]'
+						
+						if self.BLOCK == 'QUOTE':
+							if self.quoteUserPrefix in newData[-1].lower():
+								newData.pop()
+								newData[-1] = '['+(self.quoteFormat % dstrip) + ']'
+							else:
+								newData.append(pre+d+post)
+						else:
+							newData.append(pre+d+post)
+		return last
 		
 	def handleStartTag(self,tag):
 		pass
