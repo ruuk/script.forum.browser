@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2187,6 +2187,7 @@ class ForumsWindow(BaseWindow):
 					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
 			if FB.canGetOnlineUsers():
 				d.addItem('online','View Online Users')
+			d.addItem('foruminfo','View Forum Info')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2196,6 +2197,8 @@ class ForumsWindow(BaseWindow):
 			if subscribeForum(fid): pass #item.setProperty('subscribed','subscribed') #commented out because can't change if we unsubscribe from subs view
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
+		elif result == 'foruminfo':
+			self.showForumInfo()
 		elif result == 'refresh':
 			if FB:
 				self.fillForumList()
@@ -2205,7 +2208,13 @@ class ForumsWindow(BaseWindow):
 			self.showOnlineUsers()
 		elif result == 'help':
 			showHelp('forums')
-			
+		
+	def showForumInfo(self):
+		out = ''
+		for k,v in FB.getForumInfo():
+			out += u'[B]%s[/B]: [COLOR FF550000]%s[/COLOR][CR]' % (k.replace('_',' ').title(),v)
+		showMessage('Forum Info',out,scroll=True)
+				
 	def preClose(self):
 		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
 		return xbmcgui.Dialog().yesno('Really Exit?','Really exit?')
@@ -2351,18 +2360,20 @@ def setLogins(force_ask=False):
 	password = passmanager.getPassword('login_pass_' + forumID.replace('.','_'), __addon__.getSetting('login_user_' + forumID.replace('.','_')))
 	password = doKeyboard(__language__(30202),password,True)
 	if password is None: return
+	saveUserPass(forumID,user,password)
+	if not user and not password:
+		showMessage('Login Cleared','Username and password cleared.')
+	else:
+		showMessage('Login Set','Username and password set.')
+	
+def saveUserPass(forumID,user,password):
 	__addon__.setSetting('login_user_' + forumID.replace('.','_'),user)
 	key = 'login_pass_' + forumID.replace('.','_')
 	if password:
 		passmanager.savePassword(key, user, password)
 	else:
 		__addon__.setSetting(key,'')
-	if not user and not password:
-		showMessage('Login Cleared','Username and password cleared.')
-	else:
-		showMessage('Login Set','Username and password set.')
-	
-	
+		
 def doSettings():
 	helpdict = loadHelp('options.help')
 	dialog = OptionsChoiceMenu(__language__(30051))
@@ -2379,8 +2390,8 @@ def doSettings():
 	if not result: return
 	if result == 'addfavorite': addFavorite()
 	elif result == 'removefavorite': removeFavorite()
-	elif result == 'addcurrentonline': addTapatalkForum(current=True)
-	elif result == 'addforum': addTapatalkForum()
+	elif result == 'addcurrentonline': addForum(current=True)
+	elif result == 'addforum': addForum()
 	elif result == 'addonline': addForumFromOnline()
 	elif result == 'removeforum': removeForum()
 	elif result == 'setlogins': setLogins(True)
@@ -2428,6 +2439,9 @@ def loadHelp(helpfile,as_list=False):
 			if name: ret[key + '.name'] = name
 		return ret
 
+def showText(caption,text):
+	openWindow(TextDialog,'script-forumbrowser-text-dialog.xml',theme='Default',caption=caption,text=text)
+	
 def showHelp(helptype):
 	helptype += '.help'
 	caption, helplist = loadHelp(helptype,True)
@@ -2442,6 +2456,16 @@ def showHelp(helptype):
 		addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
 		changelogPath = os.path.join(addonPath,'changelog.txt')
 		showText('Changelog',open(changelogPath,'r').read())
+
+def showInfo(infotype):
+	infotype += '.info'
+	lang = xbmc.getLanguage().split(' ',1)[0]
+	addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+	infofilefull = os.path.join(addonPath,'resources','language',lang,infotype)
+	if not os.path.exists(infofilefull):
+		infofilefull = os.path.join(addonPath,'resources','language','English',infotype)
+	if not os.path.exists(infofilefull): return None
+	showText('Info',open(infofilefull,'r').read())
 	
 def registerForum():
 	url = FB.getRegURL()
@@ -2474,7 +2498,7 @@ def getFavorites():
 		favs = []
 	return favs
 	
-def addTapatalkForum(current=False):
+def addForum(current=False):
 	if not FB: return
 	dialog = xbmcgui.DialogProgress()
 	dialog.create('Add Forum')
@@ -2496,6 +2520,8 @@ def addTapatalkForum(current=False):
 		else:
 			forum = doKeyboard('Enter forum URL')
 			if forum == None: return
+			user = None
+			password=None
 			dialog.update(10,'Testing Forum: Tapatalk')
 			info = None
 			url = tapatalk.testForum(forum)
@@ -2516,8 +2542,12 @@ def addTapatalkForum(current=False):
 					
 			if not url:
 				dialog.update(16,'Testing Forum: Parser Browser')
+				yes = xbmcgui.Dialog().yesno('Question...','Does this forum require a login?')
+				if yes:
+					user = doKeyboard(__language__(30201))
+					if user: password = doKeyboard(__language__(30202),hidden=True)
 				from forumbrowser import genericparserbrowser
-				url,info,parser = genericparserbrowser.testForum(forum)
+				url,info,parser = genericparserbrowser.testForum(forum,user,password)
 				if url:
 					ftype = 'GB'
 					label = 'Parser Browser (%s)' % parser.getForumTypeName()
@@ -2534,6 +2564,11 @@ def addTapatalkForum(current=False):
 				return
 		
 			showMessage('Found','Forum %s found' % forum,'[CR]Type: ' + label,'[CR]'+ url,success=True)
+			if ftype == 'GB':
+				if parser.getForumTypeName().lower() == 'generic':
+					showInfo('parserbrowser-generic')
+				else:
+					showInfo('parserbrowser-normal')
 			forum = url.split('http://',1)[-1].split('/',1)[0]
 			
 		dialog.update(20,'Getting Description And Images')
@@ -2553,13 +2588,15 @@ def addTapatalkForum(current=False):
 		if name.startswith('www.'): name = name[4:]
 		if name.startswith('forum.'): name = name[6:]
 		if name.startswith('forums.'): name = name[7:]
-		saveForum(ftype,ftype + '.' + name,name,desc,url,logo)
+		forumID = ftype + '.' + name
+		saveForum(ftype,forumID,name,desc,url,logo)
+		if user and password: saveUserPass(forumID,user,password)
 		dialog.update(60,'Add To Online Database')
 		if ftype != 'GB': addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
 		dialog.close()
 	
-def saveForum(ftype,forumID,name,desc,url,logo):
+def saveForum(ftype,forumID,name,desc,url,logo): #TODO: Do these all the same. What... was I crazy?
 	if ftype == 'TT':
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s' % (name,desc,url,logo))
 	elif ftype == 'FR':
@@ -2694,9 +2731,6 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 			self.close()
 		
 	def onFocus( self, controlId ): self.controlId = controlId
-	
-def showText(caption,text):
-	openWindow(TextDialog,'script-forumbrowser-text-dialog.xml',theme='Default',caption=caption,text=text)
 
 class TextDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):

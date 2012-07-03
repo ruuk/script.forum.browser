@@ -491,7 +491,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			
 	def doCaptcha(self,url):
 		cachePath = sys.modules["__main__"].CACHE_PATH
-		captchaPath = os.path.join(cachePath,'captcha')
+		captchaPath = os.path.join(cachePath,'captcha'+str(time.time()))
 		open(captchaPath,'w').write(self.browser.open_novisit(url).read())
 		url = captchaPath
 		import xbmcgui, xbmc
@@ -512,6 +512,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		try:
 			return sys.modules["__main__"].doModKeyboard('Enter security code')
 		finally:
+			os.remove(captchaPath)
 			w.close()
 			del w
 		
@@ -633,8 +634,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					return False
 		response = self.browser.submit()
 		html = response.read()
-		#import codecs
-		#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
+		import codecs
+		codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
 		self.lastHTML = html + 'logout'
 		#if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
 		if self.cookieJar is not None:
@@ -673,9 +674,6 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.lastURL = response.geturl()
 		if not callback(60,__language__(30102)): return ''
 		return response.read()
-		
-	def canLogin(self):
-		return self.user and self.password
 	
 	def readURL(self,url,callback=None,force_login=False,is_html=True,force_browser=False):
 		if not url:

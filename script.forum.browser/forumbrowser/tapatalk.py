@@ -485,7 +485,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			raise
 		except:
 			ERROR('Failed to get forum config')
+			
+	def getForumInfo(self):
+		return [	('name',self.getDisplayName()),
+					('interface','Tapatalk'),
+					('tapatalk_api_level',self.forumConfig.get('api_level','')),
+					('tapatalk_plugin_version',self.getForumPluginVersion()),
+					('forum_type',self.getForumTypeName() + ' v' + self.forumConfig.get('sys_version','')),
+					('login_set',self.canLogin())
+				]
 		
+	def getForumTypeName(self):
+		return self.forumTypeNames.get(self.getForumType(),'Unknown')
+	
 	def guestOK(self):
 		return self.forumConfig.get('guest_okay',True)
 	

@@ -4,9 +4,10 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  When adding a forum, ask for logo background color (or image?)
+  Finish 'Add A Forum' stuff for Parser Browser
   
  Long Term:
+  When adding a forum, ask for logo background color (or image?) or ask later
   Option to save posts when exiting and not posting
   Use new option menus for context?
   Better 'Choose Forum' menu
@@ -31,7 +32,14 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.8
+Current Version : 1.0.9
+
+*** 1.0.9 ***
+
+Fix for adding forums via Parser Browser that require login and/or have captcha
+Now asks if forum requires login before checking for Parser Browser compatibility (then asks for user/pass if you say yes)
+Parser Browser: Added info dialogs for normal and generic methods when adding a forum that explain the possible limitations
+Added 'View Forum Info' to forums view context menu
 
 *** 1.0.8 ***
 

@@ -163,6 +163,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		self.lang = sys.modules["__main__"].__language__
 		self.online = {}
 		self.lastOnlineCheck = 0
+		self.version = {}
 		self.pmBoxes = []
 		self.loadForumFile()
 		self.setupClient()
@@ -205,6 +206,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			
 		self.platform = result.get('platform')
 		self.charset = result.get('charset')
+		self.version = result
 		
 		LOG('Forum Type: ' + self.platform)
 		LOG('Plugin Version: ' + result.get('version'))
@@ -222,6 +224,22 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		elif text == 'ipb': return 'ip' #don't know if this is right
 		return text
 	
+	def getForumVersion(self):
+		m = re.search('(\d+)',self.platform)
+		if not m: return ''
+		return m.group(1)
+		
+	def getForumTypeName(self):
+		return self.forumTypeNames.get(self.getForumType(),'Unknown')
+	
+	def getForumInfo(self):
+		return [	('name',self.getDisplayName()),
+					('interface','Forumrunner'),
+					('forumrunner_plugin_version',self.version.get('version')),
+					('forum_type',self.getForumTypeName() + ' (' + self.getForumVersion()) + ')',
+					('login_set',self.canLogin())
+				]
+		
 	def loadForumFile(self):
 		forum = self.getForumID()
 		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)

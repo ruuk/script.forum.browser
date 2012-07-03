@@ -620,12 +620,23 @@ class ForumBrowser:
 					(':s',u'\u2463',u':\rs'),
 					('\r',u'',u'')
 					]
-	
+
+	forumTypeNames = {	'vb': 'VBulletin',
+						'fb': 'FluxBB',
+						'mb': 'MyBB',
+						'pb': 'PhpBB',
+						'ip': 'Invision Power Board',
+						'sm': 'Simple Machines Forum',
+						'xf': 'XenForo'
+					}
+		
 	def __init__(self,forum,always_login=False,message_converter=None):
 		if not message_converter: message_converter = texttransform.MessageConverter
 		self.forum = forum
 		self.prefix = ''
 		self._url = ''
+		self.user = ''
+		self.password = ''
 		self.transport = None
 		self.server = None
 		self.forumConfig = {}
@@ -656,6 +667,15 @@ class ForumBrowser:
 	def domain(self):
 		domain = self._url.split('://',1)[-1]
 		return domain.split('/')[0]
+	
+	def canLogin(self):
+		return bool(self.user and self.password)
+	
+	def forumTypeDisplay(self,short):
+		return self.forumTypeNames(short,'Unknown')
+	
+	def getForumInfo(self):
+		return [ ('name',self.forum) ]
 	
 	def getForumPost(self,pdict=None):
 		return self.ForumPost(self,pdict=pdict)

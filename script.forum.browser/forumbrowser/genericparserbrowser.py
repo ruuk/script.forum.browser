@@ -8,16 +8,19 @@ ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 __language__ = sys.modules["__main__"].__language__
 
-def testForum(url):
+def testForum(url,user=None,password=None):
 	if not url.startswith('http'):
 		if url.startswith('/'): url = url[1:]
 		url = 'http://' + url
 	if not url.endswith('/'): url += '/'
-	p = GeneralForumParser()
+	#p = GeneralForumParser()
+	pb = GenericParserForumBrowser(url,url=url)
+	pb.user = user
+	pb.password = password
 	info = forumbrowser.HTMLPageInfo(url)
-	#open('/home/ruuk/test.txt','w').write(info.html)
-	p.getForums(info.html)
-	if p.isValid: return url,info,p
+	#p.getForums(info.html)
+	pb.getForums()
+	if pb.forumParser.isValid: return url,info,pb.forumParser
 	return None,None,None
 
 class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
@@ -62,7 +65,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			fname = os.path.join(sys.modules["__main__"].FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
 		self.loadForumData(fname)
-		self._url = self.urls.get('server','')
+		self._url = self.urls.get('server',self._url)
 		self.formats['quote'] = ''
 		
 	def getForumID(self):
@@ -76,6 +79,21 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def getForumType(self):
 		return self.forumType
+	
+	def getForumInfo(self):
+		return [	('name',self.getDisplayName()),
+					('interface','Parser Browser'),
+					('forum_type',self.forumParser.getForumTypeName()),
+					('login_set',self.canLogin()),
+					('can_post',self.canPost()),
+					('can_edit_posts',self.canEditPost(self.user)),
+					('can_delete_posts',self.canDelete(self.user)),
+					('can_view_private_messages',self.hasPM()),
+					('can_view_subscriptions',self.hasSubscriptions()),
+					('can_subscribe',self.canSubscribeForum(None)),
+					('can_send_private_messages',self.canPrivateMessage()),
+					('can_delete_private_messages',self.canDelete(self.user,target='PM')),
+				]
 	
 	def loadForumData(self,forum):
 		self.needsLogin = True
@@ -103,6 +121,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			
 	def getForums(self,callback=None,donecallback=None,url='',html='',subs=False):
 		if not callback: callback = self.fakeCallback
+		#if html: self.lastHTML = html #TODO: Maybe put this back
 		if not html:
 			try:
 				url = url or self._url
