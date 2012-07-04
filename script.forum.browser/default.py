@@ -2606,10 +2606,14 @@ def saveForum(ftype,forumID,name,desc,url,logo): #TODO: Do these all the same. W
 	
 def addForumFromOnline():
 	odb = forumbrowser.FBOnlineDatabase()
-	flist = odb.getForumList()
-	menu = ImageChoiceMenu('Choose Forum',True)
+	splash = showActivitySplash('Getting Forums List')
+	try:
+		flist = odb.getForumList()
+	finally:
+		splash.close()
+	menu = ImageChoiceMenu('Choose Forum')
 	for f in flist:
-		menu.addItem(f, f.get('name'), f.get('logo'), f.get('desc'))
+		menu.addItem(f, f.get('name'), f.get('logo'), 'Category: ' + f.get('cat','').title() + '[CR][CR]' + f.get('desc'))
 	for f in getHiddenForums():
 		path = getForumPath(f)
 		if not path: continue

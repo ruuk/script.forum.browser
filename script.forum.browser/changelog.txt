@@ -32,7 +32,13 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.9
+Current Version : 1.0.10
+
+*** 1.0.10 ***
+
+Added activity splash when getting forum list from online database
+Changed database interface code to handle the new database
+Added category to info when displaying forums from the online database
 
 *** 1.0.9 ***
 

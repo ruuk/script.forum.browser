@@ -61,7 +61,7 @@ class FBData():
 	
 class FBOnlineDatabase():
 	def __init__(self):
-		self.url = 'http://xbmc.2ndmind.net/forumbrowser/tapatalk.php'
+		self.url = 'http://xbmc.2ndmind.net/forumbrowser/forums.php'
 	
 	def postData(self,**data):
 		enc = urllib.urlencode(data)
@@ -72,19 +72,24 @@ class FBOnlineDatabase():
 			err = ERROR('FBTTOnlineDatabase.postData()')
 			return 'ERROR: ' + err
 			
-	def addForum(self,name,url,logo='',desc='',ftype='TT'):
-		return self.postData(do='add',name=name,url=url,desc=desc,logo=logo,type=ftype)
+	def addForum(self,name,url,logo='',desc='',ftype='TT',cat=''):
+		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype)
 		
 	def getForumList(self):
 		flist = self.postData(do='list')
+		#print flist.replace('\r',',')
 		if not flist: return None
 		flist = flist.split('\n')
 		final = []
 		for f in flist:
 			if f:
-				name, rest = f.split('=',1)
-				url,desc,logo,ftype = rest.split('\r',3)
-				final.append({'name':name,'url':url,'desc':desc,'logo':logo,'type':ftype})
+				name, rest = f.split(':',1)
+				add = {'name':name}
+				for f in rest.split('\r'):
+					k,v = f.split('=',1)
+					add[k] = v
+				#print repr(add)
+				final.append(add)
 		return final
 
 class HTMLPageInfo:
