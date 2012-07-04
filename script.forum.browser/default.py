@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.9'
+__version__ = '1.0.10'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2331,20 +2331,22 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			if not path: continue
 			if not os.path.isfile(path): continue
 			ff = open(path,'r')
-			name = ff.readline().strip('\n')[1:]
-			desc = ff.readline().strip('\n')[1:]
+			name = ff.readline().strip()[1:]
+			desc = ff.readline().strip()[1:]
 			line = ff.readline()
 			if not 'url:logo=' in line: line = ff.readline()
 			if not 'url:logo=' in line: line = ff.readline()
 			logo = line.strip('\n').split('=')[-1]
 			ff.close()
+			desc = '[B]Description[/B]: [COLOR FFFF9999]' + (desc or 'None') + '[/COLOR]'
 			if f.startswith('TT.'):
-				desc += '\n\nForum Interface: Tapatalk'
+				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Tapatalk[/COLOR]'
 			elif f.startswith('FR.'):
-				desc += '\n\nForum Interface: Forumrunner'
+				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Forumrunner[/COLOR]'
 			elif f.startswith('GB.'):
-				desc += '\n\nForum Interface: Parser Browser'
+				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
 			menu.addItem(f, name,logo,desc)
+
 	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
 	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
 	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
@@ -2498,6 +2500,13 @@ def getFavorites():
 		favs = []
 	return favs
 	
+def selectForumCategory(with_all=False):
+	d = ChoiceMenu('Select Category')
+	if with_all: d.addItem('all','Show All')
+	for x in range(0,17):
+		d.addItem(str(x), str(__language__(30500 + x)))
+	return d.getResult()
+
 def addForum(current=False):
 	if not FB: return
 	dialog = xbmcgui.DialogProgress()
@@ -2606,31 +2615,50 @@ def saveForum(ftype,forumID,name,desc,url,logo): #TODO: Do these all the same. W
 	
 def addForumFromOnline():
 	odb = forumbrowser.FBOnlineDatabase()
-	splash = showActivitySplash('Getting Forums List')
-	try:
-		flist = odb.getForumList()
-	finally:
-		splash.close()
-	menu = ImageChoiceMenu('Choose Forum')
-	for f in flist:
-		menu.addItem(f, f.get('name'), f.get('logo'), 'Category: ' + f.get('cat','').title() + '[CR][CR]' + f.get('desc'))
-	for f in getHiddenForums():
-		path = getForumPath(f)
-		if not path: continue
-		ff = open(path,'r')
-		name = ff.readline().strip('\n')[1:]
-		desc = ff.readline().strip('\n')[1:]
-		line = ff.readline()
-		if not 'url:logo=' in line: line = ff.readline()
-		if not 'url:logo=' in line: line = ff.readline()
-		logo = line.strip('\n').split('=')[-1]
-		ff.close()
-		name = f
-		if f[:3] in ('TT.','FR.','GB'): name = f[3:]
-		menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc)
-		
-	f = menu.getResult('script-forumbrowser-forum-select.xml')
-	if not f: return
+	res = True
+	while res:
+		res = selectForumCategory(with_all=True)
+		if not res: return
+		cat = res
+		if cat == 'all': cat = None
+		splash = showActivitySplash('Getting Forums List')
+		try:
+			flist = odb.getForumList(cat)
+		finally:
+			splash.close()
+		if not flist:
+			showMessage('No Forums','No forums in that category.')
+			continue
+		if cat and cat.isdigit():
+			caption = '[COLOR FF9999FF]'+str(__language__(30500 + int(cat)))+'[/COLOR]'
+		else:
+			caption = '[COLOR FF9999FF]All[/COLOR]'
+		menu = ImageChoiceMenu(caption)
+		for f in flist:
+			ftype = {'TT':'Tapatalk','FR':'Forumrunner','GB':'Parser Browser'}.get(f.get('type','TT'))
+			desc = f.get('desc','None') or 'None'
+			menu.addItem(f, f.get('name'), f.get('logo'), '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Interface[/B]: [COLOR FFFF9999]' + ftype + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]')
+		for f in getHiddenForums():
+			path = getForumPath(f)
+			if not path: continue
+			ff = open(path,'r')
+			name = ff.readline().strip('\n')[1:]
+			desc = ff.readline().strip('\n')[1:]
+			line = ff.readline()
+			if not 'url:logo=' in line: line = ff.readline()
+			if not 'url:logo=' in line: line = ff.readline()
+			logo = line.strip('\n').split('=')[-1]
+			ff.close()
+			name = f
+			if f[:3] in ('TT.','FR.','GB'): name = f[3:]
+			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc)
+			
+		f = menu.getResult('script-forumbrowser-forum-select.xml')
+		if f:
+			doAddForumFromOnline(f)
+			return
+	
+def doAddForumFromOnline(f):
 	if not isinstance(f,dict):
 		unHideForum(f)
 		return
@@ -2640,9 +2668,10 @@ def addForumFromOnline():
 def addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=None):
 	if not xbmcgui.Dialog().yesno('Add To Database?','Share to the Forum Browser','online database?'): return
 	LOG('Adding Forum To Online Database: %s at URL: %s' % (name,url))
+	cat = selectForumCategory() or '0'
 	if dialog: dialog.update(80,'Saving To Database')
 	odb = forumbrowser.FBOnlineDatabase()
-	msg = odb.addForum(name, url, logo, desc, ftype)
+	msg = odb.addForum(name, url, logo, desc, ftype, cat)
 	if msg == 'OK':
 		showMessage('Added','Forum added successfully',success=True)
 	else:

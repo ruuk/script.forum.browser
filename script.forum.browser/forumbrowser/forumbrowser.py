@@ -72,24 +72,31 @@ class FBOnlineDatabase():
 			err = ERROR('FBTTOnlineDatabase.postData()')
 			return 'ERROR: ' + err
 			
-	def addForum(self,name,url,logo='',desc='',ftype='TT',cat=''):
+	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0'):
 		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype)
 		
-	def getForumList(self):
-		flist = self.postData(do='list')
+	def getForumList(self,cat=None):
+		if cat:
+			flist = self.postData(do='list',cat=cat)
+		else:
+			flist = self.postData(do='list')
 		#print flist.replace('\r',',')
 		if not flist: return None
 		flist = flist.split('\n')
 		final = []
-		for f in flist:
-			if f:
-				name, rest = f.split(':',1)
-				add = {'name':name}
-				for f in rest.split('\r'):
-					k,v = f.split('=',1)
-					add[k] = v
-				#print repr(add)
-				final.append(add)
+		try:
+			for f in flist:
+				if f:
+					name, rest = f.split(':',1)
+					add = {'name':name}
+					for f in rest.split('\r'):
+						k,v = f.split('=',1)
+						add[k] = v
+					#print repr(add)
+					add['cat'] = int(add.get('cat',0))
+					final.append(add)
+		except:
+			ERROR(str(flist))
 		return final
 
 class HTMLPageInfo:

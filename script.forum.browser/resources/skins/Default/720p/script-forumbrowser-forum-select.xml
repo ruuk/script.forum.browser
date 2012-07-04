@@ -135,7 +135,7 @@
 				<posx>-20</posx>
 				<posy>-10</posy>
 				<width>500</width>
-				<height>450</height>
+				<height>550</height>
 				<texture border="30">forum-browser-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
@@ -143,14 +143,14 @@
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>460</width>
-				<height>420</height>
+				<height>520</height>
 				<texture border="30">forum-browser-black-box.png</texture>
 			</control>
 			<control type="textbox" id="310">
 				<posx>20</posx>
 				<posy>20</posy>
 				<width>420</width>
-				<height>380</height>
+				<height>480</height>
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>center</align>

@@ -38,7 +38,9 @@ Current Version : 1.0.10
 
 Added activity splash when getting forum list from online database
 Changed database interface code to handle the new database
-Added category to info when displaying forums from the online database
+Added category name and interface type to forum description when displaying forums from the online database, plus added some color
+When adding a forum TO the online database, it now asks you to choose a category
+When adding a forum FROM the online database, you can now view all forums or choose a category to view
 
 *** 1.0.9 ***
 
