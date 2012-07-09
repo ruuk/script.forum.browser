@@ -634,8 +634,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					return False
 		response = self.browser.submit()
 		html = response.read()
-		import codecs
-		codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
+		#import codecs
+		#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
 		self.lastHTML = html + 'logout'
 		#if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
 		if self.cookieJar is not None:

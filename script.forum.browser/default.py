@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.10'
+__version__ = '1.0.11'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2512,6 +2512,9 @@ def addForum(current=False):
 	dialog = xbmcgui.DialogProgress()
 	dialog.create('Add Forum')
 	dialog.update(0,'Enter Name/Address')
+	info = None
+	user = None
+	password=None
 	try:
 		if current:
 			ftype = FB.prefix[:2]
@@ -2529,10 +2532,7 @@ def addForum(current=False):
 		else:
 			forum = doKeyboard('Enter forum URL')
 			if forum == None: return
-			user = None
-			password=None
 			dialog.update(10,'Testing Forum: Tapatalk')
-			info = None
 			url = tapatalk.testForum(forum)
 			ftype = ''
 			label = ''
@@ -2551,7 +2551,7 @@ def addForum(current=False):
 					
 			if not url:
 				dialog.update(16,'Testing Forum: Parser Browser')
-				yes = xbmcgui.Dialog().yesno('Question...','Does this forum require a login?')
+				yes = xbmcgui.Dialog().yesno('Question...','Does this forum require a login?','Click "Yes" if you cannot view this forum','without already being a member.')
 				if yes:
 					user = doKeyboard(__language__(30201))
 					if user: password = doKeyboard(__language__(30202),hidden=True)
@@ -2582,11 +2582,9 @@ def addForum(current=False):
 			
 		dialog.update(20,'Getting Description And Images')
 		if not info: info = forumbrowser.HTMLPageInfo(pageURL)
-		images = []
-		if info.isValid:
-			tmp_desc = info.description(info.title(''))
-			tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
-			images = info.images()
+		tmp_desc = info.description(info.title(''))
+		tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
+		images = info.images()
 		dialog.update(30,'Enter Description')
 		desc = doKeyboard('Enter Description',default=tmp_desc)
 		if not desc: desc = tmp_desc

@@ -151,6 +151,7 @@ class HTMLPageInfo:
 		
 		
 	def description(self,default=''):
+		if not self.isValid: return default
 		try:
 			desc = re.search('<meta[^>]*?name="description"[^>]*?content="([^"]*?)"',self.html).group(1)
 			if desc: return desc
@@ -160,6 +161,7 @@ class HTMLPageInfo:
 		return default
 		
 	def images(self):
+		if not self.isValid: return [self.base2 + 'favicon.ico']
 		images = self._images(self.html, self.base)
 		images2 = self._images(self.html2, self.base2)
 		images3 = self.getStyleImages(self.html, self.base)
