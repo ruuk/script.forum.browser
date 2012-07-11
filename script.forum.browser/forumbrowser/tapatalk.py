@@ -420,13 +420,13 @@ class ForumUser(forumbrowser.ForumUser):
 ######################################################################################
 class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'tapatalk'
+	prefix = 'TT.'
 	ForumPost = ForumPost
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
-		self.prefix = 'TT.'
 		self._url = ''
 		self.transport = None
 		self.server = None

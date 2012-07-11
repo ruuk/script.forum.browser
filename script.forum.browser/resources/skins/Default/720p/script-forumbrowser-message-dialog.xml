@@ -77,6 +77,39 @@
 				<onclick>PreviousMenu</onclick>
 			</control>
 			
+			<control type="textbox" id="122">
+				<posx>30</posx>
+				<posy>97</posy>
+				<width>725</width>
+				<height>326</height>
+				<colordiffuse>FFFFFFFF</colordiffuse>
+				<font>ForumBrowser-font13</font>
+				<scroll>true</scroll>
+				<textcolor>FF000000</textcolor>
+				<visible>true</visible>
+				<pagecontrol>123</pagecontrol>
+			</control>
+			<control type="scrollbar" id="123">
+				<description>Message Scrollbar</description>
+				<posx>774</posx>
+				<posy>97</posy>
+				<width>4</width>
+				<height>326</height>
+				<onleft>111</onleft>
+				<onright>111</onright>
+				<onup>123</onup>
+				<ondown>123</ondown>
+				<texturesliderbackground>-</texturesliderbackground>
+				<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
+				<texturesliderbarfocus border="1">forum-browser-black-square.png</texturesliderbarfocus>
+				<textureslidernib>-</textureslidernib>
+				<textureslidernibfocus>-</textureslidernibfocus>
+				<orientation>vertical</orientation>
+				<showonepage>false</showonepage>
+				<colordiffuse>FF555555</colordiffuse>
+				<!-- visible>!Control.IsVisible(112)</visible -->
+			</control>
+			
 			<control type="group" id="112">
 				<control type="image">
 					<posx>670</posx>
@@ -92,6 +125,10 @@
 					<posy>380</posy>
 					<width>100</width>
 					<height>40</height>
+					<onleft>123</onleft>
+					<onright>123</onright>
+					<onup>123</onup>
+					<ondown>123</ondown>
 					<visible>true</visible>
 					<font>font13</font>
 					<align>center</align>
@@ -104,39 +141,7 @@
 					<onclick>PreviousMenu</onclick>
 				</control>
 			</control>
-				
-			<control type="textbox" id="122">
-				<posx>30</posx>
-				<posy>97</posy>
-				<width>725</width>
-				<height>326</height>
-				<colordiffuse>FFFFFFFF</colordiffuse>
-				<font>ForumBrowser-font13</font>
-				<scroll>true</scroll>
-				<textcolor>FF000000</textcolor>
-				<visible>true</visible>
-				<pagecontrol>123</pagecontrol>
-			</control>
-			<control type="scrollbar" id="123">
-				<description>Message Scrollbar</description>
-				<posx>766</posx>
-				<posy>97</posy>
-				<width>4</width>
-				<height>326</height>
-				<onleft>123</onleft>
-				<onright>123</onright>
-				<onup>123</onup>
-				<ondown>123</ondown>
-				<texturesliderbackground>-</texturesliderbackground>
-				<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
-				<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>
-				<textureslidernib>-</textureslidernib>
-				<textureslidernibfocus>-</textureslidernibfocus>
-				<orientation>vertical</orientation>
-				<showonepage>false</showonepage>
-				<colordiffuse>FF555555</colordiffuse>
-				<visible>!Control.IsVisible(112)</visible>
-			</control>
+			
 		</control>
 
 	</controls>

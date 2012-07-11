@@ -85,6 +85,7 @@ class ForumrunnerClient():
 			pyobj = json.loads(data)
 		except:
 			pass
+		#open('/home/ruuk/test.html','w').write(data.encode('ascii','replace'))
 		if not pyobj: pyobj = json.loads(re.sub(r'\\u[\d\w]+','?',data),strict=False)
 		if DEBUG: LOG('JSON: ' + str(pyobj))
 		if pyobj.get('success'):
@@ -154,12 +155,12 @@ class ForumPost(forumbrowser.ForumPost):
 	
 class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	browserType = 'forumrunner'
+	prefix = 'FR.'
 	ForumPost = ForumPost
 	
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
-		self.prefix = 'FR.'
 		self.lang = sys.modules["__main__"].__language__
 		self.online = {}
 		self.lastOnlineCheck = 0
@@ -302,6 +303,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				base = data.get('forums')
 				flist = []
 				for forum in base:
+					if forum.get('link'):
+						flist.append((forum,False))
+						continue
 					sub = False
 					data = self.client.get_forum(forumid=forum.get('id'))
 					f = data.get('forums')

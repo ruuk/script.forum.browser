@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.11'
+__version__ = '1.0.12'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -363,7 +363,8 @@ class ThreadWindow:
 		
 class BaseWindowFunctions(ThreadWindow):
 	def __init__( self, *args, **kwargs ):
-		self._progMessageSave = ''		
+		self._progMessageSave = ''
+		self.closed = False		
 		ThreadWindow.__init__(self)
 	
 	def onClick( self, controlID ):
@@ -373,7 +374,9 @@ class BaseWindowFunctions(ThreadWindow):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if ThreadWindow.onAction(self,action): return
-		if action == ACTION_PREVIOUS_MENU: self.close()
+		if action == ACTION_PREVIOUS_MENU:
+			self.closed = True
+			self.close()
 		xbmcgui.WindowXML.onAction(self,action)
 	
 	def startProgress(self):
@@ -1731,10 +1734,11 @@ class ThreadsWindow(PageWindow):
 		fid = item.getProperty('fid') or self.fid
 		topic = item.getProperty('title')
 		if item.getProperty('is_forum') == 'True':
-			self.fid = fid
-			self.topic = topic
-			self.setTheme()
-			self.fillThreadList()
+			openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self.parent,item=item)
+			#self.fid = fid
+			#self.topic = topic
+			#self.setTheme()
+			#self.fillThreadList()
 		else:
 			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,parent=self)
 
@@ -1973,6 +1977,7 @@ class ForumsWindow(BaseWindow):
 				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
 				item.setProperty("topic",title)
 				item.setProperty("id",unicode(fid))
+				item.setProperty("link",fdict.get('link',''))
 				if fdict.get('new_post'): item.setProperty('unread','unread')
 				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)
@@ -2032,12 +2037,19 @@ class ForumsWindow(BaseWindow):
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return False
+		link = item.getProperty('link')
+		if link:
+			return self.openLink(link)
 		fid = item.getProperty('id')
 		topic = item.getProperty('topic')
 		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item)
 		self.setPMCounts(FB.getPMCounts())
 		return True
 		
+	def openLink(self,link):
+		LOG('Forum is a link. Opening URL: ' + link)
+		webviewer.getWebResult(link,dialog=True,browser=hasattr(FB,'browser') and FB.browser)
+	
 	def openSubscriptionsWindow(self):
 		fid = 'subscriptions'
 		topic = __language__(30175)
@@ -2217,6 +2229,7 @@ class ForumsWindow(BaseWindow):
 				
 	def preClose(self):
 		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
+		if self.closed: return True
 		return xbmcgui.Dialog().yesno('Really Exit?','Really exit?')
 		
 	def resetForum(self,hidelogo=True):
@@ -2384,7 +2397,7 @@ def doSettings():
 	dialog.addItem('addforum',__language__(30222),'forum-browser-plus.png',helpdict.get('addforum',''))
 	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
 	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
-	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''))
+	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=FB.prefix == 'GB.')
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
@@ -2751,7 +2764,7 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 				self.getControl(250).setColorDiffuse('FF009900')
 			else:
 				self.getControl(250).setColorDiffuse('FF999900')
-		if self.scroll:
+		if self.scroll and not getSetting('message_dialog_always_show_ok',False):
 			self.getControl(112).setVisible(False)
 			self.setFocusId(123)
 		else:
@@ -2897,9 +2910,12 @@ class ChoiceMenu():
 	def cancel(self):
 		self.hideSplash()
 		
-	def addItem(self,ID,display,icon='',display2='',sep=False):
+	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False):
 		if not ID: return self.addSep()
-		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep})
+		if disabled:
+			display = "[COLOR FF444444]%s[/COLOR]" % display
+			display2 = "[B]DISABLED[/B][CR][CR][COLOR FF444444]%s[/COLOR]" % display2
+		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled})
 		
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True
@@ -2914,6 +2930,7 @@ class ChoiceMenu():
 		self.hideSplash()
 		idx = self.getChoiceIndex()
 		if idx < 0: return None
+		if self.items[idx]['disabled']: return None
 		return self.items[idx]['id']
 
 class OptionsChoiceMenu(ChoiceMenu):
@@ -2923,6 +2940,7 @@ class OptionsChoiceMenu(ChoiceMenu):
 		result = w.result
 		del w
 		if result == None: return None
+		if self.items[result]['disabled']: return None
 		return self.items[result]['id']
 		
 class ImageChoiceMenu(ChoiceMenu):

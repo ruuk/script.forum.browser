@@ -25,6 +25,7 @@ def testForum(url,user=None,password=None):
 
 class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	browserType = 'GenericParserForumBrowser'
+	prefix = 'GB.' 
 	
 	def __init__(self,forum,always_login=False,ftype=None,url=''):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,message_converter=texttransform.BBMessageConverter)

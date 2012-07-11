@@ -17,6 +17,8 @@
     <string id="30012">Light</string>
     
     <string id="30013">Hide Signatures In Posts</string>
+    <string id="30014">Always Show OK Button In Message Dialogs</string>
+    <string id="30015">Confirm Exit On Quit</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -121,7 +123,6 @@
     <string id="30234">Use skin modifications (Recommended)</string>
     <string id="30235">Enable SSL connections (https)</string>
     <string id="30236">Subscribe To Thread</string>
-    <string id="30237">Confirm exit on quit</string>
     
     <string id="30238">Password Encryption Type</string>
     <string id="30239">Encryption Key File (Optional)</string>

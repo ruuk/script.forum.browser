@@ -137,7 +137,13 @@ class HTMLPageInfo:
 		
 	def getHTML(self,url):
 		opener = urllib2.build_opener()
-		o = opener.open(urllib2.Request(url,None,{'User-Agent':'Wget/1.12'}))
+		try:
+			o = opener.open(urllib2.Request(url,None,{'User-Agent':'Mozilla/5.0'}))
+		except urllib2.HTTPError,e:
+			if e.code == 403:
+				o = opener.open(urllib2.Request(url,None,{'User-Agent':'Wget/1.12'}))
+			else:
+				raise
 		html = o.read()
 		o.close()
 		return html
@@ -567,6 +573,7 @@ class ForumUser:
 ######################################################################################
 class ForumBrowser:
 	browserType = 'ForumBrowser'
+	prefix = ''
 	ForumPost = ForumPost
 	PMLink = PMLink
 	PageData = PageData
@@ -590,9 +597,11 @@ class ForumBrowser:
 	
 	#Order is importand because some a substrings of others. Also some include \r so the replacement is not re-replaced. We clean those out at the end
 	smiliesDefs = [	(':devil:',u'[COLOR FFAA0000]\u2461[/COLOR]',u'>:\r)'),
+					(':evil:',u'[COLOR FFAA0000]\u2461[/COLOR]',u'>:\r)'),
+					(':twisted:',u'[COLOR FFAA0000]\u2461[/COLOR]',u'>:\rD'),
 					(':angel:',u'\u2460',u'O:\r)'),
 					(':;):',u'\u2464',u';\r)'),
-					(':-/',u'\u246e',u':-)'),
+					(':-/',u'\u246e',u':-/'),
 					(';)',u'\u2464',u';\r)'),
 					(':D',u'\u2463',u':\rD'),
 					(':P',u'\u2465',u':\rP'),
@@ -601,40 +610,60 @@ class ForumBrowser:
 					(':~',u'\u246a',u':~'),
 					(':grin:',u'\u2463',u':\rD'),
 					(':blush:',u'[COLOR FFFF9999]\u246d[/COLOR]',u':")'),
+					(':oops:',u'[COLOR FFFF9999]\u246d[/COLOR]',u':")'),
 					(':laugh:',u'\u2470',u':\r))'),
 					(':angry:',u'\u2466',u'>:\r{'),
 					(':rofl:',u'\u2467',u'*ROFL*'),
+					(':lol:',u'\u2467',u'*LOL*'),
 					(':huh:',u'\u2473',u'*HUH?*'),
 					(':sleepy:',u'\u2468',u'*SLEEPY*'),
 					(':cool:',u'\u2462',u'B)'),
+					('8-)',u'\u2462',u'8-)'),
 					(':rolleyes:',u'*ROLLEYES*',u'*ROLLEYES*'),
+					(':roll:',u'*ROLLEYES*',u'*ROLLEYES*'),
 					(':nod:',u'*NOD*',u'*NOD*'),
 					(':sniffle:',u'\u246a',u':\rs'),
 					(':confused:',u'%)',u'%)'),
 					(':mad:',u'\u2466',u'>:\r{'),
+					(':x',u'\u2466',u'>:\r{'),
 					(':yawn:',u'*YAWN*',u'*YAWN*'),
 					(':struggle:',u'*STRUGGLE*',u'*STRUGGLE*'),
 					(':shame:',u'\u246c',u'*SHAME*'),
-					(':eek:',u'[COLOR FF00AA00]\u2472[/COLOR]',u'8o'),
+					(':eek:',u'[COLOR FF00AA00]\u2472[/COLOR]',u'[COLOR FF00AA00]8o[/COLOR]'),
+					(':mrgreen:',u'[COLOR FF00AA00]\u2472[/COLOR]',u'[COLOR FF00AA00]:D[/COLOR]'),
 					(':rotfl:',u'\u2467',u'*ROFL*'),
 					(':bulgy-eyes:',u'\u246f',u'Oo'),
 					(':at-wits-end:',u'[COLOR FFAA0000]\u2466[/COLOR]',u'[COLOR FFAA0000]>:{[/COLOR]'),
 					(':oo:',u'>oo<',u'>oo<'),
 					(':stare:',u'*STARE*',u'*STARE*'),
 					(':sad:',u'\u2639',u':\r('),
+					(':cry:',u'\u2639',u':\r('),
 					(':no:',u'*NO*',u'*NO*'),
 					('???',u'\u2473',u'???'),
 					(':shocked:',u'\u2469',u'*SHOCKED*'),
+					(':shock:',u'\u2469',u'*SHOCKED*'),
 					(':love:',u'\u2471',u'[COLOR FFAA0000]<3[/COLOR]'),
 					('<3',u'[COLOR FFAA0000]\u2665[/COLOR]',u'[COLOR FFAA0000]<3[/COLOR]'),
 					(':shy:',u'*SHY*',u'*SHY*'),
 					(':nerd:',u'\u2474',u':-B'),
+					(':geek:',u'\u2474',u':-B'),
+					(':ugeek:',u'\u2474',u':-B'), #TODO: Make smiley with beard
+					#(':!:','',''), #TODO: ! in face
+					#(':?:','',''), #TODO: ? in face
+					#(':idea:','',''), #TODO: lightbulb 
+					#(':arrow:','',''), #TODO: Arrow in face
 					(':(',u'\u2639',u':\r('),
 					(':)',u'\u263a',u':\r)'),
 					(':s',u'\u2463',u':\rs'),
 					('\r',u'',u'')
 					]
 
+#From IP Board
+#:smile: :thumbsup: :wub: :unsure: >_< :ph34r: (w00t) :drool: :sick: :sorcerer: :sweat: :huggles: :console: :poke: :flowers: :hairy:
+#:super: :phone: :santa: :purple: :puppeh: :sheep: :heart: :question: (!) :homestar: :cat: :hyper: <_< :alien: :dry: :hmm: :aww: :afro:
+#:sleep: :mellow: :zorro: :whistle: :tongue: :nuke: :ike: :brr: :pirate: :kiss: :cheer: :wacko: :ninja: :turned: :faceless:
+#:baby: :ahappy: :bug: :frantics: :ohmy: :shifty: :clover: :bye: :logik: :blink: :yes: :ermm: :twitch: :queen:
+					
 	forumTypeNames = {	'vb': 'VBulletin',
 						'fb': 'FluxBB',
 						'mb': 'MyBB',
@@ -647,7 +676,6 @@ class ForumBrowser:
 	def __init__(self,forum,always_login=False,message_converter=None):
 		if not message_converter: message_converter = texttransform.MessageConverter
 		self.forum = forum
-		self.prefix = ''
 		self._url = ''
 		self.user = ''
 		self.password = ''

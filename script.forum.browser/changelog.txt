@@ -5,10 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Finish 'Add A Forum' stuff for Parser Browser
-  Leave subscriptions window when opening a forum subscription
-  Ignore button repeats when holding down the back button (and others?)
-  Add OK button as an option on info windows
-  Adding an existing forum no longer informs you it exists?
   Still some issues with no seconds listed in the tapatalk activity display?
   
  Long Term:
@@ -19,7 +15,7 @@ TODO:
   Improve the database and database management
   Adjustable text size
   Logo url from field in forum config data?
-  Add missing smilies for Phpbb (and others)
+  Add missing smilies other forum types
   Add missing quote formats for other forum systems
   Smiley dialog
   Tapatalk: Use charset from get_config
@@ -37,7 +33,19 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.11
+Current Version : 1.0.12
+
+*** 1.0.12 ***
+
+Opening a forum subscription now leaves the subscriptions window open (so when closing the forum's threads window it returns to the subscriptions list)
+Added settings option 'Always Show OK Button In Message Dialogs'
+Multiple fast button presses will no longer trigger multiple quit confirmation dialogs
+Improved smiley formatting - now ignores smiley text not preceded by whitespace -example "prompt:(name)" used to trigger a smiley
+Added more smiley handling (phpbb)
+Forumrunner: Fix for forums where the listed forums are links - now opens the link in WebViewer when the forum is selected
+Improved page info fetching when adding a forum by changing the reported user-agent (browser type)
+Added the ability to disable items in options menus
+'Add Current Forum To Online Database' now disabled in the options menu. (For Now)
 
 *** 1.0.11 ***
 
