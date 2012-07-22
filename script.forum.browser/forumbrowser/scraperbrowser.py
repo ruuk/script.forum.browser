@@ -151,7 +151,7 @@ class PageData:
 			if pdict.get('page'):
 				self.page = pdict.get('page')
 				page_set = True
-			self.totalPages = pdict.get('total','1')
+			self.totalPages = pdict.get('total','1') or '1'
 			self.pageDisplay = self.MC.tagFilter.sub('',pdict.get('display',''))
 		if next_match:
 			#check for less greedy match by looking in the whole match for a smaller match
@@ -911,12 +911,27 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl=''):
 		suburl = suburl or self.urls.get(sub,'')
 		if not suburl: return None
-		if page and not str(page).isdigit(): return self.makeURL(page)
+		if page:
+			try: int(page)
+			except: return self.makeURL(page)
+			
 		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
 			page = self.URLSubs(gnp,pid=lastid)
 		else:
 			if page:
+				
+				####-- For SMF --################################
+				if fid.endswith('.0') or tid.endswith('.0'):
+					if tid.endswith('.0'):
+						mult = 20
+						tid = tid[:-1]
+					elif fid.endswith('.0'):
+						mult = 25
+						fid = fid[:-1]
+					if int(page) > 0: page = str((int(page) - 1) * mult)
+				####-- For SMF --################################
+					
 				try:
 					if int(page) < 0: page = '9999'
 				except:
@@ -1261,7 +1276,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	
 	def canDelete(self,user,target='POST'):
 		if target == 'POST':
-			return self.user == user and self.urls.get('deletepost') and self.isLoggedIn()
+			return bool(self.user == user and self.urls.get('deletepost') and self.isLoggedIn())
 		else:
 			return bool(self.urls.get('private_messages_delete')) and self.isLoggedIn()
 	

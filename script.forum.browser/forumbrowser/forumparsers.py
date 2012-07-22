@@ -1179,12 +1179,14 @@ class GeneralForumParser(AdvancedParser):
 		self.maxForumDepth = 0
 		self.subsSet = False
 		self.forums = []
+		self.dups = {}
 		self.typeNames = {	'vb': 'VBulletin',
 							'fb': 'FluxBB',
 							'mb': 'MyBB',
 							'mb2': 'MyBB',
 							'pb': 'PhpBB',
-							'ip': 'Invision Power Board'
+							'ip': 'Invision Power Board',
+							'sm': 'SMF (Simple Machines Forum)'
 						}
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
@@ -1192,7 +1194,8 @@ class GeneralForumParser(AdvancedParser):
 							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
 							'mb2': re.compile('(?:^|")forumdisplay\.php\?(?!from=)[^"\']*?fid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)'),
-							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
+							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							'sm': re.compile('index\.php\?[^"\']*?board=(?P<id>\d+\.0+)')
 						}
 		
 		self.splits = {	'vb':[ (re.compile('<!--[^>]*?SUBSCRIBED FORUMS[^>]*?-->(?i)'),re.compile('<!--[^>]*?END SUBSCRIBED FORUMS[^>]*?-->(?i)')) ],
@@ -1219,6 +1222,7 @@ class GeneralForumParser(AdvancedParser):
 	def getForums(self,html):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.forums = []
+		self.dups = {}
 		self.reset()
 		self.getRE(html)
 		if not self.linkRE: return self.forums
@@ -1249,16 +1253,24 @@ class GeneralForumParser(AdvancedParser):
 	def handleEndTag(self,tag):
 		if tag and tag.tag == 'a':
 			href = tag.getAttr('href')
+			parent = self.stack[-1]
 			if href:
 				m = self.linkRE.search(href)
 				if m and not 'topicid' in href:
 					mdict = m.groupdict()
-					forum = {'forumid':mdict.get('id',''),'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag}
+					fid = mdict.get('id','')
+					if fid in self.dups:
+						forum = self.dups[fid]
+						if not forum.get('title'): forum['title'] = ''.join(tag.dataStack)
+						#forum['tag'] = tag
+					else:
+						forum = {'forumid':fid,'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag}
 					for t in reversed(self.stack):
 						if t.tag in ('td','li','div'):
 							t.callback = self.checkDesc
 							break
-					if 'sub' in tag.getAttr('class') or (self.lastTag and 'sub' in self.lastTag.getAttr('class')):
+					#TODO: Make this more efficient? See if re is better than checking for sub and not subject - also, perhaps get the class attr at start
+					if ('sub' in t.getAttr('class') and not 'subject' in t.getAttr('class')) or (self.lastTag and ('sub' in self.lastTag.getAttr('class') or 'children' in parent.getAttr('class')) and not 'subject' in self.lastTag.getAttr('class')):
 							forum['subforum'] = True
 							self.subsSet = True
 					for t in reversed(self.stack):
@@ -1283,7 +1295,8 @@ class GeneralForumParser(AdvancedParser):
 							break
 					self.lastForumTag = tag
 					self.lastForum = forum
-					self.forums.append(forum)
+					if not fid in self.dups: self.forums.append(forum)
+					self.dups[fid] = forum
 					#print tag.depth, forum
 	
 	def checkDesc(self,tag):
@@ -1296,9 +1309,10 @@ class GeneralThreadParser(AdvancedParser):
 		self.linkREs = {	'vb':re.compile('(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<id>\d+)'),
 							'fb':re.compile('(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<id>\d+)'),
 							'mb':re.compile('(?:^|")thread-(?P<id>\d+).html'),
-							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=(?P<id>\d+)'),
+							'mb2':re.compile('(?:^|")showthread\.php\?[^"\']*?tid=(?P<id>\d+)'),
 							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
-							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)')
+							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							'sm':re.compile('index\.php\?[^"\']*?topic=(?P<id>\d+\.0+)')
 						}
 		
 		self.genericLinkREs = {	'u0':re.compile('(?:href=|^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\'| |>)'),
@@ -1403,6 +1417,8 @@ class GeneralThreadParser(AdvancedParser):
 class GeneralPostParser(AdvancedParser):
 	def __init__(self):
 		AdvancedParser.__init__(self)
+		self.ignoreForumImages = True
+		self.domain = ''
 		self.setDefaults()
 		
 		self.wsRE = re.compile('[\r\t]')
@@ -1418,7 +1434,8 @@ class GeneralPostParser(AdvancedParser):
 							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
 							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
-							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)')
+							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)'),
+							'sm': re.compile('index\.php\?[^"\']*?topic=\d+\.msg(?P<id>\d+)#msg\d+')
 						}
 		#sm    SMF: Simple Machines Forum
 		#ub    UBB
@@ -1457,6 +1474,7 @@ class GeneralPostParser(AdvancedParser):
 							('postcount',re.compile('^([\d,]+) posts(?i)')),
 							('extra.location',re.compile('^(?:location|from):?( .+)?(?i)')),
 							('extra.reputation',re.compile('^reputation:( \d+)?(?i)')),
+							('extra.gender',re.compile('^gender:( .*?)?(?i)')),
 							('status',re.compile('(^.{1,40}$)')),
 							('postcount',re.compile('\w+: ([\d,]+)$(?i)')),
 							('title',re.compile('^re: (?i)')),
@@ -1506,7 +1524,12 @@ class GeneralPostParser(AdvancedParser):
 		self.quoteUserPrefix = self.filters.get('quote_user_prefix','posted by')
 		self.quoteFormat = self.filters.get('quote_tag','=%s')
 		self.postURLPrefix = self.filters.get('post_url_prefix','@@**&&++')
-				
+		
+	def setDomain(self,url):
+		domain = url.split('://')[-1].split('/')[0]
+		domain = '.'.join(domain.split('.')[-2:])
+		self.domain = domain
+			
 	def getPosts(self,html,url='',callback=None,filters=None,page_url=''):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
@@ -1716,12 +1739,16 @@ class GeneralPostParser(AdvancedParser):
 		if isinstance(d,HTMLTag):
 			if d.tag == 'img':
 				src = self.revertCodes(d.getAttr('src'))
-				if 'avatar' in repr(d).lower():
+				reprd = repr(d)
+				if 'avatar' in reprd.lower():
 					p['avatar'] = src or ''
-				elif 'offline' in repr(d):
+				elif 'offline' in reprd or 'useroff' in reprd:
 					p['online'] = False
-				elif 'online' in src:
+				elif 'online' in src or 'useron' in src: #useron is from SMF
 					p['online'] = True
+				elif self.lastUnset and self.lastUnset.endswith('gender') and ('male' in src.lower() or 'female' in src.lower()):
+					p['extras']['gender'] = 'female' in src.lower() and 'Female' or 'Male'
+					self.lastUnset = None 
 				elif d.getAttr('width') and not p.get('avatar'): #user added images won't have size attributes set, at least that's the theory
 					p['avatar'] = src or ''
 				elif src.startswith('http'):
@@ -1729,7 +1756,7 @@ class GeneralPostParser(AdvancedParser):
 					if 'width' in style  and not p.get('avatar'): #user added images won't have size attributes set, at least that's the theory
 						p['avatar'] = src or ''
 					else:
-						newData.append(' [img]'+src+'[/img] ')
+						if (not (self.domain and self.domain in src) and src.startswith('http')) or not self.ignoreForumImages: newData.append(' [img]'+src+'[/img] ')
 			elif d.tag == 'a':
 				href = d.getAttr('href')
 				if href and not 'javascript:' in href and not href.startswith('#'):
@@ -1832,7 +1859,7 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'li':
 				ds = ''.join(d.startTag.dataStack)
 				dslower = ds.lower()
-				if not dslower in self.ignores: #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
+				if not dslower in self.ignores and not d.startTag.info == 'IGNORE': #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
 					if not dslower.startswith('view') and not dslower.endswith('posts') and not dslower.endswith('profile'):
 						newData.append('    * ' + ds + '\n')
 			elif d.tag == 'font':
@@ -1861,7 +1888,9 @@ class GeneralPostParser(AdvancedParser):
 								user = m.group(1).strip()
 								if last == 'user' and re.search('\w',d) and not d.tag.tag == 'a' and user != p.get('user',''):
 									#print user.encode('ascii','replace') + ' : ' + p.get('user','').encode('ascii','replace')
-									if user: p[val] = user
+									if user:
+										p[val] = user
+										d.tag.info = 'IGNORE'
 								else:
 									if user == p.get('user') and not p.get('status'):
 										last = 'user'
@@ -1874,15 +1903,20 @@ class GeneralPostParser(AdvancedParser):
 							#print 'ls ' + d.encode('ascii','replace')
 							if m.group(1):
 								status = m.group(1).strip()
-								if status: p['status'] = status
+								if status:
+									p['status'] = status
+									d.tag.info = 'IGNORE'
 						elif val == 'date':
 							#print 'd ' + d.encode('ascii','replace')
 							if not val in p:
 								p[val] = dstrip
+								d.tag.info = 'IGNORE'
 							elif p[val].endswith(','):
 								p[val] += ' ' + dstrip
+								d.tag.info = 'IGNORE'
 							elif self.lastUnset:
 								p[self.lastUnset] = dstrip
+								d.tag.info = 'IGNORE'
 								self.lastUnset = None
 							else:
 								if p[val] == dstrip:
@@ -1896,9 +1930,11 @@ class GeneralPostParser(AdvancedParser):
 							#print 'pn ' + d.encode('ascii','replace')
 							if self.lastUnset:
 								p[self.lastUnset] = dstrip
+								d.tag.info = 'IGNORE'
 								self.lastUnset = None
 							elif not p.get('postnumber'):
 								p[val] = m.group(1)
+								d.tag.info = 'IGNORE'
 							else:
 								if not m.group(1) == '#': break #Eat the postnumber if already set and don't remove in case we just got #
 						elif val.startswith('extra.'):
@@ -1906,15 +1942,19 @@ class GeneralPostParser(AdvancedParser):
 							data = m.group(1)
 							if data:
 								extra = val.split('.',1)[-1]
-								if not extra in p['extras']: p['extras'][extra] = data
+								if not extra in p['extras']:
+									p['extras'][extra] = data
+									d.tag.info = 'IGNORE'
 							else:
 								self.lastUnset = val
+								d.tag.info = 'IGNORE'
 						elif m.groups():
 							#print 'g ' + d.encode('ascii','replace')
 							if not val in p:
 								mg1 = m.group(1)
 								if mg1: mg1 = mg1.strip()
 								p[val] = mg1
+								d.tag.info = 'IGNORE'
 								if not p[val]: last = val
 								if not mg1: self.lastUnset = val
 							else:
@@ -1922,12 +1962,14 @@ class GeneralPostParser(AdvancedParser):
 						elif val == 'user':
 							if not p.get('user') and not dstrip.lower() in self.ignores:
 								p[val] = dstrip
+								d.tag.info = 'IGNORE'
 							else:
 								continue
 						else:
 							#print 'ng ' + d.encode('ascii','replace')
 							if not val in p:
 								p[val] = dstrip
+								d.tag.info = 'IGNORE'
 							else:
 								continue
 						
@@ -1944,6 +1986,7 @@ class GeneralPostParser(AdvancedParser):
 							if not extra in p['extras']: p['extras'][extra] = dstrip
 						else:
 							p[self.lastUnset] = dstrip
+							d.tag.info = 'IGNORE'
 						self.lastUnset = ''
 					elif (d.tag.tag.startswith('h') or d.tag.tag == 'strong') and not p.get('title') and not (newData and self.quoteUserPrefix in newData[-1].lower()):
 						p['title'] = dstrip
@@ -1994,7 +2037,7 @@ class GeneralPostParser(AdvancedParser):
 					if not '#' in postnumber and not postnumber.isdigit():
 						postnumber = ''.join(self.lastTag.dataStack).split(' ')[0]
 					if not '#' in postnumber and not postnumber.isdigit():
-						if self.forumType != 'pb' and not self.isGeneric: return
+						if not self.forumType in ('pb','sm') and not self.isGeneric: return
 						if not title:
 							title = ''.join(self.lastTag.dataStack)
 							usedTag = self.lastTag

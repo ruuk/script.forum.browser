@@ -4,8 +4,8 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Finish 'Add A Forum' stuff for Parser Browser
-  Still some issues with no seconds listed in the tapatalk activity display?
+  Finish 'Add A Forum' stuff for Parser Browser (mainly adding Parser Browser forums to online database)
+  Still some issues with no seconds listed in the tapatalk activity display...?
   
  Long Term:
   When adding a forum, ask for logo background color (or image?) or ask later
@@ -33,7 +33,20 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.12
+Current Version : 1.0.13
+
+*** 1.0.13 ***
+
+Now requires WebViewer 0.9.1 or greater
+Updated help
+ParserBrowser: Added handling for forum type SMF (Simple Machines Forum) (Currently very basic with page handling - readonly)
+ParserBrowser: Added handling for Gender stat in posts (Shows in extra info)
+Now handles image URLs with '/../../../' or similar in them in posts and when getting a logo when adding a forum
+Added settings option 'Parser Browser: Ignore Forum Images' - when enabled it will filter out images hosted on the forum (ie smileys and arrows and stuff)
+Added the ability to set a theme ('header' color for now) for the forums display with a new color dialog (options menu)
+Added the ability to share current forum theme to the online database (options menu)
+Online database now replaces existing forum details instead of reporting that it already exists
+Online database now pointing to domain 2ndmind.tk (with new hosting) until I can get my crappy registrar (also provider of my crappy old hosting) to answer my emails, chats or phone calls  
 
 *** 1.0.12 ***
 

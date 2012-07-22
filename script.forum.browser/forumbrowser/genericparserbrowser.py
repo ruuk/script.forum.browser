@@ -7,6 +7,7 @@ LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 __language__ = sys.modules["__main__"].__language__
+getSetting = sys.modules["__main__"].getSetting
 
 def testForum(url,user=None,password=None):
 	if not url.startswith('http'):
@@ -228,6 +229,8 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = None
 		pagesURL = url
+		self.postParser.ignoreForumImages = getSetting('ignore_forum_images',True)
+		self.postParser.setDomain(self._url)
 		if self.threadParser.isGeneric:
 			for f in self.threadParser.threads:
 				if threadid == f.get('threadid'):

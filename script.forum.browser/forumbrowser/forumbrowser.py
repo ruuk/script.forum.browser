@@ -1,5 +1,5 @@
 #Forum browser common
-import sys, re, urllib, urllib2, texttransform, binascii
+import sys, os, re, urllib, urllib2, texttransform, binascii
 
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
@@ -58,10 +58,11 @@ class FBData():
 		
 	def __nonzero__(self):
 		return not self.error
-	
+
 class FBOnlineDatabase():
 	def __init__(self):
-		self.url = 'http://xbmc.2ndmind.net/forumbrowser/forums.php'
+		#self.url = 'http://xbmc.2ndmind.net/forumbrowser/forums.php'
+		self.url = 'http://xbmc.2ndmind.tk/forumbrowser/forums.php'
 	
 	def postData(self,**data):
 		enc = urllib.urlencode(data)
@@ -74,6 +75,9 @@ class FBOnlineDatabase():
 			
 	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0'):
 		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype)
+		
+	def setTheme(self,fname,vals_dict):
+		return self.postData(do='set_theme',name=fname,**vals_dict)
 		
 	def getForumList(self,cat=None):
 		if cat:
@@ -100,6 +104,7 @@ class FBOnlineDatabase():
 		return final
 
 class HTMLPageInfo:
+	urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 	def __init__(self,url,html=''):
 		self.url = url
 		
@@ -222,8 +227,72 @@ class HTMLPageInfo:
 			u = self.base2 + u[1:]
 		else:
 			u = base + u
+		pdfFilter = self.urlParentDirFilter
+		while pdfFilter.search(u):
+			#TODO: Limit
+			u = pdfFilter.sub('/',u)
+			u = u.replace('/../','/')
 		return u
 	
+class ForumData:
+	def __init__(self,forumID,forumsPath):
+		self.forumID = forumID
+		self.forumsPath = forumsPath
+		self.filePath = os.path.join(self.forumsPath,self.forumID)
+		self.name = ''
+		self.description = ''
+		self.readData()
+		
+	def readData(self):
+		self.urls = {}
+		self.theme = {}
+		self.formats = {}
+		if not os.path.exists(self.filePath): return
+		f = open(self.filePath,'r')
+		data = f.read()
+		f.close()
+		data = data.splitlines()
+		self.name = data.pop(0)[1:]
+		self.description = data.pop(0)[1:]
+		for line in data:
+			line = line.strip()
+			if not line: continue
+			if line.startswith('#'): continue
+			dtype , rest = line.split(':',1)
+			if dtype == 'import':
+				self.loadForumData(rest)
+			elif dtype == 'url':
+				key,url = rest.split('=',1)
+				if url.startswith('=='):
+					dup = url.split('=')[-1]
+					url = self.urls[dup]
+				self.urls[key] = url
+			elif dtype == 'theme':
+				key,color = rest.split('=',1)
+				if color.startswith('=='):
+					dup = color.split('=')[-1]
+					color = self.theme[dup]
+				self.theme[key] = color
+			elif dtype == 'format':
+				key,data = rest.split('=',1)
+				if data.startswith('=='):
+					dup = data.split('=')[-1]
+					data = self.formats[dup]
+				self.formats[key] = data
+				
+	def writeData(self):
+		out = '#%s\n#%s\n' % (self.name,self.description)
+		for k,v in self.urls.items():
+			out += 'url:' + k + '=' + v + '\n'
+		for k,v in self.theme.items():
+			out += 'theme:' + k + '=' + v + '\n'
+		for k,v in self.formats.items():
+			out += 'format:' + k + '=' + v + '\n'
+		f = open(self.filePath,'w')
+		f.write(out)
+		f.close()
+		
+
 ################################################################################
 # Action
 ################################################################################
@@ -233,6 +302,7 @@ class Action:
 
 class PMLink:
 	linkImageFilter = re.compile('https?://.+?\.(?:jpg|png|gif|bmp)$')
+	#urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 	def __init__(self,fb,match=None):
 		self.FB = fb
 		self.MC = fb.MC

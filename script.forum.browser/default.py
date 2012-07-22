@@ -1,4 +1,4 @@
-import urllib2, re, os, sys, time, urlparse
+import urllib2, re, os, sys, time, urlparse, binascii
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 import threading
 
@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.12'
+__version__ = '1.0.13'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -88,13 +88,6 @@ try:
 except:
 	LOG('Clipboard Disabled: No SSClipboard')
 
-FB = None
-
-from forumbrowser import forumbrowser
-from forumbrowser import texttransform
-from crypto import passmanager
-from forumbrowser import tapatalk
-from video import WebVideo
 def getSetting(key,default=None):
 	setting = __addon__.getSetting(key)
 	if not setting: return default
@@ -112,6 +105,15 @@ def setSetting(key,value):
 	if isinstance(value,list):
 		value = ':!,!:'.join(value)
 	__addon__.setSetting(key,value)
+	
+FB = None
+
+from forumbrowser import forumbrowser
+from forumbrowser import texttransform
+from crypto import passmanager
+from forumbrowser import tapatalk
+from video import WebVideo
+
 	
 ######################################################################################
 # Base Window Classes
@@ -364,7 +366,8 @@ class ThreadWindow:
 class BaseWindowFunctions(ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''
-		self.closed = False		
+		self.closed = False
+		self.headerTextFormat = '%s'
 		ThreadWindow.__init__(self)
 	
 	def onClick( self, controlID ):
@@ -390,7 +393,7 @@ class BaseWindowFunctions(ThreadWindow):
 			return False
 		w = int((pct/100.0)*self.getControl(300).getWidth())
 		self.getControl(310).setWidth(w)
-		self.getControl(104).setLabel(message)
+		self.getControl(104).setLabel(self.headerTextFormat % message)
 		return True
 		
 	def endProgress(self):
@@ -934,8 +937,13 @@ class MessageWindow(BaseWindow):
 
 	def getImages(self):
 		i=0
+		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 		for url in self.post.imageURLs():
 			i+=1
+			while urlParentDirFilter.search(url):
+				#TODO: Limit
+				url = urlParentDirFilter.sub('/',url)
+			url = url.replace('/../','/')
 			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
 			item.setProperty('url',url)
 			self.getControl(150).addItem(item)
@@ -1863,6 +1871,7 @@ class ForumsWindow(BaseWindow):
 		self.empty = True
 		self.setAsMain()
 		self.started = False
+		self.headerIsDark = False
 	
 	def getUsername(self):
 		return __addon__.getSetting('login_user_' + FB.getForumID().replace('.','_'))
@@ -1904,6 +1913,7 @@ class ForumsWindow(BaseWindow):
 	def endGetForumBrowser(self,fb):
 		global FB
 		FB = fb
+		self.setTheme()
 		self.getControl(112).setVisible(False)
 		self.resetForum()
 		self.fillForumList(True)
@@ -1913,8 +1923,39 @@ class ForumsWindow(BaseWindow):
 		self.getControl(109).setLabel('v' + __version__)
 		
 	def setTheme(self):
-		self.getControl(103).setLabel('[B]%s[/B]' % __language__(30170))
-		self.getControl(104).setLabel('[B]%s[/B]' % FB.getDisplayName())
+		hc = FB.theme.get('header_color')
+		if hc and hc.upper() != 'FFFFFF':
+			self.headerIsDark = self.hexColorIsDark(hc)
+			self.headerTextFormat = '[B]%s[/B]'
+			if self.headerIsDark: self.headerTextFormat = '[COLOR FFFFFFFF][B]%s[/B][/COLOR]'
+			hc = 'FF' + hc.upper()
+			self.getControl(100).setColorDiffuse(hc)
+			self.getControl(251).setVisible(False)
+		else:
+			self.getControl(100).setColorDiffuse('FF888888')
+			self.getControl(251).setVisible(True)
+		self.setLabels()
+		
+	def hexColorIsDark(self,h):
+		r,g,b = self.hexToRGB(h)
+		if r > 140 or g > 140 or b > 140: return False
+		return True
+		
+	def hexToRGB(self,h):
+		try:
+			r = h[:2]
+			g = h[2:4]
+			b = h[4:]
+			#print h
+			#print r,g,b
+			return (int(r,16),int(g,16),int(b,16))
+		except:
+			ERROR('hexToRGB()')
+			return (255,255,255)
+
+	def setLabels(self):
+		self.getControl(103).setLabel(self.headerTextFormat % __language__(30170))
+		self.getControl(104).setLabel(self.headerTextFormat % FB.getDisplayName())
 		
 	def errorCallback(self,error):
 		showMessage(__language__(30050),__language__(30171),error.message,error=True)
@@ -1923,7 +1964,7 @@ class ForumsWindow(BaseWindow):
 	
 	def fillForumList(self,first=False):
 		if not FB: return
-		self.setTheme()
+		self.setLabels()
 		if not FB.guestOK() and not self.hasLogin():
 			yes = xbmcgui.Dialog().yesno('Login Required','This forum does not allow guest access.','Login required.','Set login info now?')
 			if yes:
@@ -1999,13 +2040,20 @@ class ForumsWindow(BaseWindow):
 		
 	def setLogoFromFile(self):
 		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.jpg')
-		if os.path.exists(logopath): self.getControl(250).setImage(logopath)
+		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
+		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
+		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
+		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
+		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
 			
 	def setLogo(self,logo):
 		if not logo: return
-		if getSetting('save_logos',False) and not FB.getForumID().startswith('GB.'):
+		if getSetting('save_logos',False):
 			root, ext = os.path.splitext(logo) #@UnusedVariable
 			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
+			if not ext:
+				if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
+				if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
 			if os.path.exists(logopath):
 				logo = logopath
 			else:
@@ -2239,6 +2287,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
 		__addon__.setSetting('last_forum',FB.getForumID())
+		self.setTheme()
 		self.setLogoFromFile()
 		
 	def setLoggedIn(self):
@@ -2256,6 +2305,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		
 	def openSettings(self):
+		if not FB: return
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''
 		doSettings()
 		newLogin = FB and self.getUsername() + self.getPassword() or ''
@@ -2300,11 +2350,15 @@ def doKeyboard(prompt,default='',hidden=False):
 	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
 
-def getForumPath(forumID):
+def getForumPath(forumID,just_path=False):
 	path = os.path.join(FORUMS_PATH,forumID)
-	if os.path.exists(path): return path
+	if os.path.exists(path):
+		if just_path: return FORUMS_PATH
+		return path
 	path = os.path.join(FORUMS_STATIC_PATH,forumID)
-	if os.path.exists(path): return path
+	if os.path.exists(path):
+		if just_path: return FORUMS_STATIC_PATH
+		return path
 	return None
 	
 def fidSortFunction(fid):
@@ -2340,17 +2394,14 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			if not f:
 				menu.addSep()
 				continue
-			path = getForumPath(f)
+			path = getForumPath(f,just_path=True)
 			if not path: continue
-			if not os.path.isfile(path): continue
-			ff = open(path,'r')
-			name = ff.readline().strip()[1:]
-			desc = ff.readline().strip()[1:]
-			line = ff.readline()
-			if not 'url:logo=' in line: line = ff.readline()
-			if not 'url:logo=' in line: line = ff.readline()
-			logo = line.strip('\n').split('=')[-1]
-			ff.close()
+			if not os.path.isfile(os.path.join(path,f)): continue
+			fdata = forumbrowser.ForumData(f,path)
+			name = fdata.name
+			desc = fdata.description
+			logo = fdata.urls.get('logo','')
+			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			desc = '[B]Description[/B]: [COLOR FFFF9999]' + (desc or 'None') + '[/COLOR]'
 			if f.startswith('TT.'):
 				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Tapatalk[/COLOR]'
@@ -2358,7 +2409,7 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Forumrunner[/COLOR]'
 			elif f.startswith('GB.'):
 				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
-			menu.addItem(f, name,logo,desc)
+			menu.addItem(f, name,logo,desc,bgcolor=hc)
 
 	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
 	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
@@ -2398,6 +2449,8 @@ def doSettings():
 	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
 	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
 	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=FB.prefix == 'GB.')
+	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''))
+	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
@@ -2409,6 +2462,8 @@ def doSettings():
 	elif result == 'addforum': addForum()
 	elif result == 'addonline': addForumFromOnline()
 	elif result == 'removeforum': removeForum()
+	elif result == 'setcurrentcolor': return setForumColor(askColor())
+	elif result == 'updatethemeodb': updateThemeODB()
 	elif result == 'setlogins': setLogins(True)
 #	elif result == 'register': registerForum()
 	elif result == 'help': showHelp('forums')
@@ -2616,13 +2671,13 @@ def addForum(current=False):
 	finally:
 		dialog.close()
 	
-def saveForum(ftype,forumID,name,desc,url,logo): #TODO: Do these all the same. What... was I crazy?
+def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do these all the same. What... was I crazy?
 	if ftype == 'TT':
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s' % (name,desc,url,logo))
+		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	elif ftype == 'FR':
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s' % (name,desc,url,logo))
+		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	else:
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s' % (name,desc,url,logo))
+		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	
 def addForumFromOnline():
 	odb = forumbrowser.FBOnlineDatabase()
@@ -2648,21 +2703,16 @@ def addForumFromOnline():
 		for f in flist:
 			ftype = {'TT':'Tapatalk','FR':'Forumrunner','GB':'Parser Browser'}.get(f.get('type','TT'))
 			desc = f.get('desc','None') or 'None'
-			menu.addItem(f, f.get('name'), f.get('logo'), '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Interface[/B]: [COLOR FFFF9999]' + ftype + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]')
+			menu.addItem(f, f.get('name'), f.get('logo'), '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Interface[/B]: [COLOR FFFF9999]' + ftype + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]',bgcolor='FF' + f.get('header_color','FFFFFF'))
 		for f in getHiddenForums():
-			path = getForumPath(f)
+			path = getForumPath(f,just_path=True)
 			if not path: continue
-			ff = open(path,'r')
-			name = ff.readline().strip('\n')[1:]
-			desc = ff.readline().strip('\n')[1:]
-			line = ff.readline()
-			if not 'url:logo=' in line: line = ff.readline()
-			if not 'url:logo=' in line: line = ff.readline()
-			logo = line.strip('\n').split('=')[-1]
-			ff.close()
-			name = f
-			if f[:3] in ('TT.','FR.','GB'): name = f[3:]
-			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc)
+			fdata = forumbrowser.ForumData(f,path)
+			name = fdata.name
+			desc = fdata.description
+			logo = fdata.urls.get('logo','')
+			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
+			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
 			
 		f = menu.getResult('script-forumbrowser-forum-select.xml')
 		if f:
@@ -2673,7 +2723,7 @@ def doAddForumFromOnline(f):
 	if not isinstance(f,dict):
 		unHideForum(f)
 		return
-	saveForum(f['type'],f['type']+'.'+f['name'],f['name'],f.get('desc',''),f['url'],f.get('logo',''))
+	saveForum(f['type'],f['type']+'.'+f['name'],f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
 	showMessage('Added','Forum added: ' + f['name'])
 	
 def addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=None):
@@ -2708,6 +2758,148 @@ def chooseLogo(forum,image_urls):
 	url = menu.getResult()
 	return url or ''
 	
+class ColorDialog(xbmcgui.WindowXMLDialog):
+	def __init__( self, *args, **kwargs ):
+		self.image = kwargs.get('image')
+		self.hexc = kwargs.get('hexcolor','FFFFFF') or 'FFFFFF'
+		self.r = 127
+		self.g = 127
+		self.b = 127
+		self.closed = False
+		xbmcgui.WindowXMLDialog.__init__( self )
+		
+	def onInit(self):
+		if self.image: self.getControl(300).setImage(self.image)
+		self.setHexColor(self.hexc)
+		self.showColor()
+		
+	def onClick(self,controlID):
+		if   controlID == 150: self.changeR(-1)
+		elif controlID == 151: self.changeR(1)
+		elif controlID == 152: self.changeG(-1)
+		elif controlID == 153: self.changeG(1)
+		elif controlID == 154: self.changeB(-1)
+		elif controlID == 155: self.changeB(1)
+		elif controlID == 156: self.changeAll(-1)
+		elif controlID == 157: self.changeAll(1)
+		elif controlID == 158: self.setHexColor()
+		elif controlID == 170: self.setHexColor('FFFFFF')
+		elif controlID == 171: self.setHexColor('000000')
+		elif controlID == 172: self.setHexColor('7E7E7E')
+		elif controlID == 173: self.setHexColor('FF0000')
+		elif controlID == 174: self.setHexColor('00FF00')
+		elif controlID == 175: self.setHexColor('0000FF')
+		elif controlID == 111: return self.close()
+		
+		#print str(self.r) + ' ' +str(self.g) + ' ' +str(self.b)
+		self.showColor()
+		
+	def showColor(self):
+		hexR = binascii.hexlify(chr(self.r)).upper()
+		hexG = binascii.hexlify(chr(self.g)).upper()
+		hexB = binascii.hexlify(chr(self.b)).upper()
+		hexc = hexR+hexG+hexB
+		self.getControl(160).setColorDiffuse('FF' + hexc)
+		self.getControl(200).setLabel(str(self.r))
+		self.getControl(201).setLabel(hexR)
+		self.getControl(202).setLabel(str(self.g))
+		self.getControl(203).setLabel(hexG)
+		self.getControl(204).setLabel(str(self.b))
+		self.getControl(205).setLabel(hexB)
+		self.getControl(158).setLabel('#'+hexc)
+		
+	def changeR(self,mod):
+		self.r += mod
+		if self.r < 0: self.r = 255
+		elif self.r > 255: self.r = 0
+		
+	def changeG(self,mod):
+		self.g += mod
+		if self.g < 0: self.g = 255
+		elif self.g > 255: self.g = 0
+		
+	def changeB(self,mod):
+		self.b += mod
+		if self.b < 0: self.b = 255
+		elif self.b > 255: self.b = 0
+		
+	def changeAll(self,mod):
+		self.r += mod
+		if self.r < 0: self.r = 0
+		elif self.r > 255: self.r = 255
+		self.g += mod
+		if self.g < 0: self.g = 0
+		elif self.g > 255: self.g = 255
+		self.b += mod
+		if self.b < 0: self.b = 0
+		elif self.b > 255: self.b = 255
+		
+	def setHexColor(self,hexc=None):
+		if not hexc: hexc = getHexColor(self.hexValue())
+		if not hexc: return
+		self.r = int(hexc[:2],16)
+		self.g = int(hexc[2:4],16)
+		self.b = int(hexc[4:],16)
+		self.showColor()
+		
+	def hexValue(self):
+		if self.closed: return None
+		hexR = binascii.hexlify(chr(self.r)).upper()
+		hexG = binascii.hexlify(chr(self.g)).upper()
+		hexB = binascii.hexlify(chr(self.b)).upper()
+		hexc = hexR+hexG+hexB
+		return hexc
+		
+	def onAction(self,action):
+		if action == 92 or action == 10:
+			self.closed = True
+			self.close()
+		
+def getCurrentLogo():
+	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.jpg')
+	if os.path.exists(logopath): return logopath
+	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
+	if os.path.exists(logopath): return logopath
+	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
+	if os.path.exists(logopath): return logopath
+	return FB.urls.get('logo')
+
+def askColor():
+	#fffaec
+	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(),hexcolor=FB.theme.get('header_color'))
+	hexc = w.hexValue()
+	del w
+	return hexc
+	
+def getHexColor(hexc=None):
+	hexc = doKeyboard('Enter 6-Digit Hex Color',default=hexc)
+	if not hexc: return None
+	while len(hexc) != 6 or re.search('[^1234567890abcdef](?i)',hexc):
+		showMessage('Error','Invalid Hex Color')
+		hexc = doKeyboard('Enter 6-Digit Hex Color',default=hexc)
+		if not hexc: return None
+	return hexc
+	
+def setForumColor(color):
+	if not color: return False
+	fid = FB.getForumID()
+	fdata = forumbrowser.ForumData(fid,FORUMS_PATH)
+	fdata.theme['header_color'] = color
+	FB.theme['header_color'] = color
+	fdata.writeData()
+	showMessage('Done','Color Set!')
+	return True
+
+def updateThemeODB():
+	odb = forumbrowser.FBOnlineDatabase()
+	vals_dict= {'header_color':FB.theme.get('header_color')}
+	result = str(odb.setTheme(FB.getForumID()[3:],vals_dict))
+	LOG('Updating ODB Theme: ' + result)
+	if result == '1':
+		showMessage('Done','Online database color updated.')
+	else:
+		showMessage('Failed','Failed to update the online database.')
+
 def getHiddenForums():
 	flist = __addon__.getSetting('hidden_static_forums')
 	if flist: flist = flist.split('*:*')
@@ -2801,16 +2993,27 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.caption = kwargs.get('caption')
 		self.select = kwargs.get('select')
 		self.menu = kwargs.get('menu')
+		self.colorsDir = os.path.join(CACHE_PATH,'colors')
+		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
 		clist = self.getControl(120)
 		clist.reset()
+		colors = {}
+		if not os.path.exists(self.colorsDir): os.makedirs(self.colorsDir)
+		
 		for i in self.items:
 			item = xbmcgui.ListItem(label=i['disp'],label2=i['disp2'],thumbnailImage=i['icon'])
 			if i['sep']: item.setProperty('SEPARATOR','SEPARATOR')
+			item.setProperty('bgcolor',i['bgcolor'])
+			color = i['bgcolor'].upper()[2:]
+			if color in colors:
+				path = colors[color]
+			else:
+				path = self.makeColorFile(color, self.colorsDir)
+			item.setProperty('bgfile',path)
 			clist.addItem(item)
-			
 		self.getControl(300).setLabel('[B]%s[/B]' % self.caption)
 		self.setFocus(clist)
 		if self.select:
@@ -2821,14 +3024,25 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 					break
 				idx+=1
 		
+	def makeColorFile(self,color,path):
+		replace = binascii.unhexlify(color)
+		replace += replace
+		target = os.path.join(path,color + '.gif')
+		open(target,'w').write(open(self.colorGif,'r').read().replace(chr(255)*6,replace))
+		return target
+		
 	def onAction(self,action):
 		if action == 92 or action == 10:
-			self.close()
+			self.doClose()
 		elif action == 7:
 			self.finish()
 		elif action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 	
+	def doClose(self):
+		clearDirFiles(self.colorsDir)
+		self.close()
+		
 	def onClick( self, controlID ):
 		if controlID == 120:
 			self.finish()
@@ -2842,7 +3056,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 			
 	def finish(self):
 		self.result = self.getControl(120).getSelectedPosition()
-		self.close()
+		self.doClose()
 		
 	def onFocus( self, controlId ): self.controlId = controlId
 		
@@ -2910,12 +3124,12 @@ class ChoiceMenu():
 	def cancel(self):
 		self.hideSplash()
 		
-	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False):
+	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF'):
 		if not ID: return self.addSep()
 		if disabled:
 			display = "[COLOR FF444444]%s[/COLOR]" % display
 			display2 = "[B]DISABLED[/B][CR][CR][COLOR FF444444]%s[/COLOR]" % display2
-		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled})
+		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled,'bgcolor':bgcolor})
 		
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True
