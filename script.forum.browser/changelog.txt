@@ -34,7 +34,11 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.14
+Current Version : 1.0.15
+
+*** 1.0.15 ***
+
+Fixes a bug created with the last version that caused forums to be added/updated with a null URL
 
 *** 1.0.14 ***
 
@@ -44,6 +48,7 @@ Improved the forum selection dialog with interface icons, and rating icons for P
 Parser Browser: Fixed a recently created bug where some [url] tag artifacts were remaining in posts
 Adding a forum to the online database now includes theme data
 When adding a forum already in the online database, the dialog now shows that it exists and was updated
+No longes asks for description and logo when adding current forum to online database
 
 *** 1.0.13 ***
 

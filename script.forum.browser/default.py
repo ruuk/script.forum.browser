@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.14'
+__version__ = '1.0.15'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2736,7 +2736,10 @@ def doAddForumFromOnline(f):
 	
 def addCurrentForumToOnlineDatabase():
 	fdata = forumbrowser.ForumData(FB.getForumID(),FORUMS_PATH)
-	addForumToOnlineDatabase(fdata.name,fdata.urls.get(''),fdata.description,fdata.urls.get('logo'),FB.getForumID()[:2],header_color=FB.theme.get('header_color','FFFFFF'))
+	url = fdata.urls.get('tapatalk_server',fdata.urls.get('forumrunner_server',fdata.urls.get('server',FB._url)))
+	print url
+	if not url: raise Exception('No URL')
+	addForumToOnlineDatabase(fdata.name,url,fdata.description,fdata.urls.get('logo'),FB.getForumID()[:2],header_color=FB.theme.get('header_color','FFFFFF'))
 	
 def addForumToOnlineDatabase(name,url,desc,logo,ftype,header_color='FFFFFF',dialog=None):
 	if not xbmcgui.Dialog().yesno('Add To Database?','Share to the Forum Browser','online database?'): return
