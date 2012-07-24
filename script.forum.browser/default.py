@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.13'
+__version__ = '1.0.14'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2062,7 +2062,6 @@ class ForumsWindow(BaseWindow):
 					logo = logopath
 				except:
 					LOG('ERROR: Could not save logo for: ' + FB.getForumID())
-					
 		if logo: self.getControl(250).setImage(logo)
 		if 'ForumBrowser' in FB.browserType:
 			image = 'forum-browser-logo-128.png'
@@ -2403,13 +2402,17 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			logo = fdata.urls.get('logo','')
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			desc = '[B]Description[/B]: [COLOR FFFF9999]' + (desc or 'None') + '[/COLOR]'
+			interface = ''
 			if f.startswith('TT.'):
-				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Tapatalk[/COLOR]'
+				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Tapatalk[/COLOR]'
+				interface = 'TT'
 			elif f.startswith('FR.'):
-				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Forumrunner[/COLOR]'
+				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Forumrunner[/COLOR]'
+				interface = 'FR'
 			elif f.startswith('GB.'):
-				desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
-			menu.addItem(f, name,logo,desc,bgcolor=hc)
+				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
+				interface = 'GBalt'
+			menu.addItem(f, name,logo,desc,bgcolor=hc,interface=interface)
 
 	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
 	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
@@ -2448,7 +2451,7 @@ def doSettings():
 	dialog.addItem('addforum',__language__(30222),'forum-browser-plus.png',helpdict.get('addforum',''))
 	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
 	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
-	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=FB.prefix == 'GB.')
+	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline','')) #,disabled=FB.prefix == 'GB.')
 	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''))
 	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
@@ -2458,7 +2461,7 @@ def doSettings():
 	if not result: return
 	if result == 'addfavorite': addFavorite()
 	elif result == 'removefavorite': removeFavorite()
-	elif result == 'addcurrentonline': addForum(current=True)
+	elif result == 'addcurrentonline': addCurrentForumToOnlineDatabase() #addForum(current=True)
 	elif result == 'addforum': addForum()
 	elif result == 'addonline': addForumFromOnline()
 	elif result == 'removeforum': removeForum()
@@ -2667,7 +2670,7 @@ def addForum(current=False):
 		saveForum(ftype,forumID,name,desc,url,logo)
 		if user and password: saveUserPass(forumID,user,password)
 		dialog.update(60,'Add To Online Database')
-		if ftype != 'GB': addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
+		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
 		dialog.close()
 	
@@ -2701,9 +2704,14 @@ def addForumFromOnline():
 			caption = '[COLOR FF9999FF]All[/COLOR]'
 		menu = ImageChoiceMenu(caption)
 		for f in flist:
-			ftype = {'TT':'Tapatalk','FR':'Forumrunner','GB':'Parser Browser'}.get(f.get('type','TT'))
+			interface = f.get('type')
+			rf=ra=''
+			if interface == 'GB':
+				rf = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_function'),'')
+				ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
 			desc = f.get('desc','None') or 'None'
-			menu.addItem(f, f.get('name'), f.get('logo'), '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Interface[/B]: [COLOR FFFF9999]' + ftype + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]',bgcolor='FF' + f.get('header_color','FFFFFF'))
+			desc = '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]'
+			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor='FF' + f.get('header_color','FFFFFF'),interface=interface,function=rf,accuracy=ra)
 		for f in getHiddenForums():
 			path = getForumPath(f,just_path=True)
 			if not path: continue
@@ -2726,18 +2734,46 @@ def doAddForumFromOnline(f):
 	saveForum(f['type'],f['type']+'.'+f['name'],f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
 	showMessage('Added','Forum added: ' + f['name'])
 	
-def addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=None):
+def addCurrentForumToOnlineDatabase():
+	fdata = forumbrowser.ForumData(FB.getForumID(),FORUMS_PATH)
+	addForumToOnlineDatabase(fdata.name,fdata.urls.get(''),fdata.description,fdata.urls.get('logo'),FB.getForumID()[:2],header_color=FB.theme.get('header_color','FFFFFF'))
+	
+def addForumToOnlineDatabase(name,url,desc,logo,ftype,header_color='FFFFFF',dialog=None):
 	if not xbmcgui.Dialog().yesno('Add To Database?','Share to the Forum Browser','online database?'): return
 	LOG('Adding Forum To Online Database: %s at URL: %s' % (name,url))
+	frating = arating = '0'
+	if ftype == 'GB':
+		frating,arating = askForumRating()
+		if not frating:
+			showMessage('Failed','Forum must be rated in order to be added to the online database.',success=False)
+			return
+		
 	cat = selectForumCategory() or '0'
 	if dialog: dialog.update(80,'Saving To Database')
 	odb = forumbrowser.FBOnlineDatabase()
-	msg = odb.addForum(name, url, logo, desc, ftype, cat)
+	msg = odb.addForum(name, url, logo, desc, ftype, cat, rating_function=frating, rating_accuracy=arating, header_color=header_color)
 	if msg == 'OK':
 		showMessage('Added','Forum added successfully',success=True)
+	elif msg =='EXISTS':
+		showMessage('Updated','Forum entry exists. Updated successfully',success=True)
 	else:
 		showMessage('Not Added','Forum not added:',str(msg),success=False)
 		LOG('Forum Not Added: ' + str(msg))
+	
+def askForumRating():
+	d = ChoiceMenu('Function Rating')
+	d.addItem('3','Fully Functional')
+	d.addItem('2','Partially Functional')
+	d.addItem('1','Not Functional')
+	frating = d.getResult()
+	if not frating: return None,None
+	d = ChoiceMenu('Accuracy Rating')
+	d.addItem('3','Full Accuracy')
+	d.addItem('2','OK Accuracy')
+	d.addItem('1','Poor Accuracy')
+	arating = d.getResult()
+	if not arating: return None,None
+	return frating,arating
 	
 def chooseLogo(forum,image_urls):
 	#if not image_urls: return
@@ -3013,6 +3049,8 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 			else:
 				path = self.makeColorFile(color, self.colorsDir)
 			item.setProperty('bgfile',path)
+			for k,v in i.get('extras',{}).items():
+				item.setProperty(k,v)
 			clist.addItem(item)
 		self.getControl(300).setLabel('[B]%s[/B]' % self.caption)
 		self.setFocus(clist)
@@ -3124,12 +3162,12 @@ class ChoiceMenu():
 	def cancel(self):
 		self.hideSplash()
 		
-	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF'):
+	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF',**kwargs):
 		if not ID: return self.addSep()
 		if disabled:
 			display = "[COLOR FF444444]%s[/COLOR]" % display
 			display2 = "[B]DISABLED[/B][CR][CR][COLOR FF444444]%s[/COLOR]" % display2
-		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled,'bgcolor':bgcolor})
+		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled,'bgcolor':bgcolor,'extras':kwargs})
 		
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True

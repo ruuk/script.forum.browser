@@ -61,8 +61,8 @@ class FBData():
 
 class FBOnlineDatabase():
 	def __init__(self):
-		#self.url = 'http://xbmc.2ndmind.net/forumbrowser/forums.php'
-		self.url = 'http://xbmc.2ndmind.tk/forumbrowser/forums.php'
+		self.url = 'http://xbmc.2ndmind.com/forumbrowser/forums.php'
+		#self.url = 'http://xbmc.2ndmind.tk/forumbrowser/forums.php'
 	
 	def postData(self,**data):
 		enc = urllib.urlencode(data)
@@ -73,8 +73,8 @@ class FBOnlineDatabase():
 			err = ERROR('FBTTOnlineDatabase.postData()')
 			return 'ERROR: ' + err
 			
-	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0'):
-		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype)
+	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0',rating_function='0',rating_accuracy='0',header_color='FFFFFF'):
+		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype,rating_function=rating_function,rating_accuracy=rating_accuracy,header_color=header_color)
 		
 	def setTheme(self,fname,vals_dict):
 		return self.postData(do='set_theme',name=fname,**vals_dict)

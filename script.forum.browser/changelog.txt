@@ -4,7 +4,8 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Finish 'Add A Forum' stuff for Parser Browser (mainly adding Parser Browser forums to online database)
+  Help for rating when adding Parser Browser forums to the online database
+  Help for the color dialog
   Still some issues with no seconds listed in the tapatalk activity display...?
   
  Long Term:
@@ -33,7 +34,16 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.13
+Current Version : 1.0.14
+
+*** 1.0.14 ***
+
+Online database now points to 2ndmind.com (got my domains and new hosting all set up)
+Added the ability to share Parser Browser forums to the online database (with required simple rating system)
+Improved the forum selection dialog with interface icons, and rating icons for Parser Browser forums when adding from online)
+Parser Browser: Fixed a recently created bug where some [url] tag artifacts were remaining in posts
+Adding a forum to the online database now includes theme data
+When adding a forum already in the online database, the dialog now shows that it exists and was updated
 
 *** 1.0.13 ***
 
@@ -43,7 +53,7 @@ ParserBrowser: Added handling for forum type SMF (Simple Machines Forum) (Curren
 ParserBrowser: Added handling for Gender stat in posts (Shows in extra info)
 Now handles image URLs with '/../../../' or similar in them in posts and when getting a logo when adding a forum
 Added settings option 'Parser Browser: Ignore Forum Images' - when enabled it will filter out images hosted on the forum (ie smileys and arrows and stuff)
-Added the ability to set a theme ('header' color for now) for the forums display with a new color dialog (options menu)
+Added the ability to set a theme (just 'header' color for now) for the forums display with a new color dialog (options menu)
 Added the ability to share current forum theme to the online database (options menu)
 Online database now replaces existing forum details instead of reporting that it already exists
 Online database now pointing to domain 2ndmind.tk (with new hosting) until I can get my crappy registrar (also provider of my crappy old hosting) to answer my emails, chats or phone calls  

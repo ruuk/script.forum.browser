@@ -966,6 +966,7 @@ class HTMLTag:
 		self.endIndex = -1
 		self.sequenceIndex = 0
 		self.info = None
+		self.ignore = False
 		
 	def __str__(self):
 		return self.tag
@@ -1859,7 +1860,7 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'li':
 				ds = ''.join(d.startTag.dataStack)
 				dslower = ds.lower()
-				if not dslower in self.ignores and not d.startTag.info == 'IGNORE': #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
+				if not dslower in self.ignores and not d.startTag.ignore: #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
 					if not dslower.startswith('view') and not dslower.endswith('posts') and not dslower.endswith('profile'):
 						newData.append('    * ' + ds + '\n')
 			elif d.tag == 'font':
@@ -1890,7 +1891,7 @@ class GeneralPostParser(AdvancedParser):
 									#print user.encode('ascii','replace') + ' : ' + p.get('user','').encode('ascii','replace')
 									if user:
 										p[val] = user
-										d.tag.info = 'IGNORE'
+										d.tag.ignore = True
 								else:
 									if user == p.get('user') and not p.get('status'):
 										last = 'user'
@@ -1905,18 +1906,18 @@ class GeneralPostParser(AdvancedParser):
 								status = m.group(1).strip()
 								if status:
 									p['status'] = status
-									d.tag.info = 'IGNORE'
+									d.tag.ignore = True
 						elif val == 'date':
 							#print 'd ' + d.encode('ascii','replace')
 							if not val in p:
 								p[val] = dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 							elif p[val].endswith(','):
 								p[val] += ' ' + dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 							elif self.lastUnset:
 								p[self.lastUnset] = dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 								self.lastUnset = None
 							else:
 								if p[val] == dstrip:
@@ -1930,11 +1931,11 @@ class GeneralPostParser(AdvancedParser):
 							#print 'pn ' + d.encode('ascii','replace')
 							if self.lastUnset:
 								p[self.lastUnset] = dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 								self.lastUnset = None
 							elif not p.get('postnumber'):
 								p[val] = m.group(1)
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 							else:
 								if not m.group(1) == '#': break #Eat the postnumber if already set and don't remove in case we just got #
 						elif val.startswith('extra.'):
@@ -1944,17 +1945,17 @@ class GeneralPostParser(AdvancedParser):
 								extra = val.split('.',1)[-1]
 								if not extra in p['extras']:
 									p['extras'][extra] = data
-									d.tag.info = 'IGNORE'
+									d.tag.ignore = True
 							else:
 								self.lastUnset = val
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 						elif m.groups():
 							#print 'g ' + d.encode('ascii','replace')
 							if not val in p:
 								mg1 = m.group(1)
 								if mg1: mg1 = mg1.strip()
 								p[val] = mg1
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 								if not p[val]: last = val
 								if not mg1: self.lastUnset = val
 							else:
@@ -1962,14 +1963,14 @@ class GeneralPostParser(AdvancedParser):
 						elif val == 'user':
 							if not p.get('user') and not dstrip.lower() in self.ignores:
 								p[val] = dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 							else:
 								continue
 						else:
 							#print 'ng ' + d.encode('ascii','replace')
 							if not val in p:
 								p[val] = dstrip
-								d.tag.info = 'IGNORE'
+								d.tag.ignore = True
 							else:
 								continue
 						
@@ -1986,7 +1987,7 @@ class GeneralPostParser(AdvancedParser):
 							if not extra in p['extras']: p['extras'][extra] = dstrip
 						else:
 							p[self.lastUnset] = dstrip
-							d.tag.info = 'IGNORE'
+							d.tag.ignore = True
 						self.lastUnset = ''
 					elif (d.tag.tag.startswith('h') or d.tag.tag == 'strong') and not p.get('title') and not (newData and self.quoteUserPrefix in newData[-1].lower()):
 						p['title'] = dstrip
