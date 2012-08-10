@@ -232,6 +232,7 @@ class HTMLPageInfo:
 			#TODO: Limit
 			u = pdfFilter.sub('/',u)
 			u = u.replace('/../','/')
+		u = u.replace('&amp;','&')
 		return u
 	
 class ForumData:
@@ -323,6 +324,7 @@ class PMLink:
 			
 	def processURL(self):
 		if not self.url: return
+		self.url = self.url.replace('&amp;','&')
 		self._isImage = self.linkImageFilter.search(self.url) and True or False
 		if self._isImage: return
 		pm = re.search(self.FB.filters.get('post_link','@`%#@>-'),self.url)
@@ -528,7 +530,6 @@ class PageData:
 class ForumPost:
 	hideSignature = False
 	def __init__(self,fb,pdict=None):
-		self.browser = None
 		self.FB = fb
 		self.MC = fb.MC
 		self.to = ''
@@ -767,6 +768,7 @@ class ForumBrowser:
 		self.MC = None
 		self.pmBoxes = []
 		self.lastURL = ''
+		self.browser = None
 		self.messageConvertorClass=message_converter
 		
 	def initialize(self):

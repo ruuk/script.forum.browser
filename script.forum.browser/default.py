@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.0.15'
+__version__ = '1.0.16'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1938,7 +1938,7 @@ class ForumsWindow(BaseWindow):
 		
 	def hexColorIsDark(self,h):
 		r,g,b = self.hexToRGB(h)
-		if r > 140 or g > 140 or b > 140: return False
+		if r > 140 or g > 140 or b > 200: return False
 		return True
 		
 	def hexToRGB(self,h):
@@ -2039,12 +2039,8 @@ class ForumsWindow(BaseWindow):
 				self.fillForumList()
 		
 	def setLogoFromFile(self):
-		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.jpg')
-		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
-		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
-		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
-		logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
-		if os.path.exists(logopath): return self.getControl(250).setImage(logopath)
+		logopath = getCurrentLogo()
+		return self.getControl(250).setImage(logopath)
 			
 	def setLogo(self,logo):
 		if not logo: return
@@ -2895,13 +2891,17 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 			self.close()
 		
 def getCurrentLogo():
-	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.jpg')
+	logo = FB.urls.get('logo')
+	root, ext = os.path.splitext(logo) #@UnusedVariable
+	logopath = os.path.join(CACHE_PATH,FB.getForumID() + (ext or '.jpg'))
 	if os.path.exists(logopath): return logopath
 	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
 	if os.path.exists(logopath): return logopath
 	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
 	if os.path.exists(logopath): return logopath
-	return FB.urls.get('logo')
+	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.ico')
+	if os.path.exists(logopath): return logopath
+	return logo
 
 def askColor():
 	#fffaec

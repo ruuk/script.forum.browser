@@ -34,7 +34,15 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.0.15
+Current Version : 1.0.16
+
+*** 1.0.16 ***
+
+More improvements to image parsing for logo chooser
+Improved dark background color detection (for switching header text to white)
+Fixed a skin bug where the '#' character was showing as '&35;'
+Fixed a bug causing errors when opening links in WebViewer
+Now properly translates '&amp;' to '&' in links
 
 *** 1.0.15 ***
 
@@ -48,7 +56,7 @@ Improved the forum selection dialog with interface icons, and rating icons for P
 Parser Browser: Fixed a recently created bug where some [url] tag artifacts were remaining in posts
 Adding a forum to the online database now includes theme data
 When adding a forum already in the online database, the dialog now shows that it exists and was updated
-No longes asks for description and logo when adding current forum to online database
+No longer asks for description and logo when adding the current forum to the online database
 
 *** 1.0.13 ***
 
