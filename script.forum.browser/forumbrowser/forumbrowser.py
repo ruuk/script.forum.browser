@@ -66,6 +66,7 @@ class FBOnlineDatabase():
 	
 	def postData(self,**data):
 		enc = urllib.urlencode(data)
+		print enc
 		try:
 			result = urllib2.urlopen(self.url,enc).read()
 			return result
@@ -74,6 +75,7 @@ class FBOnlineDatabase():
 			return 'ERROR: ' + err
 			
 	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0',rating_function='0',rating_accuracy='0',header_color='FFFFFF'):
+		header_color = header_color or 'FFFFFF'
 		return self.postData(do='add',name=name,url=url,desc=desc,cat=cat,logo=logo,type=ftype,rating_function=rating_function,rating_accuracy=rating_accuracy,header_color=header_color)
 		
 	def setTheme(self,fname,vals_dict):

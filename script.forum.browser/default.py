@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '03-29-2012'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2707,7 +2707,8 @@ def addForumFromOnline():
 				ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
 			desc = f.get('desc','None') or 'None'
 			desc = '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]'
-			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor='FF' + f.get('header_color','FFFFFF'),interface=interface,function=rf,accuracy=ra)
+			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
+			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		for f in getHiddenForums():
 			path = getForumPath(f,just_path=True)
 			if not path: continue
@@ -2715,7 +2716,7 @@ def addForumFromOnline():
 			name = fdata.name
 			desc = fdata.description
 			logo = fdata.urls.get('logo','')
-			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
+			hc = formatHexColorToARGB(fdata.theme.get('header_color','FFFFFF'))
 			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
 			
 		f = menu.getResult('script-forumbrowser-forum-select.xml')
@@ -2723,6 +2724,13 @@ def addForumFromOnline():
 			doAddForumFromOnline(f)
 			return
 	
+def formatHexColorToARGB(hexcolor):
+	try:
+		binascii.unhexlify(hexcolor)
+		return 'FF' + hexcolor
+	except:
+		return "FFFFFFFF"
+		
 def doAddForumFromOnline(f):
 	if not isinstance(f,dict):
 		unHideForum(f)
@@ -3032,6 +3040,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.caption = kwargs.get('caption')
 		self.select = kwargs.get('select')
 		self.menu = kwargs.get('menu')
+		self.gifReplace = chr(255)*6
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		xbmcgui.WindowXMLDialog.__init__( self )
@@ -3066,10 +3075,13 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 				idx+=1
 		
 	def makeColorFile(self,color,path):
-		replace = binascii.unhexlify(color)
+		try:
+			replace = binascii.unhexlify(color)
+		except:
+			replace = chr(255)
 		replace += replace
 		target = os.path.join(path,color + '.gif')
-		open(target,'w').write(open(self.colorGif,'r').read().replace(chr(255)*6,replace))
+		open(target,'w').write(open(self.colorGif,'r').read().replace(self.gifReplace,replace))
 		return target
 		
 	def onAction(self,action):

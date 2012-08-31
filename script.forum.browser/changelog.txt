@@ -34,7 +34,12 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.0
+Current Version : 1.1.1
+
+*** 1.1.1 ***
+
+Fixed a bug causing forums to be added to the ODB with a bad header color string
+Fixed a bug where forums with a bad header color string would cause the ODB forums list to be cut off
 
 *** 1.1.0 ***
 
