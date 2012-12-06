@@ -34,7 +34,13 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.1
+Current Version : 1.1.2
+
+*** 1.1.2 ***
+
+Disabled activity splash as it was causing crashes in FRODO (Should return in a later release when fixed)
+Fixed a bug in onAction() causing errors in the (FRODO) log (log said ignoring the error could cause memory leaks, so perhaps fixed a memory leak :) )
+Fixed a bug where if the copy of the XBMC skin in the users directory was older than the copy in the install directory, the skin mods would fail to be used. This probably only affected the default skin.
 
 *** 1.1.1 ***
 

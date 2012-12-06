@@ -20,8 +20,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '03-29-2012'
-__version__ = '1.1.1'
+__date__ = '12-06-2012'
+__version__ = '1.1.2'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -380,7 +380,7 @@ class BaseWindowFunctions(ThreadWindow):
 		if action == ACTION_PREVIOUS_MENU:
 			self.closed = True
 			self.close()
-		xbmcgui.WindowXML.onAction(self,action)
+		#xbmcgui.WindowXML.onAction(self,action)
 	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
@@ -3146,9 +3146,19 @@ class ActivitySplash():
 		self.splash.close()
 		del self.splash
 		self.splash = None
+
+class FakeActivitySplash():
+	def __init__(self,caption=''):
+		pass
+		
+	def update(self,pct,message):
+		pass
+
+	def close(self):
+		pass
 		
 def showActivitySplash(caption=__language__(30248)):
-	s = ActivitySplash(caption)
+	s = FakeActivitySplash(caption)
 	s.update(0,caption)
 	return s
 	
@@ -3404,17 +3414,26 @@ def copyFont(sourceFontPath,skinPath):
 	shutil.copy(sourceFontPath,dst)
 	
 def copyTree(source,target):
-	import shutil
-	shutil.copytree(source, target)
+	try:
+		import distutils.dir_util
+		copyTree = distutils.dir_util.copy_tree
+	except:
+		import shutil
+		copyTree = shutil.copytree
+		
+	copyTree(source, target)
 		
 def checkForSkinMods():
-	if __addon__.getSetting('use_skin_mods') != 'true': return			
 	skinPath = xbmc.translatePath('special://skin')
+	skinName = skinPath
+	if skinName.endswith(os.path.sep): skinName = skinName[:-1]
+	LOG('XBMC Skin: ' + os.path.basename(skinName))
+	if __addon__.getSetting('use_skin_mods') != 'true': return			
 	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	if os.path.exists(font): return
 	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires XBMC restart to take effect.)','Install now?')
 	if not yes:
-		__addon__.setSetting('user_skin_mods','false')	
+		__addon__.setSetting('user_skin_mods','false')
 		return
 	LOG('Installing Skin Mods')
 	doModKeyboard('',no_keyboard=True)
@@ -3429,14 +3448,17 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
 	currentSkin = os.path.basename(skinPath)
 	localSkinPath = os.path.join(localAddonsPath,currentSkin)
+	#LOG(localSkinPath)
+	#LOG(skinPath)
 	
-	if not os.path.exists(localSkinPath):
-		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
+#	if not os.path.exists(localSkinPath):
+#		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
+	if True:
+		yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
 		dialog.create('Copying Files','Please wait...')
 		try:
-			
 			copyTree(skinPath,localSkinPath)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
