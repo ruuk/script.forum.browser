@@ -34,7 +34,14 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.2
+Current Version : 1.1.3
+
+*** 1.1.3 ***
+
+Vimeo video links now work again (Vimeo plugin must be installed)
+Fix for some issues with skin modification installation and detection
+Brought back activity splash (seems to be fine in Frodo RC3)
+Added 'Disable Activity Splash' in settings:advanced in case anyone still has issues
 
 *** 1.1.2 ***
 

@@ -63,7 +63,8 @@ class WebVideo():
 			video.thumbnail = info.get('thumbnail','')
 			video.title = info.get('title','')
 			#video.playableCallback = self.getVimeoFLV
-			video.isVideo = False #Vimeo support is broken
+			video.playable = self.getVimeoPluginURL(ID)
+			video.isVideo = True #False #Vimeo support is broken
 		elif 'flic.kr/' in url or 'flickr.com/' in url:
 			if just_test: return True
 			ID = self.getFlickrIDFromURL(url)
@@ -91,6 +92,8 @@ class WebVideo():
 	def getYoutubePluginURL(self,ID):
 		return 'plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=' + ID
 			
+	def getVimeoPluginURL(self,ID):
+		return 'plugin://plugin.video.vimeo/?path=/root/video&action=play_video&videoid=' + ID
 	def getYoutubeThumbURL(self,ID):
 		return 'http://i1.ytimg.com/vi/%s/default.jpg' % ID
 	

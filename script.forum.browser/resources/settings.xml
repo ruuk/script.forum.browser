@@ -20,6 +20,7 @@
     <setting label="30239" type="file" id="crypto_key_file" default="" />
     <setting id="debug" type="bool" label="30228" default="false" />
     <setting id="do_mybb_edit_bug_fix" type="bool" label="30233" default="true" />
+    <setting id="hide_activity_splash" type="bool" label="30017" default="false" />
     <setting id="forumrunner_disable_ssl" type="bool" label="30247" default="true" visible="false"/>
     <setting id="experimental" type="bool" label="Experimental Stuff" default="false" />
   </category>

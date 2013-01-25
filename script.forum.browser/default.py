@@ -20,8 +20,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '12-06-2012'
-__version__ = '1.1.2'
+__date__ = '1-24-2013'
+__version__ = '1.1.3'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -3158,7 +3158,10 @@ class FakeActivitySplash():
 		pass
 		
 def showActivitySplash(caption=__language__(30248)):
-	s = FakeActivitySplash(caption)
+	if getSetting('hide_activity_splash',False):
+		s = FakeActivitySplash(caption)
+	else:
+		s = ActivitySplash(caption)
 	s.update(0,caption)
 	return s
 	
@@ -3430,7 +3433,13 @@ def checkForSkinMods():
 	LOG('XBMC Skin: ' + os.path.basename(skinName))
 	if __addon__.getSetting('use_skin_mods') != 'true': return			
 	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
-	if os.path.exists(font): return
+	if os.path.exists(font):
+		fontsXmlFile = os.path.join(skinPath,'720p','Font.xml')
+		if not os.path.exists(fontsXmlFile): fontsXmlFile = os.path.join(skinPath,'1080i','Font.xml')
+		if os.path.exists(fontsXmlFile):
+			contents = open(fontsXmlFile,'r').read()
+			if 'Forum Browser' in contents: return
+	
 	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires XBMC restart to take effect.)','Install now?')
 	if not yes:
 		__addon__.setSetting('user_skin_mods','false')
@@ -3451,9 +3460,8 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	#LOG(localSkinPath)
 	#LOG(skinPath)
 	
-#	if not os.path.exists(localSkinPath):
-#		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
-	if True:
+	if not os.path.exists(localSkinPath):
+		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
 		yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
@@ -3499,9 +3507,10 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 		if DEBUG: LOG('Creating backup of original skin file: ' + backupPath)
 		open(backupPath,'w').write(open(dialogPath,'r').read())
 		
-	if not os.path.exists(fontBackupPath):
+	fontcontents = open(fontPath,'r').read()
+	if not os.path.exists(fontBackupPath) or not 'Forum Browser' in fontcontents:
 		if DEBUG: LOG('Creating backup and replacing original skin file: ' + fontBackupPath)
-		open(fontBackupPath,'w').write(open(fontPath,'r').read())
+		open(fontBackupPath,'w').write(fontcontents)
 		original = open(fontPath,'r').read()
 		modded = original.replace('<font>',open(sourceFontXMLPath,'r').read() + '<font>',1)
 		open(fontPath,'w').write(modded)
