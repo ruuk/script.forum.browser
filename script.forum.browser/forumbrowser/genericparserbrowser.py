@@ -178,7 +178,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			pagesURL = url
 			if page and not str(page).isdigit(): url = self._url + page
 		if not url: url = self.getPageUrl(page,'threads',fid=forumid)
-		LOG('Forum URL: ' + url)
+		LOG('Forum URL: %s' % url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)

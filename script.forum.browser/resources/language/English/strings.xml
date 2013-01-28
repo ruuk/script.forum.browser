@@ -21,6 +21,10 @@
     <string id="30015">Confirm Exit On Quit</string>
     <string id="30016">Parser Browser: Ignore Forum Images In Posts</string>
     <string id="30017">Disable Activity Splash</string>
+    <string id="30018">Notifications</string>
+    <string id="30019">Enable Notifications (Enabling Requires XBMC Restart)</string>
+    <string id="30020">Check Interval (In Minutes)</string>
+    <string id="30021">Only At XBMC Start (Disabling Requires XBMC Restart)</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -107,12 +111,14 @@
     <string id="30204">Set Logins</string>
     <string id="30205">Downloading</string>
     <string id="30206">Downloading %s</string>
+    <string id="30207">Turn On Notifications</string>
+    <string id="30208">Turn Off Notifications</string>
     
     <string id="30220">Waiting...</string>
     <string id="30221">Waiting for thread to stop...</string>
     <string id="30222">Add A Forum</string>
     <string id="30223">Add Current Forum To Favorites</string>
-    <string id="30224">Remove A Forum</string>
+    <string id="30224">Remove Forums</string>
     <string id="30225">Remove A Forum From Favorites</string>
     <string id="30226">Add A Forum From The Online Database</string>
     <string id="30227">Posting A Reply Failed:</string>

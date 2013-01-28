@@ -20,8 +20,8 @@ Read/Delete PM's in xbmc4xbox.org
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
-__date__ = '1-24-2013'
-__version__ = '1.1.3'
+__date__ = '1-28-2013'
+__version__ = '1.1.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -57,8 +57,10 @@ ACTION_RUN_IN_MAIN = 27
 MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums'))
+FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums_settings'))
 CACHE_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'cache'))
 if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
+if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
 
 def ERROR(message,hide_tb=False):
@@ -252,16 +254,25 @@ class StoppableCallbackThread(StoppableThread):
 		return self._stop.isSet()
 		
 	def progressCallback(self,*args,**kwargs):
+		if xbmc.abortRequested:
+			self.stop()
+			return False
 		if self.stopped(): return False
 		if self._progressCallback: self._progressHelper(self._progressCallback,*args,**kwargs)
 		return True
 		
 	def finishedCallback(self,*args,**kwargs):
+		if xbmc.abortRequested:
+			self.stop()
+			return False
 		if self.stopped(): return False
 		if self._finishedCallback: self._finishedHelper(self._finishedCallback,*args,**kwargs)
 		return True
 	
 	def errorCallback(self,error):
+		if xbmc.abortRequested:
+			self.stop()
+			return False
 		if self.stopped(): return False
 		if self._errorCallback: self._errorHelper(self._errorCallback,error)
 		return True
@@ -1874,13 +1885,20 @@ class ForumsWindow(BaseWindow):
 		self.headerIsDark = False
 	
 	def getUsername(self):
-		return __addon__.getSetting('login_user_' + FB.getForumID().replace('.','_'))
+		data = loadForumSettings(FB.getForumID())
+		if data and data['username']: return data['username']
+		return ''
 		
 	def getPassword(self):
-		key = 'login_pass_' + FB.getForumID().replace('.','_')
-		return passmanager.getPassword(key, self.getUsername())
-		#return __addon__.getSetting('login_pass_' + FB.getForumID().replace('.','_'))
+		data = loadForumSettings(FB.getForumID())
+		if data and data['password']: return data['password']
+		return ''
 		
+	def getNotify(self):
+		data = loadForumSettings(FB.getForumID())
+		if data: return data['notify']
+		return False
+	
 	def hasLogin(self):
 		return self.getUsername() != '' and self.getPassword() != ''
 		
@@ -2144,52 +2162,10 @@ class ForumsWindow(BaseWindow):
 		finally:
 			s.close()
 		
-#	def getGeneralForumURL(self):
-#		forums = getSetting('exp_general_forums',[])
-#		url = None
-#		if forums:
-#			d = ChoiceMenu('Choose forum')
-#			for f in forums: d.addItem(f,f)
-#			d.addItem('new','[COLOR FF00FF00]+Add New Forum[/COLOR]')
-#			d.addItem('remove','[COLOR FFFF0000]-Remove A Forum[/COLOR]')
-#			d.addItem('setlogin','Set Current Forum User/Pass')
-#			url = d.getResult()
-#			if not url: return
-#			if url == 'remove': return self.removeGeneralURL()
-#			if url == 'setlogin': return setLogins()
-#		if not url or url == 'new':
-#			url = doKeyboard('Enter full forum url')
-#			if not url: return
-#			self.addGeneralURL(url)
-#		if not url.endswith('/'): url += '/'
-#		if not url.startswith('http'): url = 'http://' + url
-#		return url	
-#	
-#	def addGeneralURL(self,url):
-#		forum = url.split('://')[-1]
-#		if forum.endswith('/'): forum = forum[:-1]
-#		forums = getSetting('exp_general_forums',[])
-#		if forum in forums: return
-#		forums.append(forum)
-#		setSetting('exp_general_forums',forums)
-#		
-#	def removeGeneralURL(self):
-#		forums = getSetting('exp_general_forums',[])
-#		d = ChoiceMenu('Choose forum')
-#		for f in forums: d.addItem(f,f)
-#		forum = d.getResult()
-#		if not forum: return
-#		if forum in forums: forums.pop(forums.index(forum))
-#		setSetting('exp_general_forums',forums)
-		
 	def changeForum(self,forum=None):
 		if not forum: forum = askForum()
 		if not forum: return False
 		url = None
-#		if forum == 'experimental.general':
-#			url = self.getGeneralForumURL()
-#			if not url: return
-#			setSetting('exp_general_forums_last_url',url)
 		self.stopThread()
 		fid = 'Unknown'
 		if FB: fid = FB.getForumID()
@@ -2336,14 +2312,57 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	del w
 	return None
 
-
-	
 def doKeyboard(prompt,default='',hidden=False):
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
 	keyboard.doModal()
 	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
+
+def loadForumSettings(forumID):
+	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)
+	if not os.path.exists(fsPath): return None
+	fsFile = open(fsPath,'r')
+	lines = fsFile.read()
+	fsFile.close()
+	try:
+		ret = {}
+		for l in lines.splitlines():
+			k,v = l.split('=',1)
+			ret[k] = v
+	except:
+		ERROR('Failed to get settings for forum: %s' % forumID)
+		return None
+	ret['username'] = ret.get('username','')
+	ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
+	ret['notify'] = ret.get('notify') == 'True' 
+	return ret
+
+
+def saveForumSettings(forumID,username=None,password=None,notify=None):
+	data = loadForumSettings(forumID) or {}
+	
+	if notify == None: data['notify'] = data.get('notify')  or False
+	else: data['notify'] = notify
+	
+	if username == None: data['username'] = data.get('username') or ''
+	else: data['username'] = username
+	
+	if password == None: data['password'] = data.get('password') or ''
+	else: data['password'] = password
+	
+	try:
+		password = passmanager.encryptPassword(data['username'], data['password'])
+		fsFile = open(os.path.join(FORUMS_SETTINGS_PATH,forumID),'w')
+		fsFile.write('username=%s\npassword=%s\nnotify=%s' % (data['username'],password,data['notify']))
+		fsFile.close()
+		return True
+	except:
+		ERROR('Failed to save forum settings for: %s' % forumID)
+		return False
+	
+def listForumSettings():
+	return os.listdir(FORUMS_SETTINGS_PATH)
 
 def getForumPath(forumID,just_path=False):
 	path = os.path.join(FORUMS_PATH,forumID)
@@ -2420,26 +2439,64 @@ def setLogins(force_ask=False):
 	if FB: forumID = FB.getForumID()
 	if not forumID or force_ask: forumID = askForum(forumID=forumID)
 	if not forumID: return
-	user = doKeyboard(__language__(30201),__addon__.getSetting('login_user_' + forumID.replace('.','_')))
+	data = loadForumSettings(forumID)
+	user = ''
+	if data: user = data.get('username','')
+	user = doKeyboard(__language__(30201),user)
 	if user is None: return
-	password = passmanager.getPassword('login_pass_' + forumID.replace('.','_'), __addon__.getSetting('login_user_' + forumID.replace('.','_')))
+	password = ''
+	if data: password = data.get('password','')
 	password = doKeyboard(__language__(30202),password,True)
 	if password is None: return
-	saveUserPass(forumID,user,password)
+	saveForumSettings(forumID,user,password)
 	if not user and not password:
 		showMessage('Login Cleared','Username and password cleared.')
 	else:
 		showMessage('Login Set','Username and password set.')
 	
-def saveUserPass(forumID,user,password):
-	__addon__.setSetting('login_user_' + forumID.replace('.','_'),user)
-	key = 'login_pass_' + forumID.replace('.','_')
-	if password:
-		passmanager.savePassword(key, user, password)
-	else:
-		__addon__.setSetting(key,'')
+###########################################################################################
+## - Version Conversion
+###########################################################################################
+
+def updateOldVersion():
+	from distutils.version import StrictVersion
+	lastVersion = getSetting('last_version') or '0.0.0'
+	if StrictVersion(__version__) <= StrictVersion(lastVersion): return False
+	setSetting('last_version',__version__)
+	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
+	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
+		convertForumSettings_1_1_4()
+	return True
+
+def convertForumSettings_1_1_4():
+	forums = os.listdir(FORUMS_PATH)
+	for f in forums:
+		username = getSetting('login_user_' + f.replace('.','_'))
+		key = 'login_pass_' + f.replace('.','_')
+		password = passmanager.getPassword(key, username)
+		if username or password:
+			LOG('CONVERTING FORUM SETTINGS: %s' % f)
+			saveForumSettings(f,username,password)
+			setSetting('login_user_' + f.replace('.','_'),'')
+			setSetting('login_pass_' + f.replace('.','_'),'')
+
+## - Version Conversion End ###############################################################
+
+def toggleNotify(forumID=None):
+	notify = True
+	if not forumID and FB: forumID = FB.getForumID()
+	if not forumID: return False
+	data = loadForumSettings(forumID)
+	if data: notify = not data['notify']
+	saveForumSettings(forumID,notify=notify)
+	return True
 		
 def doSettings():
+	notify = False
+	if FB:
+		data = loadForumSettings(FB.getForumID())
+		if data: notify = data['notify']
+		
 	helpdict = loadHelp('options.help')
 	dialog = OptionsChoiceMenu(__language__(30051))
 	dialog.addItem('addfavorite',__language__(30223),'forum-browser-star.png',helpdict.get('addfavorite',''))
@@ -2451,6 +2508,7 @@ def doSettings():
 	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''))
 	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
+	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
 	result = dialog.getResult()
@@ -2464,6 +2522,7 @@ def doSettings():
 	elif result == 'setcurrentcolor': return setForumColor(askColor())
 	elif result == 'updatethemeodb': updateThemeODB()
 	elif result == 'setlogins': setLogins(True)
+	elif result == 'setnotify': toggleNotify()
 #	elif result == 'register': registerForum()
 	elif result == 'help': showHelp('forums')
 	elif result == 'settings':
@@ -2664,7 +2723,7 @@ def addForum(current=False):
 		if name.startswith('forums.'): name = name[7:]
 		forumID = ftype + '.' + name
 		saveForum(ftype,forumID,name,desc,url,logo)
-		if user and password: saveUserPass(forumID,user,password)
+		if user and password: saveForumSettings(forumID,user,password)
 		dialog.update(60,'Add To Online Database')
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 	finally:
@@ -2718,11 +2777,10 @@ def addForumFromOnline():
 			logo = fdata.urls.get('logo','')
 			hc = formatHexColorToARGB(fdata.theme.get('header_color','FFFFFF'))
 			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
-			
-		f = menu.getResult('script-forumbrowser-forum-select.xml')
-		if f:
-			doAddForumFromOnline(f)
-			return
+		f = True	
+		while f:
+			f = menu.getResult('script-forumbrowser-forum-select.xml')
+			if f: doAddForumFromOnline(f)
 	
 def formatHexColorToARGB(hexcolor):
 	try:
@@ -2913,7 +2971,7 @@ def getCurrentLogo():
 
 def askColor():
 	#fffaec
-	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(),hexcolor=FB.theme.get('header_color'))
+	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(),hexcolor=FB.theme.get('header_color'),theme='Default')
 	hexc = w.hexValue()
 	del w
 	return hexc
@@ -2959,18 +3017,20 @@ def unHideForum(forum):
 	__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
 	
 def removeForum():
-	forum = askForum(caption='Choose Forum To Remove',hide_extra=True)
-	if not forum: return
-	path = os.path.join(FORUMS_STATIC_PATH,forum)
-	if os.path.exists(path):
-		flist = getHiddenForums()
-		if not forum in flist: flist.append(forum)
-		__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
-		return
-	path = os.path.join(FORUMS_PATH,forum)
-	if not os.path.exists(path): return
-	os.remove(path)
-	showMessage('Removed','Forum removed.')
+	forum = True
+	while forum:
+		forum = askForum(caption='Choose Forum To Remove',hide_extra=True)
+		if not forum: return
+		path = os.path.join(FORUMS_STATIC_PATH,forum)
+		if os.path.exists(path):
+			flist = getHiddenForums()
+			if not forum in flist: flist.append(forum)
+			__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
+			return
+		path = os.path.join(FORUMS_PATH,forum)
+		if not os.path.exists(path): return
+		os.remove(path)
+		showMessage('Removed','Forum removed.')
 
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
@@ -2979,6 +3039,8 @@ def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=F
 	w.doModal()
 	del w
 
+def showMessageSilent(caption,text,text2='',text3='',error=False,success=None,scroll=False): pass
+	
 class MessageDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
 		self.text = kwargs.get('text') or ''
@@ -3536,19 +3598,6 @@ def getForumList():
 		if not f.startswith('.') and not f == 'general':
 			if not f in flist: flist.append(f)
 	return flist
-
-def checkPasswordEncryption():
-	if __addon__.getSetting('passwords_encrypted') == 'true': return
-	__addon__.setSetting('passwords_encrypted','true')
-	flist = getForumList()
-	for f in flist:
-		key = 'login_pass_' + f.replace('.','_')
-		user = __addon__.getSetting('login_user_' + f.replace('.','_'))
-		if not user: continue
-		password = __addon__.getSetting(key)
-		if not password: continue
-		LOG('Encrypting password for: ' + f)
-		passmanager.savePassword(key, user, password)
 	
 def checkForInterface(url):
 	url = url.split('/forumrunner')[0].split('/mobiquo')[0]
@@ -3563,14 +3612,21 @@ def checkForInterface(url):
 	except:
 		return None
 		
-def getForumBrowser(forum=None,url=None,donecallback=None):
-	if not forum: forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
+def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_default=False):
+	showError = showMessage
+	if silent: showError = showMessageSilent
+	
+	if not forum:
+		if no_default: return False
+		forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
 	#global FB
 	#if forum.startswith('GB.') and not url:
 	#	url = getSetting('exp_general_forums_last_url')
 	#	if not url: forum = 'TT.xbmc.org'
 		
-	if not getForumPath(forum): forum = 'TT.xbmc.org'
+	if not getForumPath(forum):
+		if no_default: return False
+		forum = 'TT.xbmc.org'
 	err = ''
 	try:
 		if forum.startswith('GB.'):
@@ -3589,10 +3645,10 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 		#	from forumbrowser import parserbrowser
 		#	FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
 	except forumbrowser.ForumMovedException,e:
-		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL.\n',e.message,error=True)
+		showError(__language__(30050),'Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL.\n',e.message,error=True)
 		return False
 	except forumbrowser.ForumNotFoundException,e:
-		showMessage(__language__(30050),'Error accessing forum.\n\nIt apppears the forum interface (%s) is no longer installed, is missing or has moved.\n\nVerify the forum\'s URL in a browser and then try re-adding it.\n\nCheck with the forum administrator if the problem persists.' % e.message,error=True)
+		showError(__language__(30050),'Error accessing forum.\n\nIt apppears the forum interface (%s) is no longer installed, is missing or has moved.\n\nVerify the forum\'s URL in a browser and then try re-adding it.\n\nCheck with the forum administrator if the problem persists.' % e.message,error=True)
 		return False
 	except forumbrowser.BrokenForumException,e:
 		url = e.message
@@ -3606,32 +3662,33 @@ def getForumBrowser(forum=None,url=None,donecallback=None):
 			else:
 				toType = 'Forumrunner'
 				fromType = 'Tapatalk'
-			showMessage(__language__(30050),'Error accessing forum.\n\nForum interface appears to have changed from %s to %s.\n\nTry re-adding it.' % (fromType,toType),error=True)
+			showError(__language__(30050),'Error accessing forum.\n\nForum interface appears to have changed from %s to %s.\n\nTry re-adding it.' % (fromType,toType),error=True)
 		else:
-			showMessage(__language__(30050),'Error accessing forum.\n\nPlease contact the forum administrator if this problem continues.',error=True)
+			showError(__language__(30050),'Error accessing forum.\n\nPlease contact the forum administrator if this problem continues.',error=True)
 		return False
 	except:
 		err = ERROR(err)
-		showMessage(__language__(30050),__language__(30171),err,error=True)
+		showError(__language__(30050),__language__(30171),err,error=True)
 		return False
 	
 	if donecallback: donecallback(FB)
-	return True
+	return FB
 
 ######################################################################################
 # Startup
 ######################################################################################
-if sys.argv[-1] == 'settings':
-	doSettings()
-elif sys.argv[-1] == 'settingshelp':
-	showHelp('settings')
-else:
-	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
-	checkForSkinMods()
-	checkPasswordEncryption()
-
-	TD = ThreadDownloader()
+if __name__ == '__main__':
+	if sys.argv[-1] == 'settings':
+		doSettings()
+	elif sys.argv[-1] == 'settingshelp':
+		showHelp('settings')
+	else:
+		updateOldVersion()
+		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
+		checkForSkinMods()
 	
-	openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
-	#sys.modules.clear()
-	
+		TD = ThreadDownloader()
+		
+		openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
+		#sys.modules.clear()
+		

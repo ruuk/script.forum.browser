@@ -495,7 +495,16 @@ class BBMessageConverter(MessageConverter):
 		return convertHTMLCodes(html)
 			
 	def formatQuotes(self,html):
-		if not isinstance(html,unicode): html = unicode(html,'utf8')
+		if not isinstance(html,unicode):
+			try:
+				html = unicode(html,'utf8')
+			except UnicodeDecodeError:
+				try:
+					html = unicode(html,'latin_1')
+				except:
+					html = str(html).encode('string_escape')
+					html = unicode(html)
+			
 		ct = 0
 		ms = None
 		me = None

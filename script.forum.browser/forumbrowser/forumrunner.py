@@ -368,7 +368,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def hasSubscriptions(self): return True
 	
 	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
-		if not self.checkLogin(callback=callback): return (None,None)
+		if not self.checkLogin(callback=callback): self.finish(FBData(error='LOGIN FAILED'),donecallback)
 		return self.getThreads(None, page, callback, donecallback)
 	
 	def _getSubscriptions(self,page,callback,perpage=20):

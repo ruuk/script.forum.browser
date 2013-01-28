@@ -863,7 +863,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return True
 	
 	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
-		if not self.checkLogin(callback=callback): return (None,None)
+		if not self.checkLogin(callback=callback): return self.finish(FBData(error='LOGIN FAILED'),donecallback)
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():
 			forums = self.getSubscribedForums(callback, None)

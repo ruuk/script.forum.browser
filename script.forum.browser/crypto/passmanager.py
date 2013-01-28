@@ -55,17 +55,24 @@ def parsePassword(password):
 	return type_c,keyfile,password
 
 def savePassword(key,user,password):
-	method = getPasswordCryptoMethod()
-	__addon__.setSetting(key,preSavePassword(easypassword.encryptPassword(getUserKey(user),password,method=method,keyfile=getSetting('crypto_key_file'))))
+	__addon__.setSetting(key,encryptPassword(user,password))
 
 def getPassword(key,user):
 	if not user: return ''
+	password = getSetting(key)
+	return decryptPassword(user,password)
+
+def encryptPassword(user,password):
+	if not password: return password
+	method = getPasswordCryptoMethod()
+	return preSavePassword(easypassword.encryptPassword(getUserKey(user),password,method=method,keyfile=getSetting('crypto_key_file')))
+
+def decryptPassword(user,password):
+	if not user or not password: return ''
 	try:
-		password = getSetting(key)
 		method, keyfile, password = parsePassword(password)
 		password = easypassword.decryptPassword(getUserKey(user),password,method=method,keyfile=keyfile)
 	except:
-		ERROR('passmanager.getPassword()')
+		ERROR('passmanager.decryptPassword()')
 		return ''
 	return password
-

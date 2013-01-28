@@ -24,4 +24,9 @@
     <setting id="forumrunner_disable_ssl" type="bool" label="30247" default="true" visible="false"/>
     <setting id="experimental" type="bool" label="Experimental Stuff" default="false" />
   </category>
+  <category label="30018">
+    <setting id="notify_enabled" type="bool" label="30019" default="false" />
+    <setting id="notify_only_on_start" type="bool" label="30021" default="false" enable="eq(-1,true)"/>
+    <setting label="30020" type="slider" id="notify_interval" default="20" range="5,5,600" option="int"  enable="eq(-2,true)"/>
+  </category>
 </settings>

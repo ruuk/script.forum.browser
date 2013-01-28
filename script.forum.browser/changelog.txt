@@ -34,7 +34,19 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.3
+Current Version : 1.1.4
+
+*** 1.1.4 ***
+
+When selecting a forum from the online database, it now returns to the list
+When removing added forums, it now returns to the list after selecting a forum to remove
+Fixed bug not allowing color dialog to open on Dark skin
+Fix for encoding errors when viewing private messages
+Added unread subscriptions/PMs notify service
+Added 'Turn On/Off Notifications' to options menu which toggles for the current forum
+Added 'Notifications' section in settings with options for enabling, showing only on startup, and interval
+Forum usernames/passwords and other user data now saved in forum_settings/forumID for each forum instead of in settings.xml
+ -Added conversion function to copy forum user data from settings.xml to forum data files
 
 *** 1.1.3 ***
 
