@@ -34,7 +34,12 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.4
+Current Version : 1.1.5
+
+*** 1.1.5 ***
+
+Added PIP video overlay so you can continue to watch video while browsing forums. Pausing video will hide the overlay.
+Added setting 'Hide Video Overlay'
 
 *** 1.1.4 ***
 

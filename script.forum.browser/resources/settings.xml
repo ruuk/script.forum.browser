@@ -13,6 +13,7 @@
     <setting id="enable_ssl" type="bool" label="30235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="30245" default="false" />
     <setting id="skin" type="enum" label="30005" lvalues="30012|30011" default="0" />
+    <setting id="hide_pnp" type="bool" label="30022" default="false" />
     <setting label="30244" type="action" action="RunScript(script.forum.browser,settingshelp)"/>
   </category>
   <category label="30008">

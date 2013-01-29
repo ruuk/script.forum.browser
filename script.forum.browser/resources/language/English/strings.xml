@@ -12,7 +12,7 @@
     <string id="30008">Advanced</string>
     <string id="30009">Automatically Open Subscriptions</string>
     
-    <string id="30010">Default</string>
+    <string id="30010">PIP</string>
     <string id="30011">Dark</string>
     <string id="30012">Light</string>
     
@@ -25,6 +25,7 @@
     <string id="30019">Enable Notifications (Enabling Requires XBMC Restart)</string>
     <string id="30020">Check Interval (In Minutes)</string>
     <string id="30021">Only At XBMC Start (Disabling Requires XBMC Restart)</string>
+    <string id="30022">Hide Video Overlay</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>

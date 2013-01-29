@@ -21,12 +21,12 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
 THEME = 'Default'
-SKINS = ['Default','Dark','Default']
+SKINS = ['Default','Dark']
 if __addon__.getSetting('skin') == '1':
 	THEME = 'Dark'
 
@@ -380,7 +380,7 @@ class BaseWindowFunctions(ThreadWindow):
 		self.closed = False
 		self.headerTextFormat = '%s'
 		ThreadWindow.__init__(self)
-	
+		
 	def onClick( self, controlID ):
 		return False
 			
@@ -416,6 +416,9 @@ class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 		BaseWindowFunctions.__init__(self, *args, **kwargs)
 		xbmcgui.WindowXML.__init__( self )
 		
+	def onInit(self):
+		pass
+		
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
 		
@@ -424,6 +427,9 @@ class BaseWindowDialog(xbmcgui.WindowXMLDialog,BaseWindowFunctions):
 		BaseWindowFunctions.__init__(self, *args, **kwargs)
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
+	def onInit(self):
+		pass
+		
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
 
@@ -499,6 +505,7 @@ class ImagesDialog(BaseWindowDialog):
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
+		BaseWindowDialog.onInit(self)
 		self.getControl(200).setEnabled(len(self.images) > 1)
 		self.getControl(202).setEnabled(len(self.images) > 1)
 		self.showImage()
@@ -605,6 +612,7 @@ class PostDialog(BaseWindowDialog):
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
+		BaseWindowDialog.onInit(self)
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.failedPM:
 			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
@@ -880,6 +888,7 @@ class MessageWindow(BaseWindow):
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
+		BaseWindow.onInit(self)
 		if self.started: return
 		self.started = True
 		self.setLoggedIn()
@@ -1229,6 +1238,7 @@ class RepliesWindow(PageWindow):
 		self.currentPMBox = {}
 	
 	def onInit(self):
+		BaseWindow.onInit(self)
 		if self.started: return
 		self.started = True
 		self.setLoggedIn()
@@ -1632,6 +1642,7 @@ class ThreadsWindow(PageWindow):
 		PageWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
+		BaseWindow.onInit(self)
 		if self.started: return
 		self.started = True
 		self.setLoggedIn()
@@ -1903,6 +1914,7 @@ class ForumsWindow(BaseWindow):
 		return self.getUsername() != '' and self.getPassword() != ''
 		
 	def onInit(self):
+		BaseWindow.onInit(self)
 		try:
 			self.setLoggedIn() #So every time we return to the window we check
 			if self.started: return
@@ -2293,6 +2305,7 @@ class ForumsWindow(BaseWindow):
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
+	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	theme = theme or THEME
 	path = __addon__.getAddonInfo('path')
 	if not getSetting('use_skin_mods',True):
