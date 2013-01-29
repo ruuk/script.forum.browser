@@ -34,7 +34,11 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.5
+Current Version : 1.1.6
+
+*** 1.1.6 ***
+
+Small fix to new settings conversion function
 
 *** 1.1.5 ***
 

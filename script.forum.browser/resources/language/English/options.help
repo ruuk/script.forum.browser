@@ -24,7 +24,7 @@ Set user name and password for forums.
 Passwords are stored encrypted.
 Encryption options are available in the addon settings under 'Advanced'.
 @item:setnotify
-Toggle new subscription post/private message notifications
+Toggle new subscription post/private message notifications for the current forum.
 @item:settings
 Open the addon settings.
 @item:help

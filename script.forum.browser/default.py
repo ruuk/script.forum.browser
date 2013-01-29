@@ -21,7 +21,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.5'
+__version__ = '1.1.6'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2482,7 +2482,7 @@ def updateOldVersion():
 	return True
 
 def convertForumSettings_1_1_4():
-	forums = os.listdir(FORUMS_PATH)
+	forums = os.listdir(FORUMS_PATH) + os.listdir(FORUMS_STATIC_PATH)
 	for f in forums:
 		username = getSetting('login_user_' + f.replace('.','_'))
 		key = 'login_pass_' + f.replace('.','_')
