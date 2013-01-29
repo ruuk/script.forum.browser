@@ -1,5 +1,6 @@
 import urllib2, re, os, sys, time, urlparse, binascii
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
+from distutils.version import StrictVersion
 import threading
 
 try:
@@ -21,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2472,7 +2473,6 @@ def setLogins(force_ask=False):
 ###########################################################################################
 
 def updateOldVersion():
-	from distutils.version import StrictVersion
 	lastVersion = getSetting('last_version') or '0.0.0'
 	if StrictVersion(__version__) <= StrictVersion(lastVersion): return False
 	setSetting('last_version',__version__)
@@ -3501,23 +3501,36 @@ def copyTree(source,target):
 		
 	copyTree(source, target)
 		
+def getSkinVersion(skin_path):
+	addon = os.path.join(skin_path,'addon.xml')
+	if not os.path.exists(addon): return '0.0.0'
+	acontent = open(addon,'r').read()
+	return acontent.split('<addon',1)[-1].split('version="',1)[-1].split('"',1)[0]
+	
+
 def checkForSkinMods():
 	skinPath = xbmc.translatePath('special://skin')
-	skinName = skinPath
-	if skinName.endswith(os.path.sep): skinName = skinName[:-1]
-	LOG('XBMC Skin: ' + os.path.basename(skinName))
+	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
+	skinName = os.path.basename(skinPath)
+	version = getSkinVersion(skinPath)
+	LOG('XBMC Skin (In Use): %s %s' % (skinName,version))
+	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
+	localSkinPath = os.path.join(localAddonsPath,skinName)
+	version2 = getSkinVersion(localSkinPath)
+	LOG('XBMC Skin   (Home): %s %s' % (skinName,version2))
 	if __addon__.getSetting('use_skin_mods') != 'true': return			
-	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
+	font = os.path.join(localSkinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	if os.path.exists(font):
-		fontsXmlFile = os.path.join(skinPath,'720p','Font.xml')
-		if not os.path.exists(fontsXmlFile): fontsXmlFile = os.path.join(skinPath,'1080i','Font.xml')
-		if os.path.exists(fontsXmlFile):
-			contents = open(fontsXmlFile,'r').read()
-			if 'Forum Browser' in contents: return
+		if StrictVersion(version2) >= StrictVersion(version): 
+			fontsXmlFile = os.path.join(localSkinPath,'720p','Font.xml')
+			if not os.path.exists(fontsXmlFile): fontsXmlFile = os.path.join(localSkinPath,'1080i','Font.xml')
+			if os.path.exists(fontsXmlFile):
+				contents = open(fontsXmlFile,'r').read()
+				if 'Forum Browser' in contents: return
 	
 	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires XBMC restart to take effect.)','Install now?')
 	if not yes:
-		__addon__.setSetting('user_skin_mods','false')
+		__addon__.setSetting('use_skin_mods','false')
 		return
 	LOG('Installing Skin Mods')
 	doModKeyboard('',no_keyboard=True)
@@ -3534,8 +3547,10 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	localSkinPath = os.path.join(localAddonsPath,currentSkin)
 	#LOG(localSkinPath)
 	#LOG(skinPath)
+	version = getSkinVersion(skinPath)
+	version2 = getSkinVersion(localSkinPath)
 	
-	if not os.path.exists(localSkinPath):
+	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
 		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
 		yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
 		if not yesno: return

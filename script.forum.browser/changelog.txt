@@ -34,7 +34,12 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.6
+Current Version : 1.1.7
+
+*** 1.1.7 ***
+
+Fix: Skin mod will now update when skin version changes on XBMC upgrade
+Fix: Saying 'No' to skin mods now properly disables skin mods (which also stops it from asking to install skin mods)
 
 *** 1.1.6 ***
 
