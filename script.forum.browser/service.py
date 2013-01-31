@@ -18,8 +18,6 @@ __language__ = ADDON.getLocalizedString
 FB = None
 from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH
 
-from crypto import passmanager
-
 ADDONID = ADDON.getAddonInfo('id')
 
 def getSetting(key,default=None):
@@ -57,7 +55,7 @@ class ForumBrowserService:
 				try:
 					self.checkForums()
 				except:
-					ERROR('Failed To Check Subscriptions')
+					ERROR('Failed To Check Forums')
 				if self.onlyOnStart:
 					self.log('STARTUP ONLY - STOPPING SERVICE')
 					break
@@ -169,12 +167,17 @@ class ForumBrowserService:
 			if not self.setForumBrowser(forum): continue
 			if not self.hasLogin(): continue
 			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True)
-			pmcounts = self.FB.getPMCounts()
+			try:
+				pmcounts = self.FB.getPMCounts()
+				subs = self.FB.getSubscriptions()
+			except:
+				ERROR('Failed to get data for forum: %s' % forum)
+				continue
 			fdata['PM'] = pmcounts.get('unread',0) or 0
 			pmtotal = pmcounts.get('total',0) or 0
 			if fdata['PM']:
 				if self.checkLast(forum, 'PM', fdata['PM']): flag = True
-			subs = self.FB.getSubscriptions()
+			
 			log = self.FB.getDisplayName() + ': '
 			ct = 0
 			unread = 0
