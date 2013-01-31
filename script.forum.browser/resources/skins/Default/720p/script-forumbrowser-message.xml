@@ -168,7 +168,7 @@
 			<animation effect="slide" end="-309,0" time="400"
 				condition="Control.HasFocus(149)|Control.HasFocus(150)">Conditional</animation>
 			<control type="group">
-				<visible>Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
+				<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 				<posx>-549</posx>
 				<posy>330</posy>
 				<control type="image">

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.7'
+__version__ = '1.1.8'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -63,6 +63,8 @@ CACHE_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'
 if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
 if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
+
+STARTFORUM = None
 
 def ERROR(message,hide_tb=False):
 	LOG('ERROR: ' + message)
@@ -597,6 +599,144 @@ class ImagesDialog(BaseWindowDialog):
 		import shutil
 		shutil.copy(source, target)
 		showMessage('Finished','File Saved Successfully: ',os.path.basename(target),success=True)
+
+######################################################################################
+# Notifications Dialog
+######################################################################################
+class NotificationsDialog(BaseWindowDialog):
+	def __init__( self, *args, **kwargs ):
+		self.forumsWindow = kwargs.get('forumsWindow')
+		self.colorsDir = os.path.join(CACHE_PATH,'colors')
+		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
+		self.gifReplace = chr(255)*6
+		BaseWindowDialog.__init__( self, *args, **kwargs )
+	
+	def onInit(self):
+		BaseWindowDialog.onInit(self)
+		if not self.forumsWindow: self.getControl(250).setLabel('Forum Browser: New Posts')
+		self.fillList()
+		
+	def onClick( self, controlID ):
+		if BaseWindowDialog.onClick(self, controlID): return
+		if controlID == 220:
+			self.changeForum()
+		
+	def onAction(self,action):
+		BaseWindowDialog.onAction(self,action)
+		if action == ACTION_CONTEXT_MENU:
+			self.toggleNotify()
+		
+	def toggleNotify(self):
+		item = self.getControl(220).getSelectedItem()
+		if not item: return
+		forumID = item.getProperty('forumID')
+		if not forumID: return
+		current = toggleNotify(forumID)
+		item.setProperty('notify',current and 'notify' or '')
+		
+	def changeForum(self):
+		item = self.getControl(220).getSelectedItem()
+		if not item: return
+		forumID = item.getProperty('forumID')
+		if not forumID: return
+		if self.forumsWindow:
+			self.forumsWindow.changeForum(forumID)
+		else:
+			xbmc.executebuiltin("RunScript(script.forum.browser,forum=%s)" % forumID)
+		self.close()
+		
+	def fillList(self):
+		clist = self.getControl(220)
+		favs = getFavorites()
+		ft = os.listdir(FORUMS_STATIC_PATH)
+		hidden = getHiddenForums()
+		flist_tmp = []
+		for f in ft:
+			if not f in hidden: flist_tmp.append(f)
+		flist2_tmp = os.listdir(FORUMS_PATH)
+		rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
+		if favs:
+			for f in favs:
+				if f in rest: rest.pop(rest.index(f))
+			favs.append('')
+		whole = favs + rest
+		final = []
+		for f in whole:
+			if f and not f in final and not f.startswith('.'):
+				final.append(f)
+		unreadData = self.loadLastData() or {}
+		uitems = []
+		items = []
+		colors = {}
+		for f in final:
+			flag = False
+			path = getForumPath(f,just_path=True)
+			unread = unreadData.get(f) or {}
+			if not path: continue
+			if not os.path.isfile(os.path.join(path,f)): continue
+			fdata = forumbrowser.ForumData(f,path)
+			ndata = loadForumSettings(f) or {}
+			name = fdata.name
+			logo = fdata.urls.get('logo','')
+			exists, logopath = getCachedLogo(logo,f)
+			if exists: logo = logopath
+			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
+			item = xbmcgui.ListItem(name,iconImage=logo)
+			item.setProperty('bgcolor',hc)
+			color = hc.upper()[2:]
+			if color in colors:
+				path = colors[color]
+			else:
+				path = self.makeColorFile(color, self.colorsDir)
+				colors[color] = path
+			item.setProperty('bgfile',path)
+			item.setProperty('forumID',f)
+			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
+			up = unread.get('PM','')
+			if up:
+				flag = True
+				item.setProperty('new_PMs','newpms')
+			upms = str(up) or ''
+			if 'PM' in unread: del unread['PM']
+			uct = unread.values().count(True)
+			if uct:
+				flag = True
+				item.setProperty('new_subs','newsubs')
+			usubs = unread and str(uct) or ''
+			tsubs = unread and str(len(unread.values())) or ''
+			usubs = usubs and '%s/%s' % (usubs,tsubs) or ''
+			item.setProperty('unread_subs',usubs)
+			item.setProperty('unread_PMs',upms)
+			if flag:
+				uitems.append(item)
+			else:
+				items.append(item)
+		clist.addItems(uitems + items)
+		
+	def makeColorFile(self,color,path):
+		try:
+			replace = binascii.unhexlify(color)
+		except:
+			replace = chr(255)
+		replace += replace
+		target = os.path.join(path,color + '.gif')
+		open(target,'w').write(open(self.colorGif,'r').read().replace(self.gifReplace,replace))
+		return target
+	
+	def loadLastData(self):
+		dataFile = os.path.join(CACHE_PATH,'notifications')
+		if not os.path.exists(dataFile): return
+		seconds = (getSetting('notify_interval',20) + 5) * 60
+		df = open(dataFile,'r')
+		lines = df.read()
+		df.close()
+		try:
+			dtime,data = lines.splitlines()
+			if time.time() - float(dtime) > seconds: return
+			import ast
+			return ast.literal_eval(data)
+		except:
+			ERROR('Failed To Read Data File')
 		
 ######################################################################################
 # Post Dialog
@@ -2076,14 +2216,11 @@ class ForumsWindow(BaseWindow):
 	def setLogo(self,logo):
 		if not logo: return
 		if getSetting('save_logos',False):
-			root, ext = os.path.splitext(logo) #@UnusedVariable
-			logopath = os.path.join(CACHE_PATH,FB.getForumID() + ext or '.jpg')
-			if not ext:
-				if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
-				if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
-			if os.path.exists(logopath):
+			exists, logopath = getCachedLogo(logo,FB.getForumID())
+			if exists:
 				logo = logopath
 			else:
+				
 				try:
 					open(logopath,'wb').write(urllib2.urlopen(logo).read())
 					logo = logopath
@@ -2291,7 +2428,7 @@ class ForumsWindow(BaseWindow):
 	def openSettings(self):
 		if not FB: return
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''
-		doSettings()
+		doSettings(self)
 		newLogin = FB and self.getUsername() + self.getPassword() or ''
 		if not oldLogin == newLogin:
 			self.resetForum(False)
@@ -2325,6 +2462,16 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	if return_window: return w
 	del w
 	return None
+
+def getCachedLogo(logo,forumID):
+	root, ext = os.path.splitext(logo) #@UnusedVariable
+	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
+	if not ext:
+		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
+		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
+	if os.path.exists(logopath):
+		return True, logopath
+	return False, logopath
 
 def doKeyboard(prompt,default='',hidden=False):
 	keyboard = xbmc.Keyboard(default,prompt)
@@ -2429,6 +2576,9 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			name = fdata.name
 			desc = fdata.description
 			logo = fdata.urls.get('logo','')
+			exists, logopath = getCachedLogo(logo,f)
+			if exists: logo = logopath
+			print logo
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			desc = '[B]Description[/B]: [COLOR FFFF9999]' + (desc or 'None') + '[/COLOR]'
 			interface = ''
@@ -2498,13 +2648,13 @@ def convertForumSettings_1_1_4():
 def toggleNotify(forumID=None):
 	notify = True
 	if not forumID and FB: forumID = FB.getForumID()
-	if not forumID: return False
+	if not forumID: return None
 	data = loadForumSettings(forumID)
 	if data: notify = not data['notify']
 	saveForumSettings(forumID,notify=notify)
-	return True
+	return notify
 		
-def doSettings():
+def doSettings(window=None):
 	notify = False
 	if FB:
 		data = loadForumSettings(FB.getForumID())
@@ -2522,6 +2672,7 @@ def doSettings():
 	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
 	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''))
+	dialog.addItem('managenotify',__language__(30209),'forum-browser-info.png',helpdict.get('managenotify',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
 	result = dialog.getResult()
@@ -2536,6 +2687,7 @@ def doSettings():
 	elif result == 'updatethemeodb': updateThemeODB()
 	elif result == 'setlogins': setLogins(True)
 	elif result == 'setnotify': toggleNotify()
+	elif result == 'managenotify': manageNotifications(window)
 #	elif result == 'register': registerForum()
 	elif result == 'help': showHelp('forums')
 	elif result == 'settings':
@@ -2550,6 +2702,13 @@ def doSettings():
 		FB.MC.resetRegex()
 		checkForSkinMods()
 
+def manageNotifications(window=None,size='full'):
+	if size == 'small':
+		xmlFile = 'script-forumbrowser-notifications-small.xml'
+	else:
+		xmlFile = 'script-forumbrowser-notifications.xml'
+	openWindow(NotificationsDialog,xmlFile,theme='Default',forumsWindow=window)
+	
 def loadHelp(helpfile,as_list=False):
 	lang = xbmc.getLanguage().split(' ',1)[0]
 	addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
@@ -3135,6 +3294,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 				path = colors[color]
 			else:
 				path = self.makeColorFile(color, self.colorsDir)
+				colors[color] = path
 			item.setProperty('bgfile',path)
 			for k,v in i.get('extras',{}).items():
 				item.setProperty(k,v)
@@ -3643,7 +3803,11 @@ def checkForInterface(url):
 def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_default=False):
 	showError = showMessage
 	if silent: showError = showMessageSilent
-	
+	global STARTFORUM
+	if not forum and STARTFORUM:
+			forum = STARTFORUM
+			STARTFORUM = None
+			
 	if not forum:
 		if no_default: return False
 		forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
@@ -3717,6 +3881,7 @@ if __name__ == '__main__':
 	
 		TD = ThreadDownloader()
 		
+		if sys.argv[-1].startswith('forum='): STARTFORUM = sys.argv[-1].split('=',1)[-1]
 		openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
 		#sys.modules.clear()
 		

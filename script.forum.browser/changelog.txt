@@ -34,7 +34,15 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.7
+Current Version : 1.1.8
+
+*** 1.1.8 ***
+
+Fix: Overlay video box will no longer display when audio is playing
+Added 'Manage Notifications' to the Options menu which opens dialog for toggling notifications and viewing new post/pm status. Context button toggles notifications on/off and selecting a forum will go to that forum
+Added 'Method' in notifications settings - Choose method of notification when no video is playing: Normal XBMC Popup, Small Dialog, Full Dialog
+Added 'Method (During Video)' in notifications settings - Choose method of notification when video IS playing: Normal XBMC Popup, Small Dialog, Full Dialog
+Added 'XBMC Notice Duration' in notifications settings - Set the number of seconds the XBMC popup will display
 
 *** 1.1.7 ***
 

@@ -16,7 +16,7 @@ def LOG(txt): pass
 ADDON = __addon__ = xbmcaddon.Addon()
 __language__ = ADDON.getLocalizedString
 FB = None
-from default import getForumBrowser, listForumSettings, loadForumSettings, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH
+from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH
 
 from crypto import passmanager
 
@@ -28,7 +28,7 @@ def getSetting(key,default=None):
 	if isinstance(default,bool):
 		return setting == 'true'
 	elif isinstance(default,int):
-		return int(float(setting))
+		return int(float(setting or '0'))
 	elif isinstance(default,list):
 		if setting: return setting.split(':!,!:')
 		else: return default
@@ -41,6 +41,10 @@ class ForumBrowserService:
 		self.FB = None
 		self.seconds = 20
 		self.enabled = False
+		self.methods = ('normal','small','full')
+		self.notifyMethod = 0
+		self.notifyMethodVideo = 0
+		self.notifyXbmcDuration = 3
 		self.lastData = {}
 		self.loadLastData()
 		self.loadConfig(True)
@@ -86,14 +90,25 @@ class ForumBrowserService:
 		self.seconds = getSetting('notify_interval',20) * 60
 		self.enabled = getSetting('notify_enabled',False)
 		self.onlyOnStart = getSetting('notify_only_on_start',False)
+		self.notifyMethod = self.methods[getSetting('notify_method',0)]
+		self.notifyMethodVideo = self.methods[getSetting('notify_method_video',0)]
+		self.notifyXbmcDuration = getSetting('notify_xbmc_duration',3) * 1000
 		if not first and self.onlyOnStart:
 			self.log('CHANGED: STARTUP ONLY - STOPPING SERVICE')
 			self.stop = True
 		
-	def notify(self,message,header='Forum Browser'):
-		mtime=2000
-		image=ADDON.getAddonInfo('icon')
-		xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
+	def notify(self,message='',header='Forum Browser',type='all'):
+		if self.isVideoPlaying():
+			method = self.notifyMethodVideo
+		else:
+			method = self.notifyMethod
+			
+		if method == 'normal' and type == 'single':
+			mtime=self.notifyXbmcDuration
+			image=ADDON.getAddonInfo('icon')
+			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
+		elif method != 'normal' and type == 'all':
+			manageNotifications(size=method)
 		
 	def getUsername(self):
 		data = loadForumSettings(self.FB.getForumID())
@@ -108,6 +123,9 @@ class ForumBrowserService:
 	def hasLogin(self):
 		return self.getUsername() != '' and self.getPassword() != ''
 	
+	def isVideoPlaying(self):
+		return xbmc.getCondVisibility('Player.Playing') and xbmc.getCondVisibility('Player.HasVideo')
+		
 	def setForumBrowser(self,forum):
 		self.FB = getForumBrowser(forum,no_default=True)
 		return self.FB
@@ -144,6 +162,7 @@ class ForumBrowserService:
 	def checkForums(self):
 		self.log('CHECKING FORUMS...')
 		data = {}
+		anyflag = False
 		for forum in self.getNotifyList():
 			fdata = {}
 			flag = False
@@ -164,7 +183,7 @@ class ForumBrowserService:
 				self.log(log)
 				continue
 			
-			for f in subs['forums']:
+			for f in subs['forums'] or []:
 				ID = 'F' + f.get('forumid')
 				
 				fdata[ID] = f.get('new_post')
@@ -183,13 +202,18 @@ class ForumBrowserService:
 			log += 'Subs: %s/%s PMs: %s/%s' % (unread,ct,fdata['PM'],pmtotal)
 			
 			if flag:
-				self.notify(log)
+				self.notify(log,type='single')
 				self.log(log + ' - SHOWING NOTICE')
+				anyflag = True
 			else:
 				self.log(log)
 			
 				
 		self.setLastData(data)
+		
+		if anyflag:
+			self.log('SHOWING DIALOG')
+			self.notify()
 		self.log('CHECKING FORUMS: FINISHED')
 		
 if __name__ == '__main__':

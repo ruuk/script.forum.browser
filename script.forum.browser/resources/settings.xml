@@ -29,5 +29,8 @@
     <setting id="notify_enabled" type="bool" label="30019" default="false" />
     <setting id="notify_only_on_start" type="bool" label="30021" default="false" enable="eq(-1,true)"/>
     <setting label="30020" type="slider" id="notify_interval" default="20" range="5,5,600" option="int"  enable="eq(-2,true)"/>
+    <setting id="notify_method" type="enum" label="30023" lvalues="30025|30026|30027" default="0" enable="eq(-3,true)"/>
+    <setting id="notify_method_video" type="enum" label="30024" lvalues="30025|30026|30027" default="0" enable="eq(-4,true)"/>
+    <setting label="30028" type="slider" id="notify_xbmc_duration" default="3" range="1,1,30" option="int"  enable="eq(-5,true)"/>
   </category>
 </settings>

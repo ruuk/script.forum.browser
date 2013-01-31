@@ -318,7 +318,7 @@
 
 		</control>
 		<control type="group">
-			<visible>Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
+			<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 			<posx>828</posx>
 			<posy>453</posy>
 			<control type="image">
