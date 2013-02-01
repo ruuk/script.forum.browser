@@ -16,7 +16,7 @@ def LOG(txt): pass
 ADDON = __addon__ = xbmcaddon.Addon()
 __language__ = ADDON.getLocalizedString
 FB = None
-from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH
+from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
 
 ADDONID = ADDON.getAddonInfo('id')
 

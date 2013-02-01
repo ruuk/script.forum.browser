@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.8'
+__version__ = '1.1.9'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
