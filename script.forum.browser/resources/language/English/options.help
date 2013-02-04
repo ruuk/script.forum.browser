@@ -25,6 +25,13 @@ Passwords are stored encrypted.
 Encryption options are available in the addon settings under 'Advanced'.
 @item:setnotify
 Toggle new subscription post/private message notifications for the current forum.
+@item:managenotify
+Open the Manage Notifications dialog.
+
+This dialog displays all added forums, and the most recent data on new posts (assuming notifications is enabled in settings and turned on for the relevant forum as well as the service has finished checking forums).
+
+You can toggle notifications on or off for each forum with the context menu button.
+Selecting a forum will change Forum Browser to that forum.
 @item:settings
 Open the addon settings.
 @item:help

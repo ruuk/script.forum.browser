@@ -1,4 +1,4 @@
-import urllib2, re, os, sys, time, urlparse, binascii
+import urllib2, re, os, sys, time, urlparse, binascii, math
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.1.9'
+__version__ = '1.2.0'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -54,6 +54,8 @@ ACTION_CONTEXT_MENU   = 117
 
 #Actually it's show codec info but I'm using in a threaded callback
 ACTION_RUN_IN_MAIN = 27
+
+PLAYER = None
 
 MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
@@ -99,7 +101,7 @@ def getSetting(key,default=None):
 	if isinstance(default,bool):
 		return setting == 'true'
 	elif isinstance(default,int):
-		return int(float(setting))
+		return int(float(setting or 0))
 	elif isinstance(default,list):
 		if setting: return setting.split(':!,!:')
 		else: return default
@@ -117,8 +119,7 @@ from forumbrowser import forumbrowser
 from forumbrowser import texttransform
 from crypto import passmanager
 from forumbrowser import tapatalk
-from video import WebVideo
-
+import video
 	
 ######################################################################################
 # Base Window Classes
@@ -467,11 +468,10 @@ class PageWindow(BaseWindow):
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
 		
 	def pageMenu(self):
-		dialog = xbmcgui.Dialog()
 		options = [self._firstPage,self._lastPage]
 		if self._newestPage: options.append(self._newestPage)
 		options.append(__language__(30115))
-		idx = dialog.select(__language__(30114),options)
+		idx = dialogSelect(__language__(30114),options)
 		if idx < 0: return
 		if options[idx] == self._firstPage: self.gotoPage(self.pageData.getPageNumber(1))
 		elif options[idx] == self._lastPage: self.gotoPage(self.pageData.getPageNumber(-1))
@@ -609,12 +609,17 @@ class NotificationsDialog(BaseWindowDialog):
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		self.gifReplace = chr(255)*6
+		self.items = None
+		self.stopTimeout = False
+		self.createItems()
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
 		BaseWindowDialog.onInit(self)
 		if not self.forumsWindow: self.getControl(250).setLabel('Forum Browser: New Posts')
 		self.fillList()
+		self.startDisplayTimeout()
+		self.setFocusId(220)
 		
 	def onClick( self, controlID ):
 		if BaseWindowDialog.onClick(self, controlID): return
@@ -623,9 +628,22 @@ class NotificationsDialog(BaseWindowDialog):
 		
 	def onAction(self,action):
 		BaseWindowDialog.onAction(self,action)
+		self.stopTimeout = True
 		if action == ACTION_CONTEXT_MENU:
 			self.toggleNotify()
 		
+	def startDisplayTimeout(self):
+		if self.forumsWindow: return
+		if getSetting('notify_dialog_close_only_video',True) and not self.isVideoPlaying(): return 
+		duration = getSetting('notify_dialog_timout',0)
+		if duration:
+			xbmc.sleep(1000 * duration)
+			if self.stopTimeout and getSetting('notify_dialog_close_activity_stops',True): return
+			self.close()
+	
+	def isVideoPlaying(self):
+		return xbmc.getCondVisibility('Player.Playing') and xbmc.getCondVisibility('Player.HasVideo')
+	
 	def toggleNotify(self):
 		item = self.getControl(220).getSelectedItem()
 		if not item: return
@@ -645,25 +663,27 @@ class NotificationsDialog(BaseWindowDialog):
 			xbmc.executebuiltin("RunScript(script.forum.browser,forum=%s)" % forumID)
 		self.close()
 		
-	def fillList(self):
-		clist = self.getControl(220)
-		favs = getFavorites()
-		ft = os.listdir(FORUMS_STATIC_PATH)
-		hidden = getHiddenForums()
-		flist_tmp = []
-		for f in ft:
-			if not f in hidden: flist_tmp.append(f)
-		flist2_tmp = os.listdir(FORUMS_PATH)
-		rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
-		if favs:
-			for f in favs:
-				if f in rest: rest.pop(rest.index(f))
-			favs.append('')
-		whole = favs + rest
-		final = []
-		for f in whole:
-			if f and not f in final and not f.startswith('.'):
-				final.append(f)
+	def createItems(self):
+		if not self.forumsWindow and getSetting('notify_dialog_only_enabled'):
+			final = getNotifyList()
+		else:
+			favs = getFavorites()
+			ft = os.listdir(FORUMS_STATIC_PATH)
+			hidden = getHiddenForums()
+			flist_tmp = []
+			for f in ft:
+				if not f in hidden: flist_tmp.append(f)
+			flist2_tmp = os.listdir(FORUMS_PATH)
+			rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
+			if favs:
+				for f in favs:
+					if f in rest: rest.pop(rest.index(f))
+				favs.append('')
+			whole = favs + rest
+			final = []
+			for f in whole:
+				if f and not f in final and not f.startswith('.'):
+					final.append(f)
 		unreadData = self.loadLastData() or {}
 		uitems = []
 		items = []
@@ -711,7 +731,10 @@ class NotificationsDialog(BaseWindowDialog):
 				uitems.append(item)
 			else:
 				items.append(item)
-		clist.addItems(uitems + items)
+		self.items = uitems + items
+		
+	def fillList(self):
+		self.getControl(220).addItems(self.items)
 		
 	def makeColorFile(self,color,path):
 		try:
@@ -737,7 +760,15 @@ class NotificationsDialog(BaseWindowDialog):
 			return ast.literal_eval(data)
 		except:
 			ERROR('Failed To Read Data File')
-		
+
+def getNotifyList():
+		flist = listForumSettings()
+		nlist = []
+		for f in flist:
+			data = loadForumSettings(f)
+			if data:
+				if data['notify']: nlist.append(f)
+		return nlist
 ######################################################################################
 # Post Dialog
 ######################################################################################
@@ -935,7 +966,7 @@ class LinePostDialog(PostDialog):
 		elif share.shareType == 'image':
 			paste = '[img]%s[/img]' % share.url
 		elif share.shareType == 'video':
-			source = WebVideo().getVideoObject(share.page).sourceName.lower()
+			source = video.WebVideo().getVideoObject(share.page).sourceName.lower()
 			paste = '[video=%s]%s[/video]' % (source,share.page)
 			
 		if before:
@@ -1018,6 +1049,93 @@ class LinePostDialog(PostDialog):
 # Message Window
 #
 ######################################################################################
+class PlayerMonitor(xbmc.Player):
+	def init(self):
+		self.interrupted = None
+		self.isSelfPlaying = False
+		self.stack = 0
+		self.currentTime = None
+		return self
+		
+	def start(self,path):
+		interrupted = None
+		if getSetting('video_return_interrupt',True):
+			interrupted = video.current()
+			self.getCurrentTime()
+		self.interrupted = interrupted
+		self.played = path
+		self.isSelfPlaying = True
+		self.play(path)
+		
+	def finish(self):
+		if getSetting('video_stop_on_exit',True):
+			self.doStop()
+			if self.interrupted: self.wait()
+		else:
+			if getSetting('video_return_interrupt_after_exit',False) and self.interrupted:
+				self.waitLong()
+		LOG('PLAYER: Exiting')
+		
+	def doStop(self):
+		if not self.isSelfPlaying: return
+		LOG('PLAYER: Stopping forum video')
+		self.stop()
+		
+	def wait(self):
+		LOG('PLAYER: Waiting for video to stop...')
+		ct = 0
+		while self.interrupted and not xbmc.abortRequested:
+			xbmc.sleep(1000)
+			ct+=1
+			if ct > 19: break #Don't know if this is necessary, but it's here just in case.
+			
+	def waitLong(self):
+		LOG('PLAYER: Waiting after FB close to resume interrupted video...')
+		while self.interrupted and not xbmc.abortRequested:
+			xbmc.sleep(1000)
+		
+	def playInterrupted(self):
+		self.isSelfPlaying = False
+		if self.interrupted:
+			LOG('PLAYER: Playing interrupted video')
+			if getSetting('video_bypass_resume_dialog',True) and self.currentTime:
+				try:
+					video.playAt(self.interrupted, *self.currentTime)
+				except:
+					ERROR('PLAYER: Failed manually resume video - sending to XBMC')
+					video.play(self.interrupted)
+			else:
+				video.play(self.interrupted)
+		self.interrupted = None
+		self.currentTime = None
+	
+	def onPlayBackEnded(self):
+		self.playInterrupted()
+		
+	def onPlayBackStopped(self):
+		self.playInterrupted()
+		
+	def pauseStack(self):
+		if not self.stack: video.pause()
+		self.stack += 1
+		
+	def resumeStack(self):
+		self.stack -= 1
+		if self.stack < 1:
+			self.stack = 0
+			video.resume()
+		
+	def getCurrentTime(self):
+		if not video.isPlaying(): return None
+		offset = getSetting('video_resume_offset',0)
+		val = self.getTime() - offset
+		if val < 0: val = 0
+		(ms,tsec) = math.modf(val)
+		m, s = divmod(int(tsec), 60)
+		h, m = divmod(m, 60)
+		self.currentTime = (h,m,s,int(ms*1000))
+		
+		
 class MessageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
@@ -1025,7 +1143,9 @@ class MessageWindow(BaseWindow):
 		self.imageReplace = 'IMG #%s'
 		self.action = None
 		self.started = False
-		self.videoHandler = WebVideo()
+		self.interruptedVideo = None
+		self.videoHandler = video.WebVideo()
+		self.player = PlayerMonitor()
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -1050,7 +1170,7 @@ class MessageWindow(BaseWindow):
 		self.setTheme()
 		self.getImages()
 		self.getLinks()
-
+		
 	def setTheme(self):
 		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
 		title = ''
@@ -1127,7 +1247,12 @@ class MessageWindow(BaseWindow):
 			self.showImage(self.getControl(150).getSelectedItem().getProperty('url'))
 	
 	def showVideo(self,source):
-		xbmc.executebuiltin('PlayMedia(%s)' % source)
+		if video.isPlaying() and getSetting('video_ask_interrupt',True):
+			line2 = getSetting('video_return_interrupt',True) and __language__(30254) or ''
+			if not xbmcgui.Dialog().yesno(__language__(30255),__language__(30256),line2):
+				return
+		PLAYER.start(source)
+		#video.play(source)
 		
 	def getSelectedLink(self):
 		idx = self.getControl(148).getSelectedPosition()
@@ -2000,13 +2125,22 @@ class ThreadsWindow(PageWindow):
 	
 	def removeItem(self,item):
 		clist = self.getControl(120)
-		items = []
+		#items = []
+		storageList = xbmcgui.ControlList(-100,-100,80,80)
 		for idx in range(0,clist.size()):
 			i = clist.getListItem(idx)
-			if item != i: items.append(i)
+			#print str(item.getProperty('id')) + ' : ' + str(i.getProperty('id'))
+			if item.getProperty('id') != i.getProperty('id'): storageList.addItem(i)
 		clist.reset()
-		clist.addItems(items)
-		
+		clist.addItems(self.getListItems(storageList))
+		del storageList
+	
+	def getListItems(self,alist):
+		items = []
+		for x in range(0,alist.size()):
+			items.append(alist.getListItem(x))
+		return items
+	
 	def gotoPage(self,page):
 		self.stopThread()
 		self.fillThreadList(page)
@@ -2467,8 +2601,8 @@ def getCachedLogo(logo,forumID):
 	root, ext = os.path.splitext(logo) #@UnusedVariable
 	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
 	if not ext:
-		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
-		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
+		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.png')
+		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.gif')
 	if os.path.exists(logopath):
 		return True, logopath
 	return False, logopath
@@ -2578,7 +2712,6 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 			logo = fdata.urls.get('logo','')
 			exists, logopath = getCachedLogo(logo,f)
 			if exists: logo = logopath
-			print logo
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			desc = '[B]Description[/B]: [COLOR FFFF9999]' + (desc or 'None') + '[/COLOR]'
 			interface = ''
@@ -3208,8 +3341,10 @@ def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=F
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
 	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success,scroll=scroll)
+	if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
 	w.doModal()
 	del w
+	if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
 
 def showMessageSilent(caption,text,text2='',text3='',error=False,success=None,scroll=False): pass
 	
@@ -3443,15 +3578,25 @@ class ChoiceMenu():
 	def getResult(self,close_on_context=True):
 		self.closeContext = close_on_context
 		self.hideSplash()
+		if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
 		idx = self.getChoiceIndex()
+		if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
 		if idx < 0: return None
 		if self.items[idx]['disabled']: return None
 		return self.items[idx]['id']
 
+def dialogSelect(heading,ilist,autoclose=0):
+	if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
+	result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
+	if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
+	return result
+	
 class OptionsChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None,close_on_context=True):
 		self.closeContext = close_on_context
+		if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
+		if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None
@@ -3460,7 +3605,9 @@ class OptionsChoiceMenu(ChoiceMenu):
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None):
+		if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
+		if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None
@@ -3786,7 +3933,7 @@ def getForumList():
 		if not f.startswith('.') and not f == 'general':
 			if not f in flist: flist.append(f)
 	return flist
-	
+
 def checkForInterface(url):
 	url = url.split('/forumrunner')[0].split('/mobiquo')[0]
 	LOG('Checking for forum type at URL: ' + url)
@@ -3872,9 +4019,10 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 if __name__ == '__main__':
 	if sys.argv[-1] == 'settings':
 		doSettings()
-	elif sys.argv[-1] == 'settingshelp':
-		showHelp('settings')
+	elif sys.argv[-1].startswith('settingshelp_'):
+		showHelp('settings-' + sys.argv[-1].split('_')[-1])
 	else:
+		PLAYER = PlayerMonitor().init()
 		updateOldVersion()
 		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 		checkForSkinMods()
@@ -3884,4 +4032,5 @@ if __name__ == '__main__':
 		if sys.argv[-1].startswith('forum='): STARTFORUM = sys.argv[-1].split('=',1)[-1]
 		openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
 		#sys.modules.clear()
+		PLAYER.finish()
 		

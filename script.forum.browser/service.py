@@ -16,8 +16,8 @@ def LOG(txt): pass
 ADDON = __addon__ = xbmcaddon.Addon()
 __language__ = ADDON.getLocalizedString
 FB = None
-from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
-
+from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, getNotifyList, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
+import video
 ADDONID = ADDON.getAddonInfo('id')
 
 def getSetting(key,default=None):
@@ -43,6 +43,7 @@ class ForumBrowserService:
 		self.notifyMethod = 0
 		self.notifyMethodVideo = 0
 		self.notifyXbmcDuration = 3
+		self.notifyStaleTime = 3600
 		self.lastData = {}
 		self.loadLastData()
 		self.loadConfig(True)
@@ -74,15 +75,6 @@ class ForumBrowserService:
 			txt = txt.decode("utf-8")
 		message = u'FORUMBROWSER-SERVICE: %s' % txt
 		xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGNOTICE)
-			
-	def getNotifyList(self):
-		flist = listForumSettings()
-		nlist = []
-		for f in flist:
-			data = loadForumSettings(f)
-			if data:
-				if data['notify']: nlist.append(f)
-		return nlist
 		
 	def loadConfig(self,first=False):
 		self.seconds = getSetting('notify_interval',20) * 60
@@ -91,12 +83,13 @@ class ForumBrowserService:
 		self.notifyMethod = self.methods[getSetting('notify_method',0)]
 		self.notifyMethodVideo = self.methods[getSetting('notify_method_video',0)]
 		self.notifyXbmcDuration = getSetting('notify_xbmc_duration',3) * 1000
+		self.notifyStaleTime = getSetting('notify_stale_time',1) * 3600
 		if not first and self.onlyOnStart:
 			self.log('CHANGED: STARTUP ONLY - STOPPING SERVICE')
 			self.stop = True
 		
 	def notify(self,message='',header='Forum Browser',type='all'):
-		if self.isVideoPlaying():
+		if video.isPlaying():
 			method = self.notifyMethodVideo
 		else:
 			method = self.notifyMethod
@@ -120,9 +113,6 @@ class ForumBrowserService:
 		
 	def hasLogin(self):
 		return self.getUsername() != '' and self.getPassword() != ''
-	
-	def isVideoPlaying(self):
-		return xbmc.getCondVisibility('Player.Playing') and xbmc.getCondVisibility('Player.HasVideo')
 		
 	def setForumBrowser(self,forum):
 		self.FB = getForumBrowser(forum,no_default=True)
@@ -151,7 +141,7 @@ class ForumBrowserService:
 		df.close()
 		try:
 			dtime,data = lines.splitlines()
-			if time.time() - float(dtime) > self.seconds: return
+			if time.time() - float(dtime) > self.notifyStaleTime: return
 			import ast
 			self.lastData = ast.literal_eval(data)
 		except:
@@ -161,7 +151,7 @@ class ForumBrowserService:
 		self.log('CHECKING FORUMS...')
 		data = {}
 		anyflag = False
-		for forum in self.getNotifyList():
+		for forum in getNotifyList():
 			fdata = {}
 			flag = False
 			if not self.setForumBrowser(forum): continue
@@ -172,6 +162,7 @@ class ForumBrowserService:
 				subs = self.FB.getSubscriptions()
 			except:
 				ERROR('Failed to get data for forum: %s' % forum)
+				fdata = self.lastData.get(forum)
 				continue
 			fdata['PM'] = pmcounts.get('unread',0) or 0
 			pmtotal = pmcounts.get('total',0) or 0

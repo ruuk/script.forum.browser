@@ -25,13 +25,28 @@
     <string id="30019">Enable Notifications (Enabling Requires XBMC Restart)</string>
     <string id="30020">Check Interval (In Minutes)</string>
     <string id="30021">Only At XBMC Start (Disabling Requires XBMC Restart)</string>
-    <string id="30022">Hide Video Overlay</string>
+    <string id="30022">Video</string>
+    
     <string id="30023">Method</string>
     <string id="30024">Method (During Video)</string>
     <string id="30025">Normal XBMC Popup</string>
     <string id="30026">Small Dialog</string>
     <string id="30027">Full Dialog</string>
     <string id="30028">XBMC Notice Duration</string>
+    <string id="30029">Dialog Timeout (0 For None)</string>
+    <string id="30030">Only When Playing Video</string>
+    <string id="30031">Activity Stops Timeout</string>
+    
+    <string id="30032">Ask Before Interrupting Video</string>
+    <string id="30033">Return To Interrupted Video</string>
+    <string id="30034">Pause Video On Dialogs</string>
+    <string id="30035">Hide Video Overlay</string>
+    <string id="30036">Stop Forum Video On Forum Browser Close</string>
+    <string id="30037">Allow Return To Interrupted Video After Close</string>
+    <string id="30038">Bypass XBMC Resume Dialog</string>
+    <string id="30039">Pre-Offset (Seconds)</string>
+    <string id="30040">Hours Until Notify Data Considered Stale</string>
+    <string id="30041">Dialog: Only Show Notify Enabled Forums</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -161,6 +176,10 @@
     <string id="30251">No messages</string>
     <string id="30252">Create New Thread</string>
     <string id="30253">Send PM to %s</string>
+    
+    <string id="30254">Will Restart After Finish.</string>
+    <string id="30255">Video Playing</string>
+    <string id="30256">Interrupt Current Video?</string>
     
     <string id="30500">Miscellaneous</string>
     <string id="30501">Audio/Video Software &amp; Technology</string>

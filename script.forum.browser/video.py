@@ -1,5 +1,5 @@
 import urllib2,re, sys, os
-import xbmcaddon #@UnresolvedImport
+import xbmc, xbmcaddon #@UnresolvedImport
 
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
@@ -207,7 +207,34 @@ class WebVideo():
 			ERROR('Error importing module %s for share target %s.' % (self.importPath,self.addonID))
 		except:
 			ERROR('ShareTarget.getModule(): Error during target sharing import')
-		return 
+		return
+	
+def play(path):
+	xbmc.executebuiltin('PlayMedia(%s)' % path)
+	
+def pause():
+	if isPlaying(): control('play')
+	
+def resume():
+	if not isPlaying(): control('play')
+	
+def current():
+	return xbmc.getInfoLabel('Player.Filenameandpath')
+
+def control(command):
+	xbmc.executebuiltin('PlayerControl(%s)' % command)
+
+def isPlaying():
+		return xbmc.getCondVisibility('Player.Playing') and xbmc.getCondVisibility('Player.HasVideo')
+	
+def playAt(path,h=0,m=0,s=0,ms=0):
+	json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.Open", "params": {"item":{"file":"%s"},"options":{"resume":{"hours":%s,"minutes":%s,"seconds":%s,"milliseconds":%s}}}, "id": 1}' % (path,h,m,s,ms)) #@UnusedVariable
+									
+#	import simplejson
+#	json_query = unicode(json_query, 'utf-8', errors='ignore')
+#	json_response = simplejson.loads(json_query)
+#	print json_response
+	
 #http://vimeo.com/moogaloop.swf?clip_id=38759453
 #http://vimeo.com/api/v2/video/38759453.json
 

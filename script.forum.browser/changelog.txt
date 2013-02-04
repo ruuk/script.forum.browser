@@ -34,11 +34,27 @@ TODO:
   signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.1.9
+Current Version : 1.2.0
+
+*** 1.2.0 ***
+
+Fix a bug causing errors when retrieving a cached logo
+Make 'Manage Notifications' dialog build the forums list before displaying so that it waits to pop-up till after the processing is done
+Added help for 'Manage Notifications' on the options menu
+Rearranged settings sections to 'General', 'Notifications' and then 'Advanced'
+Created 'Video' section in settings
+Moved 'Hide Video Overlay' to Video section in settings
+Added 'Ask Before Interrupting Video', 'Return To Interrupted Video', 'Pause Video On Dialogs', 'Stop Forum Video On Forum Browser Close', 'Allow Return To Interrupted Video After Close', 'Bypass XBMC Resume Dialog' and 'Pre-Offset (Seconds)' to Video section in settings
+Fix: When service failed to get forum info, a notification display was triggered
+Fixed issue with not giving immediate focus to notifications dialog
+Fix: Unsubscribing from thread/forum crashing XBMC
+Fix for signatures not appearing when signature is saved in extra info in the format of "name's signature"
+Added 'Hours Until Notify Data Considered Stale' and 'Dialog: Only Show Notify Enabled Forums' to Notifications section in settings
+Split settings help into separate help option for each section, and updated help for all settings.
 
 *** 1.1.9 ***
 
-Add some missing images
+Add some missing image files
 
 *** 1.1.8 ***
 

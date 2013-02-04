@@ -253,6 +253,8 @@ class ForumPost(forumbrowser.ForumPost):
 			val = str(e['value'])
 			if name.lower() == 'signature':
 				self.signature = val
+			elif name.lower() == self.userName + '\'s signature' and not self.signature:
+				self.signature = val
 			else:
 				if val: self.extras[name] = val
 		
