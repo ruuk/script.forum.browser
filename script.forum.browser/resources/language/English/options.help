@@ -12,6 +12,16 @@ Forum Browser will attempt to find the forum via Tapatalk or Forumrunner. If tha
 Afterwards you may optionally share it to the Forum Browser online database.
 @item:addonline
 Select a forum to add from the Forum Browser online database, or un-hide removed built-in forums.
+
+Use the context menu button when viewing the forum lists to enter either keywords or a wildcard expression to use as a filter.
+
+Searches are checked against title + space + description, and are not case sensitive.
+
+Example:
+[I]xbmc linux[/I] : will find any entry with both xbmc and linux
+in either the title or description.
+
+[I]*x?mc*linux*[/I] : will find for example 'xbmc' or 'xcmc' as long as 'linux' is found after.
 @item:removeforum
 Remove a forum from the list of forums. For built-in forums, the forum is hidden.
 @item:setcurrentcolor

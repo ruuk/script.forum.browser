@@ -1,5 +1,6 @@
 <window>
 	<defaultcontrol>220</defaultcontrol>
+	<zorder>11</zorder>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>

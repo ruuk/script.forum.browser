@@ -226,7 +226,7 @@ class ForumPost(forumbrowser.ForumPost):
 		if not self.activity: return ''
 		if not self.activityUnix: return self.activity
 		now = time.time()
-		if time.daylight: now += 3600
+		#if time.daylight: now += 3600
 		#print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
 		#print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
 		d = now - self.activityUnix
@@ -249,9 +249,9 @@ class ForumPost(forumbrowser.ForumPost):
 			date = time.mktime(iso8601.parse_date(date).timetuple())
 		self.activityUnix = date
 		for e in info.get('custom_fields_list',[]):
-			name = str(e['name'])
+			name = str(e['name']).lower()
 			val = str(e['value'])
-			if name.lower() == 'signature':
+			if name == 'signature':
 				self.signature = val
 			elif name.lower() == self.userName + '\'s signature' and not self.signature:
 				self.signature = val

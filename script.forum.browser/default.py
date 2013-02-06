@@ -1,4 +1,4 @@
-import urllib2, re, os, sys, time, urlparse, binascii, math
+import urllib2, re, os, sys, time, urlparse, binascii, math, fnmatch
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -1471,6 +1471,7 @@ def showUserExtras(extras):
 #
 ######################################################################################
 class RepliesWindow(PageWindow):
+	info_display = {'postcount':'posts','joindate':'join date'}
 	def __init__( self, *args, **kwargs ):
 		PageWindow.__init__( self,total_items=int(kwargs.get('reply_count',0)),*args, **kwargs )
 		self.pageData.isReplies = True
@@ -1610,6 +1611,7 @@ class RepliesWindow(PageWindow):
 			self.setupPage(data.pageData)
 			if getSetting('reverse_sort',False) and not self.isPM():
 				data.data.reverse()
+			alt = self.getUserInfoAttributes()
 			self.posts = {}
 			select = -1
 			for post,idx in zip(data.data,range(0,len(data.data))):
@@ -1629,8 +1631,15 @@ class RepliesWindow(PageWindow):
 				item.setProperty('online',post.online and 'online' or '')
 				item.setProperty('postcount',post.postCount and unicode(post.postCount) or '')
 				item.setProperty('activity',post.getActivity())
-				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
-				item.setProperty('joindate',unicode(post.joinDate))
+				for a in alt:
+					val = post.getUserData(a)
+					if val != None and str(val):
+						edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),val) or ''
+						if item.getProperty('alternate1'):
+							item.setProperty('alternate2',edisp)
+							break
+						else:
+							item.setProperty('alternate1',edisp)
 				if post.extras: item.setProperty('extras','extras')
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
@@ -1654,6 +1663,13 @@ class RepliesWindow(PageWindow):
 		self.pid = ''
 		self.setLoggedIn()
 			
+	def getUserInfoAttributes(self):
+		try:
+			return getSetting('post_user_info','postcount,reputation,joindate,location').split(',')
+		except:
+			ERROR('getUserInfoAttributes(): Bad settings data')
+			return ['postcount','reputation','joindate','location']
+		
 	def makeLinksArray(self,miter):
 		if not miter: return []
 		urls = []
@@ -2367,8 +2383,9 @@ class ForumsWindow(BaseWindow):
 			image = 'forum-browser-%s.png' % FB.browserType or ''
 		self.getControl(249).setImage(image)
 			
-	def setPMCounts(self,pm_counts=None):
+	def setPMCounts(self,pm_counts=False):
 		if not FB: return
+		if pm_counts == False: return
 		disp = ''
 		if not pm_counts: pm_counts = FB.getPMCounts()
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
@@ -2477,6 +2494,7 @@ class ForumsWindow(BaseWindow):
 			self.openThreadsWindow()
 		elif controlID == 105:
 			self.stopThread()
+			self.setFocusId(202)
 			return
 		if BaseWindow.onClick(self, controlID): return
 		if self.empty: self.fillForumList()
@@ -2494,15 +2512,16 @@ class ForumsWindow(BaseWindow):
 		item = self.getControl(120).getSelectedItem()
 		d = ChoiceMenu('Options',with_splash=True)
 		try:
-			if item:
-				fid = item.getProperty('id')
-				if FB.isForumSubscribed(fid,item.getProperty('subscribed')):
-					if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
-				else:
-					if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
-			if FB.canGetOnlineUsers():
-				d.addItem('online','View Online Users')
-			d.addItem('foruminfo','View Forum Info')
+			if FB:
+				if item:
+					fid = item.getProperty('id')
+					if FB.isForumSubscribed(fid,item.getProperty('subscribed')):
+						if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
+					else:
+						if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
+				if FB.canGetOnlineUsers():
+					d.addItem('online','View Online Users')
+				d.addItem('foruminfo','View Forum Info')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2560,7 +2579,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		
 	def openSettings(self):
-		if not FB: return
+		#if not FB: return
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''
 		doSettings(self)
 		newLogin = FB and self.getUsername() + self.getPassword() or ''
@@ -2788,23 +2807,23 @@ def toggleNotify(forumID=None):
 	return notify
 		
 def doSettings(window=None):
-	notify = False
+	notify = None
 	if FB:
 		data = loadForumSettings(FB.getForumID())
-		if data: notify = data['notify']
+		if data: notify = data.get('notify')
 		
 	helpdict = loadHelp('options.help')
 	dialog = OptionsChoiceMenu(__language__(30051))
-	dialog.addItem('addfavorite',__language__(30223),'forum-browser-star.png',helpdict.get('addfavorite',''))
+	dialog.addItem('addfavorite',__language__(30223),'forum-browser-star.png',helpdict.get('addfavorite',''),disabled=not bool(FB))
 	dialog.addItem('removefavorite',__language__(30225),'forum-browser-star-minus.png',helpdict.get('removefavorite',''))
 	dialog.addItem('addforum',__language__(30222),'forum-browser-plus.png',helpdict.get('addforum',''))
 	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
 	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
-	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline','')) #,disabled=FB.prefix == 'GB.')
-	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''))
-	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''))
+	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=not bool(FB)) #,disabled=FB.prefix == 'GB.')
+	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''),disabled=not bool(FB))
+	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''),disabled=not bool(FB))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
-	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''))
+	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''),disabled=not bool(FB))
 	dialog.addItem('managenotify',__language__(30209),'forum-browser-info.png',helpdict.get('managenotify',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
 	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
@@ -2832,7 +2851,7 @@ def doSettings(window=None):
 			del w
 		global DEBUG
 		DEBUG = getSetting('debug',False)
-		FB.MC.resetRegex()
+		if FB: FB.MC.resetRegex()
 		checkForSkinMods()
 
 def manageNotifications(window=None,size='full'):
@@ -2933,13 +2952,14 @@ def getFavorites():
 	
 def selectForumCategory(with_all=False):
 	d = ChoiceMenu('Select Category')
-	if with_all: d.addItem('all','Show All')
+	if with_all:
+		d.addItem('search','Search Database')
+		d.addItem('all','Show All')
 	for x in range(0,17):
 		d.addItem(str(x), str(__language__(30500 + x)))
 	return d.getResult()
 
 def addForum(current=False):
-	if not FB: return
 	dialog = xbmcgui.DialogProgress()
 	dialog.create('Add Forum')
 	dialog.update(0,'Enter Name/Address')
@@ -2948,6 +2968,7 @@ def addForum(current=False):
 	password=None
 	try:
 		if current:
+			if not FB: return
 			ftype = FB.prefix[:2]
 			forum = FB.forum
 			url = orig = FB._url
@@ -3049,10 +3070,15 @@ def addForumFromOnline():
 		res = selectForumCategory(with_all=True)
 		if not res: return
 		cat = res
+		terms = None
 		if cat == 'all': cat = None
+		if cat == 'search':
+			terms = doKeyboard('Enter Search Terms')
+			if not terms: continue
+			cat = None
 		splash = showActivitySplash('Getting Forums List')
 		try:
-			flist = odb.getForumList(cat)
+			flist = odb.getForumList(cat,terms)
 		finally:
 			splash.close()
 		if not flist:
@@ -3084,7 +3110,7 @@ def addForumFromOnline():
 			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
 		f = True	
 		while f:
-			f = menu.getResult('script-forumbrowser-forum-select.xml')
+			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
 			if f: doAddForumFromOnline(f)
 	
 def formatHexColorToARGB(hexcolor):
@@ -3409,21 +3435,47 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.caption = kwargs.get('caption')
 		self.select = kwargs.get('select')
 		self.menu = kwargs.get('menu')
+		self.filtering = kwargs.get('filtering',False)
+		self.terms = ''
+		self.filter = None
+		self.filterType = 'terms'
+		self.started = False
 		self.gifReplace = chr(255)*6
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
+		if self.started: return
+		self.started = True
+		self.showItems()
+		
+	def showItems(self):
 		clist = self.getControl(120)
 		clist.reset()
 		colors = {}
 		if not os.path.exists(self.colorsDir): os.makedirs(self.colorsDir)
 		
 		for i in self.items:
+			if self.filter:
+				text = i['disp'] + ' ' + i['disp2']
+				if self.filterType == 'terms':
+					matched = False
+					text = (i['disp'] + ' ' + i['disp2']).lower()
+					for f in self.filter:
+						if not f.search(text):
+							break
+					else:
+						matched = True
+						
+					if not matched: continue
+				else:
+					if not fnmatch.fnmatch(text.lower(), self.filter): continue
+					
 			item = xbmcgui.ListItem(label=i['disp'],label2=i['disp2'],thumbnailImage=i['icon'])
 			if i['sep']: item.setProperty('SEPARATOR','SEPARATOR')
 			item.setProperty('bgcolor',i['bgcolor'])
+			item.setProperty('disabled',str(bool(i['disabled'])))
 			color = i['bgcolor'].upper()[2:]
 			if color in colors:
 				path = colors[color]
@@ -3444,6 +3496,26 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 					break
 				idx+=1
 		
+	def doFilter(self):
+		self.getControl(199).setVisible(False)
+		try:
+			terms = doKeyboard(__language__(30517),self.terms)
+			self.terms = terms or ''
+			if '*' in terms or '?' in terms:
+				self.filter = terms.lower()
+				self.filterType = 'wild'
+			else:
+				terms = terms.strip().split()
+				self.filter = []
+				for t in terms: self.filter.append(re.compile(r'\b%s\b' % t,re.I))
+				self.filterType = 'terms'
+				
+			self.showItems()
+		except:
+			ERROR('Error handling search terms')
+		finally:
+			self.getControl(199).setVisible(True)
+	
 	def makeColorFile(self,color,path):
 		try:
 			replace = binascii.unhexlify(color)
@@ -3476,8 +3548,12 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 			if pos < 0: return
 			if self.menu.closeContext: self.close()
 			self.menu.contextCallback(self,self.items[pos])
+		elif self.filtering:
+			self.doFilter()
 			
 	def finish(self):
+		item = self.getControl(120).getSelectedItem()
+		if item and item.getProperty('disabled') == 'True': return
 		self.result = self.getControl(120).getSelectedPosition()
 		self.doClose()
 		
@@ -3604,9 +3680,9 @@ class OptionsChoiceMenu(ChoiceMenu):
 		return self.items[result]['id']
 		
 class ImageChoiceMenu(ChoiceMenu):
-	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None):
+	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None,filtering=False):
 		if getSetting('video_pause_on_dialog',True): PLAYER.pauseStack()
-		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
+		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select,filtering=filtering)
 		if getSetting('video_pause_on_dialog',True): PLAYER.resumeStack()
 		result = w.result
 		del w

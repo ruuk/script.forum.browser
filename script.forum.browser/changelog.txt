@@ -13,7 +13,6 @@ TODO:
   Option to save posts when exiting and not posting
   Use new option menus for context?
   Better 'Choose Forum' menu
-  Improve the database and database management
   Adjustable text size
   Logo url from field in forum config data?
   Add missing smilies other forum types
@@ -31,10 +30,22 @@ TODO:
  
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
-  signature maybe with future tapatalk plugin update - edit: works for some now
   reputation maybe with future tapatalk plugin update
 
-Current Version : 1.2.0
+Current Version : 1.2.1
+
+*** 1.2.1 ***
+
+Fix: Notify service dialog will now popup over Forum Browser dialogs.
+Added the ability to filter forum lists in the add from online database dialog by keywords or wildcards
+Added 'Search Database' to the the category list in the add from online database dialog
+When clicking the stop button, focus now moves to the 'Change Forum' button
+Options dialog can now open with no connection, options that require a connection will be disabled
+Clicking disabled items in a dialog will no longer close the dialog, they will just do nothing 
+Forums window context menu will now popup when no connection, showing only 'Reset' and 'Help'
+Removed attempt to compensate for DST in activity times in the posts list as it appears unnecessary (and breaks the time)
+Added the 'Post User Attributes To Display' to General section in settings, allowing users to define info shown in posts lists
+Fix: When failing to connect when getting forum lists, was still trying to get PM counts
 
 *** 1.2.0 ***
 

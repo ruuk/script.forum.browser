@@ -81,9 +81,11 @@ class FBOnlineDatabase():
 	def setTheme(self,fname,vals_dict):
 		return self.postData(do='set_theme',name=fname,**vals_dict)
 		
-	def getForumList(self,cat=None):
+	def getForumList(self,cat=None,terms=None):
 		if cat:
 			flist = self.postData(do='list',cat=cat)
+		elif terms:
+			flist = self.postData(do='list',terms=terms)
 		else:
 			flist = self.postData(do='list')
 		#print flist.replace('\r',',')
@@ -564,6 +566,8 @@ class ForumPost:
 		self.extras = {}
 		self.isSent = False
 		if pdict: self.setVals(pdict)
+		self.attrs_index = dir(self)
+		self.attrs_lower = [x.lower() for x in self.attrs_index]
 			
 	def setVals(self,pdict): pass
 		
@@ -573,6 +577,14 @@ class ForumPost:
 	def setUserInfo(self,info): pass
 		
 	def getActivity(self): return self.activity
+	
+	def getUserData(self,name):
+		name = name.lower()
+		if hasattr(self,name): return getattr(self,name)
+		if name in self.extras: return self.extras[name]
+		if name in self.attrs_lower:
+			return getattr(self, self.attrs_index[self.attrs_lower.index(name)])
+			
 	
 	def setPostID(self,pid):
 		self.postId = pid

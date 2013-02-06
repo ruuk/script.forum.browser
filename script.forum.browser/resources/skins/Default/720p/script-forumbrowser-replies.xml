@@ -390,8 +390,7 @@
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
-						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
-						<visible>!StringCompare(ListItem.Property(postcount),)</visible>
+						<info>ListItem.Property(alternate1)</info>
 					</control>
 					<control type="label">
 						<posx>42</posx>
@@ -402,8 +401,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
-						<label>$LOCALIZE[SCRIPT3012] $INFO[ListItem.Property(joindate)]</label>
-						<visible>!StringCompare(ListItem.Property(joindate),)</visible>
+						<info>ListItem.Property(alternate2)</info>
 					</control>
 					<control type="label">
 						<posx>210</posx>
@@ -601,8 +599,7 @@
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
-						<label>$LOCALIZE[SCRIPT3011] $INFO[ListItem.Property(postcount)]</label>
-						<visible>!StringCompare(ListItem.Property(postcount),)</visible>
+						<info>ListItem.Property(alternate1)</info>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -613,8 +610,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
-						<label>$LOCALIZE[SCRIPT3012] $INFO[ListItem.Property(joindate)]</label>
-						<visible>!StringCompare(ListItem.Property(joindate),)</visible>
+						<info>ListItem.Property(alternate2)</info>
 					</control>
 					<control type="image">
 						<posx>10</posx>
