@@ -4,11 +4,16 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
+  Add help for Rules Management
+  Check for new parser rules automatically or add option to check for new rules 
   Help for rating when adding Parser Browser forums to the online database
   Help for the color dialog
   Still some issues with no seconds listed in the tapatalk activity display...?
   
  Long Term:
+  Image zoom/rotate etc
+  Look at using the AlarmClock builtin for the service - Easier to restart and less overall memory usage perhaps?
   When adding a forum, ask for logo background color (or image?) or ask later
   Option to save posts when exiting and not posting
   Use new option menus for context?
@@ -30,9 +35,29 @@ TODO:
  
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
-  reputation maybe with future tapatalk plugin update
 
-Current Version : 1.2.1
+Current Version : 1.2.2
+
+*** 1.2.2 ***
+
+ParserBrowser: Fixed bug with IPBoard forums with urls that ended in /forum being unable to list threads
+ParserBrowser: Added a very small tweak for removing extraneous ':' from some post user data
+Fixed a bug causing errors when stopping video
+ParserBrowser: Added item to 'Options' dialog 'Set Login Page' (Parser Browser forums only) which will open the forum in WebViewer, and allow you to browse to the login page to set the page to use for logins
+ParserBrowser: IPBoard - fix for some forums not displaying posts properly past page 1
+Fix spelling/grammar errors, added '(Seconds)' to 'XBMC Notice Duration' setting
+ParserBrowser: Added option in the posts list context menu 'Manage Rules' for creating some simple forum specific parsing rules and sharing them to the online database
+Now retrieves parsing rules if available from the online database
+Fix for some bad video ID extraction when parsing YouTube video URLs
+Fixed link parsing errors occuring in some forums (Notably XBMCHub)
+Added settings in Video section 'Start Video In Overlay' and 'Resume Video In Overlay'
+Now can show up to three custom infos on posts lists
+Added debugging code for unrecognized Tapatalk errors
+All post info (normal and extra) is now pooled together. Extra Info items are now all info that is not shown in the post list. This has the added benefit that all info can now be seen from the 'User Extra Info' item on the message window
+ParserBrowser: Now ignores 'Open Thread At Newest Post' setting, so no longer jumps to the bottom of list (as it can't jump to the last page yet)
+Now optionally shows image and video icons in posts list for posts where these media were detected
+Added settings option in General section: 'Show Post Media Indicators' and 'Count Link Images As Images'
+Some improvements detecting Thread links and Post links for some forum types
 
 *** 1.2.1 ***
 
@@ -42,7 +67,7 @@ Added 'Search Database' to the the category list in the add from online database
 When clicking the stop button, focus now moves to the 'Change Forum' button
 Options dialog can now open with no connection, options that require a connection will be disabled
 Clicking disabled items in a dialog will no longer close the dialog, they will just do nothing 
-Forums window context menu will now popup when no connection, showing only 'Reset' and 'Help'
+Forums window context menu will now popup when no connection, showing only 'Refresh' and 'Help'
 Removed attempt to compensate for DST in activity times in the posts list as it appears unnecessary (and breaks the time)
 Added the 'Post User Attributes To Display' to General section in settings, allowing users to define info shown in posts lists
 Fix: When failing to connect when getting forum lists, was still trying to get PM counts

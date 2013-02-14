@@ -3,8 +3,8 @@ Settings Help (Advanced)
 Select between AES & Triple DES, AES and DES encryption. The default is AES & Triple DES. Less encryption may speed password decryption but will be less secure.
 @item:crypto_key_file=Encryption Key File
 Optional.
-Allows you to select whose contents will be used as the encryption key. Normally the key is automatically generated as a combination of your system username, your XBMC user name and the forum user name.
-The only restrictions for the file is the file is that is must be readable by XBMC and it contents must not change.
+Allows you to select a file whose contents will be used as the encryption key. Normally the key is automatically generated as a combination of your system username, your XBMC user name and the forum user name.
+The only restrictions for the file is that it must be readable by XBMC and it contents must not change.
 @item:debug=Enable Debug Logging
 Enables more detailed logging. You should only enable this if the developer asks you to when reporting a bug.
 @item:do_mybb_edit_bug_fix=Enable MyBB Edit Post Bug Re-Subscribe Fix

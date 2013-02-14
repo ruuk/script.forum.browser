@@ -137,12 +137,22 @@ class CookieTransport(xmlrpclib.Transport):
 
 		#discard any response data and raise exception
 		if (response.getheader("content-length", 0)):
-			response.read()
+			html = response.read()
 		if response.status == 301:
 			raise forumbrowser.ForumMovedException(response.getheader('location'))
 		elif response.status == 404:
 			raise forumbrowser.ForumNotFoundException('Tapatalk')
 		else:
+			if DEBUG:
+				encoding = response.getheader("content-encoding")
+				if encoding == 'gzip':
+					try:
+						import zlib
+						html = zlib.decompress(html,16+zlib.MAX_WBITS)
+					except:
+						ERROR('Failed to decode gzipped response HTML')
+						pass
+				print repr(html)
 			raise httplib.HTTPException(response.reason)
 	
 	def send_content(self, connection, request_body):
@@ -488,6 +498,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			ERROR('Failed to get forum config')
 			
+	def apiOK(self,target):
+		try:
+			apiLevel = int(self.forumConfig.get('api_level',''))
+		except:
+			return False
+		return apiLevel >= target 
+		
 	def getForumInfo(self):
 		return [	('name',self.getDisplayName()),
 					('interface','Tapatalk'),
@@ -761,18 +778,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				sreplies = []
 				if pid:
 					test = self.server.get_thread_by_post(pid,20)
-					if test.get('result'):
+					if test.get('position'):
 						index = test.get('position')
 						start = int((index - 1) / 20) * 20
 						page = start
 						thread = self.server.get_thread(threadid,start,start + 19)
 					else:
+						LOG('COULD NOT GET THREAD BY POST ID')
 						pid = ''
 						page = -1
 				if not pid:
 					thread = None
 					if page < 0:
-						test = self.server.get_thread(threadid,0,19)
+						test = self.server.get_thread(threadid,0,19,True)
 						page = self.getPageData(test,0).getPageNumber(-1)
 						if page == 0: thread = test
 					if not thread: thread = self.server.get_thread(threadid,page,page + 19)
@@ -804,6 +822,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(80,self.lang(30103)): break
 			pd = self.getPageData(thread,page or 0)
 			pd.tid = threadid
+#Tried this for XBMCHub on 02-14-13 but didn't help
+#			if self.apiOK(4) and str(self.forumConfig.get('mark_topic_read')) == '1':
+#				try:
+#					LOG('Marking topic as read: %s' % threadid)
+#					self.server.mark_topic_read([threadid])
+#				except:
+#					ERROR('Failed to mark topic as read')
 			callback(100,self.lang(30052))
 			return self.finish(FBData(sreplies,pd),donecallback)
 			

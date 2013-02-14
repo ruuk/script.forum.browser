@@ -1,4 +1,4 @@
-import HTMLParser, re, htmlentitydefs
+import HTMLParser, re, htmlentitydefs, os
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
@@ -989,6 +989,10 @@ class HTMLTag:
 		if not cls: return []
 		return cls.split(' ')
 
+	def stackIgnore(self):
+		for t in self.tagStack:
+			if t.ignore: return True
+		
 	def revertCodes(self, data):
 		return self.revertCodesRE.sub(r'&\2', data or '')
 
@@ -1421,7 +1425,7 @@ class GeneralPostParser(AdvancedParser):
 		self.ignoreForumImages = True
 		self.domain = ''
 		self.setDefaults()
-		
+		self.addRules()
 		self.wsRE = re.compile('[\r\t]')
 		self.excessiveNL = re.compile('\n{2,}')
 		self.numberRE = re.compile('^([\d,]+)$')
@@ -1435,7 +1439,7 @@ class GeneralPostParser(AdvancedParser):
 							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
 							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
-							'ip': re.compile('/topic/\d+-[^"\']*?/#entry(?P<id>\d+)(?:"|\'|$)'),
+							'ip': re.compile('/topic/\d+-[^"\']*?/?#entry(?P<id>\d+)(?:"|\'|$)'),
 							'sm': re.compile('index\.php\?[^"\']*?topic=\d+\.msg(?P<id>\d+)#msg\d+')
 						}
 		#sm    SMF: Simple Machines Forum
@@ -1473,7 +1477,7 @@ class GeneralPostParser(AdvancedParser):
 							('user',re.compile('^.*\w.*$')),
 							('postcount',re.compile('^posts:?( [\d,]+)?(?i)')),
 							('postcount',re.compile('^([\d,]+) posts(?i)')),
-							('extra.location',re.compile('^(?:location|from):?( .+)?(?i)')),
+							('extra.location',re.compile('^(?:location|from) ?:?( .+)?(?i)')),
 							('extra.reputation',re.compile('^reputation:( \d+)?(?i)')),
 							('extra.gender',re.compile('^gender:( .*?)?(?i)')),
 							('status',re.compile('(^.{1,40}$)')),
@@ -1485,7 +1489,7 @@ class GeneralPostParser(AdvancedParser):
 							('extra.karma',re.compile('^karma: ?(.+)$(?i)'))
 						]
 		
-		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote','visit homepage','edit','delete')
+		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote','visit homepage','edit','delete','members','multiquote','back to top')
 		
 		self.threadParser = None
 		
@@ -1520,10 +1524,24 @@ class GeneralPostParser(AdvancedParser):
 		url = url.split('/',1)[-1]
 		return self.base + url
 	
+	def addRules(self,rules=None):
+		self.extraRules = []
+		self.headFilters = []
+		self.tailFilters = []
+		if not rules: return
+		for k, v in rules.items():
+			if k.startswith('extra.'):
+				self.extraRules.append((k,re.compile(v)))
+			elif k == 'head':
+				self.headFilters = v.split(';&;')
+			elif k == 'tail':
+				self.tailFilters = v.split(';&;')
+	
 	def setFilters(self,filters):
 		if filters: self.filters = filters
 		self.quoteUserPrefix = self.filters.get('quote_user_prefix','posted by')
-		self.quoteFormat = self.filters.get('quote_tag','=%s')
+		self.quoteUserPostfix = self.filters.get('quote_user_postfix','said:')
+		self.quoteFormat = self.filters.get('quote_tag','quote=%s')
 		self.postURLPrefix = self.filters.get('post_url_prefix','@@**&&++')
 		
 	def setDomain(self,url):
@@ -1579,18 +1597,38 @@ class GeneralPostParser(AdvancedParser):
 			seq = seq[:seq.index(s)]	
 			lastP['data'] = seq
 			data = self.setDatas(lastP)
-			lastP['message'] = data and self.lastSplitRE.split(self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data))).split(self.getLowestPageURLSplit(),1)[0].strip(),1)[0]
+			lastP['message'] = self.postProcessMessage(data and self.lastSplitRE.split(self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data))).split(self.getLowestPageURLSplit(),1)[0].strip(),1)[0] or '')
 			if 'data' in lastP: del lastP['data']
 		else:
 			if not self.posts[-1].get('data'): self.getLastData(self.posts[-1])
 			for p in self.posts:
 				data = self.setDatas(p)
-				p['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
+				p['message'] = self.postProcessMessage(data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip()) or '')
 				if 'data' in p: del p['data']
 			
 		self.reset()
 		return self.posts
 		
+	def postProcessMessage(self,data):
+		idx = 0
+		ret = data.splitlines()
+		if self.headFilters:
+			for l in ret:
+				stripLower = l.strip().lower()
+				if not stripLower in self.headFilters: break
+				idx += 1
+			ret = ret[idx:]
+			
+		idx = len(ret) - 1
+		if idx < 0: return data
+		if self.tailFilters:
+			for l in reversed(ret):
+				stripLower = l.strip().lower()
+				if not stripLower in self.tailFilters: break
+				idx -= 1
+			ret = ret[:idx]
+		return '\n'.join(ret)	
+	
 	def getLowestPageURLSplit(self):
 		if not self.pages: return '\r\r\r\r\r\r'
 		lowest = 999
@@ -1697,7 +1735,7 @@ class GeneralPostParser(AdvancedParser):
 #			last = t
 	
 	def setDatas(self,p):
-		dREs = self.postREs[:]
+		dREs = self.postREs + self.extraRules
 		if self.forumType == 'pb': dREs.pop(0)
 		newData = []
 		last = ''
@@ -1714,7 +1752,15 @@ class GeneralPostParser(AdvancedParser):
 		classes = tag.getClasses()
 		if classes:
 			if self.filters.get('quote_class') and self.filters['quote_class'] in classes:
-				newData.append('[quote]')
+				lead = newData[-1].lower()
+				if self.quoteUserPostfix in lead:
+					if not newData[-2].endswith('\n'): newData[-2] += '\n'
+					qt = '['+(self.quoteFormat % re.split(self.quoteUserPostfix,newData[-1],1,re.I)[0].strip()) + ']'
+					newData[-1] = qt
+				elif lead == 'quote':
+					newData[-1] = '[quote]'
+				else:
+					newData.append('[quote]')
 				tag.info = 'QUOTE'
 				self.BLOCK = 'QUOTE'
 				return True
@@ -1798,6 +1844,9 @@ class GeneralPostParser(AdvancedParser):
 						color = color.lower()
 					newData.append('[COLOR %s]' % color)
 					d.info = 'COLOR'
+			elif d.tag == 'span':
+				if 'reputation' in d.getClasses():
+					d.ignore = True
 				
 #			for x in d.stack:
 #				newData,last = self.handleDataItem(x, p, dREs, newData, last)
@@ -1860,12 +1909,18 @@ class GeneralPostParser(AdvancedParser):
 			elif d.tag == 'li':
 				ds = ''.join(d.startTag.dataStack)
 				dslower = ds.lower()
-				if not dslower in self.ignores and not d.startTag.ignore: #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
+				if not dslower in self.ignores and not d.startTag.ignore and not d.startTag.stackIgnore(): #('report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote'):
 					if not dslower.startswith('view') and not dslower.endswith('posts') and not dslower.endswith('profile'):
-						newData.append('    * ' + ds + '\n')
+						if ds.strip(): newData.append('    * ' + ds + '\n')
 			elif d.tag == 'font':
 				if d.startTag.info == 'COLOR':
 					newData.append('[/COLOR]')
+			elif d.tag == 'span':
+				if 'reputation' in d.startTag.getClasses():
+					rep = ''.join(d.startTag.dataStack).strip()
+					if rep.isdigit():
+						p['extras']['reputation'] = rep
+						
 		elif self.BLOCKSUB == 'PRE':
 			pass
 		else:
@@ -1982,9 +2037,12 @@ class GeneralPostParser(AdvancedParser):
 				else:
 					#print 'x ' + d.encode('ascii','replace')
 					if self.lastUnset and dstrip:
+						if dstrip.startswith(':'): dstrip = dstrip[1:].strip()
 						if self.lastUnset.startswith('extra.'):
 							extra = self.lastUnset.split('.',1)[-1]
-							if not extra in p['extras']: p['extras'][extra] = dstrip
+							if not extra in p['extras']:
+								p['extras'][extra] = dstrip
+								d.tag.ignore = True
 						else:
 							p[self.lastUnset] = dstrip
 							d.tag.ignore = True
@@ -2011,6 +2069,7 @@ class GeneralPostParser(AdvancedParser):
 								newData.pop()
 								newData[-1] = '['+(self.quoteFormat % dstrip) + ']'
 							else:
+								newData[-1].lower()
 								newData.append(pre+d+post)
 						else:
 							newData.append(pre+d+post)
@@ -2053,7 +2112,7 @@ class GeneralPostParser(AdvancedParser):
 					self.lastStack = self.stack[:]
 					self.ids[ID] = post
 					self.posts.append(post)
-					if self.lastPost:
+					if self.lastPost and 'bottom' in self.lastPost:
 						bottomTag = self.lastPost['bottom']
 						#print bottomTag.depth
 						if bottomTag.depth < self.bottom: self.bottom = bottomTag.depth

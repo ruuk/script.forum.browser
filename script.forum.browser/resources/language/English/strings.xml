@@ -32,7 +32,7 @@
     <string id="30025">Normal XBMC Popup</string>
     <string id="30026">Small Dialog</string>
     <string id="30027">Full Dialog</string>
-    <string id="30028">XBMC Notice Duration</string>
+    <string id="30028">XBMC Notice Duration (Seconds)</string>
     <string id="30029">Dialog Timeout (0 For None)</string>
     <string id="30030">Only When Playing Video</string>
     <string id="30031">Activity Stops Timeout</string>
@@ -47,6 +47,10 @@
     <string id="30039">Pre-Offset (Seconds)</string>
     <string id="30040">Hours Until Notify Data Considered Stale</string>
     <string id="30041">Dialog: Only Show Notify Enabled Forums</string>
+    <string id="30042">Resume Video In Overlay</string>
+    <string id="30043">Start Video In Overlay</string>
+    <string id="30044">Show Post Media Indicators</string>
+    <string id="30045">Count Link Images As Images</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>

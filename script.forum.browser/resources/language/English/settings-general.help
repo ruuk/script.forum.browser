@@ -1,6 +1,6 @@
 Settings Help (General)
 @item:always_login=Always Login If Possible
-When enabled, Forum Browser will always login when connecting to a forum. This only works if login user and pasword are set.
+When enabled, Forum Browser will always login when connecting to a forum. This only works if login user and password are set.
 Normally, Forum Browser will login when needed.
 @item:ask_close_on_exit=Confirm Exit On Quit
 When enabled, when you attempt to close forum browser a dialog will pop up asking if you really want to quit.
@@ -23,6 +23,7 @@ There are built in attributes, as well as anything listed in the user extra info
 
 Some possible attributes:
 
+status
 postcount
 reputation
 joindate
@@ -41,3 +42,7 @@ The custom keyboard and font will only show in Forum Browser.
 When enabled, Forum Browser will save the logo file to disk, and use this copy in the future.
 @item:skin=Skin
 Select between the Dark or Light skin. Default is currently the light skin.
+@item:show_media_indicators=Show Post Media Indicators
+When enabled, image and video icons will show in the posts lists view indicating in which posts those media have been detected.
+@item:smi_count_link_images=Count Link Images As Images
+When enabled, image links will also be detected when showing post media indicators

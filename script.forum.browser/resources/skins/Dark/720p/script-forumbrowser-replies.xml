@@ -368,7 +368,7 @@
 						<textcolor>FFAAAAAA</textcolor>
 						<selectedcolor>FFAAAAAA</selectedcolor>
 						<align>left</align>
-						<info>ListItem.Property(status)</info>
+						<info>ListItem.Property(alternate1)</info>
 					</control>
 					<control type="image">
 						<posx>10</posx>
@@ -388,7 +388,7 @@
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
-						<info>ListItem.Property(alternate1)</info>
+						<info>ListItem.Property(alternate2)</info>
 					</control>
 					<control type="label">
 						<posx>42</posx>
@@ -399,7 +399,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
-						<info>ListItem.Property(alternate2)</info>
+						<info>ListItem.Property(alternate3)</info>
 					</control>
 					<control type="label">
 						<posx>210</posx>
@@ -453,6 +453,44 @@
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
+					</control>
+					<control type="group">
+						<posx>1158</posx>
+						<posy>60</posy>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-images.png</texture>
+							<visible>StringCompare(ListItem.Property(hasimages),hasimages)</visible>
+						</control>
+						<control type="image">
+							<posx>32</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-video.png</texture>
+							<visible>StringCompare(ListItem.Property(hasvideo),hasvideo)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-images.png</texture>
+							<visible>StringCompare(ListItem.Property(hasimages),noimages)</visible>
+							<colordiffuse>22FFFFFF</colordiffuse>
+						</control>
+						<control type="image">
+							<posx>32</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-video.png</texture>
+							<visible>StringCompare(ListItem.Property(hasvideo),novideo)</visible>
+							<colordiffuse>22FFFFFF</colordiffuse>
+						</control>
 					</control>
 				</itemlayout>
 				<focusedlayout height="200">
@@ -583,7 +621,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
-						<info>ListItem.Property(status)</info>
+						<info>ListItem.Property(alternate1)</info>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -594,7 +632,7 @@
 						<aligny>center</aligny>
 						<textcolor>FF9999BB</textcolor>
 						<align>left</align>
-						<info>ListItem.Property(alternate1)</info>
+						<info>ListItem.Property(alternate2)</info>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -605,7 +643,7 @@
 						<aligny>center</aligny>
 						<textcolor>FFAAAAAA</textcolor>
 						<align>left</align>
-						<info>ListItem.Property(alternate2)</info>
+						<info>ListItem.Property(alternate3)</info>
 					</control>
 					<control type="image">
 						<posx>10</posx>
@@ -677,6 +715,44 @@
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
+					</control>
+					<control type="group">
+						<posx>1158</posx>
+						<posy>160</posy>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-images.png</texture>
+							<visible>StringCompare(ListItem.Property(hasimages),hasimages)</visible>
+						</control>
+						<control type="image">
+							<posx>32</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-video.png</texture>
+							<visible>StringCompare(ListItem.Property(hasvideo),hasvideo)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-images.png</texture>
+							<visible>StringCompare(ListItem.Property(hasimages),noimages)</visible>
+							<colordiffuse>22FFFFFF</colordiffuse>
+						</control>
+						<control type="image">
+							<posx>32</posx>
+							<posy>0</posy>
+							<width>24</width>
+							<height>24</height>
+							<texture>forum-browser-video.png</texture>
+							<visible>StringCompare(ListItem.Property(hasvideo),novideo)</visible>
+							<colordiffuse>22FFFFFF</colordiffuse>
+						</control>
 					</control>
 				</focusedlayout>
 			</control>

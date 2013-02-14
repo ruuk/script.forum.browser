@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -57,7 +57,7 @@ ACTION_RUN_IN_MAIN = 27
 
 PLAYER = None
 
-MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','default','media'))
+MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums'))
 FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums_settings'))
@@ -660,6 +660,7 @@ class NotificationsDialog(BaseWindowDialog):
 		if self.forumsWindow:
 			self.forumsWindow.changeForum(forumID)
 		else:
+			#startForumBrowser(forumID)
 			xbmc.executebuiltin("RunScript(script.forum.browser,forum=%s)" % forumID)
 		self.close()
 		
@@ -1046,16 +1047,20 @@ class LinePostDialog(PostDialog):
 
 ######################################################################################
 #
-# Message Window
+# PlayerMonitor
 #
 ######################################################################################
 class PlayerMonitor(xbmc.Player):
+	def __init__(self,core=None):
+		self.init()
+		xbmc.Player.__init__(core)
+		
 	def init(self):
 		self.interrupted = None
 		self.isSelfPlaying = False
 		self.stack = 0
 		self.currentTime = None
-		return self
+		self.FBisRunning = True
 		
 	def start(self,path):
 		interrupted = None
@@ -1063,11 +1068,10 @@ class PlayerMonitor(xbmc.Player):
 			interrupted = video.current()
 			self.getCurrentTime()
 		self.interrupted = interrupted
-		self.played = path
-		self.isSelfPlaying = True
-		self.play(path)
+		self.doPlay(path)
 		
 	def finish(self):
+		self.FBisRunning = False
 		if getSetting('video_stop_on_exit',True):
 			self.doStop()
 			if self.interrupted: self.wait()
@@ -1075,6 +1079,14 @@ class PlayerMonitor(xbmc.Player):
 			if getSetting('video_return_interrupt_after_exit',False) and self.interrupted:
 				self.waitLong()
 		LOG('PLAYER: Exiting')
+		
+	def doPlay(self,path):
+		self.played = path
+		self.isSelfPlaying = True
+		if getSetting('video_start_preview',True):
+			video.play(path, preview=True)
+		else:
+			self.play(path)
 		
 	def doStop(self):
 		if not self.isSelfPlaying: return
@@ -1095,20 +1107,29 @@ class PlayerMonitor(xbmc.Player):
 			xbmc.sleep(1000)
 		
 	def playInterrupted(self):
+		if not self.isSelfPlaying: return
 		self.isSelfPlaying = False
 		if self.interrupted:
 			LOG('PLAYER: Playing interrupted video')
 			if getSetting('video_bypass_resume_dialog',True) and self.currentTime:
 				try:
+					xbmc.sleep(1000)
 					video.playAt(self.interrupted, *self.currentTime)
 				except:
 					ERROR('PLAYER: Failed manually resume video - sending to XBMC')
+					xbmc.sleep(1000)
 					video.play(self.interrupted)
 			else:
-				video.play(self.interrupted)
+				xbmc.sleep(1000)
+				video.play(self.interrupted,getSetting('video_resume_as_preview',False))
 		self.interrupted = None
 		self.currentTime = None
 	
+	def onPlayBackStarted(self):
+		if self.FBisRunning and getSetting('video_resume_as_preview',False) and not self.isSelfPlaying:
+			xbmc.sleep(1000)
+			xbmc.executebuiltin('Action(FullScreen)')
+		
 	def onPlayBackEnded(self):
 		self.playInterrupted()
 		
@@ -1135,7 +1156,11 @@ class PlayerMonitor(xbmc.Player):
 		h, m = divmod(m, 60)
 		self.currentTime = (h,m,s,int(ms*1000))
 		
-		
+######################################################################################
+#
+# Message Window
+#
+######################################################################################		
 class MessageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
@@ -1145,7 +1170,6 @@ class MessageWindow(BaseWindow):
 		self.started = False
 		self.interruptedVideo = None
 		self.videoHandler = video.WebVideo()
-		self.player = PlayerMonitor()
 		BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -1387,7 +1411,7 @@ class MessageWindow(BaseWindow):
 				self.action.pid = pm.pid
 				self.close()
 		elif result == 'extras':
-			showUserExtras(self.post.extras)
+			showUserExtras(self.post)
 		elif result == 'help':
 			showHelp('message')
 			
@@ -1459,10 +1483,10 @@ def deletePost(post,is_pm=False):
 		splash.close()
 	return result
 
-def showUserExtras(extras):
+def showUserExtras(post,ignore=None):
 	out = ''
-	for k,v in extras.items():
-		out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + v + '[/COLOR]\n'
+	for k,v in post.getExtras(ignore=ignore).items():
+		out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + texttransform.convertHTMLCodes(str(v)) + '[/COLOR]\n'
 	showMessage('User Info',out,scroll=True)
 
 ######################################################################################
@@ -1471,7 +1495,7 @@ def showUserExtras(extras):
 #
 ######################################################################################
 class RepliesWindow(PageWindow):
-	info_display = {'postcount':'posts','joindate':'join date'}
+	info_display = {'postcount':'posts','joindate':'joined'}
 	def __init__( self, *args, **kwargs ):
 		PageWindow.__init__( self,total_items=int(kwargs.get('reply_count',0)),*args, **kwargs )
 		self.pageData.isReplies = True
@@ -1614,6 +1638,9 @@ class RepliesWindow(PageWindow):
 			alt = self.getUserInfoAttributes()
 			self.posts = {}
 			select = -1
+			webvid = video.WebVideo()
+			showIndicators = getSetting('show_media_indicators',True)
+			countLinkImages = getSetting('smi_count_link_images',False)
 			for post,idx in zip(data.data,range(0,len(data.data))):
 				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
@@ -1626,26 +1653,40 @@ class RepliesWindow(PageWindow):
 				self.setMessageProperty(post,item,True)
 				item.setProperty('post',post.postId)
 				item.setProperty('avatar',url)
-				item.setProperty('status',texttransform.convertHTMLCodes(post.status))
+				#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
 				item.setProperty('date',post.date)
 				item.setProperty('online',post.online and 'online' or '')
-				item.setProperty('postcount',post.postCount and unicode(post.postCount) or '')
+				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 				item.setProperty('activity',post.getActivity())
+				if showIndicators:
+					hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
+					item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
+					item.setProperty('hasvideo',hasvideo and 'hasvideo' or 'novideo')
+				altused = []
+				extras = post.getExtras()
 				for a in alt:
-					val = post.getUserData(a)
+					val = extras.get(a)
 					if val != None and str(val):
-						edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),val) or ''
+						edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(str(val))) or ''
+						del extras[a]
+						altused.append(a)
 						if item.getProperty('alternate1'):
-							item.setProperty('alternate2',edisp)
-							break
+							if item.getProperty('alternate2'):
+								item.setProperty('alternate3',edisp)
+								break
+							else:
+								item.setProperty('alternate2',edisp)
 						else:
 							item.setProperty('alternate1',edisp)
-				if post.extras: item.setProperty('extras','extras')
+				
+				if extras:
+					item.setProperty('extras','extras')
+					item.setProperty('usedExtras',','.join(altused))
 				self.getControl(120).addItem(item)
 				self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False):
+			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest():
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
@@ -1665,7 +1706,7 @@ class RepliesWindow(PageWindow):
 			
 	def getUserInfoAttributes(self):
 		try:
-			return getSetting('post_user_info','postcount,reputation,joindate,location').split(',')
+			return getSetting('post_user_info','status,postcount,reputation,joindate,location').split(',')
 		except:
 			ERROR('getUserInfoAttributes(): Bad settings data')
 			return ['postcount','reputation','joindate','location']
@@ -1694,6 +1735,7 @@ class RepliesWindow(PageWindow):
 				self.topic = ''
 				self.pid = w.action.pid
 				self.tid = w.action.tid
+				self.firstRun = True
 				if w.action.pid: self.showThread(nopage=True)
 				else: self.showThread()
 			elif w.action.action == 'REFRESH':
@@ -1760,10 +1802,11 @@ class RepliesWindow(PageWindow):
 					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
 				else:
 					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
-			if post and post.extras:
+			if post and item.getProperty('extras'):
 				d.addItem('extras','User Extra Info')
 			if item and FB.canPrivateMessage() and not self.isPM():
 				d.addItem('pm',__language__(30253) % item.getLabel())
+			if FB and FB.browserType == 'GenericParserForumBrowser': d.addItem('managerules','Manage Parser Rules')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -1799,10 +1842,12 @@ class RepliesWindow(PageWindow):
 		elif result == 'unsubscribe':
 			if unSubscribeThread(self.tid): self.threadItem.setProperty('subscribed','')
 		elif result == 'extras':
-			showUserExtras(post.extras)
+			showUserExtras(post,ignore=(item.getProperty('usedExtras') or '').split(','))
 		elif result == 'pm':
 			quote = xbmcgui.Dialog().yesno('Quote?','Quote the message?')
 			self.openPostDialog(post,force_pm=True,no_quote=not quote)
+		elif result == 'managerules':
+			manageParserRules()
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -2556,7 +2601,7 @@ class ForumsWindow(BaseWindow):
 		
 	def resetForum(self,hidelogo=True):
 		if not FB: return
-		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
+		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true',extra=loadForumSettings(FB.getForumID()))
 		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
 		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
@@ -2633,7 +2678,7 @@ def doKeyboard(prompt,default='',hidden=False):
 	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
 
-def loadForumSettings(forumID):
+def loadForumSettings(forumID,get_rules=False,get_both=False):
 	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)
 	if not os.path.exists(fsPath): return None
 	fsFile = open(fsPath,'r')
@@ -2641,20 +2686,35 @@ def loadForumSettings(forumID):
 	fsFile.close()
 	try:
 		ret = {}
+		rules = {}
+		mode = 'settings'
 		for l in lines.splitlines():
-			k,v = l.split('=',1)
-			ret[k] = v
+			if l.startswith('[rules]'):
+				if not get_rules: break
+				mode = 'rules'
+			else:
+				k,v = l.split('=',1)
+				if mode == 'rules':
+					rules[k] = v.strip()
+				else:
+					ret[k] = v.strip()
 	except:
 		ERROR('Failed to get settings for forum: %s' % forumID)
 		return None
-	ret['username'] = ret.get('username','')
-	ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
-	ret['notify'] = ret.get('notify') == 'True' 
-	return ret
+	if get_rules:
+		return rules
+	elif get_both:
+		return ret,rules
+	else:
+		ret['username'] = ret.get('username','')
+		ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
+		ret['notify'] = ret.get('notify') == 'True' 
+		return ret
 
-
-def saveForumSettings(forumID,username=None,password=None,notify=None):
-	data = loadForumSettings(forumID) or {}
+def saveForumSettings(forumID,username=None,password=None,notify=None,rules=None):
+	data, rules_data = loadForumSettings(forumID,get_both=True) or ({},{})
+	#data.update(kwargs)
+	if rules: rules_data.update(rules)
 	
 	if notify == None: data['notify'] = data.get('notify')  or False
 	else: data['notify'] = notify
@@ -2667,14 +2727,47 @@ def saveForumSettings(forumID,username=None,password=None,notify=None):
 	
 	try:
 		password = passmanager.encryptPassword(data['username'], data['password'])
+		data['password'] = password
+		out = []
+		for k,v in data.items():
+			out.append('%s=%s' % (k,v))
+		if rules_data:
+			out.append('[rules]')
+			for k,v in rules_data.items():
+				if v != None: out.append('%s=%s' % (k,v))
 		fsFile = open(os.path.join(FORUMS_SETTINGS_PATH,forumID),'w')
-		fsFile.write('username=%s\npassword=%s\nnotify=%s' % (data['username'],password,data['notify']))
+		#fsFile.write('username=%s\npassword=%s\nnotify=%s' % (data['username'],password,data['notify']))
+		fsFile.write('\n'.join(out))
 		fsFile.close()
 		return True
 	except:
 		ERROR('Failed to save forum settings for: %s' % forumID)
 		return False
-	
+
+def addParserRule(forumID,key,value):
+	if key.startswith('extra.'):
+		saveForumSettings(rules={key:value})
+	else:
+		rules = loadForumSettings(get_rules=True)
+		if key == 'head':
+			vallist = rules.get('head') and rules['head'].split(';&;') or []
+		elif key == 'tail':
+			vallist = rules.get('tail') and rules['tail'].split(';&;') or []
+		if not value in vallist: vallist.append(value)
+		saveForumSettings(rules={key:';&;'.join(vallist)})
+
+def removeParserRule(forumID,key,value=None):
+	if key.startswith('extra.'):
+		saveForumSettings(rules={key:None})
+	else:
+		rules = loadForumSettings(get_rules=True)
+		if key == 'head':
+			vallist = rules.get('head') and rules['head'].split(';&;') or []
+		elif key == 'tail':
+			vallist = rules.get('tail') and rules['tail'].split(';&;') or []
+		if value in vallist: vallist.pop(vallist.index(value))
+		saveForumSettings(rules={key:';&;'.join(vallist)})
+		
 def listForumSettings():
 	return os.listdir(FORUMS_SETTINGS_PATH)
 
@@ -2769,6 +2862,12 @@ def setLogins(force_ask=False):
 		showMessage('Login Cleared','Username and password cleared.')
 	else:
 		showMessage('Login Set','Username and password set.')
+		
+def setLoginPage():
+	url = FB._url
+	LOG('Open Forum Main Page - URL: ' + url)
+	(url,html) = webviewer.getWebResult(url,dialog=True) #@UnusedVariable
+	saveForumSettings(FB.getForumID(),login_url=url)
 	
 ###########################################################################################
 ## - Version Conversion
@@ -2823,6 +2922,7 @@ def doSettings(window=None):
 	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''),disabled=not bool(FB))
 	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''),disabled=not bool(FB))
 	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
+	if FB and FB.browserType == 'GenericParserForumBrowser': dialog.addItem('setloginpage','Set Login Page','forum-browser-lock.png',helpdict.get('setloginpage',''))
 	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''),disabled=not bool(FB))
 	dialog.addItem('managenotify',__language__(30209),'forum-browser-info.png',helpdict.get('managenotify',''))
 	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
@@ -2838,6 +2938,7 @@ def doSettings(window=None):
 	elif result == 'setcurrentcolor': return setForumColor(askColor())
 	elif result == 'updatethemeodb': updateThemeODB()
 	elif result == 'setlogins': setLogins(True)
+	elif result == 'setloginpage': setLoginPage()
 	elif result == 'setnotify': toggleNotify()
 	elif result == 'managenotify': manageNotifications(window)
 #	elif result == 'register': registerForum()
@@ -2860,6 +2961,103 @@ def manageNotifications(window=None,size='full'):
 	else:
 		xmlFile = 'script-forumbrowser-notifications.xml'
 	openWindow(NotificationsDialog,xmlFile,theme='Default',forumsWindow=window)
+	
+def manageParserRules():
+	rules = loadForumSettings(FB.getForumID(),get_rules=True)
+	choice = True
+	while choice:
+		menu = OptionsChoiceMenu('Select Rule:')
+		keys = rules.keys()
+		keys.sort()
+		for k in keys:
+			v = rules[k]
+			if k.startswith('extra.'):
+				if v: menu.addItem(k,'[EXTRA] ' + k.split('.')[-1],display2=v)
+			else:
+				for i in v.split(';&;'):
+					if i: menu.addItem(k + '.' + i,'[%s FILTER] ' % k.upper() + i)
+		menu.addItem('add','+ Add Rule')
+		menu.addItem('share','Share->',display2='Share rules to the Forum Browser online database')
+		menu.addItem('save','<- Save')
+		choice = menu.getResult()
+		if not choice: return
+		if choice == 'save':
+			for k in rules.keys():
+				if not rules[k]: rules[k] = None
+			saveForumSettings(FB.getForumID(),rules=rules)
+			continue
+		elif choice == 'share':
+			shareForumRules(FB.getForumID(),rules)
+			continue
+		elif choice == 'add':
+			menu = ChoiceMenu('Type:')
+			menu.addItem('extra','User Extra Info')
+			menu.addItem('head','Head Filter')
+			menu.addItem('tail','Tail Filter')
+			rtype = menu.getResult()
+			if not rtype: continue
+			if rtype == 'extra':
+				name = doKeyboard('Enter Name:')
+				if not name: continue
+				default = ''
+				if 'extra.' + name in rules: default = rules['extra.' + name]
+				val = doKeyboard('Enter Python Regular Expression:',default)
+				if not val: continue
+				rules['extra.' + name] = val
+			else:
+				val = doKeyboard('Enter Phrase')
+				if not val: continue
+				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
+				if not val in vallist:
+					vallist.append(val)
+					rules[rtype] = ';&;'.join(vallist)
+			continue
+		menu = ChoiceMenu('Select')
+		menu.addItem('edit','Edit')
+		menu.addItem('remove','Remove')
+		choice2 = menu.getResult()
+		if not choice2: continue
+		if choice2 == 'remove':
+			if choice.startswith('extra.'):
+				rules[choice] = None
+			else:
+				rtype, val = choice.split('.')
+				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
+				if val in vallist:
+					vallist.pop(vallist.index(val))
+					rules[rtype] = ';&;'.join(vallist)
+		else:
+			if choice.startswith('extra.'):
+				val = rules[choice]
+				edit = doKeyboard('Edit',val)
+				if edit == None: continue
+				rules[choice] = edit
+			else:
+				rtype, val = choice.split('.')
+				edit = doKeyboard('Edit',val)
+				if edit == None: continue
+				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
+				if val in vallist:
+					vallist.pop(vallist.index(val))
+					vallist.append(edit)
+					rules[rtype] = ';&;'.join(vallist)
+
+def shareForumRules(forumID,rules):
+	odb = forumbrowser.FBOnlineDatabase()
+	odbrules = odb.getForumRules(forumID)
+	if odbrules:
+		out = []
+		for k,v in odbrules.items():
+			if k.startswith('extra.'):
+				out.append('[EXTRA] ' + k.split('.',1)[-1] + ' = ' + v)
+			elif k == 'head':
+				out.append('[HEAD FILTERS] = ' + ', '.join(v.split(';&;')))
+			elif k == 'tail':
+				out.append('[TAIL FILTERS] = ' + ', '.join(v.split(';&;')))
+		showMessage('Current Rules','Rules already exist for this forum.\n\nRules:\n\n' + '[CR]'.join(out),scroll=True)
+		yes = xbmcgui.Dialog().yesno('Overwrite?','Overwrite existing rules?')
+		if not yes: return
+	setRulesODB(forumID, rules)
 	
 def loadHelp(helpfile,as_list=False):
 	lang = xbmc.getLanguage().split(' ',1)[0]
@@ -3111,7 +3309,7 @@ def addForumFromOnline():
 		f = True	
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
-			if f: doAddForumFromOnline(f)
+			if f: doAddForumFromOnline(f,odb)
 	
 def formatHexColorToARGB(hexcolor):
 	try:
@@ -3120,12 +3318,28 @@ def formatHexColorToARGB(hexcolor):
 	except:
 		return "FFFFFFFF"
 		
-def doAddForumFromOnline(f):
+def doAddForumFromOnline(f,odb):
 	if not isinstance(f,dict):
 		unHideForum(f)
 		return
-	saveForum(f['type'],f['type']+'.'+f['name'],f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
+	forumID = f['type']+'.'+f['name']
+	saveForum(f['type'],forumID,f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
+	rules = isinstance(f,dict) and odb.getForumRules(f['type']+'.'+f['name']) or {}
+	old_rules = loadForumSettings(forumID,get_rules=True)
+	if rules and not old_rules: saveForumSettings(forumID,rules=rules)
 	showMessage('Added','Forum added: ' + f['name'])
+	
+def setRulesODB(forumID,rules):
+	odb = forumbrowser.FBOnlineDatabase()
+	out = []
+	for k,v in rules.items():
+		out.append(k + '=' + v)
+	result = str(odb.setRules(forumID,'\n'.join(out)))
+	LOG('Updating ODB Rules: ' + result)
+	if result == '1':
+		showMessage('Done','Online database forum rules updated.',success=True)
+	else:
+		showMessage('Failed','Failed to update the online database.',error=True)
 	
 def addCurrentForumToOnlineDatabase():
 	fdata = forumbrowser.ForumData(FB.getForumID(),FORUMS_PATH)
@@ -4089,6 +4303,22 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	if donecallback: donecallback(FB)
 	return FB
 
+def startForumBrowser(forumID=None):
+	PLAYER = PlayerMonitor()
+	updateOldVersion()
+	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
+	checkForSkinMods()
+
+	#TD = ThreadDownloader()
+	global STARTFORUM
+	if forumID:
+		STARTFORUM = forumID
+	elif sys.argv[-1].startswith('forum='):
+		STARTFORUM = sys.argv[-1].split('=',1)[-1]
+	openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
+	#sys.modules.clear()
+	PLAYER.finish()
+	
 ######################################################################################
 # Startup
 ######################################################################################
@@ -4098,15 +4328,5 @@ if __name__ == '__main__':
 	elif sys.argv[-1].startswith('settingshelp_'):
 		showHelp('settings-' + sys.argv[-1].split('_')[-1])
 	else:
-		PLAYER = PlayerMonitor().init()
-		updateOldVersion()
-		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
-		checkForSkinMods()
-	
-		TD = ThreadDownloader()
-		
-		if sys.argv[-1].startswith('forum='): STARTFORUM = sys.argv[-1].split('=',1)[-1]
-		openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
-		#sys.modules.clear()
-		PLAYER.finish()
+		startForumBrowser()
 		

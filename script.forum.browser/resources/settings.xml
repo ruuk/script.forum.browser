@@ -8,12 +8,14 @@
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
     <setting id="hide_signatures" type="bool" label="30013" default="false" />
     <setting id="ignore_forum_images" type="bool" label="30016" default="true" />
-    <setting label="30518" type="text" id="post_user_info" default="postcount,reputation,joindate,location"/>
+    <setting label="30518" type="text" id="post_user_info" default="status,postcount,reputation,joindate,location"/>
     <setting id="message_dialog_always_show_ok" type="bool" label="30014" default="false" />
     <setting id="use_skin_mods" type="bool" label="30234" default="true" />
     <setting id="enable_ssl" type="bool" label="30235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="30245" default="false" />
     <setting id="skin" type="enum" label="30005" lvalues="30012|30011" default="0" />
+    <setting id="show_media_indicators" type="bool" label="30044" default="true" />
+    <setting id="smi_count_link_images" type="bool" label="30045" subsetting="true" default="false" enable="eq(-1,true)"/>
     <setting label="30244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
   </category>
   <category label="30018">
@@ -39,6 +41,8 @@
     <setting label="30039" type="slider" id="video_resume_offset" subsetting="true" default="0" range="0,1,60" option="int"  enable="eq(-2,true) + eq(-1,true)"/>
     <setting id="video_return_interrupt_after_exit" type="bool" label="30037" subsetting="true" default="false" enable="eq(1,false) + eq(-3,true)"/>
     <setting id="video_stop_on_exit" type="bool" label="30036" default="true" />
+    <setting id="video_start_preview" type="bool" label="30043" default="true" />
+    <setting id="video_resume_as_preview" type="bool" label="30042" default="false" />
     <setting label="30244" type="action" action="RunScript(script.forum.browser,settingshelp_video)"/>
   </category>
   <category label="30008">

@@ -110,7 +110,7 @@ class WebVideo():
 			#http://www.youtube.com/watch?v=MuLDUws0Zh8&feature=autoshare
 			ID = url.split('v=',1)[-1].split('&',1)[0]
 			if 'youtube.com' in ID:
-				ID = url.split('/v/',1)[-1].split('&',1)[0]
+				ID = url.split('/v/',1)[-1].split('&',1)[0].split('?',1)[0]
 			if 'youtube.com' in ID: return ''
 			return ID
 	
@@ -209,8 +209,8 @@ class WebVideo():
 			ERROR('ShareTarget.getModule(): Error during target sharing import')
 		return
 	
-def play(path):
-	xbmc.executebuiltin('PlayMedia(%s)' % path)
+def play(path,preview=False):
+	xbmc.executebuiltin('PlayMedia(%s,,%s)' % (path,preview and 1 or 0))
 	
 def pause():
 	if isPlaying(): control('play')

@@ -6,7 +6,7 @@ Pause currently playing video when dialogs are opened.
 
 Note: This is currently incomplete, and message dialogs will not pause video.
 @item:video_ask_interrupt=Ask Before Interrupting Video
-When playing a video from a post and a video is currently playing, show a dailog asking if you want to interrupt it.
+When playing a video from a post and a video is currently playing, show a dialog asking if you want to interrupt it.
 @item:video_return_interrupt=Return To Interrupted Video
 When video played from a forum post is finished or has been stopped, return to the video that was playing previously.
 @item:bypass_xbmc_resume=Bypass XBMC Resume Dialog
@@ -21,4 +21,8 @@ Allow Forum Browser to remain in memory after close in order to return to interr
 This will be ignored if 'Stop Forum Video On Forum Browser Close' is enabled
 @item:stop_forum_video_on_close=Stop Forum Video On Forum Browser Close
 If video played from a forum post is still playing when Forum Browser is closed, stop it.
-If 'Return To Interrupted Video' is enabled, the video which was interrupted will then start playing. 
+If 'Return To Interrupted Video' is enabled, the video which was interrupted will then start playing.
+@item:video_start_preview=Start Video In Overlay
+When enabled, Forum videos will start in preview mode, thereby only showing in the overlay.
+@item:video_resume_as_preview=Resume Video In Overlay
+When enabled, interrupted videos will resume in preview mode, thereby only showing in the overlay.

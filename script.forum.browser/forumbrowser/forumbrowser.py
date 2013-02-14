@@ -66,7 +66,6 @@ class FBOnlineDatabase():
 	
 	def postData(self,**data):
 		enc = urllib.urlencode(data)
-		print enc
 		try:
 			result = urllib2.urlopen(self.url,enc).read()
 			return result
@@ -80,6 +79,9 @@ class FBOnlineDatabase():
 		
 	def setTheme(self,fname,vals_dict):
 		return self.postData(do='set_theme',name=fname,**vals_dict)
+	
+	def setRules(self,forumID,rules):
+		return self.postData(do='set_rules',forumid=forumID,rules=rules)
 		
 	def getForumList(self,cat=None,terms=None):
 		if cat:
@@ -105,6 +107,19 @@ class FBOnlineDatabase():
 					final.append(add)
 		except:
 			ERROR(str(flist))
+		return final
+	
+	def getForumRules(self,forumID):
+		rules = self.postData(do='get_rules',forumid=forumID)
+		rlist = rules.split('\n')
+		final = {}
+		try:
+			for r in rlist:
+				if r:
+					k,v = r.split('=')
+					final[k] = v
+		except:
+			ERROR(str(rlist))
 		return final
 
 class HTMLPageInfo:
@@ -331,15 +346,20 @@ class PMLink:
 		self.url = self.url.replace('&amp;','&')
 		self._isImage = self.linkImageFilter.search(self.url) and True or False
 		if self._isImage: return
-		pm = re.search(self.FB.filters.get('post_link','@`%#@>-'),self.url)
-		tm = re.search(self.FB.filters.get('thread_link','@`%#@>-'),self.url)
+		pm = tm = None
+		for plre in self.FB.getPostLinkRE():
+			pm = re.search(plre,self.url)
+			if pm: break
+		for tlre in self.FB.getThreadLinkRE():
+			tm = re.search(tlre.replace('{{FORUM}}',self.FB.forum),self.url)
+			if tm: break
 		if pm:
 			d = pm.groupdict()
-			self.pid = d.get('postid','')
-			self.tid = d.get('threadid','')
+			self.pid = d.get('pid','')
+			self.tid = d.get('tid','')
 		elif tm:
 			d = tm.groupdict()
-			self.tid = d.get('threadid','')
+			self.tid = d.get('tid','')
 			
 	def processText(self):
 		m = self.MC.imageFilter.search(self.text)
@@ -585,6 +605,17 @@ class ForumPost:
 		if name in self.attrs_lower:
 			return getattr(self, self.attrs_index[self.attrs_lower.index(name)])
 			
+	def getExtras(self,ignore=None):
+		extras = self.extras.copy()
+		if self.status: extras['status'] = self.status
+		if self.postCount: extras['postcount'] = self.postCount
+		if self.joinDate: extras['joindate'] = self.joinDate
+		if not ignore: return extras
+		print extras
+		for i in ignore:
+			print i
+			if i in extras: del extras[i]
+		return extras
 	
 	def setPostID(self,pid):
 		self.postId = pid
@@ -615,6 +646,18 @@ class ForumPost:
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		return self.messageToDisplay(message)
 		
+	def hasMedia(self,webvid=None,count_link_images=False):
+		if not webvid:
+			import video
+			webvid = video.WebVideo()
+		images = False
+		video = False
+		for l in self.links():
+			if l.isImage(): images = True
+			if count_link_images and l.textIsImage(): images = True
+			elif webvid.mightBeVideo(l.url) or webvid.mightBeVideo(l.text): video = True
+		return images,video
+			
 	def messageToDisplay(self,message): return message
 	
 	def messageAsQuote(self): return ''
@@ -671,6 +714,7 @@ class ForumBrowser:
 	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
 							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
 							'vb':'(?i)\[quote(?:\=(?P<user>[^;\]]+)(?:;\d+)*)?\]',
+							'ip':'(?i)\[quote(?: name\=\'(?P<user>[^\']+)\')?\]',
 							'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?is)'
 						}
 	
@@ -757,7 +801,28 @@ class ForumBrowser:
 						'sm': 'Simple Machines Forum',
 						'xf': 'XenForo'
 					}
-		
+	
+	threadLinkRE = {		'vb': (	'(?:^|")(?:showthread.php|threads)(?:\?|/)(?:[^"]*?t=)?(?P<tid>\d+)',
+									'{{FORUM}}/.+/(?P<tid>\d+)-'),
+							'fb': (	'(?:^|")viewtopic.php?[^"]*?(?<!;|p)(?:f|id)=?(?P<tid>\d+)',),
+							'mb': (	'(?:^|")thread-(?P<tid>\d+).html',
+									'(?:^|")showthread\.php\?[^"\']*?tid=(?P<tid>\d+)'),
+							'pb': (	'(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<tid>\d+)',),
+							'ip': (	'/topic/(?P<tid>\d+)-[^"\']*?(?:"|\'|$)',),
+							'sm': (	'index\.php\?[^"\']*?topic=(?P<tid>\d+\.0+)',)
+						}
+	
+	postLinkRE = {			'vb': (	'(?:^|")showpost\.php(?:\?|/)(?:[^"\']*?p=)?(?P<pid>\d+)', # threads/70389-Name-Changes?p=1134465&amp;viewfull=1#post1134465
+									'(?:^|")(?:showthread\.php\?(?:t=)?|threads/)\d+[^"\']*?p=(?P<pid>\d+)',
+									'/(?P<tid>\d+)-.+#post(?P<pid>\d+)$'),
+							'fb': (	'(?:^|")viewtopic\.php?[^"\']*?(?<!;)pid=(?P<pid>\d+)',),
+							'mb': (	'(?:^|")thread-\d+-post-(?P<pid>\d+)\.html',
+									'(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<pid>\d+)'),
+							'pb': (	'(?:^|")#p(?P<pid>\d+)',),
+							'ip': (	'/topic/\d+-[^"\']*?/?#entry(?P<pid>\d+)(?:"|\'|$)',),
+							'sm': (	'index\.php\?[^"\']*?topic=\d+\.msg(?P<pid>\d+)#msg\d+',)
+						}
+	
 	def __init__(self,forum,always_login=False,message_converter=None):
 		if not message_converter: message_converter = texttransform.MessageConverter
 		self.forum = forum
@@ -783,6 +848,7 @@ class ForumBrowser:
 		self.pmBoxes = []
 		self.lastURL = ''
 		self.browser = None
+		self.extra = None
 		self.messageConvertorClass=message_converter
 		
 	def initialize(self):
@@ -796,6 +862,21 @@ class ForumBrowser:
 		domain = self._url.split('://',1)[-1]
 		return domain.split('/')[0]
 	
+	def getThreadLinkRE(self,others=()):
+		ft = self.getForumType()
+		if not ft: return others
+		return self.threadLinkRE.get(ft,()) + others
+	
+	def getPostLinkRE(self,others=()):
+		ft = self.getForumType()
+		if not ft: return others
+		return self.postLinkRE.get(ft,()) + others
+	
+	def getLoginURL(self):
+		if self.extra and 'login_url' in self.extra:
+			return self.extra['login_url']
+		return self.getURL('login')
+		
 	def canLogin(self):
 		return bool(self.user and self.password)
 	
@@ -838,10 +919,10 @@ class ForumBrowser:
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 						'image':'\[img\](?P<url>[^\[]+?)\[/img\](?is)',
-						'link':'\[(?:url|video)="?(?P<url>[^\]]+?)\](?P<text>.+?)"?\[/(?:url|video)\](?is)',
+						'link':'\[(?:url|video)="?(?P<url>[^\"\]]+?)"?\](?P<text>.+?)\[/(?:url|video)\](?is)',
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
-						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
-						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
+						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
+						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
 						'color_start':'\[color=?#?(?P<color>\w+)\]'})
 		return self.parseForumData(fname)
 		
@@ -922,11 +1003,12 @@ class ForumBrowser:
 	
 	def isLoggedIn(self): return False
 	
-	def setLogin(self,user,password,always=False):
+	def setLogin(self,user,password,always=False,extra=None):
 		self.user = user
 		self.password = password
 		self.alwaysLogin = always
 		self.loginError = ''
+		self.extra = extra
 		
 	def makeURL(self,url): return url
 	
@@ -975,6 +1057,8 @@ class ForumBrowser:
 	def canGetUserInfo(self): return False
 	
 	def getUserInfo(self,uid=None,uname=None): return None
+	
+	def canOpenLatest(self): return True
 	
 	
 		

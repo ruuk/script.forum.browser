@@ -6,6 +6,7 @@ from forumbrowser import FBData
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
+loadForumSettings = sys.modules["__main__"].loadForumSettings
 __language__ = sys.modules["__main__"].__language__
 getSetting = sys.modules["__main__"].getSetting
 
@@ -229,6 +230,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = None
 		pagesURL = url
+		self.postParser.addRules(loadForumSettings(self.getForumID(),get_rules=True))
 		self.postParser.ignoreForumImages = getSetting('ignore_forum_images',True)
 		self.postParser.setDomain(self._url)
 		if self.threadParser.isGeneric:
@@ -352,6 +354,8 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		for d in data.data:
 			if d.get('forumid') == fid: return True
 		return False
+	
+	def canOpenLatest(self): return False
 	
 
 	

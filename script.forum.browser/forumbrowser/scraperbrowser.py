@@ -447,12 +447,6 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.forum = forum
 		return True
 			
-		
-	def setLogin(self,user,password,always=False):
-		self.user = user
-		self.password = password
-		self.alwaysLogin = always
-			
 	def checkBrowser(self):
 		if not self.mechanize:
 			from webviewer import mechanize #@UnresolvedImport
@@ -547,7 +541,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		LOG('LOGGING IN')
 		self.checkBrowser()
 		try:
-			response = self.browser.open(url or self.getURL('login'))
+			response = self.browser.open(url or self.getLoginURL())
 		except self.mechanize.HTTPError, e:
 			if e.code == 302:
 				response = e
@@ -939,7 +933,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				page = str(page)
 				page = self.urls.get('page_arg','').replace('!PAGE!',page) or page
 		sub = self.URLSubs(suburl,pid=pid,tid=tid,fid=fid,page=page)
-		return self._url + sub
+		base_url = self._url
+		if self.filters.get('main_url_cleaner'):
+			base_url = re.sub(self.filters['main_url_cleaner'],'',base_url)
+			if not base_url.endswith('/'): base_url += '/'
+		return base_url + sub
 		
 	def getURL(self,name):
 		return self._url + self.urls.get(name,'')
