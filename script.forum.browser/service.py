@@ -156,7 +156,7 @@ class ForumBrowserService:
 			flag = False
 			if not self.setForumBrowser(forum): continue
 			if not self.hasLogin(): continue
-			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,extra=loadForumSettings(forum))
+			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,rules=loadForumSettings(forum,get_rules=True))
 			try:
 				pmcounts = self.FB.getPMCounts()
 				subs = self.FB.getSubscriptions()

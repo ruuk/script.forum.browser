@@ -4,6 +4,8 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Add activity splash when adding forum, before success dialog
+  Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
   Check for new parser rules automatically or add option to check for new rules 
@@ -36,7 +38,12 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
 
-Current Version : 1.2.2
+Current Version : 1.2.3
+
+*** 1.2.3 ***
+
+Fix a bug corrupting user passwords
+Added 'Login Page' to data shared when sharing ParserBrowser forum rules
 
 *** 1.2.2 ***
 

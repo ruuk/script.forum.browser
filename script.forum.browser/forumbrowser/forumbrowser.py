@@ -848,7 +848,7 @@ class ForumBrowser:
 		self.pmBoxes = []
 		self.lastURL = ''
 		self.browser = None
-		self.extra = None
+		self.rules = None
 		self.messageConvertorClass=message_converter
 		
 	def initialize(self):
@@ -873,9 +873,14 @@ class ForumBrowser:
 		return self.postLinkRE.get(ft,()) + others
 	
 	def getLoginURL(self):
-		if self.extra and 'login_url' in self.extra:
-			return self.extra['login_url']
-		return self.getURL('login')
+		if self.rules and 'login_url' in self.rules:
+			url = self.rules['login_url']
+		else:
+			url = self.getURL('login')
+			
+		LOG('LOGIN URL: %s' % url)
+			
+		return url
 		
 	def canLogin(self):
 		return bool(self.user and self.password)
@@ -1003,12 +1008,12 @@ class ForumBrowser:
 	
 	def isLoggedIn(self): return False
 	
-	def setLogin(self,user,password,always=False,extra=None):
+	def setLogin(self,user,password,always=False,rules=None):
 		self.user = user
 		self.password = password
 		self.alwaysLogin = always
 		self.loginError = ''
-		self.extra = extra
+		self.rules = rules
 		
 	def makeURL(self,url): return url
 	

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.2'
+__version__ = '1.2.3'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -2601,7 +2601,7 @@ class ForumsWindow(BaseWindow):
 		
 	def resetForum(self,hidelogo=True):
 		if not FB: return
-		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true',extra=loadForumSettings(FB.getForumID()))
+		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
 		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
 		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
 		if hidelogo: self.getControl(250).setImage('')
@@ -2690,7 +2690,7 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 		mode = 'settings'
 		for l in lines.splitlines():
 			if l.startswith('[rules]'):
-				if not get_rules: break
+				if not get_rules and not get_both: break
 				mode = 'rules'
 			else:
 				k,v = l.split('=',1)
@@ -2703,12 +2703,14 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 		return None
 	if get_rules:
 		return rules
-	elif get_both:
+	
+	ret['username'] = ret.get('username','')
+	ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
+	ret['notify'] = ret.get('notify') == 'True' 
+		
+	if get_both:
 		return ret,rules
 	else:
-		ret['username'] = ret.get('username','')
-		ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
-		ret['notify'] = ret.get('notify') == 'True' 
 		return ret
 
 def saveForumSettings(forumID,username=None,password=None,notify=None,rules=None):
@@ -2867,7 +2869,7 @@ def setLoginPage():
 	url = FB._url
 	LOG('Open Forum Main Page - URL: ' + url)
 	(url,html) = webviewer.getWebResult(url,dialog=True) #@UnusedVariable
-	saveForumSettings(FB.getForumID(),login_url=url)
+	saveForumSettings(FB.getForumID(),rules={'login_url':url})
 	
 ###########################################################################################
 ## - Version Conversion
@@ -2973,6 +2975,9 @@ def manageParserRules():
 			v = rules[k]
 			if k.startswith('extra.'):
 				if v: menu.addItem(k,'[EXTRA] ' + k.split('.')[-1],display2=v)
+			elif k == 'login_url':
+				if v: menu.addItem(k,'Login Page',display2=texttransform.textwrap.fill(v,30))
+				print v
 			else:
 				for i in v.split(';&;'):
 					if i: menu.addItem(k + '.' + i,'[%s FILTER] ' % k.upper() + i)
@@ -3013,12 +3018,12 @@ def manageParserRules():
 					rules[rtype] = ';&;'.join(vallist)
 			continue
 		menu = ChoiceMenu('Select')
-		menu.addItem('edit','Edit')
+		if not choice == 'login_url': menu.addItem('edit','Edit')
 		menu.addItem('remove','Remove')
 		choice2 = menu.getResult()
 		if not choice2: continue
 		if choice2 == 'remove':
-			if choice.startswith('extra.'):
+			if choice.startswith('extra.') or choice == 'login_url':
 				rules[choice] = None
 			else:
 				rtype, val = choice.split('.')
@@ -3027,8 +3032,11 @@ def manageParserRules():
 					vallist.pop(vallist.index(val))
 					rules[rtype] = ';&;'.join(vallist)
 		else:
-			if choice.startswith('extra.'):
+			if choice.startswith('extra.') or choice == 'login_url':
 				val = rules[choice]
+#				if choice == 'login_url':
+#					edit = doModKeyboard('Edit',val)
+#				else:
 				edit = doKeyboard('Edit',val)
 				if edit == None: continue
 				rules[choice] = edit
