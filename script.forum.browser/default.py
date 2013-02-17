@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.3'
+__version__ = '1.2.4'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -651,13 +651,29 @@ class NotificationsDialog(BaseWindowDialog):
 			elif result == 'rules':
 				manageParserRules(forumID)
 		elif controlID == 210:
-			showHelp('forums')
+			showMessage(str(self.getControl(210).getLabel()),loadHelp('options.help').get('help',''))
 			
 	def onAction(self,action):
 		BaseWindowDialog.onAction(self,action)
 		self.stopTimeout = True
 		if action == ACTION_CONTEXT_MENU:
-			if self.getFocusId() == 220: self.toggleNotify()
+			focusID = self.getFocusId()
+			if focusID == 220:
+				self.toggleNotify()
+			elif focusID > 199 and focusID < 210:
+				helpname = ''
+				if focusID  == 200: helpname = 'addforum'
+				if focusID  == 201: helpname = 'addonline'
+				if focusID  == 202: helpname = 'removeforum'
+				if focusID  == 203: helpname = 'addfavorite'
+				if focusID  == 204: helpname = 'removefavorite'
+				if focusID  == 205: helpname = 'setlogins'
+				if focusID  == 206: helpname = 'setcurrentcolor'
+				if focusID  == 207: helpname = 'addcurrentonline'
+				if focusID  == 208: helpname = 'updatethemeodb'
+				if focusID  == 209: helpname = 'parserbrowser'
+				showMessage(str(self.getControl(focusID).getLabel()),loadHelp('options.help').get(helpname,''))
+
 		
 	def startDisplayTimeout(self):
 		if self.forumsWindow: return

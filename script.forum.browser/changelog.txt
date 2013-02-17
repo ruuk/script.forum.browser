@@ -37,7 +37,7 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
 
-Current Version : 1.2.3
+Current Version : 1.2.4
 
 *** 1.2.4 ***
 
@@ -46,7 +46,9 @@ Created Forums Manager based on notifcations dialog
 'Options' button changed to 'Settings' which now only opens the forum settings
 Previous items under 'Options' have been migrated to the Forums manager
 The 'Set Login Page' option now asks if you want to use the URL after exiting WebViewer
-Moved the 'Manage Parser Rules' option from posts context and 'Set Login Page' to the Forums Manager 'Parser Browser' button (clicking the button brings up a menu asking which one you want to do) 
+Moved the 'Manage Parser Rules' option from posts context and 'Set Login Page' to the Forums Manager 'Parser Browser' button (clicking the button brings up a menu asking which one you want to do)
+Fixed a bug where some forums caused 'Forbidden' errors when making calls too quickly (Notably xbmc.org)
+Taptalk: Now sets 'return_html' when getting posts which gives bold, italics, underline and color data. 
 
 *** 1.2.3 ***
 

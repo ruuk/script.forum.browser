@@ -210,7 +210,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.avatar = pdict.get('icon_url','')
 			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('post_title',''))
-			self.message = str(pdict.get('post_content',''))
+			self.message = self.filterMessage(str(pdict.get('post_content','')))
 			self.signature = pdict.get('signature','') or '' #nothing
 		else:
 			self.isShort = True
@@ -344,6 +344,19 @@ class ForumPost(forumbrowser.ForumPost):
 		if base and not self.avatar:
 			self.avatar = base.replace('!USERID!',self.userId)
 		return self.avatar
+	
+	def colorReplace(self,m):
+		color = m.group(1)
+		if color.startswith('#'):
+			color = 'FF' + color[1:].upper()
+		else:
+			color = color.lower()
+		return '[COLOR %s]' % color
+		
+	def filterMessage(self,message):
+		message = message.replace('<b>','[b]').replace('</b>','[/b]').replace('<i>','[i]').replace('</i>','[/i]').replace('<u>','_').replace('</u>','_')
+		message = re.sub('<font color="([^"]+)">',self.colorReplace,message).replace('</font>','[/COLOR]') #r'[COLOR FF\1]',message)
+		return message.replace('<br />\n','\n')
 	
 ################################################################################
 # PageData
@@ -547,6 +560,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 	def login(self):
 		LOG('LOGGING IN')
+		time.sleep(0.1)
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.getPassword()))
 		if not result.get('result'):
 			error = str(result.get('result_text',''))
@@ -652,6 +666,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(80,self.lang(30231)): break
 			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
+				time.sleep(0.1)
 				pm_counts = self.getPMCounts(80)
 			except:
 				ERROR('Failed to get PM Counts')
@@ -782,7 +797,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						index = test.get('position')
 						start = int((index - 1) / 20) * 20
 						page = start
-						thread = self.server.get_thread(threadid,start,start + 19)
+						thread = self.server.get_thread(threadid,start,start + 19,True)
 					else:
 						LOG('COULD NOT GET THREAD BY POST ID')
 						pid = ''
@@ -793,7 +808,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						test = self.server.get_thread(threadid,0,19,True)
 						page = self.getPageData(test,0).getPageNumber(-1)
 						if page == 0: thread = test
-					if not thread: thread = self.server.get_thread(threadid,page,page + 19)
+					if not thread: thread = self.server.get_thread(threadid,page,page + 19,True)
 					
 					
 				posts = thread.get('posts')
@@ -806,9 +821,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				for p in posts:
 					fp = self.getForumPost(p)
 					fp.postNumber = ct
-					if not fp.userName in infos:
-						infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
-					fp.setUserInfo(infos[fp.userName])
+					try:
+						if not fp.userName in infos:
+							time.sleep(0.2)
+							infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+						fp.setUserInfo(infos[fp.userName])
+					except:
+						infos[fp.userName] = {}
+						LOG('Failed to get user info for: %s' % fp.userName)
 					sreplies.append(fp)
 					ct += 1
 			except xmlrpclib.Fault, e:

@@ -267,7 +267,7 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
-				<label>[B]Manage Forums[/B]</label>
+				<label>[B]Forums[/B]</label>
 			</control>
 			<control type="label">
 				<posx>426</posx>
