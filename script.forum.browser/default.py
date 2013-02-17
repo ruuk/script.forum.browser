@@ -623,14 +623,41 @@ class NotificationsDialog(BaseWindowDialog):
 		
 	def onClick( self, controlID ):
 		if BaseWindowDialog.onClick(self, controlID): return
-		if controlID == 220:
-			self.changeForum()
-		
+		forumID = self.getSelectedForumID()
+		if controlID == 220: self.changeForum()
+		elif controlID == 200: addForum()
+		elif controlID == 201: addForumFromOnline()
+		elif controlID == 202:
+			removeForum(forumID)
+			self.refresh()
+		elif controlID == 203:
+			addFavorite(forumID)
+			self.refresh()
+		elif controlID == 204:
+			removeFavorite(forumID)
+			self.refresh()
+		elif controlID == 205: setLogins(forumID=forumID)
+		elif controlID == 206: setForumColor(askColor(forumID),forumID)
+		elif controlID == 207: addCurrentForumToOnlineDatabase(forumID)
+		elif controlID == 208: updateThemeODB(forumID)
+		elif controlID == 209:
+			menu = ChoiceMenu('Choose:')
+			menu.addItem('login','Set Login Page')
+			menu.addItem('rules','Set Post Parser Rules')
+			result = menu.getResult()
+			if not result: return
+			if result == 'login':
+				setLoginPage(forumID)
+			elif result == 'rules':
+				manageParserRules(forumID)
+		elif controlID == 210:
+			showHelp('forums')
+			
 	def onAction(self,action):
 		BaseWindowDialog.onAction(self,action)
 		self.stopTimeout = True
 		if action == ACTION_CONTEXT_MENU:
-			self.toggleNotify()
+			if self.getFocusId() == 220: self.toggleNotify()
 		
 	def startDisplayTimeout(self):
 		if self.forumsWindow: return
@@ -652,10 +679,14 @@ class NotificationsDialog(BaseWindowDialog):
 		current = toggleNotify(forumID)
 		item.setProperty('notify',current and 'notify' or '')
 		
-	def changeForum(self):
+	def getSelectedForumID(self):
 		item = self.getControl(220).getSelectedItem()
-		if not item: return
+		if not item: return None
 		forumID = item.getProperty('forumID')
+		return forumID or None
+		
+	def changeForum(self):
+		forumID = self.getSelectedForumID()
 		if not forumID: return
 		if self.forumsWindow:
 			self.forumsWindow.changeForum(forumID)
@@ -665,6 +696,7 @@ class NotificationsDialog(BaseWindowDialog):
 		self.close()
 		
 	def createItems(self):
+		favs = []
 		if not self.forumsWindow and getSetting('notify_dialog_only_enabled'):
 			final = getNotifyList()
 		else:
@@ -710,8 +742,10 @@ class NotificationsDialog(BaseWindowDialog):
 			else:
 				path = self.makeColorFile(color, self.colorsDir)
 				colors[color] = path
+			if f in favs: item.setProperty('favorite','favorite')
 			item.setProperty('bgfile',path)
 			item.setProperty('forumID',f)
+			item.setProperty('type',f[:2])
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			up = unread.get('PM','')
 			if up:
@@ -736,6 +770,11 @@ class NotificationsDialog(BaseWindowDialog):
 		
 	def fillList(self):
 		self.getControl(220).addItems(self.items)
+		
+	def refresh(self):
+		self.getControl(220).reset()
+		self.createItems()
+		self.fillList()
 		
 	def makeColorFile(self,color,path):
 		try:
@@ -1806,7 +1845,6 @@ class RepliesWindow(PageWindow):
 				d.addItem('extras','User Extra Info')
 			if item and FB.canPrivateMessage() and not self.isPM():
 				d.addItem('pm',__language__(30253) % item.getLabel())
-			if FB and FB.browserType == 'GenericParserForumBrowser': d.addItem('managerules','Manage Parser Rules')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -1846,8 +1884,6 @@ class RepliesWindow(PageWindow):
 		elif result == 'pm':
 			quote = xbmcgui.Dialog().yesno('Quote?','Quote the message?')
 			self.openPostDialog(post,force_pm=True,no_quote=not quote)
-		elif result == 'managerules':
-			manageParserRules()
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -2533,7 +2569,8 @@ class ForumsWindow(BaseWindow):
 			self.stopThread()
 			self.openPMWindow()
 		elif controlID == 202:
-			if self.changeForum(): return
+			manageNotifications(self,size='manage')
+			#if self.changeForum(): return
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
@@ -2845,9 +2882,9 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
 	return forum
 
-def setLogins(force_ask=False):
-	forumID = None
-	if FB: forumID = FB.getForumID()
+def setLogins(force_ask=False,forumID=None):
+	if not forumID:
+		if FB: forumID = FB.getForumID()
 	if not forumID or force_ask: forumID = askForum(forumID=forumID)
 	if not forumID: return
 	data = loadForumSettings(forumID)
@@ -2865,11 +2902,19 @@ def setLogins(force_ask=False):
 	else:
 		showMessage('Login Set','Username and password set.')
 		
-def setLoginPage():
-	url = FB._url
+def setLoginPage(forumID=None):
+	if not forumID:
+		if FB: forumID = FB.getForumID()
+	if not forumID: return
+	
+	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+	url = fdata.forumURL()
+	if not url: return
 	LOG('Open Forum Main Page - URL: ' + url)
 	(url,html) = webviewer.getWebResult(url,dialog=True) #@UnusedVariable
-	saveForumSettings(FB.getForumID(),rules={'login_url':url})
+	yes = xbmcgui.Dialog().yesno('Use URL?',repr(url),'','Use this URL?')
+	if not yes: return
+	saveForumSettings(forumID,rules={'login_url':url})
 	
 ###########################################################################################
 ## - Version Conversion
@@ -2908,64 +2953,69 @@ def toggleNotify(forumID=None):
 	return notify
 		
 def doSettings(window=None):
-	notify = None
-	if FB:
-		data = loadForumSettings(FB.getForumID())
-		if data: notify = data.get('notify')
-		
-	helpdict = loadHelp('options.help')
-	dialog = OptionsChoiceMenu(__language__(30051))
-	dialog.addItem('addfavorite',__language__(30223),'forum-browser-star.png',helpdict.get('addfavorite',''),disabled=not bool(FB))
-	dialog.addItem('removefavorite',__language__(30225),'forum-browser-star-minus.png',helpdict.get('removefavorite',''))
-	dialog.addItem('addforum',__language__(30222),'forum-browser-plus.png',helpdict.get('addforum',''))
-	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
-	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
-	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=not bool(FB)) #,disabled=FB.prefix == 'GB.')
-	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''),disabled=not bool(FB))
-	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''),disabled=not bool(FB))
-	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
-	if FB and FB.browserType == 'GenericParserForumBrowser': dialog.addItem('setloginpage','Set Login Page','forum-browser-lock.png',helpdict.get('setloginpage',''))
-	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''),disabled=not bool(FB))
-	dialog.addItem('managenotify',__language__(30209),'forum-browser-info.png',helpdict.get('managenotify',''))
-	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
-	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
-	result = dialog.getResult()
-	if not result: return
-	if result == 'addfavorite': addFavorite()
-	elif result == 'removefavorite': removeFavorite()
-	elif result == 'addcurrentonline': addCurrentForumToOnlineDatabase() #addForum(current=True)
-	elif result == 'addforum': addForum()
-	elif result == 'addonline': addForumFromOnline()
-	elif result == 'removeforum': removeForum()
-	elif result == 'setcurrentcolor': return setForumColor(askColor())
-	elif result == 'updatethemeodb': updateThemeODB()
-	elif result == 'setlogins': setLogins(True)
-	elif result == 'setloginpage': setLoginPage()
-	elif result == 'setnotify': toggleNotify()
-	elif result == 'managenotify': manageNotifications(window)
-#	elif result == 'register': registerForum()
-	elif result == 'help': showHelp('forums')
-	elif result == 'settings':
-		w = openWindow(xbmcgui.WindowXMLDialog,'script-forumbrowser-overlay.xml',return_window=True,modal=False,theme='Default')
-		try:
-			__addon__.openSettings()
-		finally:
-			w.close()
-			del w
-		global DEBUG
-		DEBUG = getSetting('debug',False)
-		if FB: FB.MC.resetRegex()
-		checkForSkinMods()
+#	notify = None
+#	if FB:
+#		data = loadForumSettings(FB.getForumID())
+#		if data: notify = data.get('notify')
+#		
+#	helpdict = loadHelp('options.help')
+#	dialog = OptionsChoiceMenu(__language__(30051))
+#	dialog.addItem('addfavorite',__language__(30223),'forum-browser-star.png',helpdict.get('addfavorite',''),disabled=not bool(FB))
+#	dialog.addItem('removefavorite',__language__(30225),'forum-browser-star-minus.png',helpdict.get('removefavorite',''))
+#	dialog.addItem('addforum',__language__(30222),'forum-browser-plus.png',helpdict.get('addforum',''))
+#	dialog.addItem('removeforum',__language__(30224),'forum-browser-minus.png',helpdict.get('removeforum',''))
+#	dialog.addItem('addonline',__language__(30226),'forum-browser-arrow-left.png',helpdict.get('addonline',''))
+#	dialog.addItem('addcurrentonline',__language__(30241),'forum-browser-arrow-right.png',helpdict.get('addcurrentonline',''),disabled=not bool(FB)) #,disabled=FB.prefix == 'GB.')
+#	dialog.addItem('setcurrentcolor',"Set Current Forum Color",'forum-browser-info.png',helpdict.get('setcurrentcolor',''),disabled=not bool(FB))
+#	dialog.addItem('updatethemeodb',"Update Current Theme Online",'forum-browser-info.png',helpdict.get('updatethemeodb',''),disabled=not bool(FB))
+#	dialog.addItem('setlogins',__language__(30204),'forum-browser-lock.png',helpdict.get('setlogins',''))
+#	if FB and FB.browserType == 'GenericParserForumBrowser': dialog.addItem('setloginpage','Set Login Page','forum-browser-lock.png',helpdict.get('setloginpage',''))
+#	dialog.addItem('setnotify',notify and __language__(30208) or __language__(30207),'forum-browser-info.png',helpdict.get('setnotify',''),disabled=not bool(FB))
+#	dialog.addItem('managenotify',__language__(30209),'forum-browser-info.png',helpdict.get('managenotify',''))
+#	dialog.addItem('settings',__language__(30203),'forum-browser-wrench.png',helpdict.get('settings',''))
+#	dialog.addItem('help',__language__(30244),'forum-browser-info.png',helpdict.get('help',''))
+#	result = dialog.getResult()
+#	if not result: return
+#	if result == 'addfavorite': addFavorite()
+#	elif result == 'removefavorite': removeFavorite()
+#	elif result == 'addcurrentonline': addCurrentForumToOnlineDatabase() #addForum(current=True)
+#	elif result == 'addforum': addForum()
+#	elif result == 'addonline': addForumFromOnline()
+#	elif result == 'removeforum': removeForum()
+#	elif result == 'setcurrentcolor': return setForumColor(askColor())
+#	elif result == 'updatethemeodb': updateThemeODB()
+#	elif result == 'setlogins': setLogins(True)
+#	elif result == 'setloginpage': setLoginPage()
+#	elif result == 'setnotify': toggleNotify()
+#	elif result == 'managenotify': manageNotifications(window,size='manage')
+##	elif result == 'register': registerForum()
+#	elif result == 'help': showHelp('forums')
+#	elif result == 'settings':
+	w = openWindow(xbmcgui.WindowXMLDialog,'script-forumbrowser-overlay.xml',return_window=True,modal=False,theme='Default')
+	try:
+		__addon__.openSettings()
+	finally:
+		w.close()
+		del w
+	global DEBUG
+	DEBUG = getSetting('debug',False)
+	if FB: FB.MC.resetRegex()
+	checkForSkinMods()
 
 def manageNotifications(window=None,size='full'):
 	if size == 'small':
 		xmlFile = 'script-forumbrowser-notifications-small.xml'
+	elif size == 'manage':
+		xmlFile = 'script-forumbrowser-manage-forums.xml'
 	else:
 		xmlFile = 'script-forumbrowser-notifications.xml'
 	openWindow(NotificationsDialog,xmlFile,theme='Default',forumsWindow=window)
 	
-def manageParserRules():
-	rules = loadForumSettings(FB.getForumID(),get_rules=True)
+def manageParserRules(forumID=None):
+	if not forumID:
+		if FB: forumID = FB.getForumID()
+	if not forumID: return
+	rules = loadForumSettings(forumID,get_rules=True)
 	choice = True
 	while choice:
 		menu = OptionsChoiceMenu('Select Rule:')
@@ -2989,10 +3039,10 @@ def manageParserRules():
 		if choice == 'save':
 			for k in rules.keys():
 				if not rules[k]: rules[k] = None
-			saveForumSettings(FB.getForumID(),rules=rules)
+			saveForumSettings(forumID,rules=rules)
 			continue
 		elif choice == 'share':
-			shareForumRules(FB.getForumID(),rules)
+			shareForumRules(forumID,rules)
 			continue
 		elif choice == 'add':
 			menu = ChoiceMenu('Type:')
@@ -3130,17 +3180,18 @@ def registerForum():
 	LOG('Registering - URL: ' + url)
 	webviewer.getWebResult(url,dialog=True)
 
-def addFavorite():
-	if not FB: return
-	forum = FB.getForumID()
+def addFavorite(forum=None):
+	if not forum:
+		if not FB: return
+		forum = FB.getForumID()
 	favs = getFavorites()
 	if forum in favs: return
 	favs.append(forum)
 	__addon__.setSetting('favorites','*:*'.join(favs))
 	showMessage('Added','Current forum added to favorites!')
 	
-def removeFavorite():
-	forum = askForum(just_favs=True)
+def removeFavorite(forum=None):
+	if not forum: forum = askForum(just_favs=True)
 	if not forum: return
 	favs = getFavorites()
 	if not forum in favs: return
@@ -3349,12 +3400,15 @@ def setRulesODB(forumID,rules):
 	else:
 		showMessage('Failed','Failed to update the online database.',error=True)
 	
-def addCurrentForumToOnlineDatabase():
-	fdata = forumbrowser.ForumData(FB.getForumID(),FORUMS_PATH)
-	url = fdata.urls.get('tapatalk_server',fdata.urls.get('forumrunner_server',fdata.urls.get('server',FB._url)))
+def addCurrentForumToOnlineDatabase(forumID=None):
+	if not forumID:
+		if FB: forumID = FB.getForumID()
+	if not forumID: return
+	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+	url = fdata.urls.get('tapatalk_server',fdata.urls.get('forumrunner_server',fdata.urls.get('server',FB and FB._url or '')))
 	print url
 	if not url: raise Exception('No URL')
-	addForumToOnlineDatabase(fdata.name,url,fdata.description,fdata.urls.get('logo'),FB.getForumID()[:2],header_color=FB.theme.get('header_color','FFFFFF'))
+	addForumToOnlineDatabase(fdata.name,url,fdata.description,fdata.urls.get('logo'),forumID[:2],header_color=fdata.theme.get('header_color','FFFFFF'))
 	
 def addForumToOnlineDatabase(name,url,desc,logo,ftype,header_color='FFFFFF',dialog=None):
 	if not xbmcgui.Dialog().yesno('Add To Database?','Share to the Forum Browser','online database?'): return
@@ -3509,22 +3563,30 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 			self.closed = True
 			self.close()
 		
-def getCurrentLogo():
-	logo = FB.urls.get('logo')
+def getCurrentLogo(forumID=None,logo=None):
+	if not logo:
+		if FB: logo = FB.urls.get('logo')
+	if not logo: return
+	if not forumID: forumID = FB.getForumID()
+	if not forumID: return
 	root, ext = os.path.splitext(logo) #@UnusedVariable
-	logopath = os.path.join(CACHE_PATH,FB.getForumID() + (ext or '.jpg'))
+	logopath = os.path.join(CACHE_PATH,forumID + (ext or '.jpg'))
 	if os.path.exists(logopath): return logopath
-	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.png')
+	logopath = os.path.join(CACHE_PATH,forumID + '.png')
 	if os.path.exists(logopath): return logopath
-	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.gif')
+	logopath = os.path.join(CACHE_PATH,forumID + '.gif')
 	if os.path.exists(logopath): return logopath
-	logopath = os.path.join(CACHE_PATH,FB.getForumID() + '.ico')
+	logopath = os.path.join(CACHE_PATH,forumID + '.ico')
 	if os.path.exists(logopath): return logopath
 	return logo
 
-def askColor():
+def askColor(forumID=None):
 	#fffaec
-	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(),hexcolor=FB.theme.get('header_color'),theme='Default')
+	if not forumID:
+		if FB: forumID = FB.getForumID()
+	if not forumID: return
+	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(forumID,fdata.urls.get('logo')),hexcolor=fdata.theme['header_color'],theme='Default')
 	hexc = w.hexValue()
 	del w
 	return hexc
@@ -3538,9 +3600,12 @@ def getHexColor(hexc=None):
 		if not hexc: return None
 	return hexc
 	
-def setForumColor(color):
+def setForumColor(color,forumID=None):
 	if not color: return False
-	fid = FB.getForumID()
+	if forumID:
+		fid = forumID
+	else:
+		fid = FB.getForumID()
 	fdata = forumbrowser.ForumData(fid,FORUMS_PATH)
 	fdata.theme['header_color'] = color
 	FB.theme['header_color'] = color
@@ -3548,10 +3613,12 @@ def setForumColor(color):
 	showMessage('Done','Color Set!')
 	return True
 
-def updateThemeODB():
+def updateThemeODB(forumID=None):
+	if not forumID:
+		forumID = FB.getForumID()
 	odb = forumbrowser.FBOnlineDatabase()
-	vals_dict= {'header_color':FB.theme.get('header_color')}
-	result = str(odb.setTheme(FB.getForumID()[3:],vals_dict))
+	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+	result = str(odb.setTheme(forumID[3:],fdata.theme))
 	LOG('Updating ODB Theme: ' + result)
 	if result == '1':
 		showMessage('Done','Online database color updated.')
@@ -3569,21 +3636,25 @@ def unHideForum(forum):
 	if forum in flist: flist.pop(flist.index(forum))
 	__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
 	
-def removeForum():
+def removeForum(forum=None):
+	if forum: return doRemoveForum(forum)
 	forum = True
 	while forum:
 		forum = askForum(caption='Choose Forum To Remove',hide_extra=True)
 		if not forum: return
-		path = os.path.join(FORUMS_STATIC_PATH,forum)
-		if os.path.exists(path):
-			flist = getHiddenForums()
-			if not forum in flist: flist.append(forum)
-			__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
-			return
-		path = os.path.join(FORUMS_PATH,forum)
-		if not os.path.exists(path): return
-		os.remove(path)
-		showMessage('Removed','Forum removed.')
+		doRemoveForum(forum)
+		
+def doRemoveForum(forum):
+	path = os.path.join(FORUMS_STATIC_PATH,forum)
+	if os.path.exists(path):
+		flist = getHiddenForums()
+		if not forum in flist: flist.append(forum)
+		__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
+		return
+	path = os.path.join(FORUMS_PATH,forum)
+	if not os.path.exists(path): return
+	os.remove(path)
+	showMessage('Removed','Forum removed.')
 
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2

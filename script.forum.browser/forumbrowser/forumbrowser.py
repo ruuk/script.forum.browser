@@ -263,6 +263,9 @@ class ForumData:
 		self.description = ''
 		self.readData()
 		
+	def forumURL(self):
+		return self.urls.get('tapatalk_server',self.urls.get('forumrunner_server',self.urls.get('server','')))
+	
 	def readData(self):
 		self.urls = {}
 		self.theme = {}
