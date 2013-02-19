@@ -736,15 +736,29 @@ UNKNOWN = "<#UNKNOWN#>"
 class HTML5Parser(TreeWalker):
 	def reset(self): pass
 	
-	def feed(self,data):
+	def updateFeedProgress(self):
+		if not self.callback: return
+		pct = int(self.feedProgressBase + (self.feedProgressRange * (self.currentSize/self.total)))
+		if pct == self.progPct: return
+		self.progPct = pct
+		if pct > self.feedProgressMax: pct = self.feedProgressMax
+		self.callback(pct,'Processing HTML')
+		
+	def feed(self,data,progress_base=0,progress_range=0):
+		self.feedProgressBase = progress_base
+		self.feedProgressRange = progress_range
+		self.feedProgressMax = progress_base + progress_range
 		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
 		data = re.sub('(?<=[^\s])&nbsp;(?=[^\s])',' ',data)
 		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
 		data = self.scriptRemover.sub('',data)
 		data = self.styleRemover.sub('',data)
+		self.total = float(len(data))
 		self.tree = currentNode = html5lib_HTMLParser(tree=treebuilders.getTreeBuilder('dom')).parse(data)
 		currentText = ''
+		self.currentSize = 0
 		while currentNode is not None:
+			self.updateFeedProgress()
 			details = self.getNodeDetails(currentNode)
 			type, details = details[0], details[1:]
 			hasChildren = False
@@ -752,6 +766,7 @@ class HTML5Parser(TreeWalker):
 
 			if type == TEXT:
 				currentText += unicode(details[0])
+				self.currentSize += len(currentText)
 				#for token in self.text(*details):
 				#	if token['type'] == 'Characters': self.handle_data(token['data'])
 			else:
@@ -761,6 +776,7 @@ class HTML5Parser(TreeWalker):
 				if type == ELEMENT:
 					namespace, name, attributes, hasChildren = details
 					self.lastTagText = '<' + str(name) + ' ' + str(attributes) + '>'
+					self.currentSize += len(self.lastTagText)
 					if name in voidElements:
 						for token in self.emptyTag(namespace, name, attributes, 
 												   hasChildren):
@@ -842,7 +858,11 @@ class HTML5Parser(TreeWalker):
 		self.bodyTagRE = re.compile(r'<body[^>]*?>(?i)')
 		self.bodyEndTagRE = re.compile(r'</body>(?i)')
 		self.emptyTagRE = re.compile(r'(<(?:area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)[^>]*?(?<!/))(>)')
+		self.total = 0
+		self.currentSize = 0
+		self.progPct = 0
 		self.current = None
+		self.callback = None
 		self.mode = None
 		self.resetCurrent(False)
 	
@@ -1224,7 +1244,8 @@ class GeneralForumParser(AdvancedParser):
 			html = e.split(s.split(html,1)[-1],1)[0]	
 		return html
 	
-	def getForums(self,html):
+	def getForums(self,html,callback=None,progress_base=0,progress_range=0):
+		self.callback = callback
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.forums = []
 		self.dups = {}
@@ -1233,7 +1254,7 @@ class GeneralForumParser(AdvancedParser):
 		if not self.linkRE: return self.forums
 		html = self.splitHTML(html)
 		#open('/home/ruuk/test.txt','w').write(html.encode('ascii','replace'))
-		self.feed(html)
+		self.feed(html,progress_base,progress_range)
 		self.reset()
 		if self.subsSet: return self.forums
 		if self.maxForumDepth == 0: return self.forums
@@ -1508,6 +1529,8 @@ class GeneralPostParser(AdvancedParser):
 		self.mode = 'NORMAL'
 		self.pidTags = OrderedDict()
 		self.callback = self.fakeCallback
+		self.progressBase = 0
+		self.progressRange = 0
 		self.pages = {}
 		self.filters = {}
 		self.BLOCK = None
@@ -1548,13 +1571,20 @@ class GeneralPostParser(AdvancedParser):
 		domain = url.split('://')[-1].split('/')[0]
 		domain = '.'.join(domain.split('.')[-2:])
 		self.domain = domain
+		
+	def updateProgress(self,ct,total):
+		pct = int(self.progressBase + (self.progressRange * (ct/total)))
+		#print '%s %s %s' % (ct,total,pct)
+		self.callback(pct,'Parsing Posts')
 			
-	def getPosts(self,html,url='',callback=None,filters=None,page_url=''):
+	def getPosts(self,html,url='',callback=None,filters=None,page_url='',progress_base=0,progress_range=0):
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
 		self.setDefaults()
 		self.setBaseURL(page_url)
 		self.setFilters(filters)
 		self.callback = callback or self.fakeCallback
+		self.progressRange = progress_range/2
+		self.progressBase = progress_base + self.progressRange
 		self.reset()
 		self.getPages(url, html,self.threadParser.linkRE)
 		#if self.reVB.search(html): pass
@@ -1564,7 +1594,7 @@ class GeneralPostParser(AdvancedParser):
 		if not self.linkRE: self.mode = 'PID'
 		print 'Post Parsing Mode: ' + self.mode
 		print 'Post Forum Type: ' + self.forumType
-		self.feed(html)
+		self.feed(html,progress_base,progress_range/2)
 		if self.mode == 'PID':
 			return self.getPIDPosts()
 		#TODO: See if I want to uncomment this
@@ -1580,6 +1610,7 @@ class GeneralPostParser(AdvancedParser):
 			
 		if not self.posts:
 			raise Exception('Couldn\'t parse any posts')
+		total = float(len(self.posts))
 		if self.isGeneric:
 			lastP = None
 			for p in self.posts:
@@ -1601,10 +1632,13 @@ class GeneralPostParser(AdvancedParser):
 			if 'data' in lastP: del lastP['data']
 		else:
 			if not self.posts[-1].get('data'): self.getLastData(self.posts[-1])
+			ct = 0
 			for p in self.posts:
 				data = self.setDatas(p)
 				p['message'] = self.postProcessMessage(data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip()) or '')
 				if 'data' in p: del p['data']
+				ct += 1
+				self.updateProgress(ct,total)
 			
 		self.reset()
 		return self.posts
@@ -1705,7 +1739,7 @@ class GeneralPostParser(AdvancedParser):
 		ct = stack.index(tag)
 		point = 0
 		while ct > 0:
-			if not self.callback(95,'Parsing Post'): return
+			if not self.callback(90,'Parsing Post'): return
 			s = stack[ct]
 			if hasattr(s,'depth') and s.depth <= self.bottom:
 				#print repr(s) + ' ' + str(s.depth)
@@ -1715,7 +1749,7 @@ class GeneralPostParser(AdvancedParser):
 		bottom = stack[point]
 		#print repr(bottom)
 		while not hasattr(bottom,'stack'):
-			if not self.callback(95,'Parsing Post'): return
+			if not self.callback(90,'Parsing Post'): return
 			point += 1
 			bottom = stack[point]
 			#print repr(bottom)

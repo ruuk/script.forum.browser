@@ -138,7 +138,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
-		forums = self.forumParser.getForums(html)
+		forums = self.forumParser.getForums(html,callback,80,20)
 		LOG('Detected Forum Type: ' + self.forumParser.forumType)
 		self.forumType = self.forumParser.forumType
 		self.MC.resetRegex()
@@ -249,7 +249,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		replies = self.postParser.getPosts(html,pagesURL,callback=callback,filters=self.filters,page_url=url)
+		replies = self.postParser.getPosts(html,pagesURL,callback=callback,filters=self.filters,page_url=url,progress_base=80,progress_range=20)
 		LOG('Detected Posts Type: ' + self.postParser.forumType)
 		#topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		#if not threadid:

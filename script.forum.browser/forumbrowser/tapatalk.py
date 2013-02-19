@@ -913,6 +913,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not self.checkLogin(callback=callback): return self.finish(FBData(error='LOGIN FAILED'),donecallback)
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():
+			time.sleep(0.3)
 			forums = self.getSubscribedForums(callback, None)
 			threads['forums'] = forums.data
 			return self.finish(threads,donecallback)

@@ -22,7 +22,7 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.4'
+__version__ = '1.2.5'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 __language__ = __addon__.getLocalizedString
 
@@ -625,11 +625,12 @@ class NotificationsDialog(BaseWindowDialog):
 		if BaseWindowDialog.onClick(self, controlID): return
 		forumID = self.getSelectedForumID()
 		if controlID == 220: self.changeForum()
-		elif controlID == 200: addForum()
-		elif controlID == 201: addForumFromOnline()
+		elif controlID == 200:
+			if addForum(): self.refresh()
+		elif controlID == 201:
+			if addForumFromOnline(): self.refresh()
 		elif controlID == 202:
-			removeForum(forumID)
-			self.refresh()
+			if removeForum(forumID): self.refresh()
 		elif controlID == 203:
 			addFavorite(forumID)
 			self.refresh()
@@ -3325,6 +3326,7 @@ def addForum(current=False):
 		if user and password: saveForumSettings(forumID,user,password)
 		dialog.update(60,'Add To Online Database')
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
+		return True
 	finally:
 		dialog.close()
 	
@@ -3336,9 +3338,10 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 	else:
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	
-def addForumFromOnline():
+def addForumFromOnline(stay_open_on_select=False):
 	odb = forumbrowser.FBOnlineDatabase()
 	res = True
+	added = False
 	while res:
 		res = selectForumCategory(with_all=True)
 		if not res: return
@@ -3381,10 +3384,14 @@ def addForumFromOnline():
 			logo = fdata.urls.get('logo','')
 			hc = formatHexColorToARGB(fdata.theme.get('header_color','FFFFFF'))
 			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
-		f = True	
+		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
-			if f: doAddForumFromOnline(f,odb)
+			if f:
+				doAddForumFromOnline(f,odb)
+				added = True
+				if not stay_open_on_select: return True
+	return added
 	
 def formatHexColorToARGB(hexcolor):
 	try:
@@ -3661,16 +3668,19 @@ def removeForum(forum=None):
 		doRemoveForum(forum)
 		
 def doRemoveForum(forum):
+	yes = xbmcgui.Dialog().yesno('Remove?','Really remove forum:','','%s?' % forum[3:])
+	if not yes: return False
 	path = os.path.join(FORUMS_STATIC_PATH,forum)
 	if os.path.exists(path):
 		flist = getHiddenForums()
 		if not forum in flist: flist.append(forum)
 		__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
-		return
+		return True
 	path = os.path.join(FORUMS_PATH,forum)
 	if not os.path.exists(path): return
 	os.remove(path)
 	showMessage('Removed','Forum removed.')
+	return True
 
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
@@ -4399,13 +4409,13 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	return FB
 
 def startForumBrowser(forumID=None):
+	global PLAYER, STARTFORUM
 	PLAYER = PlayerMonitor()
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	checkForSkinMods()
 
 	#TD = ThreadDownloader()
-	global STARTFORUM
 	if forumID:
 		STARTFORUM = forumID
 	elif sys.argv[-1].startswith('forum='):

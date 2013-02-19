@@ -37,7 +37,15 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
 
-Current Version : 1.2.4
+Current Version : 1.2.5
+
+*** 1.2.5 ***
+
+Forum Manager: Adding forums now refreshes the forums list
+Fixed a bug causing errors when trying to play video
+Fixed tapatalk 'Forbidden' errors issue for some forums with notification service
+ParserBrowser: Improved progress bar movement when parsing Forums and Posts
+Now asks for confirmation when removing a forum
 
 *** 1.2.4 ***
 

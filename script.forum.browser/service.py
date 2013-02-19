@@ -159,6 +159,7 @@ class ForumBrowserService:
 			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,rules=loadForumSettings(forum,get_rules=True))
 			try:
 				pmcounts = self.FB.getPMCounts()
+				xbmc.sleep(300)
 				subs = self.FB.getSubscriptions()
 			except:
 				ERROR('Failed to get data for forum: %s' % forum)
