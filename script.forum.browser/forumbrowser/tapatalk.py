@@ -57,6 +57,7 @@ class CookieTransport(xmlrpclib.Transport):
 	def __init__(self):
 		xmlrpclib.Transport.__init__(self)
 		self._loggedIn = False
+		self.lastCall = time.time()
 		self.jar = cookielib.CookieJar()
 		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2 #@UndefinedVariable
 		self.getresponseTakesOneArg = httplib.HTTPConnection.getresponse.func_code.co_argcount < 2 #@UndefinedVariable
@@ -71,9 +72,13 @@ class CookieTransport(xmlrpclib.Transport):
 	
 	def request(self, host, handler, request_body, verbose=0):
 		#retry request once if cached connection has gone cold
+		now = time.time()
+		if now - self.lastCall < 0.1: time.sleep(0.1)
 		for i in (0, 1):
 			try:
-				return self.single_request(host, handler, request_body, verbose)
+				result = self.single_request(host, handler, request_body, verbose)
+				self.lastCall = time.time()
+				return result
 			except socket.error, e:
 				if i or e.errno not in (errno.ECONNRESET, errno.ECONNABORTED, errno.EPIPE):
 					raise
@@ -138,10 +143,14 @@ class CookieTransport(xmlrpclib.Transport):
 		#discard any response data and raise exception
 		if (response.getheader("content-length", 0)):
 			html = response.read()
-		if response.status == 301:
+		if response.status == httplib.MOVED_PERMANENTLY:
 			raise forumbrowser.ForumMovedException(response.getheader('location'))
-		elif response.status == 404:
+		elif response.status == httplib.NOT_FOUND:
 			raise forumbrowser.ForumNotFoundException('Tapatalk')
+		elif response.status == httplib.FORBIDDEN:
+			LOG('FORBIDDEN ERROR - SLEEPING 0.1 SECOND')
+			time.sleep(0.1)
+			raise httplib.CannotSendRequest()
 		else:
 			if DEBUG:
 				encoding = response.getheader("content-encoding")
@@ -212,6 +221,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.title = str(pdict.get('post_title',''))
 			self.message = self.filterMessage(str(pdict.get('post_content','')))
 			self.signature = pdict.get('signature','') or '' #nothing
+			self.setLikes(pdict.get('likes_info'))
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))
@@ -231,6 +241,14 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = str(pdict.get('short_content',''))
 			self.boxid = pdict.get('boxid','')
 			self.signature = ''
+		
+	def setLikes(self,likes_info):
+		if not likes_info: return
+		users = []
+		for l in likes_info:
+			users.append(str(l.get('username','')))
+		self.extras['like users'] = ', '.join(users)
+		self.extras['likes'] = len(users)
 		
 	def getActivity(self):
 		if not self.activity: return ''
@@ -294,11 +312,11 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = str(m.get('post_content',self.message))
 			self.isRaw = True
 		sig = ''
-		if self.signature and not self.hideSignature: sig = '\n__________\n' + self.signature
+		if self.signature and not self.hideSignature: sig = '\n__________\n[COLOR FF808080]' + self.signature + '[/COLOR]'
 		return self.message + sig
 	
 	def messageAsText(self):
-		return sys.modules["__main__"].messageToText(self.getMessage())
+		return sys.modules["__main__"].messageToText(self.getMessage(True))
 		
 	def messageAsDisplay(self,short=False,raw=False):
 		if short:
@@ -321,17 +339,17 @@ class ForumPost(forumbrowser.ForumPost):
 			return str(qp.get('post_content',''))
 		
 	def imageURLs(self):
-		return self.MC.imageFilter.findall(self.getMessage())
+		return self.MC.imageFilter.findall(self.getMessage(True))
 		
 	def linkImageURLs(self):
-		return re.findall('<a.+?href="(http://.+?\.(?:jpg|jpeg|png|gif|bmp))".+?</a>',self.message)
+		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|jpeg|png|gif|bmp))".+?</a>',self.message)
 		
 	def linkURLs(self):
-		return self.MC.linkFilter.finditer(self.getMessage())
+		return self.MC.linkFilter.finditer(self.getMessage(True))
 	
 	def link2URLs(self):
 		if not self.MC.linkFilter2: return []
-		return self.MC.linkFilter2.finditer(self.getMessage())
+		return self.MC.linkFilter2.finditer(self.getMessage(True))
 		
 	def links(self):
 		links = []
@@ -560,7 +578,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 	def login(self):
 		LOG('LOGGING IN')
-		time.sleep(0.1)
 		result = self.server.login(xmlrpclib.Binary(self.user),xmlrpclib.Binary(self.getPassword()))
 		if not result.get('result'):
 			error = str(result.get('result_text',''))
@@ -666,7 +683,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(80,self.lang(30231)): break
 			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
-				time.sleep(0.1)
 				pm_counts = self.getPMCounts(80)
 			except:
 				ERROR('Failed to get PM Counts')
@@ -823,12 +839,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					fp.postNumber = ct
 					try:
 						if not fp.userName in infos:
-							time.sleep(0.2)
 							infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
 						fp.setUserInfo(infos[fp.userName])
 					except:
 						infos[fp.userName] = {}
 						LOG('Failed to get user info for: %s' % fp.userName)
+						if DEBUG: ERROR('ERROR:')
 					sreplies.append(fp)
 					ct += 1
 			except xmlrpclib.Fault, e:
@@ -892,7 +908,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						if info.get('is_online'): info['is_online'] = bool(info.get('current_activity')) 
 						infos[fp.userName] = info
 					except:
-						ERROR('Failed to get user info')
+						infos[fp.userName] = {}
+						LOG('Failed to get user info for: %s' % fp.userName)
+						if DEBUG: ERROR('ERROR:')
 						break
 				fp.setUserInfo(infos.get(fp.userName))
 				fp.isPM = True
@@ -913,7 +931,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not self.checkLogin(callback=callback): return self.finish(FBData(error='LOGIN FAILED'),donecallback)
 		threads = self.getThreads(None, page, callback, None)
 		if self.hasForumSubscriptions():
-			time.sleep(0.3)
 			forums = self.getSubscribedForums(callback, None)
 			threads['forums'] = forums.data
 			return self.finish(threads,donecallback)

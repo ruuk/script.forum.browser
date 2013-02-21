@@ -7,11 +7,11 @@
 	</coordinates>
 	<controls>
 		<control type="group">
+			<animation effect="slide" end="-155,0" time="400" condition="Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
 			<posx>165</posx>
 			<posy>80</posy>
-			<animation effect="slide" end="-300,0" time="400"
-				condition="Control.IsVisible(220) + Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
 			<control type="image"  id="100">
+				<animation effect="zoom" end="69,100" center="-20,300" time="400" condition="!ControlGroup(260).HasFocus(0) + Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
 				<description>shadow</description>
 				<posx>-20</posx>
 				<posy>-60</posy>
@@ -21,6 +21,7 @@
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="group" id="260">
+				<animation effect="slide" end="-300,0" time="400" condition="!ControlGroup(260).HasFocus(0) + Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
 				<posx>610</posx>
 				<posy>-40</posy>
 				<control type="image">
@@ -84,7 +85,7 @@
 					<width>290</width>
 					<height>40</height>
 					<visible>true</visible>
-					<colordiffuse>FFFF4444</colordiffuse>
+					<colordiffuse>FFFF9999</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<label>Remove Forum</label>
@@ -135,25 +136,25 @@
 					<focusedcolor>white</focusedcolor>
 				</control>
 				<control type="button" id="205">
-					<description>Login</description>
+					<description>Forum Settings</description>
 					<onleft>220</onleft>
 					<onright>220</onright>
 					<onup>204</onup>
-					<ondown>206</ondown>
+					<ondown>207</ondown>
 					<posx>40</posx>
 					<posy>250</posy>
 					<width>290</width>
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Set Login</label>
+					<label>Forum Settings</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
-				<control type="button" id="206">
+				<!--<control type="button" id="206">
 					<description>Theme</description>
 					<onleft>220</onleft>
 					<onright>220</onright>
@@ -171,20 +172,20 @@
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
-				</control>
+				</control> -->
 				<control type="button" id="207">
 					<description>Add Online</description>
 					<onleft>220</onleft>
 					<onright>220</onright>
-					<onup>206</onup>
+					<onup>205</onup>
 					<ondown>208</ondown>
 					<posx>40</posx>
-					<posy>350</posy>
+					<posy>330</posy>
 					<width>290</width>
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Share TO Online DB</label>
+					<label>Share To Online DB</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -196,9 +197,9 @@
 					<onleft>220</onleft>
 					<onright>220</onright>
 					<onup>207</onup>
-					<ondown>209</ondown>
+					<ondown>210</ondown>
 					<posx>40</posx>
-					<posy>400</posy>
+					<posy>380</posy>
 					<width>290</width>
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
@@ -210,7 +211,7 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
-				<control type="button" id="209">
+				<!--<control type="button" id="209">
 					<description>Parser Browser</description>
 					<onleft>220</onleft>
 					<onright>220</onright>
@@ -229,12 +230,12 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<enable>StringCompare(Container(220).ListItem.Property(type),GB)</enable>
-				</control>
+				</control> -->
 				<control type="button" id="210">
 					<description>Help</description>
 					<onleft>220</onleft>
 					<onright>220</onright>
-					<onup>209</onup>
+					<onup>208</onup>
 					<ondown>200</ondown>
 					<posx>40</posx>
 					<posy>540</posy>
@@ -696,8 +697,15 @@
 						<posy>0</posy>
 						<width>600</width>
 						<height>38</height>
-						<texture border="19">forum-browser-white-boxr.png</texture>
-						<colordiffuse>88FF0000</colordiffuse>
+						<texture border="20">forum-browser-black-outline.png</texture>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>600</width>
+						<height>38</height>
+						<texture border="19">forum-browser-white-outline.png</texture>
+						<colordiffuse>AAFF0000</colordiffuse>
 						<visible>Control.HasFocus(202)</visible>		
 					</control>
 					<control type="image">
@@ -705,16 +713,9 @@
 						<posy>0</posy>
 						<width>600</width>
 						<height>38</height>
-						<texture border="19">forum-browser-white-boxr.png</texture>
-						<colordiffuse>8800FF00</colordiffuse>
+						<texture border="19">forum-browser-white-outline.png</texture>
+						<colordiffuse>AA00FF00</colordiffuse>
 						<visible>Control.HasFocus(203) | Control.HasFocus(204) | Control.HasFocus(205) | Control.HasFocus(206) | Control.HasFocus(207) | Control.HasFocus(208) | Control.HasFocus(209)</visible>		
-					</control>
-					<control type="image">
-						<posx>0</posx>
-						<posy>0</posy>
-						<width>600</width>
-						<height>38</height>
-						<texture border="20">forum-browser-black-outline.png</texture>
 					</control>
 					<control type="image">
 						<posx>576</posx>

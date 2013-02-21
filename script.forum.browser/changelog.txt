@@ -4,6 +4,11 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Fix logging in after setting login details
+  See if FB can have a better activity triggered after viewing posts
+  Optional imports of ShareSocial, Vimeo, YouTube
+  
+  Fix for color issues when viewing raw post (ie xbmchub)
   Add activity splash when adding forum, before success dialog
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
@@ -37,7 +42,19 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie likes,followers) - TTv4
 
-Current Version : 1.2.5
+Current Version : 1.2.6
+
+*** 1.2.6 ***
+
+Changed 'Set Logins' on Forum Manager to 'Forum Settings' which opens a per forum settings editor
+Removed 'Set Theme' and 'ParserBrowser' buttons from the forums manager, as they are now handled in the 'Forum Settings' dialog
+When video is playing, the Forum Manager now opens to the left and hides the buttons panel, which slides out on focus
+Changed look of Forum Manager list highlighting when forum action buttons are focused
+Tapatalk: The PMs list now show only a short preview again, unltil you click for the message view
+Added more robust handling of 'Forbidden' errors, hopefully fixing this issue once and for all!
+Since tapatalk strips all formatting from the signatures, I lightened the sigs to set them apart from the post text
+Added likes data to extra info (ie XBMCHub) 'like users' (list of users who liked) and 'likes' (number of users who liked)
+Changed 'User Extra Info' to 'User/Post Extra Info'
 
 *** 1.2.5 ***
 

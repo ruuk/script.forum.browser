@@ -114,7 +114,7 @@ class MessageConverter:
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
 			self.quoteVert = u'\u2502'
-			self.hrReplace = u'[B]'+u'\u2500'*300+u'[/B]'
+			self.hrReplace = u'[COLOR FF808080][B]'+u'\u2500'*300+u'[/B][/COLOR]'
 			self.codeStartReplace = u'\u250c'+u'\u2500'*300
 			self.codeEndReplace = u'\u2514'+u'\u2500'*300
 			self.bullet = u'\u2022'
@@ -122,7 +122,7 @@ class MessageConverter:
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
 			self.quoteVert = u'|'
-			self.hrReplace = u'[B]'+u'_'*300+u'[/B]'
+			self.hrReplace = u'[COLOR FF808080][B]'+u'_'*300+u'[/B][/COLOR]'
 			self.codeStartReplace = u','+u'-'*300
 			self.codeEndReplace = u'`'+u'-'*300
 			self.bullet = u'*'

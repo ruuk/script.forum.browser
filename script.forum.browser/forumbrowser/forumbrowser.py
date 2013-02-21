@@ -324,7 +324,7 @@ class Action:
 		self.action = action
 
 class PMLink:
-	linkImageFilter = re.compile('https?://.+?\.(?:jpg|png|gif|bmp)$')
+	linkImageFilter = re.compile('https?://.+?\.(?:jpg|jpeg|png|gif|bmp)$')
 	#urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 	def __init__(self,fb,match=None):
 		self.FB = fb
@@ -614,7 +614,6 @@ class ForumPost:
 		if self.postCount: extras['postcount'] = self.postCount
 		if self.joinDate: extras['joindate'] = self.joinDate
 		if not ignore: return extras
-		print extras
 		for i in ignore:
 			print i
 			if i in extras: del extras[i]
@@ -659,6 +658,7 @@ class ForumPost:
 			if l.isImage(): images = True
 			if count_link_images and l.textIsImage(): images = True
 			elif webvid.mightBeVideo(l.url) or webvid.mightBeVideo(l.text): video = True
+		if not images: images = bool(self.imageURLs())
 		return images,video
 			
 	def messageToDisplay(self,message): return message
