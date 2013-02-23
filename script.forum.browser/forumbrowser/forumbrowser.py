@@ -123,7 +123,6 @@ class FBOnlineDatabase():
 		return final
 
 class HTMLPageInfo:
-	urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 	def __init__(self,url,html=''):
 		self.url = url
 		
@@ -234,25 +233,29 @@ class HTMLPageInfo:
 		#print urls
 		return urls
 	
-	def fullURL(self,u,base):
-		u = u.strip()
-		if u.startswith('http'):
-			pass
-		elif u.startswith('./') or u.startswith('../'):
-			u = base + u[2:]
-		elif u.startswith('.'):
-			u = base + u[1:]
-		elif u.startswith('/'):
-			u = self.base2 + u[1:]
-		else:
-			u = base + u
-		pdfFilter = self.urlParentDirFilter
-		while pdfFilter.search(u):
-			#TODO: Limit
-			u = pdfFilter.sub('/',u)
-			u = u.replace('/../','/')
-		u = u.replace('&amp;','&')
-		return u
+	def fullURL(self,u,base): return fullURL(u,base,self.base2)
+	
+urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
+def fullURL(u,base,base2=None):
+	if not base2: base2 = 'http://' + base.rsplit('://',1)[-1].split('/',1)[0] + '/'
+	u = u.strip()
+	if u.startswith('http'):
+		pass
+	elif u.startswith('./') or u.startswith('../'):
+		u = base + u[2:]
+	elif u.startswith('.'):
+		u = base + u[1:]
+	elif u.startswith('/'):
+		u = base2 + u[1:]
+	else:
+		u = base + u
+	pdfFilter = urlParentDirFilter
+	while pdfFilter.search(u):
+		#TODO: Limit
+		u = pdfFilter.sub('/',u)
+		u = u.replace('/../','/')
+	u = u.replace('&amp;','&')
+	return u
 	
 class ForumData:
 	def __init__(self,forumID,forumsPath):
@@ -615,7 +618,6 @@ class ForumPost:
 		if self.joinDate: extras['joindate'] = self.joinDate
 		if not ignore: return extras
 		for i in ignore:
-			print i
 			if i in extras: del extras[i]
 		return extras
 	
@@ -879,7 +881,7 @@ class ForumBrowser:
 		if self.rules and 'login_url' in self.rules:
 			url = self.rules['login_url']
 		else:
-			url = self.getURL('login')
+			url = self.makeURL(self.getURL('login'))
 			
 		LOG('LOGIN URL: %s' % url)
 			
@@ -931,7 +933,7 @@ class ForumBrowser:
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
-						'color_start':'\[color=?#?(?P<color>\w+)\]'})
+						'color_start':'\[color=?["\']?#?(?P<color>\w+)["\']?\](?i)'})
 		return self.parseForumData(fname)
 		
 	def parseForumData(self,fname):

@@ -153,7 +153,18 @@
 				<texture border="20">forum-browser-dark-black-box.png</texture>
 				<colordiffuse>FFCCCCCC</colordiffuse>
 			</control>
-			
+			<control type="label">
+				<description>Time</description>
+				<posx>1250</posx>
+				<posy>72</posy>
+				<width>200</width>
+				<height>10</height>
+				<font>ForumBrowser-font12</font>
+				<textcolor>black</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
+				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
+			</control>
 			<control type="label" id="109">
 				<description>Version</description>
 				<posx>1250</posx>

@@ -524,6 +524,27 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		LOG('Login Failed. Attempting to find re-direct login link...')
 		return self.doLogin(url,generic=True)
 		
+	def ungzipResponse(self,r):
+		headers = r.info()
+		if headers.get('Content-Encoding') =='gzip':
+			import gzip
+			gz = gzip.GzipFile(fileobj=r, mode='rb')
+			html = gz.read()
+			gz.close()
+			headers["Content-type"] = "text/html; charset=utf-8"
+			r.set_data( html )
+			self.browser.set_response(r)
+		
+	def browserOpen(self,url):
+		r = self.browser.open(url)
+		self.ungzipResponse(r)
+		return r
+		
+	def browserSubmit(self):
+		r = self.browser.submit()
+		self.ungzipResponse(r)
+		return r
+	
 	def doLogin(self,url='',generic=False):
 		if generic:
 			usercontrol = 'user'
@@ -541,11 +562,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		LOG('LOGGING IN')
 		self.checkBrowser()
 		try:
-			response = self.browser.open(url or self.getLoginURL())
+			response = self.browserOpen(url or self.getLoginURL())
 		except self.mechanize.HTTPError, e:
 			if e.code == 302:
 				response = e
+			elif e.code == 404:
+				raise Exception('Login Page Not Found: 404')
 			else:
+				LOG('CODE: %s' % e.code)
 				return False
 		html = response.read()
 		#self.lastHTML = html
@@ -578,7 +602,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						ct+=1
 						try:
 							for c in self.browser.form.controls:
+								print c
 								if not userset and usercontrol in str(c.name):
+									LOG('Found possible username control: %s' % c.name)
 									userset = True
 									c.value = self.user
 								elif generic and not userset and 'email' in str(c.name):
@@ -586,6 +612,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 									userset = True
 									c.value = self.user
 								elif not passset and passcontrol in str(c.name):
+									LOG('Found possible password control: %s' % c.name)
 									passset = True
 									c.value = self.password
 								elif userset and ('sec' in str(c.name).lower() or 'captcha' in str(c.name).lower()) and not c.readonly:
@@ -599,7 +626,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 							LOG('WRONG FORM: %s' % ct)
 					if not userset or not passset:
 						if userset:
-							response = self.browser.submit()
+							response = self.browserSubmit()
 							html = response.read()
 							#import codecs
 							#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
@@ -624,9 +651,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						LOG('FAILED TO FIND USER AND/OR PASSWORD CONTROLS')
 						return False
 				except:
+					#import zlib
+					#html = zlib.decompress(html,16+zlib.MAX_WBITS)
+					#print repr(html)
 					LOG('FAILED')
 					return False
-		response = self.browser.submit()
+		response = self.browserSubmit()
 		html = response.read()
 		#import codecs
 		#codecs.open('/home/ruuk/test.txt','w','utf8').write(html.decode('utf8'))
@@ -645,8 +675,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def checkLogin(self,callback=None):
 		#raise Exception('TEST')
 		loginURL = ''
-		if 'login.php?' in self.lastURL:
+		url = self.checkForLoginLink()
+		if url:
+			loginURL = url
+		elif 'login.php?' in self.lastURL:
 			loginURL = self.lastURL
+			
 		if self.isLoggedIn(): return True
 		if not callback: callback = self.fakeCallback
 		if not self.canLogin():
@@ -662,9 +696,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 		return self._loggedIn
 		
+	def checkForLoginLink(self):
+		m = re.search('<a.+href=["\']?([^"\']+)["\']?.*>(?:Login|Sign In)</a>(?i)',self.lastHTML)
+		if not m: return None
+		sub = m.group(1)
+		if sub.startswith('http'): return sub
+		return forumbrowser.fullURL(sub, self._url)
+		
+		
+		
 	def browserReadURL(self,url,callback):
 		if not callback(30,__language__(30101)): return ''
-		response = self.browser.open(url)
+		response = self.browserOpen(url)
 		self.lastURL = response.geturl()
 		if not callback(60,__language__(30102)): return ''
 		return response.read()
@@ -700,7 +743,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if phppart.startswith('http://'):
 			url = phppart
 		else:
-			url = self._url + phppart
+			url = self._url
+			if url.endswith('.php') or url.endswith('.php/'):
+				if url.endswith('/'): url = url[:-1]
+				url = url.rsplit('/',1)[0] + '/'
+			url = url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
 		
 	def getPMCounts(self,html=''):
@@ -862,14 +909,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return self.finish(FBData(pms),donecallback)
 		
 	def getPMCSVFromForm(self,url):
-		res = self.browser.open(url)
+		res = self.browserOpen(url)
 		html = res.read()
 		self.selectForm(self.forms.get('private_messages_csv_action'))
-		res = self.browser.submit()
+		res = self.browserSubmit()
 		html = res.read()
 		if self.forms.get('private_messages_csv_submit2'):
 			self.selectForm(self.forms.get('private_messages_csv_action'))
-			res = self.browser.submit()
+			res = self.browserSubmit()
 			html = res.read()
 		#open('/home/ruuk/test.txt','w').write(html)
 		return html
@@ -940,7 +987,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		return base_url + sub
 		
 	def getURL(self,name):
-		return self._url + self.urls.get(name,'')
+		return self.makeURL(self.urls.get(name,''))
+		#return self._url + self.urls.get(name,'')
 		
 	def predicateLogin(self,formobj):
 		return self.forms.get('login_action','@%+#') in formobj.action
@@ -1013,7 +1061,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			url = self.postURL(post)
 		LOG('Posting URL: ' + url)
-		res = self.browser.open(url)
+		res = self.browserOpen(url)
 		#print res.info()
 		html = res.read()
 		self.lastHTML = html
@@ -1026,7 +1074,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if not self.login():
 				post.error = 'Could not log in'
 				return False
-			res = self.browser.open(url)
+			res = self.browserOpen(url)
 			html = res.read()
 		callback(40,__language__(30105))
 		selected = False
@@ -1072,7 +1120,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if wait: callback(60,__language__(30107) % wait)
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
-			res = self.browser.submit(name=self.forms.get(pre + 'post_submit_name'),label=self.forms.get(pre + 'post_submit_value'))
+			res = self.browserSubmit(name=self.forms.get(pre + 'post_submit_name'),label=self.forms.get(pre + 'post_submit_value'))
 			html = res.read()
 			#open('/home/ruuk/test.txt','w').write(html)
 			err = self.checkForError(html)
@@ -1145,12 +1193,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		field_dict = field_dict or {}
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False
-		res = self.browser.open(url)
+		res = self.browserOpen(url)
 		html = res.read()
 		if self.forms.get('login_action','@%+#') in html:
 			callback(5,__language__(30100))
 			if not self.login(): return False
-			res = self.browser.open(url)
+			res = self.browserOpen(url)
 			html = res.read()
 		callback(40,__language__(30105))
 		selected = False
@@ -1187,7 +1235,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if wait: callback(60,__language__(30107) % wait)
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
-			res = self.browser.submit(name=submit_name,label=submit_value)
+			res = self.browserSubmit(name=submit_name,label=submit_value)
 			callback(100,__language__(30052))
 		except:
 			ERROR('FORM ERROR')
@@ -1202,7 +1250,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def deletePost(self,post):
 		post.error = 'Failed'
 		if not self.checkLogin(): return post
-		res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
+		res = self.browserOpen(self.URLSubs(self.getURL('deletepost'),post=post))
 		html = res.read()
 		#open('/home/ruuk/test2.html','w').write(html)
 		if not self.isLoggedIn():
@@ -1210,7 +1258,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				post.error = 'Could not log in.'
 				return False
 			try:
-				res = self.browser.open(self.URLSubs(self.getURL('deletepost'),post=post))
+				res = self.browserOpen(self.URLSubs(self.getURL('deletepost'),post=post))
 				html = res.read()
 			except:
 				post.error = ERROR('Error deleting post')
@@ -1236,9 +1284,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.setControls('delete_control%s')
 			#self.browser["reason"] = reason[:50]
 			if 'delete_submit_name' in self.forms:
-				res = self.browser.submit(name=self.forms['delete_submit_name'])
+				res = self.browserSubmit(name=self.forms['delete_submit_name'])
 			else:
-				res = self.browser.submit()
+				res = self.browserSubmit()
 			#print res.read()
 		except self.mechanize.HTTPError, e:
 			LOG('HTTPError on delete submit: ' + e.msg)

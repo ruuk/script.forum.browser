@@ -22,8 +22,8 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__version__ = '1.2.6'
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
+__version__ = __addon__.getAddonInfo('version')
 __language__ = __addon__.getLocalizedString
 
 THEME = 'Default'
@@ -613,6 +613,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 		self.help = {}
 		self.helpSep = FB.MC.hrReplace
 		self.header = ''
+		self.settingsChanged = False
 		self.OK = False
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 		
@@ -652,52 +653,81 @@ class ForumSettingsDialog(BaseWindowDialog):
 		
 	def onClick(self,controlID):
 		if controlID == 320:
-			item = self.getControl(320).getSelectedItem()
-			if not item: return
-			dID = item.getProperty('id')
-			data = self.data.get(dID)
-			if not data:
-				LOG('ERROR GETTING FORUM SETTING FROM LISTITEM')
-				return
-			if data['type'] == 'boolean':
-				data['value'] = not data['value']
-				item.setLabel2(data['value'] and 'booleanTrue' or 'booleanFalse')
-			elif data['type'].startswith('text'):
-				if data['type'] == 'text.long':
-					val = doModKeyboard('Enter New Value',data['value'])
-					item.setProperty('help',self.help.get(dID,'') + '[CR][COLOR FF999999]%s[/COLOR][CR][B]Current:[/B][CR][CR]%s' % (self.helpSep,val))
-				elif data['type'].startswith('text.url'):
-					if data['value']:
-						yes = xbmcgui.Dialog().yesno('Clear?','Select yes to clear URL,','No to set new URL')
-						if yes:
-							data['value'] = ''
-							item.setLabel2('')
-							return
-					val = browseWebURL(data['type'].split('.',2)[-1])
-				else:
-					val = doKeyboard('Enter New Value',data['value'],hidden=data['type']=='text.password')
-				if val == None: return
-				data['value'] = val
-				item.setLabel2(data['type'] != 'text.password' and val or len(val) * '*')
-			elif data['type'].startswith('webimage.'):
-				url = data['type'].split('.',1)[-1]
-				logo = self.getWebImage(url)
-				if not logo: return
-				data['value'] = logo
-			elif data['type'].startswith('color.'):
-				forumID = data['type'].split('.',1)[-1]
-				color = askColor(forumID)
-				if not color: return
-				data['value'] = color
-				item.setLabel2(self.makeColorFile(color))
-			elif data['type'] == 'function':
-				data['value'][0](*data['value'][1:])		
+			self.editSetting()		
 		elif controlID == 100:
 			self.OK = True
 			self.close()
 		elif controlID == 101:
-			self.close()
+			self.cancel()
+		
+	def onAction(self,action):
+		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
+			action = ACTION_PREVIOUS_MENU
+		if action == ACTION_PREVIOUS_MENU:
+			self.cancel()
+		
+	def cancel(self):
+		if self.settingsChanged:
+			yes = xbmcgui.Dialog().yesno('Settings Changed','Settings changed.','Really discard changes?')
+			if not yes: return
+		self.close()
+		
+	def editSetting(self):
+		item = self.getControl(320).getSelectedItem()
+		if not item: return
+		dID = item.getProperty('id')
+		data = self.data.get(dID)
+		value = data['value']
+		self.doEditSetting(dID,item,data)
+		if value != data['value']: self.settingsChanged = True
+		
+	def doEditSetting(self,dID,item,data):
+		if not data:
+			LOG('ERROR GETTING FORUM SETTING FROM LISTITEM')
+			return
+		if data['type'] == 'boolean':
+			data['value'] = not data['value']
+			item.setLabel2(data['value'] and 'booleanTrue' or 'booleanFalse')
+		elif data['type'].startswith('text'):
+			if data['type'] == 'text.long':
+				val = doModKeyboard('Enter New Value',data['value'])
+				item.setProperty('help',self.help.get(dID,'') + '[CR][COLOR FF999999]%s[/COLOR][CR][B]Current:[/B][CR][CR]%s' % (self.helpSep,val))
+			elif data['type'].startswith('text.url'):
+				if data['value']:
+					yes = xbmcgui.Dialog().yesno('Clear?','Select yes to clear URL,','No to set new URL')
+					if yes:
+						data['value'] = ''
+						item.setLabel2('')
+						return
+				val = browseWebURL(data['type'].split('.',2)[-1])
+			else:
+				val = doKeyboard('Enter New Value',data['value'],hidden=data['type']=='text.password')
+			if val == None: return
+			data['value'] = val
+			item.setLabel2(data['type'] != 'text.password' and val or len(val) * '*')
+		elif data['type'].startswith('webimage.'):
+			url = data['type'].split('.',1)[-1]
+			logo = self.getWebImage(url)
+			if not logo: return
+			data['value'] = logo
+			print logo
+			item.setProperty('value',logo)
+			self.refreshImage()
+		elif data['type'].startswith('color.'):
+			forumID = data['type'].split('.',1)[-1]
+			color = askColor(forumID,data['value'],logo=(self.data.get('logo') or {}).get('value'))
+			if not color: return
+			data['value'] = color
+			item.setLabel2(self.makeColorFile(color))
+		elif data['type'] == 'function':
+			data['value'][0](*data['value'][1:])
 			
+	def refreshImage(self):
+		cid = self.getFocusId()
+		if not cid: return
+		self.setFocusId(100)
+		self.setFocusId(cid)
+		
 	def getWebImage(self,url):
 		splash = showActivitySplash('Getting Images')
 		try:
@@ -725,9 +755,9 @@ def editForumSettings(forumID):
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 	w.setHeader(forumID[3:])
 	w.setHelp(loadHelp('forumsettings.help') or {})
-	w.addItem('username','Login User',sett['username'],'text')
-	w.addItem('password','Login Password',sett['password'],'text.password')
-	w.addItem('notify','Notifications',sett['notify'],'boolean')
+	w.addItem('username','Login User',sett.get('username',''),'text')
+	w.addItem('password','Login Password',sett.get('password',''),'text.password')
+	w.addItem('notify','Notifications',sett.get('notify',''),'boolean')
 	w.addSep()
 	w.addItem('description','Description',fdata.description,'text.long')
 	w.addItem('logo','Logo',fdata.urls.get('logo',''),'webimage.' + fdata.forumURL())
@@ -738,7 +768,7 @@ def editForumSettings(forumID):
 		w.addItem('rules','Post Parser Rules',(manageParserRules,forumID,rules),'function')
 	w.doModal()
 	if w.OK:
-		rules['login_url'] = w.data['login_url']['value'] or None
+		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
 		saveForumSettings(forumID, w.data['username']['value'], w.data['password']['value'], w.data['notify']['value'],rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
@@ -752,15 +782,20 @@ def editForumSettings(forumID):
 class NotificationsDialog(BaseWindowDialog):
 	def __init__( self, *args, **kwargs ):
 		self.forumsWindow = kwargs.get('forumsWindow')
+		self.initialForumID = kwargs.get('forumID')
+		self.initialIndex = 0
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = None
 		self.stopTimeout = False
+		self.started = False
 		self.createItems()
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
+		if self.started: return
+		self.started = True
 		BaseWindowDialog.onInit(self)
 		if not self.forumsWindow: self.getControl(250).setLabel('Forum Browser: New Posts')
 		self.fillList()
@@ -772,9 +807,11 @@ class NotificationsDialog(BaseWindowDialog):
 		forumID = self.getSelectedForumID()
 		if controlID == 220: self.changeForum()
 		elif controlID == 200:
-			if addForum(): self.refresh()
+			forumID = addForum()
+			if forumID: self.refresh(forumID)
 		elif controlID == 201:
-			if addForumFromOnline(): self.refresh()
+			forumID = addForumFromOnline()
+			if forumID: self.refresh(forumID)
 		elif controlID == 202:
 			if removeForum(forumID): self.refresh()
 		elif controlID == 203:
@@ -890,6 +927,7 @@ class NotificationsDialog(BaseWindowDialog):
 		uitems = []
 		items = []
 		colors = {}
+		idx = 0
 		for f in final:
 			flag = False
 			path = getForumPath(f,just_path=True)
@@ -935,12 +973,18 @@ class NotificationsDialog(BaseWindowDialog):
 				uitems.append(item)
 			else:
 				items.append(item)
+			if f == self.initialForumID: self.initialIndex = idx
+			idx += 1
 		self.items = uitems + items
 		
 	def fillList(self):
 		self.getControl(220).addItems(self.items)
+		self.getControl(220).selectItem(self.initialIndex)
+		self.initialForumID = None
+		self.initialIndex = 0
 		
-	def refresh(self):
+	def refresh(self,forumID=None):
+		self.initialForumID = forumID
 		self.getControl(220).reset()
 		self.createItems()
 		self.fillList()
@@ -2738,7 +2782,8 @@ class ForumsWindow(BaseWindow):
 			self.stopThread()
 			self.openPMWindow()
 		elif controlID == 202:
-			manageNotifications(self,size='manage')
+			forumsManager(self,size='manage',forumID=FB.getForumID())
+			return
 			#if self.changeForum(): return
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
@@ -2919,7 +2964,7 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 		return rules
 	
 	ret['username'] = ret.get('username','')
-	ret['password'] = passmanager.decryptPassword(ret['username'], ret.get('password',''))
+	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
 	ret['notify'] = ret.get('notify') == 'True' 
 		
 	if get_both:
@@ -2942,7 +2987,7 @@ def saveForumSettings(forumID,username=None,password=None,notify=None,rules=None
 	else: data['password'] = password
 	
 	try:
-		password = passmanager.encryptPassword(data['username'], data['password'])
+		password = passmanager.encryptPassword(data['username'] or '?', data['password'])
 		data['password'] = password
 		out = []
 		for k,v in data.items():
@@ -3170,7 +3215,7 @@ def doSettings(window=None):
 #	elif result == 'setlogins': setLogins(True)
 #	elif result == 'setloginpage': setLoginPage()
 #	elif result == 'setnotify': toggleNotify()
-#	elif result == 'managenotify': manageNotifications(window,size='manage')
+#	elif result == 'managenotify': forumsManager(window,size='manage')
 ##	elif result == 'register': registerForum()
 #	elif result == 'help': showHelp('forums')
 #	elif result == 'settings':
@@ -3185,14 +3230,23 @@ def doSettings(window=None):
 	if FB: FB.MC.resetRegex()
 	checkForSkinMods()
 
-def manageNotifications(window=None,size='full'):
+def forumsManager(window=None,size='full',forumID=None):
 	if size == 'small':
 		xmlFile = 'script-forumbrowser-notifications-small.xml'
 	elif size == 'manage':
 		xmlFile = 'script-forumbrowser-manage-forums.xml'
 	else:
 		xmlFile = 'script-forumbrowser-notifications.xml'
-	openWindow(NotificationsDialog,xmlFile,theme='Default',forumsWindow=window)
+		
+	if FB and window and forumID: canLogin = FB.canLogin()
+	
+	openWindow(NotificationsDialog,xmlFile,theme='Default',forumsWindow=window,forumID=forumID)
+	
+	if FB and window and forumID:
+		if forumID == FB.getForumID() and not canLogin:
+			window.resetForum()
+			if FB.canLogin():
+				window.fillForumList()
 	
 def manageParserRules(forumID=None,rules=None):
 	if not forumID:
@@ -3428,6 +3482,7 @@ def addForum(current=False):
 		else:
 			forum = doKeyboard('Enter forum URL')
 			if forum == None: return
+			forum = forum.lower()
 			dialog.update(10,'Testing Forum: Tapatalk')
 			url = tapatalk.testForum(forum)
 			ftype = ''
@@ -3496,7 +3551,7 @@ def addForum(current=False):
 		if user and password: saveForumSettings(forumID,user,password)
 		dialog.update(60,'Add To Online Database')
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
-		return True
+		return forumID
 	finally:
 		dialog.close()
 	
@@ -3558,9 +3613,9 @@ def addForumFromOnline(stay_open_on_select=False):
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
 			if f:
-				doAddForumFromOnline(f,odb)
-				added = True
-				if not stay_open_on_select: return True
+				forumID = doAddForumFromOnline(f,odb)
+				added = forumID
+				if not stay_open_on_select: return added
 	return added
 	
 def formatHexColorToARGB(hexcolor):
@@ -3573,13 +3628,14 @@ def formatHexColorToARGB(hexcolor):
 def doAddForumFromOnline(f,odb):
 	if not isinstance(f,dict):
 		unHideForum(f)
-		return
+		return f
 	forumID = f['type']+'.'+f['name']
 	saveForum(f['type'],forumID,f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
 	rules = isinstance(f,dict) and odb.getForumRules(f['type']+'.'+f['name']) or {}
 	old_rules = loadForumSettings(forumID,get_rules=True)
 	if rules and not old_rules: saveForumSettings(forumID,rules=rules)
 	showMessage('Added','Forum added: ' + f['name'])
+	return forumID
 	
 def setRulesODB(forumID,rules):
 	odb = forumbrowser.FBOnlineDatabase()
@@ -3613,8 +3669,17 @@ def addForumToOnlineDatabase(name,url,desc,logo,ftype,header_color='FFFFFF',dial
 			return
 		
 	cat = selectForumCategory() or '0'
-	if dialog: dialog.update(80,'Saving To Database')
-	odb = forumbrowser.FBOnlineDatabase()
+	splash = None
+	if dialog:
+		dialog.update(80,'Saving To Database')
+	else:
+		splash = showActivitySplash('Saving TO ODB')
+		
+	try:
+		odb = forumbrowser.FBOnlineDatabase()
+	finally:
+		if splash: splash.close()
+		
 	msg = odb.addForum(name, url, logo, desc, ftype, cat, rating_function=frating, rating_accuracy=arating, header_color=header_color)
 	if msg == 'OK':
 		showMessage('Added','Forum added successfully',success=True)
@@ -3772,13 +3837,15 @@ def getCurrentLogo(forumID=None,logo=None):
 	if os.path.exists(logopath): return logopath
 	return logo
 
-def askColor(forumID=None):
+def askColor(forumID=None,color=None,logo=None):
 	#fffaec
 	if not forumID:
 		if FB: forumID = FB.getForumID()
 	if not forumID: return
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
-	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=getCurrentLogo(forumID,fdata.urls.get('logo')),hexcolor=fdata.theme['header_color'],theme='Default')
+	color = color or fdata.theme.get('header_color')
+	logo = logo or getCurrentLogo(forumID,fdata.urls.get('logo'))
+	w = openWindow(ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=logo,hexcolor=color,theme='Default')
 	hexc = w.hexValue()
 	del w
 	return hexc
@@ -3810,7 +3877,11 @@ def updateThemeODB(forumID=None):
 		forumID = FB.getForumID()
 	odb = forumbrowser.FBOnlineDatabase()
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
-	result = str(odb.setTheme(forumID[3:],fdata.theme))
+	splash = showActivitySplash('Saving To ODB')
+	try:
+		result = str(odb.setTheme(forumID[3:],fdata.theme))
+	finally:
+		splash.close()
 	LOG('Updating ODB Theme: ' + result)
 	if result == '1':
 		showMessage('Done','Online database color updated.')
@@ -4539,11 +4610,11 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('TT.'):
 			err = 'getForumBrowser(): Tapatalk'
-			FB = tapatalk.TapatalkForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+			FB = tapatalk.TapatalkForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('FR.'):
 			err = 'getForumBrowser(): Forumrunner'
 			from forumbrowser import forumrunner
-			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=getSetting('always_login',False))
 		#else:
 		#	err = 'getForumBrowser(): Boxee'
 		#	from forumbrowser import parserbrowser

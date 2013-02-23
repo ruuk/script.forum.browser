@@ -4,12 +4,9 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Fix logging in after setting login details
-  See if FB can have a better activity triggered after viewing posts
   Optional imports of ShareSocial, Vimeo, YouTube
+  Add ability to like a post
   
-  Fix for color issues when viewing raw post (ie xbmchub)
-  Add activity splash when adding forum, before success dialog
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
@@ -40,9 +37,24 @@ TODO:
   Skip forward on remote causes XBMC dialog
  
  Awaiting Future Developments:
-  Show more extra info in tapatalk (ie likes,followers) - TTv4
+  Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.2.6
+Current Version : 1.2.7
+
+*** 1.2.7 ***
+
+Fixed handling of [size] tags
+ParserBrowser: Fix for finding login page on some forums
+ParserBrowser: Fix for handling gzipped resonses
+Added time to forums window
+Forums Manager now focuses on open to current forum and focuses to a forum that has just been added
+Forum Settings now updates the logo preview after selecting new logo
+When editing forum colors, the logo and starting color are now from the settings view rather than the forum's current color and logo
+When login details are first set on a forum, when exiting the Forums Manager FB will now login
+On the Forum Settings dialog, if a setting has been changed and you attempt to cancel or exit without clicking OK, it will ask if you want to discard changes
+Fix for [color] tags issue in message view
+Added activity splash when adding a forum or theme to the online database
+Now converts forum names to lower case when adding to prevent name conflicts
 
 *** 1.2.6 ***
 

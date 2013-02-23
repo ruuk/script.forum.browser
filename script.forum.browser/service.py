@@ -16,7 +16,7 @@ def LOG(txt): pass
 ADDON = __addon__ = xbmcaddon.Addon()
 __language__ = ADDON.getLocalizedString
 FB = None
-from default import getForumBrowser, listForumSettings, loadForumSettings, manageNotifications, getNotifyList, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
+from default import getForumBrowser, listForumSettings, loadForumSettings, forumsManager, getNotifyList, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
 import video
 ADDONID = ADDON.getAddonInfo('id')
 
@@ -99,7 +99,7 @@ class ForumBrowserService:
 			image=ADDON.getAddonInfo('icon')
 			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
 		elif method != 'normal' and type == 'all':
-			manageNotifications(size=method)
+			forumsManager(size=method)
 		
 	def getUsername(self):
 		data = loadForumSettings(self.FB.getForumID())
