@@ -39,7 +39,13 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.2.7
+Current Version : 1.2.8
+
+*** 1.2.8 ***
+
+Re-worked Forums Manager display to better show what's going on
+Added Post Attributes to forum settings for a per-forum preferred attributes display
+Fixed a bug causing forums manager to not open on a fresh install
 
 *** 1.2.7 ***
 

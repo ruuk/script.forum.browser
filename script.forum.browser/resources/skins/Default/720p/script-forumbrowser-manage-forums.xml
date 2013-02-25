@@ -7,11 +7,13 @@
 	</coordinates>
 	<controls>
 		<control type="group">
-			<animation effect="slide" end="-155,0" time="400" condition="Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
-			<posx>165</posx>
+			<animation effect="slide" end="-300,0" time="400" condition="Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
+			<animation effect="slide" end="-150,0" time="400" condition="ControlGroup(260).HasFocus(0) + !Player.Playing">Conditional</animation>
+			<animation effect="slide" end="-150,0" time="400" condition="ControlGroup(260).HasFocus(0) + StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
+			<posx>315</posx>
 			<posy>80</posy>
 			<control type="image"  id="100">
-				<animation effect="zoom" end="69,100" center="-20,300" time="400" condition="!ControlGroup(260).HasFocus(0) + Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
+				<animation effect="zoom" end="69,100" center="-20,300" time="400" condition="!ControlGroup(260).HasFocus(0)">Conditional</animation>
 				<description>shadow</description>
 				<posx>-20</posx>
 				<posy>-60</posy>
@@ -21,7 +23,7 @@
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="group" id="260">
-				<animation effect="slide" end="-300,0" time="400" condition="!ControlGroup(260).HasFocus(0) + Player.Playing + !Player.Paused + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
+				<animation effect="slide" end="-300,0" time="400" condition="!ControlGroup(260).HasFocus(0)">Conditional</animation>
 				<posx>610</posx>
 				<posy>-40</posy>
 				<control type="image">
@@ -250,8 +252,24 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
+				<control type="button" id="299">
+					<description>Mouse Focus Button</description>
+					<onleft>200</onleft>
+					<onright>200</onright>
+					<onup>200</onup>
+					<ondown>200</ondown>
+					<posx>20</posx>
+					<posy>0</posy>
+					<width>320</width>
+					<height>600</height>
+					<visible>true</visible>
+					<font>ForumBrowser-font13</font>
+					<texturefocus></texturefocus>
+					<texturenofocus></texturenofocus>
+					<textcolor>black</textcolor>
+				</control>
 			</control>
-				
+
 			<control type="image" id="251">
 				<posx>0</posx>
 				<posy>-40</posy>
@@ -307,6 +325,16 @@
 				<width>640</width>
 				<height>560</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
+				<visible>!ControlGroup(260).HasFocus(0)</visible>
+			</control>
+			<control type="image" id="251">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>640</width>
+				<height>560</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
+				<colordiffuse>FF444444</colordiffuse>
+				<visible>ControlGroup(260).HasFocus(0)</visible>
 			</control>
 			<!-- ** Required ** Do not change <id> or <type> -->
 			<control type="list" id="220">
@@ -321,10 +349,10 @@
 				<viewtype label="535">list</viewtype>
 				<pagecontrol>121</pagecontrol>
 				<scrolltime>200</scrolltime>
-				<itemlayout height="38">
+				<itemlayout height="39">
 					<control type="image">
 						<posx>104</posx>
-						<posy>1</posy>
+						<posy>0</posy>
 						<width>300</width>
 						<height>38</height>
 						<texture>$INFO[ListItem.Property(bgfile)]</texture>
@@ -332,7 +360,7 @@
 					</control>
 					<control type="image">
 						<posx>104</posx>
-						<posy>1</posy>
+						<posy>0</posy>
 						<width>300</width>
 						<height>38</height>
 						<texture>$INFO[ListItem.Icon]</texture>
@@ -340,23 +368,26 @@
 					</control>
 					<control type="image">
 						<posx>104</posx>
-						<posy>1</posy>
+						<posy>0</posy>
 						<width>300</width>
 						<height>38</height>
 						<texture>forum-browser-fade-overlay.png</texture>
 						<aspectratio>stretch</aspectratio>
+						<visible>!ControlGroup(260).HasFocus(0)</visible>
 					</control>
 					<control type="image">
-						<posx>20</posx>
-						<posy>37</posy>
-						<width>560</width>
-						<height>2</height>
-						<texture>forum-browser-white-box.png</texture>
-						<colordiffuse>FF999999</colordiffuse>
+						<posx>104</posx>
+						<posy>0</posy>
+						<width>300</width>
+						<height>38</height>
+						<texture>forum-browser-fade-overlay.png</texture>
+						<aspectratio>stretch</aspectratio>
+						<colordiffuse>FF444444</colordiffuse>
+						<visible>ControlGroup(260).HasFocus(0)</visible>
 					</control>
 					<control type="image">
 						<posx>404</posx>
-						<posy>1</posy>
+						<posy>0</posy>
 						<width>1</width>
 						<height>38</height>
 						<texture>forum-browser-panel-full.png</texture>
@@ -462,8 +493,16 @@
 							<visible>StringCompare(ListItem.Property(type),GB)</visible>
 						</control>
 					</control>
+					<control type="image">
+						<posx>20</posx>
+						<posy>37</posy>
+						<width>560</width>
+						<height>2</height>
+						<texture>forum-browser-white-box.png</texture>
+						<colordiffuse>FF999999</colordiffuse>
+					</control>
 				</itemlayout>
-				<focusedlayout height="38">
+				<focusedlayout height="39">
 					<control type="image">
 						<posx>20</posx>
 						<posy>37</posy>
@@ -482,7 +521,7 @@
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
 							<texture>$INFO[ListItem.Property(bgfile)]</texture>
@@ -490,7 +529,7 @@
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
 							<texture>$INFO[ListItem.Icon]</texture>
@@ -498,10 +537,11 @@
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
-							<texture>forum-browser-fade-overlay-grey.png</texture>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<colordiffuse>FF4A4A4A</colordiffuse>
 							<aspectratio>stretch</aspectratio>
 						</control>
 						<control type="image">
@@ -589,10 +629,19 @@
 							<width>600</width>
 							<height>38</height>
 							<texture border="20">forum-browser-white-boxr.png</texture>
+							<visible>Control.HasFocus(220)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>600</width>
+							<height>38</height>
+							<texture border="20">forum-browser-white-boxr-no-border.png</texture>
+							<visible>!Control.HasFocus(220)</visible>
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
 							<texture>$INFO[ListItem.Property(bgfile)]</texture>
@@ -600,7 +649,7 @@
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
 							<texture>$INFO[ListItem.Icon]</texture>
@@ -608,7 +657,7 @@
 						</control>
 						<control type="image">
 							<posx>104</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>300</width>
 							<height>38</height>
 							<texture>forum-browser-fade-overlay.png</texture>
@@ -624,7 +673,7 @@
 						</control>
 						<control type="image">
 							<posx>404</posx>
-							<posy>1</posy>
+							<posy>0</posy>
 							<width>1</width>
 							<height>38</height>
 							<texture>forum-browser-panel-full.png</texture>
@@ -690,6 +739,15 @@
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
 						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>600</width>
+							<height>38</height>
+							<texture border="19">forum-browser-white-boxr-no-border.png</texture>
+							<colordiffuse>44FF0000</colordiffuse>
+							<visible>Control.HasFocus(202)</visible>
+						</control>
 						<visible>!Control.HasFocus(220)</visible>
 					</control>
 					<control type="image">
@@ -698,25 +756,9 @@
 						<width>600</width>
 						<height>38</height>
 						<texture border="20">forum-browser-black-outline.png</texture>
+						<visible>Control.HasFocus(220)</visible>
 					</control>
-					<control type="image">
-						<posx>0</posx>
-						<posy>0</posy>
-						<width>600</width>
-						<height>38</height>
-						<texture border="19">forum-browser-white-outline.png</texture>
-						<colordiffuse>AAFF0000</colordiffuse>
-						<visible>Control.HasFocus(202)</visible>		
-					</control>
-					<control type="image">
-						<posx>0</posx>
-						<posy>0</posy>
-						<width>600</width>
-						<height>38</height>
-						<texture border="19">forum-browser-white-outline.png</texture>
-						<colordiffuse>AA00FF00</colordiffuse>
-						<visible>Control.HasFocus(203) | Control.HasFocus(204) | Control.HasFocus(205) | Control.HasFocus(206) | Control.HasFocus(207) | Control.HasFocus(208) | Control.HasFocus(209)</visible>		
-					</control>
+					
 					<control type="image">
 						<posx>576</posx>
 						<posy>11</posy>

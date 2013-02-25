@@ -758,6 +758,7 @@ def editForumSettings(forumID):
 	w.addItem('username','Login User',sett.get('username',''),'text')
 	w.addItem('password','Login Password',sett.get('password',''),'text.password')
 	w.addItem('notify','Notifications',sett.get('notify',''),'boolean')
+	w.addItem('extras','Post Attributes',sett.get('extras',''),'text')
 	w.addSep()
 	w.addItem('description','Description',fdata.description,'text.long')
 	w.addItem('logo','Logo',fdata.urls.get('logo',''),'webimage.' + fdata.forumURL())
@@ -769,7 +770,7 @@ def editForumSettings(forumID):
 	w.doModal()
 	if w.OK:
 		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
-		saveForumSettings(forumID, w.data['username']['value'], w.data['password']['value'], w.data['notify']['value'],rules)
+		saveForumSettings(forumID, username=w.data['username']['value'], password=w.data['password']['value'], notify=w.data['notify']['value'],extras=w.data['extras']['value'],rules=rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
 		fdata.theme['header_color'] = w.data['header_color']['value']
@@ -785,6 +786,7 @@ class NotificationsDialog(BaseWindowDialog):
 		self.initialForumID = kwargs.get('forumID')
 		self.initialIndex = 0
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
+		if not os.path.exists(self.colorsDir): os.makedirs(self.colorsDir)
 		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = None
@@ -1957,7 +1959,9 @@ class RepliesWindow(PageWindow):
 		self.setLoggedIn()
 			
 	def getUserInfoAttributes(self):
+		data = loadForumSettings(FB.getForumID())
 		try:
+			if 'extras' in data and data['extras']: return data['extras'].split(',')
 			return getSetting('post_user_info','status,postcount,reputation,joindate,location').split(',')
 		except:
 			ERROR('getUserInfoAttributes(): Bad settings data')
@@ -2655,6 +2659,9 @@ class ForumsWindow(BaseWindow):
 		
 	def setLogoFromFile(self):
 		logopath = getCurrentLogo()
+		if not logopath:
+			LOG('NO LOGO WHEN SETTING LOGO')
+			return
 		return self.getControl(250).setImage(logopath)
 			
 	def setLogo(self,logo):
@@ -2965,17 +2972,23 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 	
 	ret['username'] = ret.get('username','')
 	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
-	ret['notify'] = ret.get('notify') == 'True' 
+	ret['notify'] = ret.get('notify') == 'True'
 		
 	if get_both:
 		return ret,rules
 	else:
 		return ret
 
-def saveForumSettings(forumID,username=None,password=None,notify=None,rules=None):
+def saveForumSettings(forumID,**kwargs):
+	username=kwargs.pop('username',None)
+	password=kwargs.pop('password',None)
+	notify=kwargs.pop('notify',None)
+	rules=kwargs.pop('rules',None)
+	
 	data, rules_data = loadForumSettings(forumID,get_both=True) or ({},{})
 	#data.update(kwargs)
 	if rules: rules_data.update(rules)
+	if data: data.update(kwargs)
 	
 	if notify == None: data['notify'] = data.get('notify')  or False
 	else: data['notify'] = notify
@@ -3118,7 +3131,7 @@ def setLogins(force_ask=False,forumID=None):
 	if data: password = data.get('password','')
 	password = doKeyboard(__language__(30202),password,True)
 	if password is None: return
-	saveForumSettings(forumID,user,password)
+	saveForumSettings(forumID,username=user,password=password)
 	if not user and not password:
 		showMessage('Login Cleared','Username and password cleared.')
 	else:
@@ -3165,7 +3178,7 @@ def convertForumSettings_1_1_4():
 		password = passmanager.getPassword(key, username)
 		if username or password:
 			LOG('CONVERTING FORUM SETTINGS: %s' % f)
-			saveForumSettings(f,username,password)
+			saveForumSettings(f,username=username,password=password)
 			setSetting('login_user_' + f.replace('.','_'),'')
 			setSetting('login_pass_' + f.replace('.','_'),'')
 
@@ -3548,7 +3561,7 @@ def addForum(current=False):
 		if name.startswith('forums.'): name = name[7:]
 		forumID = ftype + '.' + name
 		saveForum(ftype,forumID,name,desc,url,logo)
-		if user and password: saveForumSettings(forumID,user,password)
+		if user and password: saveForumSettings(forumID,username=user,password=password)
 		dialog.update(60,'Add To Online Database')
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 		return forumID
