@@ -597,6 +597,14 @@ class ForumPost:
 			
 	def setVals(self,pdict): pass
 		
+	def canLike(self): return False
+	
+	def canUnlike(self): return False
+	
+	def like(self): return False
+	
+	def unlike(self): return False
+	
 	def messageType(self):
 		return self.isPM and 'PM' or 'POST'
 		

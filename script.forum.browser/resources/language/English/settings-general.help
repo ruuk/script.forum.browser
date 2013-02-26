@@ -18,7 +18,7 @@ When enabled, will hide post signatures if possible
 Try to detect forum software images in posts (such as small icons and such) and remove them from the display.
 @item:post_user_info=Post User Attributes To Display
 A comma separated list of attributes to display in the posts list below the user name and activity information.
-Up to two items will be displayed following the order of the specified list and depending on availability of the data.
+Up to three items will be displayed following the order of the specified list and depending on availability of the data.
 There are built in attributes, as well as anything listed in the user extra info.
 
 Some possible attributes:

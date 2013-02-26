@@ -39,7 +39,18 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.2.8
+Current Version : 1.2.9
+
+*** 1.2.9 ***
+
+Removed hidden forums concept. xbmc.org is now created automatically on first run from local copy
+Fix: Forums Manager now focuses on 'Add Forum' when forums list is empty
+Fix for notifications dialog skin (was broken due to changes to Forums Manager skin)
+Fix for Forums Manager color issues when a dialog is opened
+Forums Manager list and buttons not longer wrap left and right
+Added Forum Settings help for 'Post Attributes'
+Fix for opening Forums Manager after failed first forum open
+Tapatalk: Added the ability to like/unlike posts (where available - notably XBMCHub) via context menu
 
 *** 1.2.8 ***
 

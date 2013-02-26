@@ -199,7 +199,8 @@
 							<posy>1</posy>
 							<width>300</width>
 							<height>38</height>
-							<texture>forum-browser-fade-overlay-grey.png</texture>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<colordiffuse>FF4A4A4A</colordiffuse>
 							<aspectratio>stretch</aspectratio>
 						</control>
 						<control type="image">

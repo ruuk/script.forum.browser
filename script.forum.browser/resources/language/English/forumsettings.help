@@ -8,6 +8,12 @@ Passwords are stored encrypted.
 Encryption options are available in the addon settings under 'Advanced'.
 @item:notify
 This will toggle notifications on and off. This only matters when notifications are enabled in Forum Browser settings.
+@item:extras
+A comma separated list of attributes to display in the posts list below the user name and activity information. This overrides the main Forum Browser setting. 
+Up to three items will be displayed following the order of the specified list and depending on availability of the data.
+There are built in attributes, as well as anything listed in the user extra info.
+
+Examples: status, postcount, reputation, joindate, location, homepage, platform
 @item:description
 Allows you to edit the forum description. If you want to change the Online DataBase description, share the forum to the ODB after editing.
 @item:logo

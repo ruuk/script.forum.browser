@@ -222,6 +222,8 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = self.filterMessage(str(pdict.get('post_content','')))
 			self.signature = pdict.get('signature','') or '' #nothing
 			self.setLikes(pdict.get('likes_info'))
+			self._can_like = pdict.get('can_like')
+			self._is_liked = pdict.get('is_liked')
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))
@@ -241,9 +243,29 @@ class ForumPost(forumbrowser.ForumPost):
 			self.message = str(pdict.get('short_content',''))
 			self.boxid = pdict.get('boxid','')
 			self.signature = ''
+			self._can_like = False
+			self._is_liked = False
+		
+	def update(self,data):
+		self.setVals(data)
+		
+	def canLike(self): return self._can_like and not self._is_liked
+	
+	def canUnlike(self): return bool(self._is_liked)
+	
+	def like(self):
+		if not self.canLike(): return False
+		return self.FB.like(self)
+		
+	def unLike(self):
+		if not self.canUnlike(): return False
+		return self.FB.unLike(self)
 		
 	def setLikes(self,likes_info):
-		if not likes_info: return
+		if not likes_info:
+			if 'like users' in self.extras: del self.extras['like users']
+			if 'likes' in self.extras: del self.extras['likes']
+			return
 		users = []
 		for l in likes_info:
 			users.append(str(l.get('username','')))
@@ -1043,6 +1065,42 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if self.forumConfig.get('can_moderate'): return True
 		return False
 	
+	def updatePost(self,post):
+		thread = self.server.get_thread_by_post(post.pid,1)
+		if not thread.get('position'):
+			LOG('COULD NOT GET THREAD BY POST ID')
+			return False
+		posts = thread.get('posts')
+		if not posts:
+			LOG('FAILED TO UPDATE POST - NO POSTS')
+			return False
+		for p in posts:
+			if p.get('post_id') == post.pid:
+				post.update(p)
+				return True
+		LOG('FAILED TO UPDATE POST - NOT FOUND')
+		return False
+	
+	def like(self,post):
+		result = self.server.like_post(post.pid)
+		if result.get('result'):
+			self.updatePost(post)
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to like post: ' + text)
+			return text
+		
+	def unLike(self,post):
+		result = self.server.unlike_post(post.pid)
+		if result.get('result'):
+			self.updatePost(post)
+			return True
+		else:
+			text = result.get('result_text')
+			LOG('Failed to unlike post: ' + text)
+			return text
+		
 	def canSubscribeThread(self,tid): return self.isLoggedIn()
 	def canSubscribeForum(self,fid): return self.isLoggedIn()
 	def canUnSubscribeThread(self,tid): return self.isLoggedIn()

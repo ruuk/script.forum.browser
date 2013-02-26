@@ -34,10 +34,10 @@
 					<texture border="20">forum-browser-white-boxr.png</texture>
 					<colordiffuse>FF777777</colordiffuse>
 				</control>
+
 				<control type="button" id="200">
 					<description>Add Forum</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
 					<onup>210</onup>
 					<ondown>201</ondown>
 					<posx>40</posx>
@@ -55,10 +55,25 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
+				
+				<control type="button" id="299">
+					<description>Mouse Focus</description>
+					<onleft>200</onleft>
+					<onup>200</onup>
+					<ondown>200</ondown>
+					<onright>200</onright>
+					<posx>30</posx>
+					<posy>60</posy>
+					<width>310</width>
+					<height>540</height>
+					<texturefocus></texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				
 				<control type="button" id="201">
 					<description>Add From Online</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>200</onup>
 					<ondown>202</ondown>
 					<posx>40</posx>
@@ -79,7 +94,7 @@
 				<control type="button" id="202">
 					<description>Remove Forum</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>201</onup>
 					<ondown>203</ondown>
 					<posx>40</posx>
@@ -100,7 +115,7 @@
 				<control type="button" id="203">
 					<description>Add To Favorites</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>202</onup>
 					<ondown>204</ondown>
 					<posx>40</posx>
@@ -120,7 +135,7 @@
 				<control type="button" id="204">
 					<description>Remove From Favs</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>203</onup>
 					<ondown>205</ondown>
 					<posx>40</posx>
@@ -140,7 +155,7 @@
 				<control type="button" id="205">
 					<description>Forum Settings</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>204</onup>
 					<ondown>207</ondown>
 					<posx>40</posx>
@@ -159,7 +174,7 @@
 				<!--<control type="button" id="206">
 					<description>Theme</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>205</onup>
 					<ondown>207</ondown>
 					<posx>40</posx>
@@ -178,7 +193,7 @@
 				<control type="button" id="207">
 					<description>Add Online</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>205</onup>
 					<ondown>208</ondown>
 					<posx>40</posx>
@@ -197,7 +212,7 @@
 				<control type="button" id="208">
 					<description>Theme Online</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>207</onup>
 					<ondown>210</ondown>
 					<posx>40</posx>
@@ -216,7 +231,7 @@
 				<!--<control type="button" id="209">
 					<description>Parser Browser</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					
 					<onup>208</onup>
 					<ondown>210</ondown>
 					<posx>40</posx>
@@ -236,7 +251,6 @@
 				<control type="button" id="210">
 					<description>Help</description>
 					<onleft>220</onleft>
-					<onright>220</onright>
 					<onup>208</onup>
 					<ondown>200</ondown>
 					<posx>40</posx>
@@ -251,22 +265,6 @@
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
-				</control>
-				<control type="button" id="299">
-					<description>Mouse Focus Button</description>
-					<onleft>200</onleft>
-					<onright>200</onright>
-					<onup>200</onup>
-					<ondown>200</ondown>
-					<posx>20</posx>
-					<posy>0</posy>
-					<width>320</width>
-					<height>600</height>
-					<visible>true</visible>
-					<font>ForumBrowser-font13</font>
-					<texturefocus></texturefocus>
-					<texturenofocus></texturenofocus>
-					<textcolor>black</textcolor>
 				</control>
 			</control>
 
@@ -311,7 +309,7 @@
 				<label>PMs</label>
 			</control>
 			
-			<control type="image" id="251">
+			<control type="image" id="253">
 				<posx>581</posx>
 				<posy>-28</posy>
 				<width>24</width>
@@ -325,20 +323,20 @@
 				<width>640</width>
 				<height>560</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
-				<visible>!ControlGroup(260).HasFocus(0)</visible>
+				<visible>!Control.IsVisible(252)</visible>
 			</control>
-			<control type="image" id="251">
+			<control type="image" id="252">
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>640</width>
 				<height>560</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
 				<colordiffuse>FF444444</colordiffuse>
-				<visible>ControlGroup(260).HasFocus(0)</visible>
+				<visible>!Control.HasFocus(220)</visible>
 			</control>
 			<!-- ** Required ** Do not change <id> or <type> -->
 			<control type="list" id="220">
-				<onleft>260</onleft>
+				<onleft>220</onleft>
 				<onright>260</onright>
 				<onup>220</onup>
 				<ondown>220</ondown>
@@ -373,7 +371,7 @@
 						<height>38</height>
 						<texture>forum-browser-fade-overlay.png</texture>
 						<aspectratio>stretch</aspectratio>
-						<visible>!ControlGroup(260).HasFocus(0)</visible>
+						<visible>Control.HasFocus(220)</visible>
 					</control>
 					<control type="image">
 						<posx>104</posx>
@@ -383,7 +381,7 @@
 						<texture>forum-browser-fade-overlay.png</texture>
 						<aspectratio>stretch</aspectratio>
 						<colordiffuse>FF444444</colordiffuse>
-						<visible>ControlGroup(260).HasFocus(0)</visible>
+						<visible>!Control.HasFocus(220)</visible>
 					</control>
 					<control type="image">
 						<posx>404</posx>
@@ -637,7 +635,6 @@
 							<width>600</width>
 							<height>38</height>
 							<texture border="20">forum-browser-white-boxr-no-border.png</texture>
-							<visible>!Control.HasFocus(220)</visible>
 						</control>
 						<control type="image">
 							<posx>104</posx>
@@ -811,7 +808,7 @@
 					<width>4</width>
 					<height>540</height>
 					<onleft>220</onleft>
-					<onright>220</onright>
+					<onright>260</onright>
 					<texturesliderbackground border="1">-</texturesliderbackground>
 					<texturesliderbar border="1">forum-browser-panel-full.png</texturesliderbar>
 					<texturesliderbarfocus border="1">forum-browser-panel-full.png</texturesliderbarfocus>

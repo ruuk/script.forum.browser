@@ -802,7 +802,10 @@ class NotificationsDialog(BaseWindowDialog):
 		if not self.forumsWindow: self.getControl(250).setLabel('Forum Browser: New Posts')
 		self.fillList()
 		self.startDisplayTimeout()
-		self.setFocusId(220)
+		if self.items:
+			self.setFocusId(220)
+		else:
+			if self.forumsWindow: self.setFocusId(200)
 		
 	def onClick( self, controlID ):
 		if BaseWindowDialog.onClick(self, controlID): return
@@ -909,13 +912,8 @@ class NotificationsDialog(BaseWindowDialog):
 			final = getNotifyList()
 		else:
 			favs = getFavorites()
-			ft = os.listdir(FORUMS_STATIC_PATH)
-			hidden = getHiddenForums()
-			flist_tmp = []
-			for f in ft:
-				if not f in hidden: flist_tmp.append(f)
-			flist2_tmp = os.listdir(FORUMS_PATH)
-			rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
+			flist_tmp = os.listdir(FORUMS_PATH)
+			rest = sorted(flist_tmp,key=fidSortFunction)
 			if favs:
 				for f in favs:
 					if f in rest: rest.pop(rest.index(f))
@@ -1858,6 +1856,56 @@ class RepliesWindow(PageWindow):
 		item.setProperty('title',title)
 		item.setProperty('message',post.messageAsDisplay(short))
 		
+	def updateItem(self,item,post):
+		alt = self.getUserInfoAttributes()
+		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
+		webvid = video.WebVideo()
+		showIndicators = getSetting('show_media_indicators',True)
+		countLinkImages = getSetting('smi_count_link_images',False)
+		item.setProperty('alternate1','')
+		item.setProperty('alternate2','')
+		item.setProperty('alternate3','')
+		
+		self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
+		self.setFocusId(120)
+		
+	def _updateItem(self,item,post,defAvatar,showIndicators,countLinkImages,webvid,alt):
+		url = defAvatar
+		if post.avatar: url = FB.makeURL(post.avatar)
+		post.avatarFinal = url
+		self.setMessageProperty(post,item,True)
+		item.setProperty('post',post.postId)
+		item.setProperty('avatar',url)
+		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
+		item.setProperty('date',post.date)
+		item.setProperty('online',post.online and 'online' or '')
+		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
+		item.setProperty('activity',post.getActivity())
+		if showIndicators:
+			hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
+			item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
+			item.setProperty('hasvideo',hasvideo and 'hasvideo' or 'novideo')
+		altused = []
+		extras = post.getExtras()
+		for a in alt:
+			val = extras.get(a)
+			if val != None and str(val):
+				edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(str(val))) or ''
+				del extras[a]
+				altused.append(a)
+				if item.getProperty('alternate1'):
+					if item.getProperty('alternate2'):
+						item.setProperty('alternate3',edisp)
+						break
+					else:
+						item.setProperty('alternate2',edisp)
+				else:
+					item.setProperty('alternate1',edisp)
+		
+		if extras:
+			item.setProperty('extras','extras')
+			item.setProperty('usedExtras',','.join(altused))
+			
 	def doFillRepliesList(self,data):
 		if 'newthreadid' in data: self.tid = data['newthreadid']
 		if not data:
@@ -1898,46 +1946,12 @@ class RepliesWindow(PageWindow):
 			for post,idx in zip(data.data,range(0,len(data.data))):
 				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
-				url = defAvatar
-				if post.avatar: url = FB.makeURL(post.avatar)
-				post.avatarFinal = url
 				user = re.sub('<.*?>','',post.userName)
 				item = xbmcgui.ListItem(label=post.isSent and 'To: ' + user or user)
 				if user == self.me: item.setInfo('video',{"Director":'me'})
-				self.setMessageProperty(post,item,True)
-				item.setProperty('post',post.postId)
-				item.setProperty('avatar',url)
-				#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
-				item.setProperty('date',post.date)
-				item.setProperty('online',post.online and 'online' or '')
-				item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
-				item.setProperty('activity',post.getActivity())
-				if showIndicators:
-					hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
-					item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
-					item.setProperty('hasvideo',hasvideo and 'hasvideo' or 'novideo')
-				altused = []
-				extras = post.getExtras()
-				for a in alt:
-					val = extras.get(a)
-					if val != None and str(val):
-						edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(str(val))) or ''
-						del extras[a]
-						altused.append(a)
-						if item.getProperty('alternate1'):
-							if item.getProperty('alternate2'):
-								item.setProperty('alternate3',edisp)
-								break
-							else:
-								item.setProperty('alternate2',edisp)
-						else:
-							item.setProperty('alternate1',edisp)
-				
-				if extras:
-					item.setProperty('extras','extras')
-					item.setProperty('usedExtras',','.join(altused))
+				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
 				self.getControl(120).addItem(item)
-				self.setFocusId(120)
+			self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
 			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest():
@@ -2062,6 +2076,10 @@ class RepliesWindow(PageWindow):
 				d.addItem('extras','User/Post Extra Info')
 			if item and FB.canPrivateMessage() and not self.isPM():
 				d.addItem('pm',__language__(30253) % item.getLabel())
+			if post and post.canLike():
+				d.addItem('like','Like Post')
+			if post and post.canUnlike():
+				d.addItem('unlike','Unlike Post')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2101,6 +2119,20 @@ class RepliesWindow(PageWindow):
 		elif result == 'pm':
 			quote = xbmcgui.Dialog().yesno('Quote?','Quote the message?')
 			self.openPostDialog(post,force_pm=True,no_quote=not quote)
+		elif result == 'like':
+			splash = showActivitySplash('Liking')
+			try:
+				post.like()
+				self.updateItem(item, post)
+			finally:
+				splash.close()
+		elif result == 'unlike':
+			splash = showActivitySplash('Un-Liking')
+			try:
+				post.unLike()
+				self.updateItem(item, post)
+			finally:
+				splash.close()
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -2789,7 +2821,7 @@ class ForumsWindow(BaseWindow):
 			self.stopThread()
 			self.openPMWindow()
 		elif controlID == 202:
-			forumsManager(self,size='manage',forumID=FB.getForumID())
+			forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
 			return
 			#if self.changeForum(): return
 		elif controlID == 120:
@@ -3062,13 +3094,8 @@ def fidSortFunction(fid):
 
 def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=None,hide_extra=False):
 	favs = getFavorites()
-	ft = os.listdir(FORUMS_STATIC_PATH)
-	hidden = getHiddenForums()
-	flist_tmp = []
-	for f in ft:
-		if not f in hidden: flist_tmp.append(f)
-	flist2_tmp = os.listdir(FORUMS_PATH)
-	rest = sorted(flist_tmp + flist2_tmp,key=fidSortFunction)
+	flist_tmp = os.listdir(FORUMS_PATH)
+	rest = sorted(flist_tmp,key=fidSortFunction)
 	if favs:
 		for f in favs:
 			if f in rest: rest.pop(rest.index(f))
@@ -3077,7 +3104,7 @@ def askForum(just_added=False,just_favs=False,caption='Choose Forum',forumID=Non
 		if not favs: return None
 		whole = favs[:-1]
 	elif just_added:
-		whole = flist2_tmp
+		whole = flist_tmp
 	else:
 		whole = favs + rest
 	menu = ImageChoiceMenu(caption)
@@ -3168,7 +3195,15 @@ def updateOldVersion():
 	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
 	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
 		convertForumSettings_1_1_4()
+	if lastVersion == '0.0.0': doFirstRun()
 	return True
+
+def doFirstRun():
+	LOG('EXECUTING FIRST RUN FUNCTIONS')
+	xbmc_org = os.path.join(FORUMS_PATH,'TT.xbmc.org')
+	if not os.path.exists(xbmc_org):
+		local = os.path.join(FORUMS_STATIC_PATH,'TT.xbmc.org')
+		if os.path.exists(local): open(xbmc_org,'w').write(open(local,'r').read())
 
 def convertForumSettings_1_1_4():
 	forums = os.listdir(FORUMS_PATH) + os.listdir(FORUMS_STATIC_PATH)
@@ -3613,15 +3648,6 @@ def addForumFromOnline(stay_open_on_select=False):
 			desc = '[B]Category[/B]: [COLOR FFFF9999]' + str(__language__(30500 + f.get('cat',0))) + '[/COLOR][CR][CR][B]Description[/B]: [COLOR FFFF9999]' + desc + '[/COLOR]'
 			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
 			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
-		for f in getHiddenForums():
-			path = getForumPath(f,just_path=True)
-			if not path: continue
-			fdata = forumbrowser.ForumData(f,path)
-			name = fdata.name
-			desc = fdata.description
-			logo = fdata.urls.get('logo','')
-			hc = formatHexColorToARGB(fdata.theme.get('header_color','FFFFFF'))
-			menu.addItem(f,name,logo,'Hidden (Built-in)[CR]' + desc,bgcolor=hc)
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
@@ -3639,9 +3665,7 @@ def formatHexColorToARGB(hexcolor):
 		return "FFFFFFFF"
 		
 def doAddForumFromOnline(f,odb):
-	if not isinstance(f,dict):
-		unHideForum(f)
-		return f
+	if not isinstance(f,dict): return
 	forumID = f['type']+'.'+f['name']
 	saveForum(f['type'],forumID,f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
 	rules = isinstance(f,dict) and odb.getForumRules(f['type']+'.'+f['name']) or {}
@@ -3900,17 +3924,6 @@ def updateThemeODB(forumID=None):
 		showMessage('Done','Online database color updated.')
 	else:
 		showMessage('Failed','Failed to update the online database.')
-
-def getHiddenForums():
-	flist = __addon__.getSetting('hidden_static_forums')
-	if flist: flist = flist.split('*:*')
-	else: flist = []
-	return flist
-
-def unHideForum(forum):
-	flist = getHiddenForums()
-	if forum in flist: flist.pop(flist.index(forum))
-	__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
 	
 def removeForum(forum=None):
 	if forum: return doRemoveForum(forum)
@@ -3923,12 +3936,6 @@ def removeForum(forum=None):
 def doRemoveForum(forum):
 	yes = xbmcgui.Dialog().yesno('Remove?','Really remove forum:','','%s?' % forum[3:])
 	if not yes: return False
-	path = os.path.join(FORUMS_STATIC_PATH,forum)
-	if os.path.exists(path):
-		flist = getHiddenForums()
-		if not forum in flist: flist.append(forum)
-		__addon__.setSetting('hidden_static_forums','*:*'.join(flist))
-		return True
 	path = os.path.join(FORUMS_PATH,forum)
 	if not os.path.exists(path): return
 	os.remove(path)
@@ -4575,10 +4582,9 @@ def doModKeyboard(prompt,default='',hidden=False,no_keyboard=False):
 	return ret
 
 def getForumList():
-	ft = os.listdir(FORUMS_STATIC_PATH)
 	ft2 = os.listdir(FORUMS_PATH)
 	flist = []
-	for f in ft + ft2:
+	for f in ft2:
 		if not f.startswith('.') and not f == 'general':
 			if not f in flist: flist.append(f)
 	return flist
