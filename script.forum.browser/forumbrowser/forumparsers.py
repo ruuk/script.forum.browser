@@ -1562,8 +1562,8 @@ class GeneralPostParser(AdvancedParser):
 	
 	def setFilters(self,filters):
 		if filters: self.filters = filters
-		self.quoteUserPrefix = self.filters.get('quote_user_prefix','posted by')
-		self.quoteUserPostfix = self.filters.get('quote_user_postfix','said:')
+		self.quoteUserPrefix = re.compile(self.filters.get('quote_user_prefix','posted by(?i)'))
+		self.quoteUserPostfix = re.compile(self.filters.get('quote_user_postfix','said:(?i)'))
 		self.quoteFormat = self.filters.get('quote_tag','quote=%s')
 		self.postURLPrefix = self.filters.get('post_url_prefix','@@**&&++')
 		
@@ -1787,9 +1787,9 @@ class GeneralPostParser(AdvancedParser):
 		if classes:
 			if self.filters.get('quote_class') and self.filters['quote_class'] in classes:
 				lead = newData[-1].lower()
-				if self.quoteUserPostfix in lead:
+				if self.quoteUserPostfix.search(lead):
 					if not newData[-2].endswith('\n'): newData[-2] += '\n'
-					qt = '['+(self.quoteFormat % re.split(self.quoteUserPostfix,newData[-1],1,re.I)[0].strip()) + ']'
+					qt = '['+(self.quoteFormat % self.quoteUserPostfix.split(newData[-1],1)[0].strip()) + ']'
 					newData[-1] = qt
 				elif lead == 'quote':
 					newData[-1] = '[quote]'
@@ -2081,7 +2081,7 @@ class GeneralPostParser(AdvancedParser):
 							p[self.lastUnset] = dstrip
 							d.tag.ignore = True
 						self.lastUnset = ''
-					elif (d.tag.tag.startswith('h') or d.tag.tag == 'strong') and not p.get('title') and not (newData and self.quoteUserPrefix in newData[-1].lower()):
+					elif (d.tag.tag.startswith('h') or d.tag.tag == 'strong') and not p.get('title') and not (newData and self.quoteUserPrefix.search(newData[-1])):
 						p['title'] = dstrip
 					elif d.tag.tag == 'embed':
 						pass
@@ -2099,7 +2099,7 @@ class GeneralPostParser(AdvancedParser):
 						elif d.tag.tag == 'i': pre='[i]';post='[/i]'
 						
 						if self.BLOCK == 'QUOTE':
-							if self.quoteUserPrefix in newData[-1].lower():
+							if self.quoteUserPrefix.search(newData[-1]):
 								newData.pop()
 								newData[-1] = '['+(self.quoteFormat % dstrip) + ']'
 							else:

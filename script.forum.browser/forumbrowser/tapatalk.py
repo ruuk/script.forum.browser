@@ -3,7 +3,7 @@ import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
 from forumbrowser import FBData
-from texttransform import BBMessageConverter
+from texttransform import BBMessageConverter, convertHTMLCodes
 
 #import xbmc #@UnresolvedImport
 
@@ -396,7 +396,7 @@ class ForumPost(forumbrowser.ForumPost):
 	def filterMessage(self,message):
 		message = message.replace('<b>','[b]').replace('</b>','[/b]').replace('<i>','[i]').replace('</i>','[/i]').replace('<u>','_').replace('</u>','_')
 		message = re.sub('<font color="([^"]+)">',self.colorReplace,message).replace('</font>','[/COLOR]') #r'[COLOR FF\1]',message)
-		return message.replace('<br />\n','\n')
+		return convertHTMLCodes(message.replace('<br />\n','\n'))
 	
 ################################################################################
 # PageData

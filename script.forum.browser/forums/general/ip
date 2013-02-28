@@ -52,5 +52,5 @@ form:post_submit_wait=1
 #-- Post Stuff ----------------------------------------
 #######################################################
 filter:quote_class=blockquote
-filter:quote_user_postfix=said:
+filter:quote_user_postfix=said:(?i)
 filter:quote_tag=quote name='%s'
