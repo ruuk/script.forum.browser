@@ -463,7 +463,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.browser = self.mechanize.Browser()
 			self.browser.set_cookiejar(self.cookieJar)
 			self.browser.set_handle_robots(False)
-			self.browser.addheaders = [('User-Agent','Wget/1.12')]
+			self.browser.addheaders = [('User-Agent','Wget/1.12'), ('Accept', '*/*')]
 #			class SanitizeHandler(mechanize.BaseHandler):
 #				def http_response(self, request, response):
 #					if not hasattr(response, "seek"):
