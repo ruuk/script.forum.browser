@@ -707,10 +707,14 @@ class ForumSettingsDialog(BaseWindowDialog):
 			item.setLabel2(data['type'] != 'text.password' and val or len(val) * '*')
 		elif data['type'].startswith('webimage.'):
 			url = data['type'].split('.',1)[-1]
-			logo = self.getWebImage(url)
-			if not logo: return
+			yes = xbmcgui.Dialog().yesno('Edit?','Select yes to edit the URL,','No to browse site images')
+			if yes:
+				logo = doKeyboard('Edit Url:',data['value'] or 'http://')
+				logo = logo or ''
+			else:
+				logo = self.getWebImage(url)
+				if not logo: return
 			data['value'] = logo
-			print logo
 			item.setProperty('value',logo)
 			self.refreshImage()
 		elif data['type'].startswith('color.'):
@@ -767,6 +771,7 @@ def editForumSettings(forumID):
 		w.addSep()
 		w.addItem('login_url','Login Page',rules.get('login_url',''),'text.url.' + fdata.forumURL())
 		w.addItem('rules','Post Parser Rules',(manageParserRules,forumID,rules),'function')
+	oldLogo = fdata.urls.get('logo','')
 	w.doModal()
 	if w.OK:
 		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
@@ -776,6 +781,8 @@ def editForumSettings(forumID):
 		fdata.theme['header_color'] = w.data['header_color']['value']
 		fdata.writeData()
 	del w
+	if oldLogo != fdata.urls['logo']:
+		getCachedLogo(fdata.urls['logo'],forumID,clear=True)
 	
 ######################################################################################
 # Notifications Dialog
@@ -1416,6 +1423,7 @@ class PlayerMonitor(xbmc.Player):
 class MessageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
+		self.searchRE = kwargs.get('search_re')
 		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]'
 		self.imageReplace = 'IMG #%s'
 		self.action = None
@@ -1441,11 +1449,26 @@ class MessageWindow(BaseWindow):
 			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
 		finally:
 			s.close()
+			
+		if self.searchRE: text = self.highlightTerms(text)
+			
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
 		self.getImages()
 		self.getLinks()
+		
+	def highlightTerms(self,message):
+		message = self.searchRE[0].sub(self.searchReplace,message)
+		for sRE in self.searchRE[1:]: message = sRE.sub(self.searchWordReplace,message)
+		message.replace('\r','')
+		return message
+	
+	def searchReplace(self,m):
+		return '[COLOR FFFF0000][B]%s[/B][/COLOR]' % '\r'.join(list(m.group(0)))
+	
+	def searchWordReplace(self,m):
+		return '[COLOR FFAAAA00][B]%s[/B][/COLOR]' % m.group(0)
 		
 	def setTheme(self):
 		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
@@ -1759,13 +1782,22 @@ class RepliesWindow(PageWindow):
 			self.topic = item.getProperty('title')
 			self.reply_count = item.getProperty('reply_count')
 			self.isAnnouncement = bool(item.getProperty('announcement'))
+			self.search = item.getProperty('search_terms')
 		else:
 			self.tid = kwargs.get('tid')
 			self.lastid = ''
 			self.topic = kwargs.get('topic')
 			self.reply_count = ''
 			self.isAnnouncement = False
+			self.search = kwargs.get('search_terms')
 			
+		self.searchRE = None
+		if self.search:
+			self.searchRE = [re.compile(self.search,re.I)]
+			words = self.search.split(' ')
+			if len(words) > 1:
+				for w in words: self.searchRE.append(re.compile(w,re.I))
+				
 		self.fid = kwargs.get('fid','')
 		self.pid = ''
 		self.parent = kwargs.get('parent')
@@ -1825,7 +1857,8 @@ class RepliesWindow(PageWindow):
 			page = ''
 		else:
 			page = '1'
-			if __addon__.getSetting('open_thread_to_newest') == 'true': page = '-1'
+			if __addon__.getSetting('open_thread_to_newest') == 'true':
+				if not self.searchRE: page = '-1'
 		self.fillRepliesList(FB.getPageData(is_replies=True).getPageNumber(page))
 		
 	def isPM(self):
@@ -1846,6 +1879,9 @@ class RepliesWindow(PageWindow):
 		elif self.isAnnouncement:
 			t = self.getThread(FB.getAnnouncement,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='ANNOUNCEMENT')
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
+		elif self.search:
+			t = self.getThread(FB.searchReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='SEARCHPOSTS')
+			t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		else:
 			t = self.getThread(FB.getReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='POSTS')
 			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid or pid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
@@ -1854,8 +1890,22 @@ class RepliesWindow(PageWindow):
 	def setMessageProperty(self,post,item,short=False):
 		title = post.title or ''
 		item.setProperty('title',title)
-		item.setProperty('message',post.messageAsDisplay(short))
+		message = post.messageAsDisplay(short)
+		if self.searchRE: message = self.highlightTerms(message)
+		item.setProperty('message',message)
 		
+	def highlightTerms(self,message):
+		message = self.searchRE[0].sub(self.searchReplace,message)
+		for sRE in self.searchRE[1:]: message = sRE.sub(self.searchWordReplace,message)
+		message.replace('\r','')
+		return message
+	
+	def searchReplace(self,m):
+		return '[COLOR FFFF0000][B]%s[/B][/COLOR]' % '\r'.join(list(m.group(0)))
+	
+	def searchWordReplace(self,m):
+		return '[COLOR FFAAAA00][B]%s[/B][/COLOR]' % m.group(0)
+	
 	def updateItem(self,item,post):
 		alt = self.getUserInfoAttributes()
 		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
@@ -1954,7 +2004,7 @@ class RepliesWindow(PageWindow):
 			self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest():
+			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest() and not self.searchRE:
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
@@ -1997,7 +2047,7 @@ class RepliesWindow(PageWindow):
 		post = self.posts.get(item.getProperty('post'))
 		post.tid = self.tid
 		post.fid = self.fid
-		w = openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,parent=self)
+		w = openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,search_re=self.searchRE,parent=self)
 		self.setMessageProperty(post,item)
 		self.setFocusId(120)
 		if w.action:
@@ -2729,6 +2779,11 @@ class ForumsWindow(BaseWindow):
 		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=__language__(30176),parent=self)
 		self.setPMCounts(FB.getPMCounts())
 		
+	def searchPosts(self):
+		terms = doKeyboard('Enter Search Terms')
+		if not terms: return
+		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',parent=self)
+		
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return False
@@ -2857,6 +2912,7 @@ class ForumsWindow(BaseWindow):
 				if FB.canGetOnlineUsers():
 					d.addItem('online','View Online Users')
 				d.addItem('foruminfo','View Forum Info')
+				if FB.canSearchPosts(): d.addItem('searchposts','Search Posts')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2868,6 +2924,8 @@ class ForumsWindow(BaseWindow):
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
 		elif result == 'foruminfo':
 			self.showForumInfo()
+		elif result == 'searchposts':
+			self.searchPosts()
 		elif result == 'refresh':
 			if FB:
 				self.fillForumList()
@@ -2951,13 +3009,14 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	del w
 	return None
 
-def getCachedLogo(logo,forumID):
+def getCachedLogo(logo,forumID,clear=False):
 	root, ext = os.path.splitext(logo) #@UnusedVariable
 	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
 	if not ext:
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.png')
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.gif')
 	if os.path.exists(logopath):
+		if clear: os.remove(logopath)
 		return True, logopath
 	return False, logopath
 

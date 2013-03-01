@@ -1219,7 +1219,8 @@ class GeneralForumParser(AdvancedParser):
 							'mb': re.compile('(?:^|")forum-(?P<id>\d+).html'),
 							'mb2': re.compile('(?:^|")forumdisplay\.php\?(?!from=)[^"\']*?fid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)'),
-							'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							#'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							'ip': re.compile('(?:(?<!/)/(?!/)(?P<prefix>.+/))?forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
 							'sm': re.compile('index\.php\?[^"\']*?board=(?P<id>\d+\.0+)')
 						}
 		
@@ -1238,6 +1239,10 @@ class GeneralForumParser(AdvancedParser):
 		if self.linkRE: return
 		AdvancedParser.getRE(self, html)
 		
+	def getPrefix(self):
+		if not self.forums: return ''
+		return self.forums[0].get('prefix','') or ''
+	
 	def splitHTML(self,html):
 		splits = self.splits.get(self.getForumType(),[])
 		for s,e in splits:
@@ -1290,7 +1295,7 @@ class GeneralForumParser(AdvancedParser):
 						if not forum.get('title'): forum['title'] = ''.join(tag.dataStack)
 						#forum['tag'] = tag
 					else:
-						forum = {'forumid':fid,'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag}
+						forum = {'forumid':fid,'title':''.join(tag.dataStack),'depth':self.forumDepth,'url':mdict.get('url',''),'tag':tag,'prefix':mdict.get('prefix','')}
 					for t in reversed(self.stack):
 						if t.tag in ('td','li','div'):
 							t.callback = self.checkDesc
@@ -1460,7 +1465,7 @@ class GeneralPostParser(AdvancedParser):
 							'mb': re.compile('(?:^|")thread-\d+-post-(?P<id>\d+)\.html'),
 							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
-							'ip': re.compile('/topic/\d+-[^"\']*?/?#entry(?P<id>\d+)(?:"|\'|$)'),
+							'ip': re.compile('/topic/\d+-[^"\']*?/?(?:#entry|findpost__p__)(?P<id>\d+)(?:"|\'|$)'),
 							'sm': re.compile('index\.php\?[^"\']*?topic=\d+\.msg(?P<id>\d+)#msg\d+')
 						}
 		#sm    SMF: Simple Machines Forum

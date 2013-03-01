@@ -597,6 +597,8 @@ class ForumPost:
 			
 	def setVals(self,pdict): pass
 		
+	def canSearchPosts(self): return False
+	
 	def canLike(self): return False
 	
 	def canUnlike(self): return False

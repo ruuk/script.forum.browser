@@ -949,7 +949,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		
-	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl=''):
+	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl='',prefix=''):
 		suburl = suburl or self.urls.get(sub,'')
 		if not suburl: return None
 		if page:
@@ -984,6 +984,8 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if self.filters.get('main_url_cleaner'):
 			base_url = re.sub(self.filters['main_url_cleaner'],'',base_url)
 			if not base_url.endswith('/'): base_url += '/'
+		base_url += prefix
+		print base_url
 		return base_url + sub
 		
 	def getURL(self,name):

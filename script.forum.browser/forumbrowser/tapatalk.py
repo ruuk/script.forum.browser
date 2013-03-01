@@ -219,11 +219,12 @@ class ForumPost(forumbrowser.ForumPost):
 			self.avatar = pdict.get('icon_url','')
 			self.online = pdict.get('is_online',False)
 			self.title = str(pdict.get('post_title',''))
-			self.message = self.filterMessage(str(pdict.get('post_content','')))
-			self.signature = pdict.get('signature','') or '' #nothing
+			self.message = self.filterMessage(str(pdict.get('post_content',pdict.get('short_content',''))))
+			self.signature = pdict.get('signature','') or self.signature #nothing
 			self.setLikes(pdict.get('likes_info'))
 			self._can_like = pdict.get('can_like')
 			self._is_liked = pdict.get('is_liked')
+			self.isShort = not pdict.get('post_content')
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))
@@ -242,7 +243,6 @@ class ForumPost(forumbrowser.ForumPost):
 			self.title = str(pdict.get('msg_subject',''))
 			self.message = str(pdict.get('short_content',''))
 			self.boxid = pdict.get('boxid','')
-			self.signature = ''
 			self._can_like = False
 			self._is_liked = False
 		
@@ -286,7 +286,7 @@ class ForumPost(forumbrowser.ForumPost):
 		if not info: return
 		self.userInfo = info
 		self.status = str(info.get('display_text',''))
-		self.activity = str(info.get('current_activity',''))
+		self.activity = str(info.get('current_action',info.get('current_activity','')))
 		self.online = info.get('is_online',False) or self.online
 		self.postCount = info.get('post_count',0)
 		date = str(info.get('reg_time',''))
@@ -325,8 +325,11 @@ class ForumPost(forumbrowser.ForumPost):
 	
 	def getMessage(self,skip=False,raw=False):
 		if self.isShort and not skip:
-			m = self.FB.server.get_message(self.getID(),self.boxid)
-			self.message = str(m.get('text_body',self.message))
+			if self.isPM:
+				m = self.FB.server.get_message(self.getID(),self.boxid)
+				self.message = str(m.get('text_body',self.message))
+			else:
+				self.FB.updatePost(self)
 			self.isShort = False
 			self.isRaw = True
 		elif raw and self.userName == self.FB.user and not self.isRaw:
@@ -818,8 +821,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 		callback(100,self.lang(30052))
 		return self.finish(FBData(threads,pd),donecallback)
+	
+	def canSearchPosts(self): return True
 		
-	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None):
+	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, search=True)
+	
+	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False):
 		if not callback: callback = self.fakeCallback
 		while True:
 			try:
@@ -840,7 +848,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						LOG('COULD NOT GET THREAD BY POST ID')
 						pid = ''
 						page = -1
-				if not pid:
+				if search:
+					thread = self.server.search_post(xmlrpclib.Binary(threadid),page,page + 19,lastid)
+				elif not pid:
 					thread = None
 					if page < 0:
 						test = self.server.get_thread(threadid,0,19,True)

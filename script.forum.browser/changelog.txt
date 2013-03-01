@@ -5,8 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Optional imports of ShareSocial, Vimeo, YouTube
-  Add ability to like a post
-  
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
@@ -28,7 +26,7 @@ TODO:
   Smiley dialog
   Tapatalk: Use charset from get_config
   Find forum mobiquo.php path from tapatalk.js path in html page
-  Search function
+  Search threads function/advanced search
   Latest Threads
   Today's New Posts?
   Make a million dollars
@@ -39,7 +37,16 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.0
+Current Version : 1.3.1
+
+*** 1.3.1 ***
+
+Tapatalk: Added check for 'current_action' (API 4) in addition to current check for 'current_activity' (API 3)
+When changing logo in forum settings, now asks if you want to edit the URL instead of browse site images
+When logo is changed in forum settings, the old cached logo is now deleted
+Added search posts option to forums window context menu
+ParserBrowser: Handle more URL formats and fixes for parsing posts on some forums
+Added wrench icon tab to Forums Manager to help indicate that forum settings are to the right
 
 *** 1.3.0 ***
 

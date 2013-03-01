@@ -178,7 +178,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 					break
 			pagesURL = url
 			if page and not str(page).isdigit(): url = self._url + page
-		if not url: url = self.getPageUrl(page,'threads',fid=forumid)
+		if not url: url = self.getPageUrl(page,'threads',fid=forumid,prefix=self.forumParser.getPrefix())
 		LOG('Forum URL: %s' % url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
@@ -244,7 +244,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 					break
 			pagesURL = url
 			if page and not str(page).replace('-','').isdigit(): url = self._url + page
-		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
+		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid,prefix=self.forumParser.getPrefix())
 		LOG('Thread URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
 		if not html or not callback(80,__language__(30103)):
