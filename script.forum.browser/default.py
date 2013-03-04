@@ -415,6 +415,27 @@ class BaseWindowFunctions(ThreadWindow):
 		#self.getControl(310).setVisible(False)
 		self.getControl(104).setLabel(self._progMessageSave)
 		
+	def highlightTerms(self,message):
+		message = self.searchRE[0].sub(self.searchReplace,message)
+		for sRE in self.searchRE[1:]: message = sRE.sub(self.searchWordReplace,message)
+		message = message.replace('\r','')
+		message = FB.MC.removeNested(message,'\[/?B\]','[B]')
+		return message
+	
+	def searchReplace(self,m):
+		return '[COLOR FFFF0000][B]%s[/B][/COLOR]' % '\r'.join(list(m.group(0)))
+	
+	def searchWordReplace(self,m):
+		return '[COLOR FFAAAA00][B]%s[/B][/COLOR]' % m.group(0)
+	
+	def setupSearch(self):
+		self.searchRE = None
+		if self.search:
+			self.searchRE = [re.compile(self.search,re.I)]
+			words = self.search.split(' ')
+			if len(words) > 1:
+				for w in words: self.searchRE.append(re.compile(w,re.I))
+		
 class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 	def __init__(self, *args, **kwargs):
 		BaseWindowFunctions.__init__(self, *args, **kwargs)
@@ -1451,24 +1472,11 @@ class MessageWindow(BaseWindow):
 			s.close()
 			
 		if self.searchRE: text = self.highlightTerms(text)
-			
 		self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
 		self.getImages()
 		self.getLinks()
-		
-	def highlightTerms(self,message):
-		message = self.searchRE[0].sub(self.searchReplace,message)
-		for sRE in self.searchRE[1:]: message = sRE.sub(self.searchWordReplace,message)
-		message.replace('\r','')
-		return message
-	
-	def searchReplace(self,m):
-		return '[COLOR FFFF0000][B]%s[/B][/COLOR]' % '\r'.join(list(m.group(0)))
-	
-	def searchWordReplace(self,m):
-		return '[COLOR FFAAAA00][B]%s[/B][/COLOR]' % m.group(0)
 		
 	def setTheme(self):
 		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
@@ -1791,15 +1799,11 @@ class RepliesWindow(PageWindow):
 			self.isAnnouncement = False
 			self.search = kwargs.get('search_terms')
 			
-		self.searchRE = None
-		if self.search:
-			self.searchRE = [re.compile(self.search,re.I)]
-			words = self.search.split(' ')
-			if len(words) > 1:
-				for w in words: self.searchRE.append(re.compile(w,re.I))
+		self.searchRE = kwargs.get('search_re')
+		if not self.searchRE: self.setupSearch()
 				
 		self.fid = kwargs.get('fid','')
-		self.pid = ''
+		self.pid = kwargs.get('pid','')
 		self.parent = kwargs.get('parent')
 		#self._firstPage = __language__(30113)
 		self._newestPage = __language__(30112)
@@ -1823,13 +1827,21 @@ class RepliesWindow(PageWindow):
 		self.postSelected()
 		self.setPMBox()
 		self.setTheme()
-		if self.isPM():
-			self.getControl(201).setEnabled(FB.canPrivateMessage())
-		else:
-			self.getControl(201).setEnabled(FB.canPost())
+		self.setPostButton()
 		self.showThread()
 		#self.setFocusId(120)
-	
+				
+	def setPostButton(self):
+		if self.isPM():
+			self.getControl(201).setEnabled(FB.canPrivateMessage())
+			self.getControl(201).setLabel(__language__(30177))
+		elif self.search:
+			self.getControl(201).setEnabled(True)
+			self.getControl(201).setLabel(__language__(3014))
+		else:
+			self.getControl(201).setEnabled(FB.canPost())
+			self.getControl(201).setLabel(__language__(3002))
+			
 	def setPMBox(self,boxid=None):
 		if not self.isPM(): return
 		boxes = FB.getPMBoxes(update=False)
@@ -1848,7 +1860,7 @@ class RepliesWindow(PageWindow):
 		
 	def setTheme(self):
 		mtype = self.isPM() and self.currentPMBox.get('name','Inbox') or __language__(30130)
-		if self.isPM(): self.getControl(201).setLabel(__language__(30177))
+		#if self.isPM(): self.getControl(201).setLabel(__language__(30177))
 		self.getControl(103).setLabel('[B]%s[/B]' % mtype)
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		
@@ -1893,18 +1905,6 @@ class RepliesWindow(PageWindow):
 		message = post.messageAsDisplay(short)
 		if self.searchRE: message = self.highlightTerms(message)
 		item.setProperty('message',message)
-		
-	def highlightTerms(self,message):
-		message = self.searchRE[0].sub(self.searchReplace,message)
-		for sRE in self.searchRE[1:]: message = sRE.sub(self.searchWordReplace,message)
-		message.replace('\r','')
-		return message
-	
-	def searchReplace(self,m):
-		return '[COLOR FFFF0000][B]%s[/B][/COLOR]' % '\r'.join(list(m.group(0)))
-	
-	def searchWordReplace(self,m):
-		return '[COLOR FFAAAA00][B]%s[/B][/COLOR]' % m.group(0)
 	
 	def updateItem(self,item,post):
 		alt = self.getUserInfoAttributes()
@@ -2045,6 +2045,8 @@ class RepliesWindow(PageWindow):
 			item = self.getControl(120).getSelectedItem()
 		if not item: return
 		post = self.posts.get(item.getProperty('post'))
+		if self.searchRE and getSetting('search_open_thread',False):
+			return self.openPostThread(post)
 		post.tid = self.tid
 		post.fid = self.fid
 		w = openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,search_re=self.searchRE,parent=self)
@@ -2055,7 +2057,10 @@ class RepliesWindow(PageWindow):
 				self.topic = ''
 				self.pid = w.action.pid
 				self.tid = w.action.tid
+				self.search = ''
+				self.searchRE = None
 				self.firstRun = True
+				self.setPostButton()
 				if w.action.pid: self.showThread(nopage=True)
 				else: self.showThread()
 			elif w.action.action == 'REFRESH':
@@ -2071,7 +2076,10 @@ class RepliesWindow(PageWindow):
 	def onClick(self,controlID):
 		if controlID == 201:
 			self.stopThread()
-			self.openPostDialog()
+			if self.search:
+				self.newSearch()
+			else:
+				self.openPostDialog()
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.postSelected()
@@ -2085,6 +2093,13 @@ class RepliesWindow(PageWindow):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 		PageWindow.onAction(self,action)
+	
+	def newSearch(self):
+		terms = doKeyboard('Enter Search Terms')
+		if not terms: return
+		self.search = terms
+		self.setupSearch()
+		self.fillRepliesList()
 	
 	def selectNewPMBox(self):
 		boxes = FB.getPMBoxes(update=False)
@@ -2109,7 +2124,7 @@ class RepliesWindow(PageWindow):
 					d.addItem('changebox','Change PM Box')
 			if item:
 				post = self.posts.get(item.getProperty('post'))
-				if FB.canPost():
+				if FB.canPost() and not self.search:
 					d.addItem('quote',self.isPM() and __language__(30249) or __language__(30134))
 				if FB.canDelete(item.getLabel(),post.messageType()):
 					d.addItem('delete',__language__(30141))
@@ -2130,6 +2145,8 @@ class RepliesWindow(PageWindow):
 				d.addItem('like','Like Post')
 			if post and post.canUnlike():
 				d.addItem('unlike','Unlike Post')
+			if self.searchRE and not getSetting('search_open_thread',False):
+				d.addItem('open_thread','Open Post Thread')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2183,6 +2200,8 @@ class RepliesWindow(PageWindow):
 				self.updateItem(item, post)
 			finally:
 				splash.close()
+		elif result == 'open_thread':
+			self.openPostThread(post)
 		elif result == 'help':
 			if self.isPM():
 				showHelp('pm')
@@ -2198,6 +2217,10 @@ class RepliesWindow(PageWindow):
 		if deletePost(post,is_pm=self.isPM()):
 			self.fillRepliesList(self.pageData.getPageNumber())
 		
+	def openPostThread(self,post):
+		if not post: return
+		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=post.fid,tid=post.tid,pid=post.postId,topic=post.topic,parent=self)
+	
 	def openPostDialog(self,post=None,force_pm=False,no_quote=False):
 		tid = self.tid
 		if force_pm:
@@ -2295,6 +2318,10 @@ class ThreadsWindow(PageWindow):
 		self.parent = kwargs.get('parent')
 		self.forumItem = kwargs.get('item')
 		self.me = self.parent.getUsername() or '?'
+		self.search = kwargs.get('search_terms')
+			
+		self.setupSearch()
+		
 		self.empty = True
 		self.textBase = '%s'
 		self.newBase = '[B]%s[/B]'
@@ -2314,7 +2341,7 @@ class ThreadsWindow(PageWindow):
 		self.setTheme()
 		self.fillThreadList()
 		#self.setFocus(self.getControl(120))
-		
+			
 	def setTheme(self):
 		self.desc_base = unicode.encode(__language__(30162)+' %s','utf8')
 		self.getControl(103).setLabel('[B]%s[/B]' % (self.fid != 'subscriptions' and __language__(30160) or ''))
@@ -2330,6 +2357,9 @@ class ThreadsWindow(PageWindow):
 		if self.fid == 'subscriptions':
 			t = self.getThread(FB.getSubscriptions,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SUBSCRIPTIONS')
 			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+		elif self.search:
+			t = self.getThread(FB.searchThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
+			t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		else:
 			t = self.getThread(FB.getThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='THREADS')
 			t.setArgs(self.fid,page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
@@ -2374,20 +2404,25 @@ class ThreadsWindow(PageWindow):
 			if starter == self.me: starterbase = self.highBase
 			else: starterbase = self.textBase
 			#title = (tdict.get('new_post') and self.newBase or self.textBase) % title
-			item = xbmcgui.ListItem(label=starterbase % starter,label2=title)
+			titleDisplay = title
+			if self.searchRE: titleDisplay = self.highlightTerms(titleDisplay)
+			item = xbmcgui.ListItem(label=starterbase % starter,label2=titleDisplay)
 			if tdict.get('new_post'): item.setProperty('unread','unread')
 			item.setInfo('video',{"Genre":sticky})
 			item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
 			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
 			item.setProperty("id",unicode(tid))
 			item.setProperty("fid",unicode(fid))
+			
 			if last:
 				last = self.desc_base % last
 				short = tdict.get('short_content','')
 				if short: last += '[CR]' + re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(short))[:100]
 			else:
 				last = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(tdict.get('short_content','')))
+			if self.searchRE: last = self.highlightTerms(last)
 			item.setProperty("last",last)
+			
 			item.setProperty("lastid",tdict.get('lastid',''))
 			item.setProperty('title',title)
 			item.setProperty('announcement',unicode(tdict.get('announcement','')))
@@ -2432,7 +2467,7 @@ class ThreadsWindow(PageWindow):
 			#self.setTheme()
 			#self.fillThreadList()
 		else:
-			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,parent=self)
+			openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,parent=self)
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2586,6 +2621,7 @@ class ForumsWindow(BaseWindow):
 		
 	def onInit(self):
 		BaseWindow.onInit(self)
+		self.getControl(112).setVisible(False)
 		try:
 			self.setLoggedIn() #So every time we return to the window we check
 			if self.started: return
@@ -2607,6 +2643,7 @@ class ForumsWindow(BaseWindow):
 	def startGetForumBrowser(self,forum=None,url=None):
 		self.getControl(201).setEnabled(False)
 		self.getControl(203).setEnabled(False)
+		self.getControl(204).setEnabled(False)
 		t = self.getThread(getForumBrowser,finishedCallback=self.endGetForumBrowser,errorCallback=self.errorCallback,name='GETFORUMBROWSER')
 		t.setArgs(forum=forum,url=url,donecallback=t.finishedCallback)
 		t.start()
@@ -2784,6 +2821,11 @@ class ForumsWindow(BaseWindow):
 		if not terms: return
 		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',parent=self)
 		
+	def searchThreads(self):
+		terms = doKeyboard('Enter Search Terms')
+		if not terms: return
+		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,topic='Thread Search Results',parent=self)
+	
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return False
@@ -2879,6 +2921,10 @@ class ForumsWindow(BaseWindow):
 			forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
 			return
 			#if self.changeForum(): return
+		elif controlID == 205:
+			self.searchPosts()
+		elif controlID == 206:
+			self.searchThreads()
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
@@ -2912,7 +2958,6 @@ class ForumsWindow(BaseWindow):
 				if FB.canGetOnlineUsers():
 					d.addItem('online','View Online Users')
 				d.addItem('foruminfo','View Forum Info')
-				if FB.canSearchPosts(): d.addItem('searchposts','Search Posts')
 			d.addItem('refresh',__language__(30054))
 			d.addItem('help',__language__(30244))
 		finally:
@@ -2923,9 +2968,7 @@ class ForumsWindow(BaseWindow):
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
 		elif result == 'foruminfo':
-			self.showForumInfo()
-		elif result == 'searchposts':
-			self.searchPosts()
+			self.showForumInfo()			
 		elif result == 'refresh':
 			if FB:
 				self.fillForumList()
@@ -2950,8 +2993,7 @@ class ForumsWindow(BaseWindow):
 	def resetForum(self,hidelogo=True):
 		if not FB: return
 		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
-		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
-		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
+		self.setButtons()
 		if hidelogo: self.getControl(250).setImage('')
 		__addon__.setSetting('last_forum',FB.getForumID())
 		self.setTheme()
@@ -2968,8 +3010,15 @@ class ForumsWindow(BaseWindow):
 				self.getControl(111).setColorDiffuse('FF555555')
 		self.getControl(160).setLabel(FB.loginError)
 		self.getControl(112).setVisible(FB.SSL)
-		self.getControl(201).setEnabled(FB.isLoggedIn() and FB.hasSubscriptions())
-		self.getControl(203).setEnabled(FB.isLoggedIn() and FB.hasPM())
+		self.setButtons()
+	
+	def setButtons(self):
+		loggedIn = FB.isLoggedIn()
+		self.getControl(201).setEnabled(loggedIn and FB.hasSubscriptions())
+		self.getControl(203).setEnabled(loggedIn and FB.hasPM())
+		self.getControl(204).setEnabled(loggedIn and FB.canSearch())
+		self.getControl(205).setEnabled(loggedIn and FB.canSearchPosts())
+		self.getControl(206).setEnabled(loggedIn and FB.canSearchThreads())
 		
 	def openSettings(self):
 		#if not FB: return

@@ -4,6 +4,7 @@
     <setting id="always_login" type="bool" label="30004" default="false" />
     <setting id="ask_close_on_exit" type="bool" label="30015" default="false" />
     <setting id="open_thread_to_newest" type="bool" label="30001" default="true" />
+    <setting id="search_open_thread" type="bool" label="30046" default="false" />
     <setting id="auto_thread_subscriptions_window" type="bool" label="30009" default="false" />
     <setting id="reverse_sort" type="bool" label="30002" default="false" />
     <setting id="hide_signatures" type="bool" label="30013" default="false" />

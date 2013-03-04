@@ -33,7 +33,7 @@
     <string id="30026">Small Dialog</string>
     <string id="30027">Full Dialog</string>
     <string id="30028">XBMC Notice Duration (Seconds)</string>
-    <string id="30029">Dialog Timeout (0 For None)</string>
+    <string id="30029">Dialog Timeout (Seconds - 0 For None)</string>
     <string id="30030">Only When Playing Video</string>
     <string id="30031">Activity Stops Timeout</string>
     
@@ -51,6 +51,7 @@
     <string id="30043">Start Video In Overlay</string>
     <string id="30044">Show Post Media Indicators</string>
     <string id="30045">Count Link Images As Images</string>
+    <string id="30046">Searching Posts: Open Thread On Post Click</string>
     
     <string id="30050">ERROR</string>
     <string id="30051">Options</string>
@@ -205,7 +206,6 @@
     <string id="30517">Enter Keywords or Use Wildcards *?</string>
     <string id="30518">Post User Attributes To Display</string>
 
-    <string id="30515">Internet</string>					
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>
     <string id="3002">Post Reply</string>
@@ -220,5 +220,6 @@
     <string id="3011">Posts:</string>
     <string id="3012">Join:</string>
     <string id="3013">OK</string>
+    <string id="3014">New Search</string>
 
 </strings>

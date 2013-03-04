@@ -225,6 +225,9 @@ class ForumPost(forumbrowser.ForumPost):
 			self._can_like = pdict.get('can_like')
 			self._is_liked = pdict.get('is_liked')
 			self.isShort = not pdict.get('post_content')
+			self.fid = pdict.get('forum_id')
+			self.tid = pdict.get('topic_id')
+			self.topic = pdict.get('topic_title')
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))
@@ -338,7 +341,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.isRaw = True
 		sig = ''
 		if self.signature and not self.hideSignature: sig = '\n__________\n[COLOR FF808080]' + self.signature + '[/COLOR]'
-		return self.message + sig
+		return self.message + unicode(sig,'utf8')
 	
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage(True))
@@ -806,7 +809,21 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		for n in normal: self.createThreadDict(n)
 		normal = self.sortDictList(normal, 'post_time')
 		return normal, pd
+	
+	def searchThreads(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		if not callback: callback = self.fakeCallback
+		while True:
+			topics = self.server.search_topic(xmlrpclib.Binary(terms),page,int(page) + 19,sid)
+			if not callback(90,self.lang(30103)): break
+			pd = self.getPageData(topics,page)
+			normal = topics.get('topics',[])
+			for n in normal: self.createThreadDict(n)
+			return self.finish(FBData(normal,pd),donecallback)
 			
+		if donecallback:
+			donecallback(None,None)
+		return (None,None)
+	
 	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		try:
@@ -823,6 +840,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return self.finish(FBData(threads,pd),donecallback)
 	
 	def canSearchPosts(self): return True
+	
+	def canSearchThreads(self): return True
 		
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
 		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, search=True)

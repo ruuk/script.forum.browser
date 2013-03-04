@@ -4,11 +4,12 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Search this forum/search this thread
   Optional imports of ShareSocial, Vimeo, YouTube
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
-  Check for new parser rules automatically or add option to check for new rules 
+  Check for new parser rules automatically or add option to check for new rules
   Help for rating when adding Parser Browser forums to the online database
   Help for the color dialog
   Still some issues with no seconds listed in the tapatalk activity display...?
@@ -26,7 +27,6 @@ TODO:
   Smiley dialog
   Tapatalk: Use charset from get_config
   Find forum mobiquo.php path from tapatalk.js path in html page
-  Search threads function/advanced search
   Latest Threads
   Today's New Posts?
   Make a million dollars
@@ -37,7 +37,16 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.1
+Current Version : 1.3.2
+
+*** 1.3.2 ***
+
+Posts window with search results now shows 'New Search' button
+Added threads searching
+Added 'Search' button to main window which when clicked shows 'Search Posts' and 'Search Threads' buttons, and removed the search posts option from the forums window context menu
+Added option to 'General' settings: 'Searching Posts: Open Thread On Post Click' - When searching posts and selecting a post, causes the thread to be opened and then the post selected to be displayed, instead of just showing the post content
+Added help for setting 'Searching Posts: Open Thread On Post Click'
+Fix for decoding errors on some messages when displaying a signature
 
 *** 1.3.1 ***
 

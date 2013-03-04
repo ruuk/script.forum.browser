@@ -84,6 +84,7 @@
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
+				<disabledcolor>FFCCCCCC</disabledcolor>
 			</control>
 
 			<control type="label" id="104">

@@ -7,6 +7,11 @@ When enabled, when you attempt to close forum browser a dialog will pop up askin
 This is useful if you find yourself often quickly backing out of windows and accidentally exiting.
 @item:open_thread_to_newest=Open Thread At Newest Post
 When enabled, when you open a thread, Forum Browser will open the page with the newest post and jump to it.
+@item:search_open_thread=Searching Posts: Open Thread On Post Click
+When searching posts and this is enabled, if you select a post, Forum Browser will open the thread that the post is in to the page with the post and display the post.
+
+When disabled and you select a post, the post contents will be displayed.
+If you then want to jump to the thread, there will be an option on the context menu.
 @item:auto_thread_subscriptions_window=Automatically Open Subscriptions
 When enabled, Forum Browser will automatilly open the subscriptions window when it starts up.
 This only works if login user and password are set for the current forum.

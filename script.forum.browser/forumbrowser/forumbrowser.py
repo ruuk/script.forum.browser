@@ -596,8 +596,6 @@ class ForumPost:
 		self.attrs_lower = [x.lower() for x in self.attrs_index]
 			
 	def setVals(self,pdict): pass
-		
-	def canSearchPosts(self): return False
 	
 	def canLike(self): return False
 	
@@ -1033,6 +1031,12 @@ class ForumBrowser:
 	def makeURL(self,url): return url
 	
 	def getPMCounts(self,pct=0): return None
+	
+	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads()
+	
+	def canSearchPosts(self): return False
+	
+	def canSearchThreads(self): return False
 	
 	def canSubscribeThread(self,tid): return False
 	def canUnSubscribeThread(self,tid): return False
