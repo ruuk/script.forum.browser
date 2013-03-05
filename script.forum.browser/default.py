@@ -431,10 +431,17 @@ class BaseWindowFunctions(ThreadWindow):
 	def setupSearch(self):
 		self.searchRE = None
 		if self.search:
-			self.searchRE = [re.compile(self.search,re.I)]
-			words = self.search.split(' ')
+			self.searchRE = [re.compile(re.sub('[\'"]','',self.search),re.I)]
+			words = self.getSearchWords(self.search)
 			if len(words) > 1:
 				for w in words: self.searchRE.append(re.compile(w,re.I))
+	
+	def getSearchWords(self,text):
+		words = []
+		quoted = re.findall('(?P<quote>["\'])(.+?)(?P=quote)',text)
+		for q in quoted: words.append(q[1])
+		words += re.sub('(?P<quote>["\'])(.+?)(?P=quote)','',text).split()
+		return words
 		
 class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 	def __init__(self, *args, **kwargs):
@@ -1804,6 +1811,8 @@ class RepliesWindow(PageWindow):
 				
 		self.fid = kwargs.get('fid','')
 		self.pid = kwargs.get('pid','')
+		self.uid = kwargs.get('uid','')
+		self.search_uname = kwargs.get('search_name','')
 		self.parent = kwargs.get('parent')
 		#self._firstPage = __language__(30113)
 		self._newestPage = __language__(30112)
@@ -1892,15 +1901,25 @@ class RepliesWindow(PageWindow):
 			t = self.getThread(FB.getAnnouncement,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='ANNOUNCEMENT')
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
 		elif self.search:
-			t = self.getThread(FB.searchReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='SEARCHPOSTS')
-			t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+			if self.uid:
+				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UID-SEARCHPOSTS')
+				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,uid=self.uid)
+			elif self.search_uname:
+				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UID-SEARCHPOSTS')
+				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,uname=self.search_uname)
+			elif self.tid:
+				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='TID-SEARCHPOSTS')
+				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,tid=self.tid)
+			else:
+				t = self.getThread(FB.searchReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='SEARCHPOSTS')
+				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		else:
 			t = self.getThread(FB.getReplies,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='POSTS')
 			t.setArgs(self.tid,self.fid,page,lastid=self.lastid,pid=self.pid or pid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		t.start()
 		
 	def setMessageProperty(self,post,item,short=False):
-		title = post.title or ''
+		title = (self.search and post.topic or post.title) or ''
 		item.setProperty('title',title)
 		message = post.messageAsDisplay(short)
 		if self.searchRE: message = self.highlightTerms(message)
@@ -1993,6 +2012,7 @@ class RepliesWindow(PageWindow):
 			webvid = video.WebVideo()
 			showIndicators = getSetting('show_media_indicators',True)
 			countLinkImages = getSetting('smi_count_link_images',False)
+			items = []
 			for post,idx in zip(data.data,range(0,len(data.data))):
 				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
@@ -2000,7 +2020,8 @@ class RepliesWindow(PageWindow):
 				item = xbmcgui.ListItem(label=post.isSent and 'To: ' + user or user)
 				if user == self.me: item.setInfo('video',{"Director":'me'})
 				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
-				self.getControl(120).addItem(item)
+				items.append(item)
+			self.getControl(120).addItems(items)
 			self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
@@ -2095,7 +2116,7 @@ class RepliesWindow(PageWindow):
 		PageWindow.onAction(self,action)
 	
 	def newSearch(self):
-		terms = doKeyboard('Enter Search Terms')
+		terms = doKeyboard('Enter Search Terms',self.search or '')
 		if not terms: return
 		self.search = terms
 		self.setupSearch()
@@ -2219,7 +2240,7 @@ class RepliesWindow(PageWindow):
 		
 	def openPostThread(self,post):
 		if not post: return
-		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=post.fid,tid=post.tid,pid=post.postId,topic=post.topic,parent=self)
+		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=post.fid,tid=post.tid,pid=post.postId,topic=post.topic,search_re=self.searchRE,parent=self)
 	
 	def openPostDialog(self,post=None,force_pm=False,no_quote=False):
 		tid = self.tid
@@ -2358,8 +2379,12 @@ class ThreadsWindow(PageWindow):
 			t = self.getThread(FB.getSubscriptions,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SUBSCRIPTIONS')
 			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		elif self.search:
-			t = self.getThread(FB.searchThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
-			t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+			if self.fid:
+				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
+				t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,fid=self.fid)
+			else:
+				t = self.getThread(FB.searchThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
+				t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		else:
 			t = self.getThread(FB.getThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='THREADS')
 			t.setArgs(self.fid,page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
@@ -2510,6 +2535,8 @@ class ThreadsWindow(PageWindow):
 							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getLabel()[:25])
 					if FB.canCreateThread(item.getProperty('id')):
 						d.addItem('createthread',__language__(30252))
+				if FB.canSearchAdvanced():
+					d.addItem('search','Search [B][I]%s[/I][/B]' % item.getProperty('title')[:30])
 			d.addItem('help',__language__(30244))
 		finally:
 			d.cancel()
@@ -2531,6 +2558,11 @@ class ThreadsWindow(PageWindow):
 			if subscribeForum(self.fid): self.forumItem.setProperty('subscribed','subscribed')
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(self.fid): self.forumItem.setProperty('subscribed','')
+		elif result == 'search':
+			if not item.getProperty("is_forum") == 'True':
+				searchPosts(self,item.getProperty('id'))
+			else:
+				searchThreads(self.parent,item.getProperty('id'))
 		elif result == 'createthread':
 			self.createThread()
 		elif result == 'help':
@@ -2815,16 +2847,6 @@ class ForumsWindow(BaseWindow):
 	def openPMWindow(self):
 		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=__language__(30176),parent=self)
 		self.setPMCounts(FB.getPMCounts())
-		
-	def searchPosts(self):
-		terms = doKeyboard('Enter Search Terms')
-		if not terms: return
-		openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',parent=self)
-		
-	def searchThreads(self):
-		terms = doKeyboard('Enter Search Terms')
-		if not terms: return
-		openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,topic='Thread Search Results',parent=self)
 	
 	def openThreadsWindow(self):
 		item = self.getControl(120).getSelectedItem()
@@ -2867,12 +2889,16 @@ class ForumsWindow(BaseWindow):
 	def showOnlineContext(self,menu,item):
 		d = ChoiceMenu('Options')
 		if FB.canPrivateMessage(): d.addItem('pm',__language__(30253) % item.get('disp'))
+		if FB.canSearchAdvanced(): d.addItem('search','Search Posts Of %s' % item.get('disp'))
 		if FB.canGetUserInfo(): d.addItem('info','View User Info')
 		result = d.getResult()
 		if not result: return
 		if result == 'pm':
 			menu.close()
 			openPostDialog(tid='private_messages',to=item.get('disp'))
+		elif result == 'search':
+			menu.close()
+			searchUser(self,item.get('id'))
 		elif result == 'info':
 			self.showUserInfo(item.get('id'),item.get('disp'))
 
@@ -2922,9 +2948,11 @@ class ForumsWindow(BaseWindow):
 			return
 			#if self.changeForum(): return
 		elif controlID == 205:
-			self.searchPosts()
+			searchPosts(self)
 		elif controlID == 206:
-			self.searchThreads()
+			searchThreads(self)
+		elif controlID == 207:
+			searchUser(self)
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
@@ -2955,6 +2983,8 @@ class ForumsWindow(BaseWindow):
 						if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
 					else:
 						if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
+					if FB.canSearchAdvanced():
+						d.addItem('search','Search [B][I]%s[/I][/B]' % item.getProperty('topic')[:30])
 				if FB.canGetOnlineUsers():
 					d.addItem('online','View Online Users')
 				d.addItem('foruminfo','View Forum Info')
@@ -2967,6 +2997,8 @@ class ForumsWindow(BaseWindow):
 			if subscribeForum(fid): pass #item.setProperty('subscribed','subscribed') #commented out because can't change if we unsubscribe from subs view
 		elif result == 'unsubscribecurrentforum':
 			if unSubscribeForum(fid): item.setProperty('subscribed','')
+		elif result == 'search':
+			searchThreads(self,item.getProperty('id'))
 		elif result == 'foruminfo':
 			self.showForumInfo()			
 		elif result == 'refresh':
@@ -3037,6 +3069,25 @@ class ForumsWindow(BaseWindow):
 
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 
+def searchPosts(parent,tid=None):
+	terms = doKeyboard('Enter Search Terms')
+	if not terms: return
+	openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',tid=tid,parent=parent)
+	
+def searchThreads(parent,fid=None):
+	terms = doKeyboard('Enter Search Terms')
+	if not terms: return
+	openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,topic='Thread Search Results',fid=fid,parent=parent)
+
+def searchUser(parent,uid=None):
+	uname = None
+	if not uid:
+		uname = doKeyboard('Enter Name Of User To Search')
+		if not uname: return
+	terms = doKeyboard('Enter Search Terms')
+	if not terms: return
+	openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',uid=uid,search_name=uname,parent=parent)
+		
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
 	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	theme = theme or THEME

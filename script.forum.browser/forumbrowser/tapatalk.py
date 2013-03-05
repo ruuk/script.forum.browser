@@ -3,7 +3,7 @@ import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
 from forumbrowser import FBData
-from texttransform import BBMessageConverter, convertHTMLCodes
+from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode
 
 #import xbmc #@UnresolvedImport
 
@@ -71,9 +71,10 @@ class CookieTransport(xmlrpclib.Transport):
 		return self._loggedIn
 	
 	def request(self, host, handler, request_body, verbose=0):
+		self._connection = None
 		#retry request once if cached connection has gone cold
 		now = time.time()
-		if now - self.lastCall < 0.1: time.sleep(0.1)
+		#if now - self.lastCall < 0.1: time.sleep(0.1)
 		for i in (0, 1):
 			try:
 				result = self.single_request(host, handler, request_body, verbose)
@@ -227,7 +228,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.isShort = not pdict.get('post_content')
 			self.fid = pdict.get('forum_id')
 			self.tid = pdict.get('topic_id')
-			self.topic = pdict.get('topic_title')
+			self.topic = str(pdict.get('topic_title'))
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))
@@ -341,7 +342,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.isRaw = True
 		sig = ''
 		if self.signature and not self.hideSignature: sig = '\n__________\n[COLOR FF808080]' + self.signature + '[/COLOR]'
-		return self.message + unicode(sig,'utf8')
+		return makeUnicode(self.message) + makeUnicode(sig)
 	
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage(True))
@@ -551,12 +552,27 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Forum Type: ' + self.getForumType())
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
-			if DEBUG: LOG(self.forumConfig)
+			if DEBUG:
+				#LOG(self.forumConfig)
+				for k,v in self.forumConfig.items():
+					print '   %s: %s' % (k,v)
 		except (forumbrowser.ForumMovedException, forumbrowser.ForumNotFoundException):
 			raise
 		except:
 			ERROR('Failed to get forum config')
 			
+	def getConfigInfo(self,key,default=None):
+		val = self.forumConfig.get(key)
+		if val == None: return default
+		if isinstance(default,bool):
+			return val == '1'
+		elif isinstance(default,int):
+			try:
+				return int(val)
+			except:
+				return default
+		return str(self.forumConfig.get(key)) or default
+	
 	def apiOK(self,target):
 		try:
 			apiLevel = int(self.forumConfig.get('api_level',''))
@@ -811,14 +827,61 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return normal, pd
 	
 	def searchThreads(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		if len(terms)  < self.getConfigInfo('min_search_length',3):
+			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
 		if not callback: callback = self.fakeCallback
 		while True:
-			topics = self.server.search_topic(xmlrpclib.Binary(terms),page,int(page) + 19,sid)
+			result = self.server.search_topic(xmlrpclib.Binary(terms),page,int(page) + 19,sid)
+			if not result.get('result'):
+				err = str(result.get('result_text',''))
+				LOG('Search: %s' % err)
+				return self.finish(FBData(error=err),donecallback)
 			if not callback(90,self.lang(30103)): break
-			pd = self.getPageData(topics,page)
-			normal = topics.get('topics',[])
-			for n in normal: self.createThreadDict(n)
-			return self.finish(FBData(normal,pd),donecallback)
+			pd = self.getPageData(result,page)
+			threads = result.get('topics',[])
+			for n in threads: self.createThreadDict(n)
+			return self.finish(FBData(threads,pd),donecallback)
+			
+		if donecallback:
+			donecallback(None,None)
+		return (None,None)
+	
+	def searchAdvanced(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None,fid=None,tid=None,uid=None,uname=None):
+		if len(terms)  < self.getConfigInfo('min_search_length',3):
+			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
+		if not callback: callback = self.fakeCallback
+		sfilter = {}
+		if fid:
+			sfilter['forumid'] = fid
+		elif tid:
+			sfilter['threadid'] = tid
+		if uid:
+			sfilter['userid'] = uid
+			sfilter['showposts'] = 1
+		elif uname:
+			sfilter['searchuser'] = uname
+			sfilter['showposts'] = 1
+			
+		sfilter['keywords'] = xmlrpclib.Binary(terms)
+		page = int(page or 0)
+		sfilter['page'] = page
+		sfilter['perpage'] = page + 19
+			
+		while True:
+			result = self.server.search(sfilter)
+			if not result.get('result'):
+				err = str(result.get('result_text',''))
+				LOG('Search: %s' % err)
+				return self.finish(FBData(error=err),donecallback)
+			pd = self.getPageData(result,page)
+			if not callback(90,self.lang(30103)): break
+			if fid:
+				normal = result.get('topics',[])
+				for n in normal: self.createThreadDict(n)
+				return self.finish(FBData(normal,pd),donecallback)
+			else:
+				replies = self.processThread(result, page, callback, donecallback)
+				return self.finish(FBData(replies,pd),donecallback)
 			
 		if donecallback:
 			donecallback(None,None)
@@ -843,7 +906,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def canSearchThreads(self): return True
 		
+	def canSearchAdvanced(self): return self.getConfigInfo('advanced_search', False)
+	
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		if len(terms)  < self.getConfigInfo('min_search_length',3):
+			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
 		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, search=True)
 	
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False):
@@ -855,7 +922,6 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				page = 0
 			if not callback(20,self.lang(30102)): break
 			try:
-				sreplies = []
 				if pid:
 					test = self.server.get_thread_by_post(pid,20)
 					if test.get('position'):
@@ -869,6 +935,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						page = -1
 				if search:
 					thread = self.server.search_post(xmlrpclib.Binary(threadid),page,page + 19,lastid)
+					if not thread.get('result'):
+						err = str(thread.get('result_text',''))
+						LOG('Search: %s' % err)
+						return self.finish(FBData(error=err),donecallback)
 				elif not pid:
 					thread = None
 					if page < 0:
@@ -877,27 +947,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						if page == 0: thread = test
 					if not thread: thread = self.server.get_thread(threadid,page,page + 19,True)
 					
-					
-				posts = thread.get('posts')
-				if not posts:
-					callback(-1,'NO POSTS')
-					return self.finish(FBData(error='NO POSTS'),donecallback)
-				if not callback(60,self.lang(30103)): break
-				infos = {}
-				ct = page + 1
-				for p in posts:
-					fp = self.getForumPost(p)
-					fp.postNumber = ct
-					try:
-						if not fp.userName in infos:
-							infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
-						fp.setUserInfo(infos[fp.userName])
-					except:
-						infos[fp.userName] = {}
-						LOG('Failed to get user info for: %s' % fp.userName)
-						if DEBUG: ERROR('ERROR:')
-					sreplies.append(fp)
-					ct += 1
+				sreplies = self.processThread(thread,page,callback,donecallback)
+				if not sreplies: break
+				
 			except xmlrpclib.Fault, e:
 				LOG('ERROR GETTING POSTS: ' + e.faultString)
 				raise forumbrowser.Error(e.faultString)
@@ -921,6 +973,30 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 		return self.finish(FBData(error='CANCEL'),donecallback)
 		
+	def processThread(self,thread,page,callback,donecallback):
+		sreplies = []
+		posts = thread.get('posts')
+		if not posts:
+			callback(-1,'NO POSTS')
+			return self.finish(FBData(error='NO POSTS'),donecallback)
+		if not callback(60,self.lang(30103)): return None
+		infos = {}
+		ct = page + 1
+		for p in posts:
+			fp = self.getForumPost(p)
+			fp.postNumber = ct
+			try:
+				if not fp.userName in infos:
+					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
+				fp.setUserInfo(infos[fp.userName])
+			except:
+				infos[fp.userName] = {}
+				LOG('Failed to get user info for: %s' % fp.userName)
+				if DEBUG: ERROR('ERROR:')
+			sreplies.append(fp)
+			ct += 1
+		return sreplies
+					
 	def hasPM(self):
 		return not self.forumConfig.get('disable_pm','0') == '1'
 	

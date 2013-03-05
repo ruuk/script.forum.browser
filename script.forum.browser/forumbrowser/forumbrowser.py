@@ -580,6 +580,7 @@ class ForumPost:
 		self.avatarFinal = ''
 		self.tid = ''
 		self.fid = ''
+		self.topic = ''
 		self.boxid = ''
 		self.status = ''
 		self.activity = ''
@@ -1032,11 +1033,10 @@ class ForumBrowser:
 	
 	def getPMCounts(self,pct=0): return None
 	
-	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads()
-	
+	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads() or self.canSearchAdvanced()
 	def canSearchPosts(self): return False
-	
 	def canSearchThreads(self): return False
+	def canSearchAdvanced(self): return False
 	
 	def canSubscribeThread(self,tid): return False
 	def canUnSubscribeThread(self,tid): return False

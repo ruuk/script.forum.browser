@@ -4,7 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Search this forum/search this thread
+  Forumrunner search
   Optional imports of ShareSocial, Vimeo, YouTube
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
@@ -37,7 +37,18 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.2
+Current Version : 1.3.3
+
+*** 1.3.3 ***
+
+Added forums context menu item 'Search <FORUMNAME>' for searching within a single forum
+Added threads/subscriptions context menu item 'Search <THREAD/FORUMNAME>' for searching within a single thread/forum
+When searching posts, post title area now shows the thread topic
+Added 'Search User Posts' button in 'Search' button menu which allows you to enter a user name and search that users posts
+Added 'Search In Posts Of <USER>' in online users list context menu
+Improved display of posts by creating items first and then adding them to the list all at once
+Fix for some post encoding errors
+Fix improvement for 'Forbidden' errors issue that doesn't cause any extra delays 
 
 *** 1.3.2 ***
 

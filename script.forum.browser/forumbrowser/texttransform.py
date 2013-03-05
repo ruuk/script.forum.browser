@@ -619,6 +619,17 @@ class BBMessageConverter(MessageConverter):
 ######################################################################################
 # Functions
 ######################################################################################
+def makeUnicode(html):
+	if not isinstance(html,unicode):
+		try:
+			html = unicode(html,'utf8')
+		except UnicodeDecodeError:
+			try:
+				html = unicode(html,'latin_1')
+			except:
+				html = str(html).encode('string_escape')
+				html = unicode(html)
+	return html
 
 def subTags(m): return '[%s]' % m.group(1).upper()
 
