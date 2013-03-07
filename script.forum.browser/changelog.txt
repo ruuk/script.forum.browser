@@ -5,7 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Forumrunner search
-  Optional imports of ShareSocial, Vimeo, YouTube
   Add success dialog when setting login page 
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
@@ -37,7 +36,14 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.3
+Current Version : 1.3.4
+
+*** 1.3.4 ***
+
+Improved progress contrast on forums window with dark header backgrounds
+ParserBrowser: IPBoard: Improved thread parsing and improved post parsing (especially for single post threads)
+Moved video functions to WebViewer and changed WebViewer requirement to 0.9.6
+Added ShareSocial as an optional import in addon.xml
 
 *** 1.3.3 ***
 

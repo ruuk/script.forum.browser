@@ -955,13 +955,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if page:
 			try: int(page)
 			except: return self.makeURL(page)
-			
+		if page == 1 and self.formats.get('zero_based_index') == 'True': page = 0
 		if sub == 'replies' and page and int(page) < 0:
 			gnp = self.urls.get('gotonewpost','')
 			page = self.URLSubs(gnp,pid=lastid)
 		else:
-			if page:
-				
+			if page or page == 0:
 				####-- For SMF --################################
 				if fid.endswith('.0') or tid.endswith('.0'):
 					if tid.endswith('.0'):

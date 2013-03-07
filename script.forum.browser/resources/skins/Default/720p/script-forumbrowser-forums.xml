@@ -95,6 +95,15 @@
 				<height>60</height>
 				<texture>-</texture>
 			</control>
+			<control type="image">
+				<description>bg</description>
+				<posx>1011</posx>
+				<posy>36</posy>
+				<width>128</width>
+				<height>58</height>
+				<texture border="20">forum-browser-white-boxr-no-border.png</texture>
+				<visible>Control.isVisible(105)</visible>
+			</control>
 			<control type="image" id="310">
 				<description>Progress</description>
 				<posx>1010</posx>

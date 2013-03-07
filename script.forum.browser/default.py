@@ -119,7 +119,9 @@ from forumbrowser import forumbrowser
 from forumbrowser import texttransform
 from crypto import passmanager
 from forumbrowser import tapatalk
-import video
+from webviewer import video #@UnresolvedImport
+video.LOG = LOG
+video.ERROR = ERROR
 	
 ######################################################################################
 # Base Window Classes

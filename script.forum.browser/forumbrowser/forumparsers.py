@@ -1130,7 +1130,13 @@ class AdvancedParser(HTML5Parser):
 		self.linkRE = pick
 		self.forumType = ftpick[:2]
 		self.isGeneric = self.forumType[1].isdigit()
-		
+	
+	def splitHTML(self,html):
+		splits = self.splits.get(self.getForumType(),[])
+		for s,e in splits:
+			html = e.split(s.split(html,1)[-1],1)[0]	
+		return html
+	
 	def handle_starttag(self,tag,attrs):
 		tag = HTMLTag(tag,self.get_starttag_text(),attrs)
 		tag.startIndex = self.tagIndex
@@ -1243,12 +1249,6 @@ class GeneralForumParser(AdvancedParser):
 		if not self.forums: return ''
 		return self.forums[0].get('prefix','') or ''
 	
-	def splitHTML(self,html):
-		splits = self.splits.get(self.getForumType(),[])
-		for s,e in splits:
-			html = e.split(s.split(html,1)[-1],1)[0]	
-		return html
-	
 	def getForums(self,html,callback=None,progress_base=0,progress_range=0):
 		self.callback = callback
 		if not isinstance(html,unicode): html = unicode(html,'utf8','replace')
@@ -1342,13 +1342,18 @@ class GeneralThreadParser(AdvancedParser):
 							'mb':re.compile('(?:^|")thread-(?P<id>\d+).html'),
 							'mb2':re.compile('(?:^|")showthread\.php\?[^"\']*?tid=(?P<id>\d+)'),
 							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
-							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							#'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
+							'ip':re.compile('/topic/(?P<id>\d+)-[^"\'/]*?/(?:"|\'|$)'),
 							'sm':re.compile('index\.php\?[^"\']*?topic=(?P<id>\d+\.0+)')
 						}
 		
 		self.genericLinkREs = {	'u0':re.compile('(?:href=|^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\'| |>)'),
 								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)')
 							 }
+		
+		self.splits = { 'ip':[(re.compile('section=markasread'),re.compile(''))]
+					}
+		
 		self.linkRE = None
 		self.forumParser = None
 		
@@ -1370,6 +1375,7 @@ class GeneralThreadParser(AdvancedParser):
 		self.getRE(html)
 		#open('/home/ruuk/test.txt','w').write(html.encode('ascii','replace'))
 		if not self.linkRE: return self.threads
+		html = self.splitHTML(html)
 		self.feed(html)
 		self.reset()
 		return self.threads
@@ -1517,6 +1523,10 @@ class GeneralPostParser(AdvancedParser):
 		
 		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote','visit homepage','edit','delete','members','multiquote','back to top')
 		
+		self.splits = { 'ip':[	(re.compile('<!-- ::: CONTENT ::: -->'),re.compile('<!-- Close topic -->')),
+								(re.compile("<div class='topic_controls'>"),re.compile(''))]
+					}
+		
 		self.threadParser = None
 		
 	def setDefaults(self):
@@ -1599,6 +1609,7 @@ class GeneralPostParser(AdvancedParser):
 		if not self.linkRE: self.mode = 'PID'
 		print 'Post Parsing Mode: ' + self.mode
 		print 'Post Forum Type: ' + self.forumType
+		html = self.splitHTML(html)
 		self.feed(html,progress_base,progress_range/2)
 		if self.mode == 'PID':
 			return self.getPIDPosts()
@@ -1636,7 +1647,11 @@ class GeneralPostParser(AdvancedParser):
 			lastP['message'] = self.postProcessMessage(data and self.lastSplitRE.split(self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data))).split(self.getLowestPageURLSplit(),1)[0].strip(),1)[0] or '')
 			if 'data' in lastP: del lastP['data']
 		else:
-			if not self.posts[-1].get('data'): self.getLastData(self.posts[-1])
+			if not self.posts[-1].get('data'):
+				self.getLastData(self.posts[-1])
+			if len(self.posts) == 1 and self.posts[0].get('data'):
+				print 'TEST2'
+				self.posts[0]['data'] = self.sequence
 			ct = 0
 			for p in self.posts:
 				data = self.setDatas(p)

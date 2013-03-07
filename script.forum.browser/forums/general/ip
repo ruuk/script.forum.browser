@@ -5,6 +5,7 @@ url:threads=forum/!FORUMID!-/!PAGE!
 url:replies=topic/!THREADID!-/!PAGE!
 
 url:page_arg=page__st__!PAGE!
+format:zero_based_index=True
 filter:main_url_cleaner=/forum(?:/|$)
 
 #------------------------------------- Subscriptions
