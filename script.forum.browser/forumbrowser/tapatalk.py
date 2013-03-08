@@ -228,7 +228,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.isShort = not pdict.get('post_content')
 			self.fid = pdict.get('forum_id')
 			self.tid = pdict.get('topic_id')
-			self.topic = str(pdict.get('topic_title'))
+			self.topic = str(pdict.get('topic_title') or self.topic)
 		else:
 			self.isShort = True
 			self.setPostID(pdict.get('msg_id',''))

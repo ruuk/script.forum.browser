@@ -395,7 +395,7 @@ class MessageConverter:
 	def processItem(self,m):
 		self.ordered_count += 1
 		if self.ordered: bullet = str(self.ordered_count) + '.'
-		else: bullet = '*'
+		else: bullet = self.bullet
 		return  '%s %s\n' % (bullet,m.group(1))
 		
 	def parseCodes(self,text):
@@ -426,7 +426,8 @@ class BBMessageConverter(MessageConverter):
 		self.numberedFilter = re.compile('\[list=\d\](.*?)\[/list\](?i)')
 		self.bulletedFilter = re.compile('\[list\](.*?)\[/list\](?i)')
 		self.kissingTagFilter = re.compile('(\[/\w+\])(\[\w+\])')
-		self.listItemFilter = re.compile('\[\*\]')
+		self.listItemFilter1 = re.compile('\[\*\](.*?)($|\[CR\])')
+		self.listItemFilter2 = re.compile('\[\*\]')
 		self.underlineFilter = re.compile('\[/?u\](?i)')
 		self.setReplaces()
 		self.resetRegex()
@@ -577,9 +578,18 @@ class BBMessageConverter(MessageConverter):
 		return out
 	
 	def processList(self,html):
-		return self.listItemFilter.sub(self.processItem,html)
+		html = self.listItemFilter1.sub(self.processItem1,html)
+		return self.listItemFilter2.sub(self.processItem2,html)
 	
-	def processItem(self,m):
+	def processItem1(self,m):
+		print m.group(0)
+		if not m.group(1).strip(): return ''
+		self.ordered_count += 1
+		if self.ordered: bullet = str(self.ordered_count) + '. '
+		else: bullet = self.bullet + ' '
+		return  bullet + m.group(1) + m.group(2)
+	
+	def processItem2(self,m):
 		self.ordered_count += 1
 		if self.ordered: bullet = str(self.ordered_count) + '. '
 		else: bullet = self.bullet + ' '

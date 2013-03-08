@@ -17,7 +17,7 @@ ADDON = __addon__ = xbmcaddon.Addon()
 __language__ = ADDON.getLocalizedString
 FB = None
 from default import getForumBrowser, listForumSettings, loadForumSettings, forumsManager, getNotifyList, FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
-import video
+from webviewer import video #@UnresolvedImport
 ADDONID = ADDON.getAddonInfo('id')
 
 def getSetting(key,default=None):

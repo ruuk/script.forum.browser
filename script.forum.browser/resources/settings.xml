@@ -12,6 +12,7 @@
     <setting label="30518" type="text" id="post_user_info" default="status,postcount,reputation,joindate,location"/>
     <setting id="message_dialog_always_show_ok" type="bool" label="30014" default="false" />
     <setting id="use_skin_mods" type="bool" label="30234" default="true" />
+    <setting id="use_keyboard_mod" type="bool" label="30237" subsetting="true" default="false"  enable="eq(-1,true)"/>
     <setting id="enable_ssl" type="bool" label="30235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="30245" default="false" />
     <setting id="skin" type="enum" label="30005" lvalues="30012|30011" default="0" />

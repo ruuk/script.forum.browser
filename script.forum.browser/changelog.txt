@@ -4,8 +4,12 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Search history, show last search
+  Check on optional import behavior
+  Update forums list logo when forum setting changed
+  View users recent posts, not just search
   Forumrunner search
-  Add success dialog when setting login page 
+  Add success dialog when setting login page
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
   Check for new parser rules automatically or add option to check for new rules
@@ -36,7 +40,18 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.4
+Current Version : 1.3.5
+
+*** 1.3.5 ***
+
+Improved html ordered list display in posts
+Fix bug in service caused by moving the video functions to WebViewer
+Keyboard mod now replaces XBMC keyboard, currently has generic, Confluence and Transparency replacements
+Added an info window that explains the mods (what they do and the caveats) before asking to install
+Added a setting 'Use keyboard mod' subsetting below 'Use skin modifications' in general settings
+Fixed a bug causing full message view not to display when 'Searching Posts: Open Thread On Post Click' is enabled
+Fixed a bug causing infinite loop when 'Searching Posts: Open Thread On Post Click' is enabled
+Fixed a bug causing 'None' to be displayed when returning from full message view to post search results 
 
 *** 1.3.4 ***
 
