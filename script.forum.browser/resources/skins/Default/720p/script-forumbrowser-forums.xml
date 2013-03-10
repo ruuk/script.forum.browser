@@ -132,7 +132,7 @@
 				<height>60</height>
 				<onleft>202</onleft>
 				<onright>200</onright>
-				<onup>200</onup>
+				<onup>202</onup>
 				<ondown>120</ondown>
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF000000</textcolor>
@@ -221,8 +221,9 @@
 					<texture border="30">forum-browser-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
-				<control type="button" id="200">
-					<description>The Button</description>
+				
+				<control type="button" id="202">
+					<description>Forums</description>
 					<onleft>120</onleft>
 					<onright>201</onright>
 					<onup>120</onup>
@@ -235,17 +236,17 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3003]</label>
+					<label>$LOCALIZE[SCRIPT3005]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
-      
+				
 				<control type="button" id="201">
-					<description>The Button</description>
-					<onleft>200</onleft>
+					<description>Subscriptions</description>
+					<onleft>202</onleft>
 					<onright>203</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
@@ -266,7 +267,7 @@
 				</control>
       
 				<control type="button" id="203">
-					<description>The Button</description>
+					<description>Messages</description>
 					<onleft>201</onleft>
 					<onright>204</onright>
 					<onup>120</onup>
@@ -287,7 +288,7 @@
 					<focusedcolor>white</focusedcolor>
 				</control>
 			      
-				<control type="button" id="202">
+				<control type="button" id="200">
 					<description>The Button</description>
 					<onleft>204</onleft>
 					<onright>120</onright>
@@ -301,7 +302,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3005]</label>
+					<label>$LOCALIZE[SCRIPT3003]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -389,10 +390,10 @@
 				<posy>132</posy>
 				<width>1223</width>
 				<height>440</height>
-				<onleft>202</onleft>
-				<onright>200</onright>
+				<onleft>200</onleft>
+				<onright>202</onright>
 				<onup>105</onup>
-				<ondown>200</ondown>
+				<ondown>202</ondown>
 				<viewtype label="535">list</viewtype>
 				<pagecontrol>121</pagecontrol>
 				<scrolltime>200</scrolltime>
@@ -562,7 +563,7 @@
 						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search User</description>
 						<onleft>203</onleft>
-						<onright>202</onright>
+						<onright>200</onright>
 						<onup>207</onup>
 						<ondown>206</ondown>
 						<posx>756</posx>
@@ -601,7 +602,7 @@
 						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Threads</description>
 						<onleft>203</onleft>
-						<onright>202</onright>
+						<onright>200</onright>
 						<onup>207</onup>
 						<ondown>205</ondown>
 						<posx>756</posx>
@@ -625,7 +626,7 @@
 						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Posts</description>
 						<onleft>203</onleft>
-						<onright>202</onright>
+						<onright>200</onright>
 						<onup>206</onup>
 						<ondown>204</ondown>
 						<posx>756</posx>
@@ -649,7 +650,7 @@
 					<visible allowhiddenfocus="true">Control.HasFocus(204)</visible>
 					<onclick>Control.SetFocus(205)</onclick>
 					<onleft>203</onleft>
-					<onright>202</onright>
+					<onright>200</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
 					<posx>776</posx>
@@ -672,7 +673,7 @@
 					<description>Search Mouse</description>
 					<enable>Control.IsEnabled(204)</enable>
 					<onleft>203</onleft>
-					<onright>202</onright>
+					<onright>200</onright>
 					<onup>206</onup>
 					<ondown>204</ondown>
 					<posx>776</posx>

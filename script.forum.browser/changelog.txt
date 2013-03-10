@@ -4,7 +4,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Search history, show last search
   Check on optional import behavior
   Update forums list logo when forum setting changed
   View users recent posts, not just search
@@ -40,7 +39,15 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.5
+Current Version : 1.3.6
+
+*** 1.3.6 ***
+
+Swapped 'Forums' and 'Settings' buttons
+Moved some functions out of the default.py file to their own modules. Hopefully I didn't break anything
+Now has separate search history for post, thread and user post searches, plus a global search history
+Clicking a search button will now show a menu with options to start a new search or pick from the search history, with button specific history on top, and global below
+Added general setting 'Search: Show Search History'
 
 *** 1.3.5 ***
 
