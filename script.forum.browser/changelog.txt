@@ -5,8 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Check on optional import behavior
-  Update forums list logo when forum setting changed
-  View users recent posts, not just search
   Forumrunner search
   Add success dialog when setting login page
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
@@ -39,7 +37,20 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.6
+Current Version : 1.3.7
+
+*** 1.3.7 ***
+
+Changed 'Search User Posts' button to 'Search User'
+Added '[Recent Posts]' and '[Recent Threads]' to search options on 'Search User'
+Finally fixed (hopefully) the daylight savings time handling code for user activity display
+Show last seen time instead of activity if user not online
+Show last activity time for online users even if no activity text available.
+Fix for forum manager night always highlighting the correct forum on open
+Logo and logo background color now update in forums manager when changed in forum settings
+Logo and header color now update in forums window when changed in forum settings and forums manager is closed
+Fix: Some forums (notably XBMC.org) weren't getting last post user data because they used a different key name for the value
+Known Issue: xbmc.org (and probably some other mybb forums) show the last poster as the starter. This is a bug in the forums Tapatalk plugin (that means not Forum Browser =] )
 
 *** 1.3.6 ***
 

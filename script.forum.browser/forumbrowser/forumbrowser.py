@@ -585,6 +585,7 @@ class ForumPost:
 		self.status = ''
 		self.activity = ''
 		self.activityUnix = None
+		self.lastSeen = None
 		self.online = False
 		self.postCount = 0
 		self.postNumber = 0
@@ -661,7 +662,7 @@ class ForumPost:
 		
 	def hasMedia(self,webvid=None,count_link_images=False):
 		if not webvid:
-			import video
+			from webviewer import video #@UnresolvedImport
 			webvid = video.WebVideo()
 		images = False
 		video = False
@@ -1033,6 +1034,9 @@ class ForumBrowser:
 	
 	def getPMCounts(self,pct=0): return None
 	
+	def canGetUserPosts(self): return False
+	def canGetUserThreads(self): return False
+
 	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads() or self.canSearchAdvanced()
 	def canSearchPosts(self): return False
 	def canSearchThreads(self): return False

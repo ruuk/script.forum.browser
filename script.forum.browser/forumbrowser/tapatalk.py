@@ -277,20 +277,32 @@ class ForumPost(forumbrowser.ForumPost):
 		self.extras['likes'] = len(users)
 		
 	def getActivity(self):
-		if not self.activity: return ''
-		if not self.activityUnix: return self.activity
+		activity = self.activity
+		if not activity:
+			if self.activityUnix:
+				if self.online:
+					activity = ''
+				else:
+					activity = 'Last Seen - '
+			else:
+				return ''
+		else:
+			activity += ' - '
+		if not self.activityUnix: return activity
 		now = time.time()
-		#if time.daylight: now += 3600
+		if time.daylight:
+			now += (time.timezone - time.altzone)
 		#print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
 		#print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
 		d = now - self.activityUnix
-		return self.activity + ' - ' + forumbrowser.durationToShortText(d) + ' ago'
+		return activity + forumbrowser.durationToShortText(d) + ' ago'
 	
 	def setUserInfo(self,info):
 		if not info: return
+		#for k,v in info.items(): print '%s: %s' % (k,v)
 		self.userInfo = info
 		self.status = str(info.get('display_text',''))
-		self.activity = str(info.get('current_action',info.get('current_activity','')))
+		self.activity = str(info.get('current_action') or info.get('current_activity',''))
 		self.online = info.get('is_online',False) or self.online
 		self.postCount = info.get('post_count',0)
 		date = str(info.get('reg_time',''))
@@ -465,6 +477,8 @@ class PageData:
 ######################################################################################
 class ForumUser(forumbrowser.ForumUser):
 	def __init__(self,ID,name,info):
+		ID = ID or info.get('user_id','')
+		name = name or str(info.get('username',''))
 		forumbrowser.ForumUser.__init__(self,ID,name)
 		self.avatar = info.get('icon_url','')
 		self.status = str(info.get('display_text',''))
@@ -542,7 +556,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		#	LOG('Enabling SSL')
 		#	url = url.replace('http://','https://')
 		#	self.SSL = True
-		self.server = xmlrpclib.ServerProxy(url,transport=self.transport)
+		self.server = xmlrpclib.ServerProxy(url,transport=self.transport,allow_none=True)
 		self.getForumConfig()
 		return True
 			
@@ -778,12 +792,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return False
 	
 	def createThreadDict(self,data,sticky=False):
+		for k,v in data.items(): print '%s: %s' % (k,v)
+		print '--------------------------'
 		data['threadid'] = data.get('topic_id','')
 		data['starter'] = str(data.get('topic_author_name',data.get('post_author_name',self.user)))
 		data['title'] = str(data.get('topic_title',''))
 		data['short_content'] = str(data.get('short_content',''))
 		data['subscribed'] = data.get('is_subscribed',False)
-		data['lastposter'] = str(data.get('last_reply_user',''))
+		data['lastposter'] = str(data.get('last_reply_user') or data.get('last_reply_author_name',''))
 		#data['forumid'] = 
 		data['sticky'] = sticky
 		return data
@@ -887,6 +903,30 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			donecallback(None,None)
 		return (None,None)
 	
+	def getUserThreads(self,uname=None,uid=None,callback=None,donecallback=None,page_data=None):
+		result = None
+		if self.apiOK(4):
+			if not uid: uid = self.getUserInfo(uid, uname).ID
+			if uid: result = self.server.get_user_topic(xmlrpclib.Binary(''),uid)
+		if not result: result = self.server.get_user_topic(xmlrpclib.Binary(uname))
+		if 'result' in result and not result['result']:
+			error = str(result.get('result_text'))
+			LOG('Failed to get user threads: %s' % error)
+			return self.finish(FBData(error=error),donecallback)
+		for n in result: self.createThreadDict(n)
+		pd = page_data or PageData(self)
+		return self.finish(FBData(result,pd),donecallback)
+	
+	def getUserPosts(self,uname=None,uid=None,callback=None,donecallback=None,page_data=None):
+		result = self.server.get_user_reply_post(xmlrpclib.Binary(uname))
+		if 'result' in result and not result['result']:
+			error = str(result.get('result_text'))
+			LOG('Failed to get user posts: %s' % error)
+			return self.finish(FBData(error=error),donecallback)
+		replies = self.processThread({'posts':result}, 0, callback, donecallback)
+		pd = page_data or PageData(self)
+		return self.finish(FBData(replies,pd),donecallback)
+	
 	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		try:
@@ -902,10 +942,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,self.lang(30052))
 		return self.finish(FBData(threads,pd),donecallback)
 	
-	def canSearchPosts(self): return True
+	def canGetUserPosts(self): return 50
+	def canGetUserThreads(self): return 50
 	
+	def canSearchPosts(self): return True
 	def canSearchThreads(self): return True
-		
 	def canSearchAdvanced(self): return self.getConfigInfo('advanced_search', False)
 	
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):

@@ -449,7 +449,7 @@ class BaseWindowFunctions(ThreadWindow):
 	
 	def setupSearch(self):
 		self.searchRE = None
-		if self.search:
+		if self.search and not self.search.startswith('@!RECENT'):
 			self.searchRE = [re.compile(re.sub('[\'"]','',self.search),re.I)]
 			words = self.getSearchWords(self.search)
 			if len(words) > 1:
@@ -886,6 +886,20 @@ class NotificationsDialog(BaseWindowDialog):
 			ndata = loadForumSettings(forumID) or {}
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			
+			fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+			logo = fdata.urls.get('logo','')
+			exists, logopath = getCachedLogo(logo,forumID)
+			if exists: logo = logopath
+			item.setIconImage(logo)
+			
+			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
+			item.setProperty('bgcolor',hc)
+			color = hc.upper()[2:]
+			path = self.makeColorFile(color, self.colorsDir)
+			item.setProperty('bgfile',path)
+			
+			self.setFocusId(220)
+			
 		elif controlID == 206: setForumColor(askColor(forumID),forumID)
 		elif controlID == 207: addCurrentForumToOnlineDatabase(forumID)
 		elif controlID == 208: updateThemeODB(forumID)
@@ -981,7 +995,6 @@ class NotificationsDialog(BaseWindowDialog):
 		uitems = []
 		items = []
 		colors = {}
-		idx = 0
 		for f in final:
 			flag = False
 			path = getForumPath(f,just_path=True)
@@ -1027,9 +1040,11 @@ class NotificationsDialog(BaseWindowDialog):
 				uitems.append(item)
 			else:
 				items.append(item)
-			if f == self.initialForumID: self.initialIndex = idx
-			idx += 1
 		self.items = uitems + items
+		idx = 0
+		for item in self.items:
+			if item.getProperty('forumID') == self.initialForumID: self.initialIndex = idx
+			idx += 1
 		
 	def fillList(self):
 		self.getControl(220).addItems(self.items)
@@ -1920,11 +1935,14 @@ class RepliesWindow(PageWindow):
 			t = self.getThread(FB.getAnnouncement,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='ANNOUNCEMENT')
 			t.setArgs(self.tid,callback=t.progressCallback,donecallback=t.finishedCallback)
 		elif self.search:
-			if self.uid:
+			if self.search == '@!RECENT!@':
+				t = self.getThread(FB.getUserPosts,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='USER-RECENT-POSTS')
+				t.setArgs(uname=self.search_uname,uid=self.uid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+			elif self.uid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UID-SEARCHPOSTS')
 				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,uid=self.uid)
 			elif self.search_uname:
-				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UID-SEARCHPOSTS')
+				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UNAME-SEARCHPOSTS')
 				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,uname=self.search_uname)
 			elif self.tid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='TID-SEARCHPOSTS')
@@ -1968,7 +1986,10 @@ class RepliesWindow(PageWindow):
 		item.setProperty('date',post.date)
 		item.setProperty('online',post.online and 'online' or '')
 		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
-		item.setProperty('activity',post.getActivity())
+		if post.online:
+			item.setProperty('activity',post.getActivity())
+		else:
+			item.setProperty('last_seen',post.getActivity())
 		if showIndicators:
 			hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
 			item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
@@ -2044,7 +2065,7 @@ class RepliesWindow(PageWindow):
 			self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest() and not self.searchRE:
+			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest() and not self.search:
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
@@ -2359,7 +2380,8 @@ class ThreadsWindow(PageWindow):
 		self.forumItem = kwargs.get('item')
 		self.me = self.parent.getUsername() or '?'
 		self.search = kwargs.get('search_terms')
-			
+		self.search_uname = kwargs.get('search_name','')
+		
 		self.setupSearch()
 		
 		self.empty = True
@@ -2398,7 +2420,10 @@ class ThreadsWindow(PageWindow):
 			t = self.getThread(FB.getSubscriptions,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SUBSCRIPTIONS')
 			t.setArgs(page,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 		elif self.search:
-			if self.fid:
+			if self.search == '@!RECENTTHREADS!@':
+				t = self.getThread(FB.getUserThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='USERRECENTTHREADS')
+				t.setArgs(uname=self.search_uname,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+			elif self.fid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
 				t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,fid=self.fid)
 			else:
@@ -2963,9 +2988,7 @@ class ForumsWindow(BaseWindow):
 			self.stopThread()
 			self.openPMWindow()
 		elif controlID == 202:
-			forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
-			return
-			#if self.changeForum(): return
+			return self.openForumsManager()
 		elif controlID == 205:
 			searchPosts(self)
 		elif controlID == 206:
@@ -2990,6 +3013,17 @@ class ForumsWindow(BaseWindow):
 		if action == ACTION_PREVIOUS_MENU:
 			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
+	
+	def openForumsManager(self):
+		forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
+		if not FB: return
+		forumID = FB.getForumID()
+		fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
+		logo = fdata.urls.get('logo','')
+		self.setLogo(logo)
+		
+		hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
+		self.getControl(100).setColorDiffuse(hc.upper())
 		
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
@@ -3094,7 +3128,7 @@ def appendSettingList(key,value,limit=0):
 	if limit: slist = slist[-limit:]
 	setSetting(key,slist)
 	
-def getSearchDefault(setting,default='',with_global=True,heading='Search Options',new='New Search'):
+def getSearchDefault(setting,default='',with_global=True,heading='Search Options',new='New Search',extra=None):
 	if not getSetting('show_search_history',True): return default
 	slist = getSetting(setting,[])
 	slistDisplay = slist[:]
@@ -3107,6 +3141,10 @@ def getSearchDefault(setting,default='',with_global=True,heading='Search Options
 	if slist:
 		slist.reverse()
 		slistDisplay.reverse()
+		if extra:
+			for eid,edisplay in extra:
+				slistDisplay.insert(0,'[[COLOR FF009999][B]%s[/B][/COLOR]]' % edisplay)
+				slist.insert(0,eid)
 		slistDisplay.insert(0,'[[COLOR FF00AA00][B]%s[/B][/COLOR]]' % new)
 		slist.insert(0,'')
 		idx = xbmcgui.Dialog().select(heading,slistDisplay)
@@ -3137,16 +3175,38 @@ def searchUser(parent,uid=None):
 	if not uid:
 		default = getSearchDefault('last_search_user',with_global=False,heading='User Options',new='New User')
 		if default == None: return
-		uname = dialogs.doKeyboard('Enter Name Of User To Search',default)
+		if default:
+			uname = default
+		else:
+			uname = dialogs.doKeyboard('Enter Name Of User To Search',default)
 		if not uname: return
 		appendSettingList('last_search_user',uname,10)
-	default = getSearchDefault('last_user_search')
+	extra = None
+	ct = FB.canGetUserThreads()
+	if ct:
+		if not extra: extra = []
+		extra.append(('@!RECENTTHREADS!@','Recent Threads'))
+	ct = FB.canGetUserPosts()
+	if ct:
+		if not extra: extra = []
+		extra.append(('@!RECENT!@','Recent Posts'))
+		
+	default = getSearchDefault('last_user_search',extra=extra)
 	if default == None: return
-	terms = dialogs.doKeyboard('Enter Search Terms',default)
-	if not terms: return
-	appendSettingList('last_user_search',terms,10)
-	appendSettingList('last_search',terms,10)
-	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic='Post Search Results',uid=uid,search_name=uname,parent=parent)
+	topic = 'Post Search Results'
+	if default == '@!RECENT!@':
+		terms = default
+		topic = 'Recent Posts'
+	elif default == '@!RECENTTHREADS!@':
+		terms = default
+		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,search_name=uname,topic='Recent Threads',parent=parent)
+		return 
+	else:
+		terms = dialogs.doKeyboard('Enter Search Terms',default)
+		if not terms: return
+		appendSettingList('last_user_search',terms,10)
+		appendSettingList('last_search',terms,10)
+	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic=topic,uid=uid,search_name=uname,parent=parent)
 
 def getCachedLogo(logo,forumID,clear=False):
 	root, ext = os.path.splitext(logo) #@UnusedVariable

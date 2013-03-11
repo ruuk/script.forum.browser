@@ -555,7 +555,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search Users Posts</label>
+						<label>Search User</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>

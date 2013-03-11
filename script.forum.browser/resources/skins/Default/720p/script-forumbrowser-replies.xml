@@ -360,6 +360,20 @@
 						<textcolor>FF00BB00</textcolor>
 						<scroll>false</scroll>
 						<info>ListItem.Property(activity)</info>
+						<visible>!StringCompare(ListItem.Property(activity),)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>30</posy>
+						<width>175</width>
+						<height>10</height>
+						<font>ForumBrowser-font10</font>
+						<aligny>center</aligny>
+						<align>left</align>
+						<textcolor>FFCC99AA</textcolor>
+						<scroll>false</scroll>
+						<info>ListItem.Property(last_seen)</info>
+						<visible>StringCompare(ListItem.Property(activity),)</visible>
 					</control>
 					<control type="label">
 						<posx>10</posx>
@@ -617,6 +631,20 @@
 						<textcolor>FF00BB00</textcolor>
 						<scroll>false</scroll>
 						<info>ListItem.Property(activity)</info>
+						<visible>!StringCompare(ListItem.Property(activity),)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>30</posy>
+						<width>175</width>
+						<height>10</height>
+						<font>ForumBrowser-font10</font>
+						<aligny>center</aligny>
+						<align>left</align>
+						<textcolor>FFCC99AA</textcolor>
+						<scroll>false</scroll>
+						<info>ListItem.Property(last_seen)</info>
+						<visible>StringCompare(ListItem.Property(activity),)</visible>
 					</control>
 					<control type="label">
 						<posx>10</posx>
