@@ -792,8 +792,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return False
 	
 	def createThreadDict(self,data,sticky=False):
-		for k,v in data.items(): print '%s: %s' % (k,v)
-		print '--------------------------'
+		#for k,v in data.items(): print '%s: %s' % (k,v)
+		#print '--------------------------'
 		data['threadid'] = data.get('topic_id','')
 		data['starter'] = str(data.get('topic_author_name',data.get('post_author_name',self.user)))
 		data['title'] = str(data.get('topic_title',''))
