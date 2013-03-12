@@ -1568,6 +1568,8 @@ class MessageWindow(BaseWindow):
 						LOG('Error getting video info')
 				if video:
 					item.setIconImage(video.thumbnail)
+					if video.title: item.setLabel(video.title)
+					item.setLabel2('%s: %s' % (video.sourceName,video.ID))
 				elif link.textIsImage():
 					item.setIconImage(link.text)
 				elif link.isImage():
