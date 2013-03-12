@@ -213,7 +213,9 @@ class ForumPost(forumbrowser.ForumPost):
 			date = str(pdict.get('post_time',''))
 			if date:
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
-				date = time.strftime('%I:%M %p - %A %B %d, %Y',iso8601.parse_date(date).timetuple())
+				datetuple = iso8601.parse_date(date).timetuple()
+				self.unixtime = time.mktime(datetuple)
+				date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
 			self.date = date
 			self.userId = pdict.get('post_author_id','')
 			self.userName = str(pdict.get('post_author_name') or 'UERROR')
@@ -235,7 +237,9 @@ class ForumPost(forumbrowser.ForumPost):
 			date = str(pdict.get('sent_date',''))
 			if date:
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
-				date = time.strftime('%I:%M %p - %A %B %d, %Y',iso8601.parse_date(date).timetuple())
+				datetuple = iso8601.parse_date(date).timetuple()
+				self.unixtime = time.mktime(datetuple)
+				date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
 			self.date = date
 			if 'msg_from' in pdict:
 				self.userName = str(pdict.get('msg_from') or 'UERROR')
@@ -276,7 +280,11 @@ class ForumPost(forumbrowser.ForumPost):
 		self.extras['like users'] = ', '.join(users)
 		self.extras['likes'] = len(users)
 		
-	def getActivity(self):
+	def getDate(self,offset=0):
+		if not self.unixtime: return self.date
+		return time.strftime('%I:%M %p - %A %B %d, %Y',time.localtime(self.unixtime + offset))
+	
+	def getActivity(self,time_offset=0):
 		activity = self.activity
 		if not activity:
 			if self.activityUnix:
@@ -295,6 +303,7 @@ class ForumPost(forumbrowser.ForumPost):
 		#print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
 		#print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
 		d = now - self.activityUnix
+		d += time_offset
 		return activity + forumbrowser.durationToShortText(d) + ' ago'
 	
 	def setUserInfo(self,info):

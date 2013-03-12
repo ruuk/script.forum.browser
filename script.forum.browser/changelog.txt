@@ -6,7 +6,6 @@ TODO:
  Short Term:
   Check on optional import behavior
   Forumrunner search
-  Add success dialog when setting login page
   When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
   Add help for Rules Management
   Check for new parser rules automatically or add option to check for new rules
@@ -37,7 +36,12 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.3.7
+Current Version : 1.3.8
+
+*** 1.3.8 ***
+
+Added forum setting 'Time Offset' which allows you to set a time offset in hours to correct displayed time being offset from your local time. Currently works with Tapatalk for user activity and post time
+Fixed a bug causing errors when trying to edit a post
 
 *** 1.3.7 ***
 

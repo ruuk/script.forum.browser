@@ -97,6 +97,9 @@ except:
 
 def getSetting(key,default=None):
 	setting = __addon__.getSetting(key)
+	return _processSetting(setting,default)
+
+def _processSetting(setting,default):
 	if not setting: return default
 	if isinstance(default,bool):
 		return setting == 'true'
@@ -139,7 +142,7 @@ mods.setSetting = setSetting
 
 video.LOG = LOG
 video.ERROR = ERROR
-	
+
 ######################################################################################
 # Base Window Classes
 ######################################################################################
@@ -750,6 +753,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 			else:
 				val = dialogs.doKeyboard('Enter New Value',data['value'],hidden=data['type']=='text.password')
 			if val == None: return
+			if not self.validate(val,data['type']): return
 			data['value'] = val
 			item.setLabel2(data['type'] != 'text.password' and val or len(val) * '*')
 		elif data['type'].startswith('webimage.'):
@@ -772,7 +776,17 @@ class ForumSettingsDialog(BaseWindowDialog):
 			item.setLabel2(self.makeColorFile(color))
 		elif data['type'] == 'function':
 			data['value'][0](*data['value'][1:])
-			
+		
+	def validate(self,val,vtype):
+		if vtype == 'text.integer':
+			if not val: return True
+			try:
+				int(val)
+			except:
+				dialogs.showMessage('Bad Value','Value must be an integer.')
+				return False
+		return True
+				
 	def refreshImage(self):
 		cid = self.getFocusId()
 		if not cid: return
@@ -810,6 +824,7 @@ def editForumSettings(forumID):
 	w.addItem('password','Login Password',sett.get('password',''),'text.password')
 	w.addItem('notify','Notifications',sett.get('notify',''),'boolean')
 	w.addItem('extras','Post Attributes',sett.get('extras',''),'text')
+	w.addItem('time_offset_hours','Time Offset',sett.get('time_offset_hours',''),'text.integer')
 	w.addSep()
 	w.addItem('description','Description',fdata.description,'text.long')
 	w.addItem('logo','Logo',fdata.urls.get('logo',''),'webimage.' + fdata.forumURL())
@@ -822,7 +837,13 @@ def editForumSettings(forumID):
 	w.doModal()
 	if w.OK:
 		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
-		saveForumSettings(forumID, username=w.data['username']['value'], password=w.data['password']['value'], notify=w.data['notify']['value'],extras=w.data['extras']['value'],rules=rules)
+		saveForumSettings(	forumID,
+							username=w.data['username']['value'],
+							password=w.data['password']['value'],
+							notify=w.data['notify']['value'],
+							extras=w.data['extras']['value'],
+							time_offset_hours=w.data['time_offset_hours']['value'],
+							rules=rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
 		fdata.theme['header_color'] = w.data['header_color']['value']
@@ -1317,12 +1338,9 @@ class LinePostDialog(PostDialog):
 					.replace('[/B]','[/b]')\
 					.replace('[/I]','[/i]')\
 					.replace('[/COLOR]','[/color]')
-	
-	def doKeyboard(self,caption,text):
-		return dialogs.doKeyboard(caption,text)
 			
 	def addLineSingle(self,line=None,before=False,update=True):
-		if line == None: line = self.dialogs.doKeyboard(__language__(30123),'')
+		if line == None: line = dialogs.doKeyboard(__language__(30123),'')
 		if line == None: return False
 		if before:
 			clist = self.getControl(120)
@@ -1359,7 +1377,7 @@ class LinePostDialog(PostDialog):
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return
-		line = self.dialogs.doKeyboard(__language__(30124),item.getLabel())
+		line = dialogs.doKeyboard(__language__(30124),item.getLabel())
 		if line == None: return False
 		item.setProperty('text',line)
 		item.setLabel(self.displayLine(line))
@@ -1858,6 +1876,7 @@ class RepliesWindow(PageWindow):
 		self.firstRun = True
 		self.started = False
 		self.currentPMBox = {}
+		self.timeOffset = getForumSetting(FB.getForumID(),'time_offset_hours',0)
 	
 	def onInit(self):
 		BaseWindow.onInit(self)
@@ -1983,13 +2002,13 @@ class RepliesWindow(PageWindow):
 		item.setProperty('post',post.postId)
 		item.setProperty('avatar',url)
 		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
-		item.setProperty('date',post.date)
+		item.setProperty('date',post.getDate(self.timeOffset))
 		item.setProperty('online',post.online and 'online' or '')
 		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 		if post.online:
-			item.setProperty('activity',post.getActivity())
+			item.setProperty('activity',post.getActivity(self.timeOffset * 3600))
 		else:
-			item.setProperty('last_seen',post.getActivity())
+			item.setProperty('last_seen',post.getActivity(self.timeOffset * 3600))
 		if showIndicators:
 			hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
 			item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
@@ -2482,7 +2501,7 @@ class ThreadsWindow(PageWindow):
 			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
 			item.setProperty("id",unicode(tid))
 			item.setProperty("fid",unicode(fid))
-			
+			item.setProperty("lastposter",last)
 			if last:
 				last = self.desc_base % last
 				short = tdict.get('short_content','')
@@ -3218,6 +3237,10 @@ def getCachedLogo(logo,forumID,clear=False):
 		if clear: os.remove(logopath)
 		return True, logopath
 	return False, logopath
+
+def getForumSetting(forumID,key,default=None):
+	data = loadForumSettings(forumID)
+	return _processSetting(data.get(key),default)
 
 def loadForumSettings(forumID,get_rules=False,get_both=False):
 	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)

@@ -593,6 +593,7 @@ class ForumPost:
 		self.userInfo = {}
 		self.extras = {}
 		self.isSent = False
+		self.unixtime = 0
 		if pdict: self.setVals(pdict)
 		self.attrs_index = dir(self)
 		self.attrs_lower = [x.lower() for x in self.attrs_index]
@@ -612,7 +613,9 @@ class ForumPost:
 		
 	def setUserInfo(self,info): pass
 		
-	def getActivity(self): return self.activity
+	def getDate(self,offset=0): return self.date
+	
+	def getActivity(self,time_offset=0): return self.activity
 	
 	def getUserData(self,name):
 		name = name.lower()
