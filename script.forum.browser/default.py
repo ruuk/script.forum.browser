@@ -76,6 +76,8 @@ def ERROR(message,hide_tb=False):
 	else:
 		import traceback #@Reimport
 		traceback.print_exc()
+		if getSetting('debug_show_traceback_dialog',False):
+			dialogs.showText('Traceback', traceback.format_exc())
 	return short
 	
 def LOG(message):
