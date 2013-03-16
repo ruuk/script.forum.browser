@@ -208,6 +208,9 @@
     <string id="30516">Entertainment (TV/Movies/Music)</string>
     <string id="30517">Enter Keywords or Use Wildcards *?</string>
     <string id="30518">Post User Attributes To Display</string>
+    
+    <string id="30519">Open Subscriptions/PMs Window Automatically On Open Forum</string>
+    <string id="30520">If Both Subs and PMs, Open Subs Window Instead</string>
 
     <string id="3000">Prev</string> <!-- Previous -->
     <string id="3001">Next</string>

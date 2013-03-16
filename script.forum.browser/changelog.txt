@@ -6,12 +6,7 @@ TODO:
  Short Term:
   Check on optional import behavior
   Forumrunner search
-  When opening forum from Notifications Manager, open subscriptions window, PMs, post etc...
-  Add help for Rules Management
   Check for new parser rules automatically or add option to check for new rules
-  Help for rating when adding Parser Browser forums to the online database
-  Help for the color dialog
-  Still some issues with no seconds listed in the tapatalk activity display...?
   
  Long Term:
   Image zoom/rotate etc
@@ -36,7 +31,16 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.0
+Current Version : 1.4.1
+
+*** 1.4.1 ***
+
+Now uses xbmcvfs to copy files. Fixes copying errors when installing skin mods on Android (At least on MY phone =] )
+Now indicates file copy activity when copying skin directory to local dir
+Focusing wrench tab on forums manager now slides out the buttons. Useful on touch interfaces
+Added to the help for the 'Share To Online DB' button 
+Added DST adjustment to post dates
+Added notifications settings 'Open Subscriptions/PMs Window Automatically On Open Forum' and subsetting 'If Both Subs and PMs, Open Subs Window Instead' and updated help
 
 *** 1.4.0 ***
 

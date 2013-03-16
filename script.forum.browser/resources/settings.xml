@@ -33,6 +33,8 @@
     <setting id="notify_dialog_close_only_video" type="bool" label="30030" subsetting="true"  default="true" enable="eq(-8,true)"/>
     <setting id="notify_dialog_close_activity_stops" type="bool" label="30031" subsetting="true" default="true" enable="eq(-9,true)"/>
     <setting id="notify_dialog_only_enabled" type="bool" label="30041" default="true" enable="eq(-10,true)"/>
+    <setting id="notify_open_subs_pms" type="bool" label="30519" default="true" enable="eq(-11,true)"/>
+    <setting id="notify_prefer_subs" type="bool" label="30520" subsetting="true" default="false" enable="eq(-12,true) + eq(-1,true)"/>
     <setting label="30244" type="action" action="RunScript(script.forum.browser,settingshelp_notify)"/>
   </category>
   <category label="30022">

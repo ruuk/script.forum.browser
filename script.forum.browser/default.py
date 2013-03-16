@@ -2,6 +2,7 @@ import urllib2, re, os, sys, time, urlparse, binascii, math, fnmatch
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
+from lib import util
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -994,7 +995,16 @@ class NotificationsDialog(BaseWindowDialog):
 			self.forumsWindow.changeForum(forumID)
 		else:
 			#startForumBrowser(forumID)
-			xbmc.executebuiltin("RunScript(script.forum.browser,forum=%s)" % forumID)
+			section = ''
+			if getSetting('notify_open_subs_pms',True):
+				item = self.getControl(220).getSelectedItem()
+				if item:
+					if getSetting('notify_prefer_subs',False):
+						section = item.getProperty('new_subs') and 'SUBSCRIPTIONS' or ''
+					if not section: section = item.getProperty('new_PMs') and 'PM' or ''
+					if not section: section = item.getProperty('new_subs') and 'SUBSCRIPTIONS' or ''
+			furl = util.createForumBrowserURL(forumID,section)
+			xbmc.executebuiltin("RunScript(script.forum.browser,%s)" % furl)
 		self.close()
 		
 	def createItems(self):
@@ -1847,6 +1857,7 @@ class RepliesWindow(PageWindow):
 		self.pageData.isReplies = True
 		self.threadItem = item = kwargs.get('item')
 		self.dontOpenPD = False
+		self.forumElements = kwargs.get('forumElements')
 		if item:
 			self.tid = item.getProperty('id')
 			self.lastid = item.getProperty('lastid')
@@ -2006,7 +2017,7 @@ class RepliesWindow(PageWindow):
 		item.setProperty('post',post.postId)
 		item.setProperty('avatar',url)
 		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
-		item.setProperty('date',post.getDate(self.timeOffset))
+		item.setProperty('date',post.getDate(self.timeOffset * 3600))
 		item.setProperty('online',post.online and 'online' or '')
 		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 		if post.online:
@@ -2105,6 +2116,14 @@ class RepliesWindow(PageWindow):
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		self.pid = ''
 		self.setLoggedIn()
+		self.openElements()
+		
+	def openElements(self):
+		if not self.forumElements: return
+		if self.forumElements.get('post'):
+			item = util.selectListItemByProperty(self.getControl(120),'post',self.forumElements.get('post'))
+			if item: self.onClick(120)
+		self.forumElements = None
 			
 	def getUserInfoAttributes(self):
 		data = loadForumSettings(FB.getForumID())
@@ -2404,6 +2423,7 @@ class ThreadsWindow(PageWindow):
 		self.me = self.parent.getUsername() or '?'
 		self.search = kwargs.get('search_terms')
 		self.search_uname = kwargs.get('search_name','')
+		self.forumElements = kwargs.get('forumElements','')
 		
 		self.setupSearch()
 		
@@ -2477,6 +2497,24 @@ class ThreadsWindow(PageWindow):
 			ERROR('FILL THREAD ERROR')
 			dialogs.showMessage(__language__(30050),__language__(30163),error=True)
 		self.setLoggedIn()
+		self.openElements()
+		
+	def openElements(self):
+		if not self.forumElements: return
+		if self.forumElements.get('section') == 'SUBSCRIPTIONS' and self.forumElements.get('forum'):
+			item = util.selectListItemByProperty(self.getControl(120),'id',self.forumElements.get('forum'))
+			if item:
+				self.onClick(120)
+			else:
+				self.openRepliesWindow(self.forumElements)
+				self.forumElements = None
+		elif self.forumElements.get('thread'):
+			item = util.selectListItemByProperty(self.getControl(120),'id',self.forumElements.get('thread'))
+			if item:
+				self.onClick(120)
+			else:
+				self.openRepliesWindow(self.forumElements)
+				self.forumElements = None
 			
 	def addThreads(self,threads):
 		if not threads: return False
@@ -2547,8 +2585,25 @@ class ThreadsWindow(PageWindow):
 			self.getControl(120).addItem(item)
 		return True
 				
-	def openRepliesWindow(self):
-		item = self.getControl(120).getSelectedItem()
+	def openRepliesWindow(self,forumElements=None):
+		forumElements = forumElements or self.forumElements
+		self.forumElements = None
+		if forumElements and forumElements.get('section') == 'SUBSCRIPTIONS' and forumElements.get('forum'):
+			item = util.getListItemByProperty(self.getControl(120),'id',forumElements.get('forum'))
+			if not item:
+				item = xbmcgui.ListItem()
+				item.setProperty('fid',forumElements.get('forum'))
+				item.setProperty('id',forumElements.get('forum'))
+				item.setProperty('is_forum','True')
+		elif forumElements and forumElements.get('thread'):
+			item = util.getListItemByProperty(self.getControl(120),'id',forumElements.get('thread'))
+			if not item:
+				item = xbmcgui.ListItem()
+				item.setProperty('fid',forumElements.get('forum'))
+				item.setProperty('id',forumElements.get('thread'))
+		else:
+			item = self.getControl(120).getSelectedItem()
+		
 		item.setProperty('unread','')
 		fid = item.getProperty('fid') or self.fid
 		topic = item.getProperty('title')
@@ -2559,7 +2614,7 @@ class ThreadsWindow(PageWindow):
 			#self.setTheme()
 			#self.fillThreadList()
 		else:
-			dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,parent=self)
+			dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,parent=self,forumElements=forumElements)
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2699,6 +2754,7 @@ class ForumsWindow(BaseWindow):
 		self.setAsMain()
 		self.started = False
 		self.headerIsDark = False
+		self.forumElements = None
 	
 	def getUsername(self):
 		data = loadForumSettings(FB.getForumID())
@@ -2747,7 +2803,7 @@ class ForumsWindow(BaseWindow):
 		t.setArgs(forum=forum,url=url,donecallback=t.finishedCallback)
 		t.start()
 		
-	def endGetForumBrowser(self,fb):
+	def endGetForumBrowser(self,fb,forumElements):
 		global FB
 		FB = fb
 		self.setTheme()
@@ -2755,6 +2811,32 @@ class ForumsWindow(BaseWindow):
 		self.resetForum()
 		self.fillForumList(True)
 		__addon__.setSetting('last_forum',FB.getForumID())
+		self.forumElements = forumElements
+		
+	def openElements(self):
+		if not self.forumElements: return
+		forumElements = self.forumElements
+		if forumElements.get('section'):
+			if forumElements.get('section') == 'SUBSCRIPTIONS':
+				self.openSubscriptionsWindow(forumElements)
+				self.forumElements = None
+			elif forumElements.get('section') == 'PM':
+				self.openPMWindow(forumElements)
+				self.forumElements = None
+		elif forumElements.get('forum'):
+			fid = forumElements.get('forum')
+			item = util.selectListItemByProperty(self.getControl(120),'id',fid)
+			if item:
+				self.onClick(120)
+			else:
+				self.openThreadsWindow(forumElements)
+				self.forumElements = None
+		elif forumElements.get('thread'):
+			tid = forumElements.get('thread')
+			self.forumElements = None
+		elif forumElements.get('post'):
+			pid = forumElements.get('post')
+			self.forumElements = None
 		
 	def setVersion(self):
 		self.getControl(109).setLabel('v' + __version__)
@@ -2874,6 +2956,7 @@ class ForumsWindow(BaseWindow):
 				setLogins()
 				self.resetForum()
 				self.fillForumList()
+		self.openElements()
 		
 	def setLogoFromFile(self):
 		logopath = getCurrentLogo()
@@ -2911,19 +2994,30 @@ class ForumsWindow(BaseWindow):
 		self.getControl(203).setLabel(__language__(3009) + disp)
 		self.setLoggedIn()
 		
-	def openPMWindow(self):
-		dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=__language__(30176),parent=self)
+	def openPMWindow(self,forumElements=None):
+		dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=__language__(30176),parent=self,forumElements=forumElements)
 		self.setPMCounts(FB.getPMCounts())
 	
-	def openThreadsWindow(self):
-		item = self.getControl(120).getSelectedItem()
-		if not item: return False
-		link = item.getProperty('link')
-		if link:
-			return self.openLink(link)
-		fid = item.getProperty('id')
-		topic = item.getProperty('topic')
-		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item)
+	def openThreadsWindow(self,forumElements=None):
+		forumElements = forumElements or self.forumElements
+		self.forumElements = None
+		fid = None
+		topic = ''
+		item = None
+		if forumElements and forumElements.get('forum'):
+			fid = forumElements.get('forum')
+			item = util.getListItemByProperty(self.getControl(120),'id',fid)
+		else:
+			item = self.getControl(120).getSelectedItem()
+			
+		if item:
+			link = item.getProperty('link')
+			if link:
+				return self.openLink(link)
+			if not fid: fid = item.getProperty('id')
+			topic = item.getProperty('topic')
+			
+		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item,forumElements=forumElements)
 		self.setPMCounts(FB.getPMCounts())
 		return True
 		
@@ -2931,10 +3025,10 @@ class ForumsWindow(BaseWindow):
 		LOG('Forum is a link. Opening URL: ' + link)
 		webviewer.getWebResult(link,dialog=True,browser=hasattr(FB,'browser') and FB.browser)
 	
-	def openSubscriptionsWindow(self):
+	def openSubscriptionsWindow(self,forumElements=None):
 		fid = 'subscriptions'
 		topic = __language__(30175)
-		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self)
+		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,forumElements=forumElements)
 		self.setPMCounts(FB.getPMCounts())
 	
 	def showOnlineUsers(self):
@@ -4215,8 +4309,10 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	showError = dialogs.showMessage
 	if silent: showError = dialogs.showMessageSilent
 	global STARTFORUM
+	forumElements = None
 	if not forum and STARTFORUM:
-			forum = STARTFORUM
+			forumElements = util.parseForumBrowserURL(STARTFORUM)
+			forum = forumElements.get('forumID')
 			STARTFORUM = None
 			
 	if not forum:
@@ -4274,7 +4370,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		showError(__language__(30050),__language__(30171),err,error=True)
 		return False
 	
-	if donecallback: donecallback(FB)
+	if donecallback: donecallback(FB,forumElements)
 	return FB
 
 def startForumBrowser(forumID=None):
@@ -4282,13 +4378,18 @@ def startForumBrowser(forumID=None):
 	PLAYER = PlayerMonitor()
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
-	mods.checkForSkinMods()
+	try:
+		mods.checkForSkinMods()
+	except:
+		ERROR('Error Installing Skin Mods')
 
 	#TD = ThreadDownloader()
 	if forumID:
 		STARTFORUM = forumID
 	elif sys.argv[-1].startswith('forum='):
 		STARTFORUM = sys.argv[-1].split('=',1)[-1]
+	elif sys.argv[-1].startswith('forumbrowser://'):
+		STARTFORUM = sys.argv[-1]
 	dialogs.openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
 	#sys.modules.clear()
 	PLAYER.finish()

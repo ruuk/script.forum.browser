@@ -5,6 +5,12 @@ Add the selected forum to your favorites list. When listing forums, favorites ar
 Remove selected forum from your favorites list.
 @item:addcurrentonline
 Share the selected forum info to the Forum Browser online database.
+
+If the forum uses the Parser Browser, you will be asked to rate the function and accuracy.
+
+The function rating deals with whether you can view down the tree to posts, whether you can login, etc.
+
+The accuracy rating indicates how well the titles and posts match the actual forum's displayed info. Whether there is a lot of extra text in the posts for example. 
 @item:addforum
 Add a forum by entering it's domain or URL.
 

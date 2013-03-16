@@ -36,7 +36,7 @@ Opens the color editor to select the header color for this forum.
 
 The color editor allows you to change red/green/blue values or enter the hex value of the color.
 
-Usually you will chose a color that blends with the background of the logo, or matches the logo background (especially for semi-transparent logos).
+Usually you will chose a color that blends with the background of the logo, or matches the logo background on the web page (especially for semi-transparent logos).
 @item:login_url
 Some forums use a non-standard login page.
 

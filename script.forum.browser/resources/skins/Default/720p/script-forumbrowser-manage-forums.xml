@@ -38,6 +38,23 @@
 				<height>24</height>
 				<texture>forum-browser-wrench.png</texture>
 			</control>
+			<control type="button">
+				<description>Add Forum</description>
+				<onleft>260</onleft>
+				<onright>260</onright>
+				<onup>260</onup>
+				<ondown>260</ondown>
+				<posx>628</posx>
+				<posy>20</posy>
+				<width>200</width>
+				<height>200</height>
+				<visible>true</visible>
+				<texturefocus></texturefocus>
+				<texturenofocus></texturenofocus>
+				<visible>!Control.HasFocus(260)</visible>
+				<onclick>Control.SetFocus(260)</onclick>
+				<onfocus>Control.SetFocus(260)</onfocus>
+			</control>
 				
 			<control type="group" id="260">
 				<animation effect="slide" end="-300,0" time="400" condition="!ControlGroup(260).HasFocus(0)">Conditional</animation>

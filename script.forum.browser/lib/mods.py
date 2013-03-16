@@ -1,4 +1,4 @@
-import os, sys, xbmc, xbmcgui, dialogs
+import os, sys, xbmc, xbmcgui, xbmcvfs, dialogs
 from distutils.version import StrictVersion
 
 DEBUG = None
@@ -15,19 +15,17 @@ def copyKeyboardModImages(skinPath):
 	if os.path.exists(dst): return
 	os.makedirs(dst)
 	src = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'keyboard','images')
-	import shutil
 	for f in os.listdir(src):
 		s = os.path.join(src,f)
 		d = os.path.join(dst,f)
-		if not os.path.exists(d) and not f.startswith('.'): shutil.copy(s,d)
+		if not os.path.exists(d) and not f.startswith('.'): xbmcvfs.copy(s,d)
 
 def copyFont(sourceFontPath,skinPath):
 	dst = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	if os.path.exists(dst): return
-	import shutil
-	shutil.copy(sourceFontPath,dst)
+	xbmcvfs.copy(sourceFontPath,dst)
 	
-def copyTree(source,target):
+def copyTree2(source,target):
 	try:
 		import distutils.dir_util
 		copyTree = distutils.dir_util.copy_tree
@@ -37,6 +35,27 @@ def copyTree(source,target):
 		
 	copyTree(source, target)
 		
+def copyTree(source,target,dialog=None):
+	pct = 0
+	mod = 5
+	if not source or not target: return
+	if not os.path.isdir(source): return
+	sourcelen = len(source)
+	if not source.endswith(os.path.sep): sourcelen += 1
+	for path, dirs, files in os.walk(source): #@UnusedVariable
+		subpath = path[sourcelen:]
+		xbmcvfs.mkdir(os.path.join(target,subpath))
+		for f in files:
+			if dialog: dialog.update(pct,'Copying files:',f)
+			xbmcvfs.copy(os.path.join(path,f),os.path.join(target,subpath,f))
+			pct += mod
+			if pct > 100:
+				pct = 95
+				mod = -5
+			elif pct < 0:
+				pct = 5
+				mod = 5
+
 def getSkinVersion(skin_path):
 	addon = os.path.join(skin_path,'addon.xml')
 	if not os.path.exists(addon): return '0.0.0'
@@ -105,12 +124,12 @@ def installSkinMods(update=False):
 	
 	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
 		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
-		yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
+		#yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
 		dialog.create('Copying Files','Please wait...')
 		try:
-			copyTree(skinPath,localSkinPath)
+			copyTree(skinPath,localSkinPath,dialog)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
 			dialogs.showMessage('Error',err,'Failed to copy files, aborting.',error=True)

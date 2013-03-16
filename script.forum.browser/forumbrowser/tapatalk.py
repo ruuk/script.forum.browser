@@ -282,6 +282,8 @@ class ForumPost(forumbrowser.ForumPost):
 		
 	def getDate(self,offset=0):
 		if not self.unixtime: return self.date
+		if time.daylight:
+			offset -= (time.timezone - time.altzone)
 		return time.strftime('%I:%M %p - %A %B %d, %Y',time.localtime(self.unixtime + offset))
 	
 	def getActivity(self,time_offset=0):
@@ -302,8 +304,7 @@ class ForumPost(forumbrowser.ForumPost):
 			now += (time.timezone - time.altzone)
 		#print  time.strftime('%b %d, %Y %H:%M',time.localtime(now))
 		#print  time.strftime('%b %d, %Y %H:%M',time.gmtime(self.activityUnix))
-		d = now - self.activityUnix
-		d += time_offset
+		d = now - (self.activityUnix + time_offset)
 		return activity + forumbrowser.durationToShortText(d) + ' ago'
 	
 	def setUserInfo(self,info):
