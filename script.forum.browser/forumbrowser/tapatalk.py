@@ -451,6 +451,7 @@ class PageData:
 		self.prevStart = ps
 		self.topic = data.get('topic_title','')
 		self.tid = ''
+		self.searchID = None
 	
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
@@ -853,6 +854,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return normal, pd
 	
 	def searchThreads(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		if page_data.searchID: sid = page_data.searchID
 		if len(terms)  < self.getConfigInfo('min_search_length',3):
 			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
 		if not callback: callback = self.fakeCallback
@@ -864,6 +866,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				return self.finish(FBData(error=err),donecallback)
 			if not callback(90,self.lang(30103)): break
 			pd = self.getPageData(result,page)
+			pd.searchID = result.get('search_id')
 			threads = result.get('topics',[])
 			for n in threads: self.createThreadDict(n)
 			return self.finish(FBData(threads,pd),donecallback)
@@ -900,6 +903,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				LOG('Search: %s' % err)
 				return self.finish(FBData(error=err),donecallback)
 			pd = self.getPageData(result,page)
+			pd.searchID = result.get('search_id')
 			if not callback(90,self.lang(30103)): break
 			if fid:
 				normal = result.get('topics',[])
@@ -962,7 +966,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
 		if len(terms)  < self.getConfigInfo('min_search_length',3):
 			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
-		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, search=True)
+		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, page_data=page_data,search=True)
 	
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False):
 		if not callback: callback = self.fakeCallback
@@ -985,6 +989,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						pid = ''
 						page = -1
 				if search:
+					if page_data and page_data.searchID: lastid = page_data.searchID
 					thread = self.server.search_post(xmlrpclib.Binary(threadid),page,page + 19,lastid)
 					if not thread.get('result'):
 						err = str(thread.get('result_text',''))
@@ -1011,7 +1016,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			
 			if not callback(80,self.lang(30103)): break
 			pd = self.getPageData(thread,page or 0)
-			pd.tid = threadid
+			pd.searchID = thread.get('search_id')
+			if not search: pd.tid = threadid
 #Tried this for XBMCHub on 02-14-13 but didn't help
 #			if self.apiOK(4) and str(self.forumConfig.get('mark_topic_read')) == '1':
 #				try:
@@ -1128,7 +1134,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False
 		callback(40,self.lang(30106))
-		result = self.server.reply_post(post.fid,post.tid,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
+		fid = post.fid
+		if fid == 'subscriptions': fid = ''
+		result = self.server.reply_post(fid or '',post.tid or '',xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
 		callback(100,self.lang(30052))
 		status = result.get('result',False)
 		if not status:

@@ -1947,7 +1947,7 @@ class RepliesWindow(PageWindow):
 		else:
 			page = '1'
 			if __addon__.getSetting('open_thread_to_newest') == 'true':
-				if not self.searchRE: page = '-1'
+				if not self.search: page = '-1'
 		self.fillRepliesList(FB.getPageData(is_replies=True).getPageNumber(page))
 		
 	def isPM(self):
@@ -2237,9 +2237,9 @@ class RepliesWindow(PageWindow):
 						
 			if self.threadItem:
 				if FB.isThreadSubscribed(self.tid,self.threadItem.getProperty('subscribed')):
-					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getLabel2()[:25])
+					if FB.canUnSubscribeThread(self.tid): d.addItem('unsubscribe',__language__(30240) + ': ' + self.threadItem.getProperty('title')[:25])
 				else:
-					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getLabel2()[:25])
+					if FB.canSubscribeThread(self.tid): d.addItem('subscribe',__language__(30236) + ': ' + self.threadItem.getProperty('title')[:25])
 			if post and item.getProperty('extras'):
 				d.addItem('extras','User/Post Extra Info')
 			if item and FB.canPrivateMessage() and not self.isPM():
@@ -2652,9 +2652,9 @@ class ThreadsWindow(PageWindow):
 				if self.fid != 'subscriptions':
 					if self.forumItem:
 						if FB.isForumSubscribed(self.forumItem.getProperty('id'),self.forumItem.getProperty('subscribed')):
-							if FB.canUnSubscribeForum(self.forumItem.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getLabel()[:25])
+							if FB.canUnSubscribeForum(self.forumItem.getProperty('id')): d.addItem('unsubscribecurrentforum', __language__(30242) + ': ' + self.forumItem.getProperty('topic')[:25])
 						else:
-							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getLabel()[:25])
+							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getProperty('topic')[:25])
 					if FB.canCreateThread(item.getProperty('id')):
 						d.addItem('createthread',__language__(30252))
 				if FB.canSearchAdvanced():
@@ -3251,6 +3251,7 @@ def getSearchDefault(setting,default='',with_global=True,heading='Search Options
 	slistDisplay = slist[:]
 	if with_global:
 		glist = getSetting('last_search',[])
+		glist.reverse()
 		for g in glist:
 			if not g in slist:
 				slistDisplay.insert(0,'[COLOR FFAAAA00]%s[/COLOR]' % g)

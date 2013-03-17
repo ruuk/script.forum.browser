@@ -41,6 +41,11 @@ Focusing wrench tab on forums manager now slides out the buttons. Useful on touc
 Added to the help for the 'Share To Online DB' button 
 Added DST adjustment to post dates
 Added notifications settings 'Open Subscriptions/PMs Window Automatically On Open Forum' and subsetting 'If Both Subs and PMs, Open Subs Window Instead' and updated help
+'Global' search history is now in the correct order
+Fixed a bug causing [COLOR] tags to sometimes appear on the subscribe option when when in a search result
+Fixed pagination for 'Search Posts'
+Fixed errors when posting to a search result thread
+Fixed open to newest post not working properly when opening a thread on a search result
 
 *** 1.4.0 ***
 
