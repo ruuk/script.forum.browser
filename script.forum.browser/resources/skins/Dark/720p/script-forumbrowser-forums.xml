@@ -499,6 +499,7 @@
 			</control>
 			<control  type="group" id="198">
 				<control type="group" id="199">
+					<defaultcontrol>205</defaultcontrol>
 					<posx>20</posx>
 					<posy>665</posy>
 					<control type="group">
@@ -524,7 +525,7 @@
 					</control>
 					
 					<control type="button">
-						<visible>ControlGroup(198).HasFocus(0) + Control.IsEnabled(206)</visible>
+						<visible>ControlGroup(198).HasFocus(0) + Control.IsEnabled(207)</visible>
 						<description>Mouse Focus</description>
 						<onleft>206</onleft>
 						<onup>206</onup>
@@ -602,6 +603,21 @@
 						<focusedcolor>white</focusedcolor>
 					</control>
 					
+					<control type="button">
+						<visible>ControlGroup(198).HasFocus(0) + !Control.IsEnabled(205)</visible>
+						<description>Mouse Focus</description>
+						<onleft>206</onleft>
+						<onup>206</onup>
+						<ondown>206</ondown>
+						<onright>206</onright>
+						<posx>746</posx>
+						<posy>-60</posy>
+						<width>252</width>
+						<height>100</height>
+						<texturefocus></texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					
 					<control type="button" id="205">
 						<animation effect="slide" end="0,-50" time="200" delay="200" condition="ControlGroup(199).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
@@ -629,7 +645,7 @@
 				<control type="button" id="204">
 					<description>Search</description>
 					<visible allowhiddenfocus="true">Control.HasFocus(204)</visible>
-					<onclick>Control.SetFocus(205)</onclick>
+					<onclick>Control.SetFocus(199)</onclick>
 					<onleft>203</onleft>
 					<onright>200</onright>
 					<onup>120</onup>

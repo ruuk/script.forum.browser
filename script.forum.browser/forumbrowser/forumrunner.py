@@ -106,21 +106,24 @@ class ForumPost(forumbrowser.ForumPost):
 	def setVals(self,pdict):
 		self.postId = pdict.get('post_id',pdict.get('id',''))
 		self.tid = pdict.get('thread_id','')
-		self.userName = pdict.get('username','')
-		self.userId = pdict.get('userid','')
+		self.userName = pdict.get('username',pdict.get('post_username',''))
+		self.userId = pdict.get('userid',pdict.get('post_userid',''))
 		self.title = pdict.get('title','')
-		self.message = pdict.get('edittext',self.filterMessage(pdict.get('text',pdict.get('message',''))))
+		self.message = pdict.get('edittext',self.filterMessage(pdict.get('text',pdict.get('message',pdict.get('thread_preview','')))))
 		self.date = pdict.get('post_timestamp',pdict.get('pm_timestamp',''))
 		self.images = pdict.get('images',[])
 		self.thumbs = pdict.get('image_thumbs',[])
 		self.quotable = pdict.get('quotable','')
 		self.avatar = pdict.get('avatarurl','')
-		self.postCount = pdict.get('numposts',0)
+		self.postCount = pdict.get('numposts',pdict.get('posts',0))
 		self.joinDate = pdict.get('joindate',0)
 		self.status = pdict.get('usertitle','')
 		#print self.images
 		#print self.thumbs
 	
+	def update(self,pdict):
+		self.setVals(pdict)
+		
 	def imageURLs(self):
 		return self.MC.imageFilter.findall(self.getMessage())
 		
@@ -137,6 +140,12 @@ class ForumPost(forumbrowser.ForumPost):
 	def messageAsQuote(self):
 		qr = self.FB.getQuoteReplace()
 		return qr.replace('!USER!',self.userName).replace('!POSTID!',self.postId).replace('!USERID!',self.userId).replace('!DATE!',str(int(time.time()))).replace('!QUOTE!',self.quotable)
+	
+	def getMessage(self,skip=False,raw=False):
+		if raw and self.isShort:
+			self.FB.updatePost(self)
+		if self.hideSignature: return self.message
+		return self.message + self.signature
 	
 	def messageToDisplay(self,message):
 		return self.MC.messageToDisplay(message)
@@ -380,7 +389,6 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		normal = sub.get('threads',[])
 		if not callback(70,self.lang(30103)): return None,None
 		for n in normal:
-			print n
 			self.createThreadDict(n)
 			n['subscribed'] = True
 		return normal, pd
@@ -428,7 +436,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 						return online.message
 				for o in online.get('users',online.get('online_users',[])): #online_users is the documented key but not found in practice
 					oDict[o.get('username','?')] = o.get('userid','?')
-					ret.append({'user':str(o.get('username','')),'userid':o.get('userid',''),'avatar':o.get('avatarurl',''),'status':'Online'})
+					ret.append({'user':unicode(o.get('username','')),'userid':o.get('userid',''),'avatar':o.get('avatarurl',''),'status':'Online'})
 				self.online = oDict
 				#print self.online
 			except:
@@ -442,6 +450,102 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			else:
 				return ret
 	
+	def updatePost(self,post):
+		result = self.client.get_post(postid=post.postId)
+		if result: post.update(result)
+	
+	def canGetUserThreads(self): return self.isLoggedIn() and -1 or None
+	
+	def getUserThreads(self,uname=None,page=0,uid=None,callback=None,donecallback=None,page_data=None):
+		return self.searchThreads(None, page, callback=callback, donecallback=donecallback, page_data=page_data, uname=uname, starter=True)		
+	
+	def canGetUserPosts(self): return self.isLoggedIn() and -1 or None
+	
+	def getUserPosts(self,uname=None,page=0,uid=None,callback=None,donecallback=None,page_data=None):			
+		return self.searchReplies(None, page, callback=callback, donecallback=donecallback, page_data=page_data, uname=uname, starter=True)
+	
+	def canSearchPosts(self): return True
+	def canSearchThreads(self): return True
+	def canSearchAdvanced(self,stype=None):
+		if stype == 'UNAME' or stype == 'FID' or stype == 'TID': return True
+		return False
+	
+	def searchAdvanced(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None,fid=None,tid=None,uid=None,uname=None):
+		if uname:
+			return self.searchReplies(terms, page, sid, callback, donecallback, page_data, uname=uname)
+		elif fid:
+			return self.searchThreads(terms, page, sid, callback, donecallback, page_data, fid)
+		elif tid:
+			return self.searchReplies(terms, page, sid, callback, donecallback, page_data, tid=tid)
+		
+	def searchThreads(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None,fid=None,uname=None,starter=False):
+		if page_data and page_data.searchID:
+			result = self.client.search_searchid(searchid=page_data.searchID,page=page,perpage=20)
+		else:
+			if fid:
+				result = self.client.search(query=terms,forumid=fid,page=page,perpage=20)
+			elif starter:
+				result = self.client.search(starteronly=1,searchuser=uname,page=page,perpage=20)
+			else:
+				result = self.client.search(query=terms,page=page,perpage=20)
+		if not result.get('threads'): return self.finish(FBData(error='NO THREADS'),donecallback)
+		if result['threads'][0] and 'error' in result['threads'][0]:
+			return self.finish(FBData(error=result['threads'][0]['error']),donecallback)
+			
+		threads = []
+		for t in result.get('threads'): threads.append(self.createThreadDict(t))
+		total = int(result.get('total_threads',1))
+		current = len(result.get('threads',[]))
+		pd = self.getPageData(page=page,total_items=total,current_total=current)
+		pd.searchID = result.get('searchid')
+		return self.finish(FBData(threads,pd),donecallback)
+		
+	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None,uname=None,tid=None,starter=False):
+		if page_data and page_data.searchID:
+			result = self.client.search_searchid(searchid=page_data.searchID,page=page,perpage=20)
+		else:
+			if starter:
+				result = self.client.search(starteronly=1,searchuser=uname,showposts=1,page=page,perpage=20)
+			elif uname:
+				result = self.client.search(query=terms,searchuser=uname,showposts=1,page=page,perpage=20)
+			elif tid:
+				result = self.client.search(query=terms,searchthreadid=tid,showposts=1,page=page,perpage=20)
+			else:
+				result = self.client.search(query=terms,showposts=1,page=page,perpage=20)
+		if not result.get('threads'): return self.finish(FBData(error='NO THREADS'),donecallback)
+		if result['threads'][0] and 'error' in result['threads'][0]:
+			return self.finish(FBData(error=result['threads'][0]['error']),donecallback)
+		total = int(result.get('total_threads',1))
+		current = len(result.get('threads',[]))
+		pd = self.getPageData(page=page,total_items=total,current_total=current)
+		pd.searchID = result.get('searchid')
+		posts = []
+		ct = pd.current + 1
+		oDict = self.getOnlineUsers()
+		profiles = {}
+		for p in result.get('threads'):
+			if self.isLoggedIn():
+				if p.get('post_userid') in profiles:
+					profile = profiles[p.get('post_userid')]
+				else:
+					profile = self.client.get_profile(userid=p.get('post_userid'))
+					
+				profiles[p.get('post_userid')] = profile
+				if isinstance(profile,dict):
+					profile.update(p)
+					p = profile
+			fp = self.getForumPost(p)
+			fp.isShort = True
+			fp.postNumber = ct
+			fp.online = fp.userName in self.online
+			for o in oDict:
+				if fp.userId == o.get('userid'):
+					fp.avatar = fp.avatar or o.get('avatar')
+			posts.append(fp)
+			ct+=1
+		
+		return self.finish(FBData(posts,pd),donecallback)
+		
 	def getReplies(self,threadid,forumid,page=1,lastid='',pid='',callback=None,donecallback=None,announcement=False,page_data=None):
 		if not callback: callback = self.fakeCallback
 		while True:
@@ -501,7 +605,6 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	
 	def getAnnouncement(self,aid,callback=None,donecallback=None):
 		return self.getReplies(aid, None, callback=callback, donecallback=donecallback,announcement=True)
-		
 	
 	def getPMBoxes(self,update=True,callback_percent=5):
 		if not update and self.pmBoxes: return self.pmBoxes

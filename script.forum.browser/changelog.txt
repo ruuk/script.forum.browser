@@ -5,8 +5,8 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Check on optional import behavior
-  Forumrunner search
   Check for new parser rules automatically or add option to check for new rules
+  Somehow handle Notifications dialog opening when Forum Browser is open
   
  Long Term:
   Image zoom/rotate etc
@@ -31,7 +31,14 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.1
+Current Version : 1.4.2
+
+*** 1.4.2 ***
+
+Disabling the the keyboard mod will now cause the mod to be removed
+Mod install/removal now only needs FB restart instead of XBMC restart. It wouldn't need any restart, but reloading the skin while FB is open apparently crashes XBMC
+Forumrummer: Search now working here too
+Time offset is now in format -mmm:ss. The original offset I added this for turned out to be a daylight savings issue. While this can still be used to correct large offsets, it is most useful, for example, on xbmc.org which currently has it's time off by about 14:30 :)
 
 *** 1.4.1 ***
 

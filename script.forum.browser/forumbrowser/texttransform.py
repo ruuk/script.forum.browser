@@ -582,7 +582,6 @@ class BBMessageConverter(MessageConverter):
 		return self.listItemFilter2.sub(self.processItem2,html)
 	
 	def processItem1(self,m):
-		print m.group(0)
 		if not m.group(1).strip(): return ''
 		self.ordered_count += 1
 		if self.ordered: bullet = str(self.ordered_count) + '. '

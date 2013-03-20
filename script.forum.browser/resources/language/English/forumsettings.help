@@ -16,15 +16,15 @@ There are built in attributes, as well as anything listed in the user extra info
 Examples: status, postcount, reputation, joindate, location, homepage, platform
 @item:time_offset_hours
 Used to correct displayed time being offset from your local time.
-You should set the value to the number of hours the forum is offset from your time.
-For instance when your activity shows '1h ago' when it shoud be '3s ago', you would set this to -1.
+You should set the value to the number of minutes and seconds the forum is offset from your time.
+For instance when your activity shows '1h ago' when it shoud be '3s ago', you would set this to 57:00.
 
-Value must be an integer and can be positive or negative.
+Value must be in the format -mmm:ss and can be positive or negative.
 
 [B]Examples:[/B]
-  1
-  -1
-  2
+  110:05
+  -4:15
+  28
 @item:description
 Allows you to edit the forum description. If you want to change the Online DataBase description, share the forum to the ODB after editing.
 @item:logo

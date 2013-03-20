@@ -56,12 +56,12 @@
 				<description>Caption</description>
 				<posx>35</posx>
 				<posy>14</posy>
-				<width>200</width>
+				<width>600</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
-				<align>center</align>
+				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			

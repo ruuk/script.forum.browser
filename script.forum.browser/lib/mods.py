@@ -63,6 +63,21 @@ def getSkinVersion(skin_path):
 	return acontent.split('<addon',1)[-1].split('version="',1)[-1].split('"',1)[0]
 	
 
+def getSkinFilePath(skinPath,skinFile):
+	skinPath = os.path.join(skinPath,'720p',skinFile)
+	if not os.path.exists(skinPath): skinPath = os.path.join(skinPath,'1080i',skinFile)
+	if not os.path.exists(skinPath): return None
+	return skinPath
+	
+def checkKBModRemove(skinPath):
+		backupPath = getSkinFilePath(skinPath,'DialogKeyboard.xml.FBbackup')
+		dialogPath = getSkinFilePath(skinPath,'DialogKeyboard.xml')
+		if backupPath and dialogPath:
+			xbmcvfs.delete(dialogPath)
+			xbmcvfs.rename(backupPath,dialogPath)
+			dialogs.showMessage('Keyboard Mod Removed','Keyboard Mod Removed',' ','Forum Browser will need to be restarted before it takes effect.')
+			return True
+				
 def checkForSkinMods():
 	skinPath = xbmc.translatePath('special://skin')
 	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
@@ -75,7 +90,7 @@ def checkForSkinMods():
 	LOG('XBMC Skin   (Home): %s %s' % (skinName,version2))
 	if __addon__.getSetting('use_skin_mods') != 'true':
 		LOG('Skin mods disabled')
-		return			
+		return checkKBModRemove(localSkinPath)
 	font = os.path.join(localSkinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	install = True
 	if os.path.exists(font):
@@ -89,7 +104,8 @@ def checkForSkinMods():
 					install = False
 	if not install and not getSetting('use_keyboard_mod',False):
 		LOG('Keyboard mod disabled')
-		return
+		return checkKBModRemove(localSkinPath)
+	
 	dialogPath = os.path.join(localSkinPath,'720p','DialogKeyboard.xml')
 	if not os.path.exists(dialogPath): dialogPath = os.path.join(localSkinPath,'1080i','DialogKeyboard.xml')
 	if os.path.exists(dialogPath):
@@ -99,13 +115,13 @@ def checkForSkinMods():
 			return
 	
 	dialogs.showInfo('skinmods')
-	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires XBMC restart to take effect.)','Install now?')
+	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires Forum Browser restart to take effect.)','Install now?')
 	if not yes:
 		__addon__.setSetting('use_skin_mods','false')
 		dialogs.showMessage('Aborted','','Skin modifications were [B]NOT[/B] installed',"[CR]Enable 'Use skin modifications (Recommended)' in settings if you want to install them at a later time.")
 		return
 	LOG('Installing Skin Mods')
-	installSkinMods()
+	return installSkinMods()
 
 def installSkinMods(update=False):
 	if not getSetting('use_skin_mods',False): return
@@ -137,7 +153,7 @@ def installSkinMods(update=False):
 		finally:
 			dialog.close()
 		#restart = True
-		dialogs.showMessage('Success','Files copied.','XBMC needs to be restarted','for mod to take effect',success=True)
+		dialogs.showMessage('Success','Files copied.','Forum Browser needs to be restarted','for mod to take effect',success=True)
 		
 	skinPath = localSkinPath
 	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.xml')
@@ -194,6 +210,7 @@ def installSkinMods(update=False):
 		dialogs.showMessage('Done','','Keyboard installed')
 	else:
 		dialogs.showMessage('Aborted','','Keyboard [B]NOT[/B] installed',"[CR]Enable 'Use keyboard mod' in settings if you want to install it at a later time.")
+	return True
 
 def chooseKeyboardFile(fbPath,currentSkin):
 	files = os.listdir(os.path.join(fbPath,'keyboard'))

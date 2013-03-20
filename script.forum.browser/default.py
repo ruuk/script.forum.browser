@@ -117,6 +117,8 @@ def _processSetting(setting,default):
 def setSetting(key,value):
 	if isinstance(value,list):
 		value = ':!,!:'.join(value)
+	elif isinstance(value,bool):
+		value = value and 'true' or 'false'
 	__addon__.setSetting(key,value)
 	
 FB = None
@@ -788,6 +790,17 @@ class ForumSettingsDialog(BaseWindowDialog):
 			except:
 				dialogs.showMessage('Bad Value','Value must be an integer.')
 				return False
+		elif vtype == 'text.time':
+			if not val: return True
+			if val.startswith('-'): val = val[1:]
+			if not ':' in val:
+				if val.isdigit() and len(val) < 3: return True
+			else:
+				left, right = val.split(':',1)
+				left = left or '00'
+				if left.isdigit() and right.isdigit() and len(right) == 2: return True
+			dialogs.showMessage('Bad Value','Value must be in format -mmm:ss')
+			return False
 		return True
 				
 	def refreshImage(self):
@@ -827,7 +840,7 @@ def editForumSettings(forumID):
 	w.addItem('password','Login Password',sett.get('password',''),'text.password')
 	w.addItem('notify','Notifications',sett.get('notify',''),'boolean')
 	w.addItem('extras','Post Attributes',sett.get('extras',''),'text')
-	w.addItem('time_offset_hours','Time Offset',sett.get('time_offset_hours',''),'text.integer')
+	w.addItem('time_offset_hours','Time Offset',sett.get('time_offset_hours',''),'text.time')
 	w.addSep()
 	w.addItem('description','Description',fdata.description,'text.long')
 	w.addItem('logo','Logo',fdata.urls.get('logo',''),'webimage.' + fdata.forumURL())
@@ -1891,7 +1904,17 @@ class RepliesWindow(PageWindow):
 		self.firstRun = True
 		self.started = False
 		self.currentPMBox = {}
-		self.timeOffset = getForumSetting(FB.getForumID(),'time_offset_hours',0)
+		self.timeOffset = 0
+		timeOffset = getForumSetting(FB.getForumID(),'time_offset_hours','').replace(':','')
+		if timeOffset:
+			negative = timeOffset.startswith('-') and -1 or 1
+			timeOffset = timeOffset.strip('-')
+			seconds = timeOffset[-2:] or 0
+			minutes = timeOffset[:-2] or 0
+			try:
+				self.timeOffset = negative * ((int(minutes) * 60) + int(seconds)) 
+			except:
+				pass 
 	
 	def onInit(self):
 		BaseWindow.onInit(self)
@@ -1971,7 +1994,7 @@ class RepliesWindow(PageWindow):
 		elif self.search:
 			if self.search == '@!RECENT!@':
 				t = self.getThread(FB.getUserPosts,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='USER-RECENT-POSTS')
-				t.setArgs(uname=self.search_uname,uid=self.uid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+				t.setArgs(uname=self.search_uname,page=page or 0,uid=self.uid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 			elif self.uid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillRepliesList,errorCallback=self.errorCallback,name='UID-SEARCHPOSTS')
 				t.setArgs(self.search,page,sid=self.lastid,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,uid=self.uid)
@@ -2014,16 +2037,16 @@ class RepliesWindow(PageWindow):
 		if post.avatar: url = FB.makeURL(post.avatar)
 		post.avatarFinal = url
 		self.setMessageProperty(post,item,True)
-		item.setProperty('post',post.postId)
+		item.setProperty('post',str(post.postId))
 		item.setProperty('avatar',url)
 		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
-		item.setProperty('date',post.getDate(self.timeOffset * 3600))
+		item.setProperty('date',post.getDate(self.timeOffset))
 		item.setProperty('online',post.online and 'online' or '')
 		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
 		if post.online:
-			item.setProperty('activity',post.getActivity(self.timeOffset * 3600))
+			item.setProperty('activity',post.getActivity(self.timeOffset))
 		else:
-			item.setProperty('last_seen',post.getActivity(self.timeOffset * 3600))
+			item.setProperty('last_seen',post.getActivity(self.timeOffset))
 		if showIndicators:
 			hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
 			item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
@@ -2032,8 +2055,8 @@ class RepliesWindow(PageWindow):
 		extras = post.getExtras()
 		for a in alt:
 			val = extras.get(a)
-			if val != None and str(val):
-				edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(str(val))) or ''
+			if val != None and unicode(val):
+				edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(unicode(val))) or ''
 				del extras[a]
 				altused.append(a)
 				if item.getProperty('alternate1'):
@@ -2465,7 +2488,7 @@ class ThreadsWindow(PageWindow):
 		elif self.search:
 			if self.search == '@!RECENTTHREADS!@':
 				t = self.getThread(FB.getUserThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='USERRECENTTHREADS')
-				t.setArgs(uname=self.search_uname,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+				t.setArgs(uname=self.search_uname,page=page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 			elif self.fid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
 				t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,fid=self.fid)
@@ -2657,7 +2680,7 @@ class ThreadsWindow(PageWindow):
 							if FB.canSubscribeForum(self.forumItem.getProperty('id')): d.addItem('subscribecurrentforum', __language__(30243) + ': ' + self.forumItem.getProperty('topic')[:25])
 					if FB.canCreateThread(item.getProperty('id')):
 						d.addItem('createthread',__language__(30252))
-				if FB.canSearchAdvanced():
+				if FB.canSearchAdvanced('TID'):
 					d.addItem('search','Search [B][I]%s[/I][/B]' % item.getProperty('title')[:30])
 			d.addItem('help',__language__(30244))
 		finally:
@@ -3050,7 +3073,7 @@ class ForumsWindow(BaseWindow):
 	def showOnlineContext(self,menu,item):
 		d = dialogs.ChoiceMenu('Options')
 		if FB.canPrivateMessage(): d.addItem('pm',__language__(30253) % item.get('disp'))
-		if FB.canSearchAdvanced(): d.addItem('search','Search Posts Of %s' % item.get('disp'))
+		if FB.canSearchAdvanced('UID'): d.addItem('search','Search Posts Of %s' % item.get('disp'))
 		if FB.canGetUserInfo(): d.addItem('info','View User Info')
 		result = d.getResult()
 		if not result: return
@@ -3153,7 +3176,7 @@ class ForumsWindow(BaseWindow):
 						if FB.canUnSubscribeForum(fid): d.addItem('unsubscribecurrentforum', __language__(30242))
 					else:
 						if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', __language__(30243))
-					if FB.canSearchAdvanced():
+					if FB.canSearchAdvanced('FID'):
 						d.addItem('search','Search [B][I]%s[/I][/B]' % item.getProperty('topic')[:30])
 				if FB.canGetOnlineUsers():
 					d.addItem('online','View Online Users')
@@ -3218,9 +3241,10 @@ class ForumsWindow(BaseWindow):
 		loggedIn = FB.isLoggedIn()
 		self.getControl(201).setEnabled(loggedIn and FB.hasSubscriptions())
 		self.getControl(203).setEnabled(loggedIn and FB.hasPM())
-		self.getControl(204).setEnabled(loggedIn and FB.canSearch())
-		self.getControl(205).setEnabled(loggedIn and FB.canSearchPosts())
-		self.getControl(206).setEnabled(loggedIn and FB.canSearchThreads())
+		self.getControl(204).setEnabled(FB.canSearch())
+		self.getControl(205).setEnabled(FB.canSearchPosts())
+		self.getControl(206).setEnabled(FB.canSearchThreads())
+		self.getControl(207).setEnabled(FB.canSearchAdvanced('UNAME'))
 		
 	def openSettings(self):
 		#if not FB: return
@@ -3615,7 +3639,9 @@ def doSettings(window=None):
 	global DEBUG
 	DEBUG = getSetting('debug',False)
 	if FB: FB.MC.resetRegex()
-	mods.checkForSkinMods()
+	if mods.checkForSkinMods():
+		setSetting('refresh_skin',True)
+	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 
 def forumsManager(window=None,size='full',forumID=None):
 	if size == 'small':
@@ -4380,7 +4406,10 @@ def startForumBrowser(forumID=None):
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	try:
-		mods.checkForSkinMods()
+		if mods.checkForSkinMods() or getSetting('refresh_skin',False):
+			LOG('Skin Mods Changed: Reloading Skin')
+			xbmc.executebuiltin('ReloadSkin()')
+			setSetting('refresh_skin',False)
 	except:
 		ERROR('Error Installing Skin Mods')
 

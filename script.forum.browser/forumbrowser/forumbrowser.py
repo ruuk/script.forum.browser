@@ -523,6 +523,7 @@ class PageData:
 		self.topic = ''
 		self.tid = ''
 		self.isReplies = is_replies
+		self.searchID = None
 	
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
@@ -942,7 +943,7 @@ class ForumBrowser:
 						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
 						'image':'\[img\](?P<url>[^\[]+?)\[/img\](?is)',
-						'link':'\[(?:url|video)="?(?P<url>[^\"\]]+?)"?\](?P<text>.+?)\[/(?:url|video)\](?is)',
+						'link':'\[(?:url|video|ame)="?(?P<url>[^\"\]]+?)"?\](?P<text>.+?)\[/(?:url|video|ame)\](?is)',
 						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
 						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
 						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
@@ -1043,7 +1044,7 @@ class ForumBrowser:
 	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads() or self.canSearchAdvanced()
 	def canSearchPosts(self): return False
 	def canSearchThreads(self): return False
-	def canSearchAdvanced(self): return False
+	def canSearchAdvanced(self,stype=None): return False
 	
 	def canSubscribeThread(self,tid): return False
 	def canUnSubscribeThread(self,tid): return False

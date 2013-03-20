@@ -917,7 +917,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			donecallback(None,None)
 		return (None,None)
 	
-	def getUserThreads(self,uname=None,uid=None,callback=None,donecallback=None,page_data=None):
+	def getUserThreads(self,uname=None,page=None,uid=None,callback=None,donecallback=None,page_data=None):
 		result = None
 		if self.apiOK(4):
 			if not uid: uid = self.getUserInfo(uid, uname).ID
@@ -931,7 +931,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		pd = page_data or PageData(self)
 		return self.finish(FBData(result,pd),donecallback)
 	
-	def getUserPosts(self,uname=None,uid=None,callback=None,donecallback=None,page_data=None):
+	def getUserPosts(self,uname=None,page=None,uid=None,callback=None,donecallback=None,page_data=None):
 		result = self.server.get_user_reply_post(xmlrpclib.Binary(uname))
 		if 'result' in result and not result['result']:
 			error = str(result.get('result_text'))
@@ -959,9 +959,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def canGetUserPosts(self): return 50
 	def canGetUserThreads(self): return 50
 	
-	def canSearchPosts(self): return True
-	def canSearchThreads(self): return True
-	def canSearchAdvanced(self): return self.getConfigInfo('advanced_search', False)
+	def canSearch(self): return self.getConfigInfo('guest_search', True) or self.isLoggedIn()
+	def canSearchPosts(self): return self.canSearch()
+	def canSearchThreads(self): return self.canSearch()
+	def canSearchAdvanced(self,stype=None): return self.canSearch() and self.getConfigInfo('advanced_search', False)
 	
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
 		if len(terms)  < self.getConfigInfo('min_search_length',3):
