@@ -38,10 +38,12 @@ def clearDirFiles(filepath):
 		f = os.path.join(filepath,f)
 		if os.path.isfile(f): os.remove(f)
 				
-def doKeyboard(prompt,default='',hidden=False):
+def doKeyboard(prompt,default='',hidden=False,mod=False):
+	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
 	keyboard.doModal()
+	xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
 

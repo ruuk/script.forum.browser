@@ -4,7 +4,8 @@
 	<include>dialogeffect7</include>
 	<coordinates>
 		<posx>0</posx>
-		<posy>265</posy>
+		<posy>175</posy>
+		<origin x="0" y="265">StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</origin>
 	</coordinates>
 	<controls>
 		<control type="group">
@@ -14,14 +15,14 @@
 			<!--  <include name="T-KeyboardInput1"> -->
 			<control type="image">
 				<posx>337</posx>
-				<posy>-170</posy>
+				<posy>30</posy>
 				<width>624</width>
-				<height>260</height>
+				<height>60</height>
 				<texture border="0,45,0,0">keyboard-input.png</texture>
-				<animation effect="zoom" start="337,90,624,1" end="337,-170,624,260" time="300" delay="300">WindowOpen</animation>
-				<animation effect="zoom" start="337,-170,624,260" end="337,90,624,1" time="200" delay="150">WindowClose</animation>
+				<animation effect="zoom" start="337,90,624,1" end="337,-170,624,60" time="300" delay="300">WindowOpen</animation>
+				<animation effect="zoom" start="337,30,624,60" end="337,90,624,1" time="200" delay="150">WindowClose</animation>
 				<include>T-Level</include>
-				<visible>Skin.HasSetting(HateTransparency)</visible>
+				<visible>Skin.HasSetting(HateTransparency) + !StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
 				<posx>337</posx>
@@ -31,6 +32,28 @@
 				<texture border="0,45,0,0">keyboard-input.png</texture>
 				<animation effect="zoom" start="337,90,624,1" end="337,-170,624,260" time="300" delay="300">WindowOpen</animation>
 				<animation effect="zoom" start="337,-170,624,260" end="337,90,624,1" time="200" delay="150">WindowClose</animation>
+				<include>T-Level</include>
+				<visible>Skin.HasSetting(HateTransparency) + StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>337</posx>
+				<posy>30</posy>
+				<width>624</width>
+				<height>60</height>
+				<texture border="0,45,0,0">keyboard-input.png</texture>
+				<animation effect="zoom" start="337,90,624,1" end="337,-170,624,60" time="300" delay="300">WindowOpen</animation>
+				<animation effect="zoom" start="337,30,624,60" end="337,90,624,1" time="200" delay="150">WindowClose</animation>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>337</posx>
+				<posy>-170</posy>
+				<width>624</width>
+				<height>260</height>
+				<texture border="0,45,0,0">keyboard-input.png</texture>
+				<animation effect="zoom" start="337,90,624,1" end="337,-170,624,260" time="300" delay="300">WindowOpen</animation>
+				<animation effect="zoom" start="337,-170,624,260" end="337,90,624,1" time="200" delay="150">WindowClose</animation>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="button">
 				<posx>902</posx>
@@ -47,7 +70,7 @@
 			<control type="label" id="311">
 				<description>dialog Heading</description>
 				<posx>342</posx>
-				<posy>-166</posy>
+				<posy>34</posy>
 				<width>600</width>
 				<height>30</height>
 				<font>font-23</font>
@@ -56,11 +79,12 @@
 				<aligny>center</aligny>
 				<animation effect="fade" start="0" end="100" time="200" delay="500">WindowOpen</animation>
 				<animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+				<animation effect="slide" end="0,-200" time="200" delay="500" condition="StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)">Conditional</animation>
 			</control>
 			<control type="label" id="310">
 				<description>Edit Text</description>
 				<posx>352</posx>
-				<posy>-142</posy>
+				<posy>60</posy>
 				<width>580</width>
 				<height>210</height>
 				<font>font-23</font>
@@ -69,6 +93,7 @@
 				<wrapmultiline>true</wrapmultiline>
 				<animation effect="fade" start="0" end="100" time="200" delay="500">WindowOpen</animation>
 				<animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+				<animation effect="slide" end="0,-200" time="0" delay="0" condition="StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)">Conditional</animation>
 			</control>
 			<control type="image">
 				<posx>295</posx>

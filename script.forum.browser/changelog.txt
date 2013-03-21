@@ -31,7 +31,12 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.2
+Current Version : 1.4.3
+
+*** 1.4.3 ***
+
+Keyboard mods now can change between "Normal" and mod appearance, and "Normal" is moved down some to accommodate captchas
+Keyboard now only displays modified view when editing posts 
 
 *** 1.4.2 ***
 

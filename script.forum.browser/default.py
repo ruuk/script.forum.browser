@@ -1328,7 +1328,7 @@ class LinePostDialog(PostDialog):
 	def paste(self,before=False):
 		share = CLIPBOARD.getClipboard()
 		if share.shareType == 'link':
-			text = dialogs.doKeyboard('Enter Link Text')
+			text = dialogs.doKeyboard('Enter Link Text',mod=True)
 			if not text: text = share.page
 			paste = '[url=%s]%s[/url]' % (share.page,text)
 		elif share.shareType == 'image':
@@ -1365,7 +1365,7 @@ class LinePostDialog(PostDialog):
 					.replace('[/COLOR]','[/color]')
 			
 	def addLineSingle(self,line=None,before=False,update=True):
-		if line == None: line = dialogs.doKeyboard(__language__(30123),'')
+		if line == None: line = dialogs.doKeyboard(__language__(30123),'',mod=True)
 		if line == None: return False
 		if before:
 			clist = self.getControl(120)
@@ -1402,7 +1402,7 @@ class LinePostDialog(PostDialog):
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return
-		line = dialogs.doKeyboard(__language__(30124),item.getLabel())
+		line = dialogs.doKeyboard(__language__(30124),item.getLabel(),mod=True)
 		if line == None: return False
 		item.setProperty('text',line)
 		item.setLabel(self.displayLine(line))

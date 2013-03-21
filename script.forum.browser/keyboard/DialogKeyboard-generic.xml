@@ -4,7 +4,8 @@
 	<coordinates>
 		<system>2</system>
 		<posx>255</posx>
-		<posy>50</posy>
+		<posy>200</posy>
+		<origin x="255" y="50">StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</origin>
 	</coordinates>
 	<controls>
 		<control type="group">
@@ -13,9 +14,27 @@
 				<posx>0</posx>
 				<posy>-5</posy>
 				<width>780</width>
+				<height>410</height>
+				<texture border="40">forum-browser-keyboard/forum-browser-white-box.png</texture>
+				<colordiffuse>AA000000</colordiffuse>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>-5</posy>
+				<width>780</width>
 				<height>610</height>
 				<texture border="40">forum-browser-keyboard/forum-browser-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>760</width>
+				<height>385</height>
+				<texture border="40">forum-browser-keyboard/forum-browser-black-boxr.png</texture>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
 				<posx>0</posx>
@@ -23,6 +42,7 @@
 				<width>760</width>
 				<height>585</height>
 				<texture border="40">forum-browser-keyboard/forum-browser-black-boxr.png</texture>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="label" id="311">
 				<description>header label</description>
@@ -56,14 +76,24 @@
 				<posx>40</posx>
 				<posy>49</posy>
 				<width>680</width>
+				<height>60</height>
+				<aspectratio>stretch</aspectratio>
+				<texture border="20">forum-browser-keyboard/forum-browser-white-boxr.png</texture>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>40</posx>
+				<posy>49</posy>
+				<width>680</width>
 				<height>260</height>
 				<aspectratio>stretch</aspectratio>
 				<texture border="20">forum-browser-keyboard/forum-browser-white-boxr.png</texture>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="label" id="310">
 				<description>Edit Text</description>
 				<posx>55</posx>
-				<posy>52</posy>
+				<posy>55</posy>
 				<width>650</width>
 				<height>220</height>
 				<font>font13</font>
@@ -74,7 +104,8 @@
 			</control>
 			<control type="group">
 				<posx>30</posx>
-				<posy>320</posy>
+				<posy>120</posy>
+				<animation effect="slide" end="0,200" time="0" delay="0" condition="StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)">Conditional</animation>
 				<control type="button" id="300">
 					<description>DONE button</description>
 					<posx>0</posx>
