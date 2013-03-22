@@ -42,7 +42,7 @@ Encryption options are available in the addon settings under 'Advanced'.
 @item:help
 Change forums, view notifications info and manage forums.
 
-The list displays the an icon for the forum interface, the forum name, the unread/total subscriptions and the unread PM count.
+The list displays an icon for the forum interface, the forum name, the unread/total subscriptions and the unread PM count.
 
 Select a forum to change to that forum. The context menu button will toggle notifications for the selected forum when navigating the forums list and will show help for the selected button when navigating the buttons.
 @item:parserbrowser

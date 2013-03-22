@@ -46,7 +46,7 @@ def copyTree(source,target,dialog=None):
 		subpath = path[sourcelen:]
 		xbmcvfs.mkdir(os.path.join(target,subpath))
 		for f in files:
-			if dialog: dialog.update(pct,'Copying files:',f)
+			if dialog: dialog.update(pct,__language__(30478),f)
 			xbmcvfs.copy(os.path.join(path,f),os.path.join(target,subpath,f))
 			pct += mod
 			if pct > 100:
@@ -75,7 +75,7 @@ def checkKBModRemove(skinPath):
 		if backupPath and dialogPath:
 			xbmcvfs.delete(dialogPath)
 			xbmcvfs.rename(backupPath,dialogPath)
-			dialogs.showMessage('Keyboard Mod Removed','Keyboard Mod Removed',' ','Forum Browser will need to be restarted before it takes effect.')
+			dialogs.showMessage(__language__(30476),__language__(30476),' ',__language__(30477))
 			return True
 				
 def checkForSkinMods():
@@ -115,10 +115,10 @@ def checkForSkinMods():
 			return
 	
 	dialogs.showInfo('skinmods')
-	yes = xbmcgui.Dialog().yesno('Skin Mods','Recommended skin modifications not installed.','(Requires Forum Browser restart to take effect.)','Install now?')
+	yes = xbmcgui.Dialog().yesno(__language__(30479),__language__(30480),__language__(30481),__language__(30482))
 	if not yes:
 		__addon__.setSetting('use_skin_mods','false')
-		dialogs.showMessage('Aborted','','Skin modifications were [B]NOT[/B] installed',"[CR]Enable 'Use skin modifications (Recommended)' in settings if you want to install them at a later time.")
+		dialogs.showMessage(__language__(30482),__language__(30484),' ',__language__(30485))
 		return
 	LOG('Installing Skin Mods')
 	return installSkinMods()
@@ -139,21 +139,20 @@ def installSkinMods(update=False):
 	version2 = getSkinVersion(localSkinPath)
 	
 	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
-		yesno = xbmcgui.Dialog().yesno('Skin Mod Install',currentSkin + ' skin not installed in user path.','Click Yes to copy,','click No to Abort')
-		#yesno = xbmcgui.Dialog().yesno('Skin Mod Install','Skin files need to be copied to user path.','Click Yes to copy,','click No to Abort')
+		yesno = xbmcgui.Dialog().yesno(__language__(30484),__language__(30487).format(currentSkin),__language__(30488),__language__(30489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
-		dialog.create('Copying Files','Please wait...')
+		dialog.create(__language__(30490),__language__(30491))
 		try:
 			copyTree(skinPath,localSkinPath,dialog)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
-			dialogs.showMessage('Error',err,'Failed to copy files, aborting.',error=True)
+			dialogs.showMessage(__language__(30050),err,__language__(30492),error=True)
 			return
 		finally:
 			dialog.close()
 		#restart = True
-		dialogs.showMessage('Success','Files copied.','Forum Browser needs to be restarted','for mod to take effect',success=True)
+		dialogs.showMessage(__language__(30304),__language__(30493),__language__(30494),success=True)
 		
 	skinPath = localSkinPath
 	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.xml')
@@ -185,16 +184,16 @@ def installSkinMods(update=False):
 		original = open(fontPath,'r').read()
 		modded = original.replace('<font>',open(sourceFontXMLPath,'r').read() + '<font>',1)
 		open(fontPath,'w').write(modded)
-	dialogs.showMessage('Done','','Font installed')
+	dialogs.showMessage(__language__(30052),'',__language__(30495))
 	
-	if update and not getSetting('use_keyboard_mod',False): return
+	if update and not getSetting('use_keyboard_mod',False): return True
 	
-	yes = xbmcgui.Dialog().yesno('Keyboard Mod','Install keyboard skin mod?','THIS WILL REPLACE THE CURRENT XBMC KEYBOARD')
+	yes = xbmcgui.Dialog().yesno(__language__(30496),__language__(30497),__language__(30498))
 	setSetting('use_keyboard_mod',yes and 'true' or 'false')
 	
 	if yes:
 		keyboardFile = chooseKeyboardFile(fbPath,currentSkin)
-		if not keyboardFile: return
+		if not keyboardFile: return True
 		sourcePath = os.path.join(fbPath,'keyboard',keyboardFile)
 		LOG('Keyboard source path: %s' % sourcePath)
 		copyKeyboardModImages(skinPath)
@@ -207,9 +206,9 @@ def installSkinMods(update=False):
 			LOG('Replacing DialogKeyboard.xml with: ' + sourcePath)
 			os.remove(dialogPath)
 			open(dialogPath,'w').write(open(sourcePath,'r').read())
-		dialogs.showMessage('Done','','Keyboard installed')
+		dialogs.showMessage(__language__(30052),'',__language__(30499))
 	else:
-		dialogs.showMessage('Aborted','','Keyboard [B]NOT[/B] installed',"[CR]Enable 'Use keyboard mod' in settings if you want to install it at a later time.")
+		dialogs.showMessage(__language__(30483),__language__(30521),' ',__language__(30522))
 	return True
 
 def chooseKeyboardFile(fbPath,currentSkin):
@@ -219,6 +218,6 @@ def chooseKeyboardFile(fbPath,currentSkin):
 		if f.startswith('DialogKeyboard-'):
 			skinName = f.split('-',1)[-1].rsplit('.',1)[0].lower()
 			if skinName in currentSkin.lower() or skinName == 'generic': skins.append(skinName.title())
-	idx = xbmcgui.Dialog().select('Select Skin',skins)
+	idx = xbmcgui.Dialog().select(__language__(30523),skins)
 	if idx < 0: return None
 	return 'DialogKeyboard-%s.xml' % skins[idx].lower()

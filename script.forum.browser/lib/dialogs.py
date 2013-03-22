@@ -464,11 +464,11 @@ class ImageChoiceMenu(ChoiceMenu):
 		return self.items[result]['id']
 
 def getHexColor(hexc=None):
-	hexc = doKeyboard('Enter 6-Digit Hex Color',default=hexc)
+	hexc = doKeyboard(__language__(30475),default=hexc)
 	if not hexc: return None
 	while len(hexc) != 6 or re.search('[^1234567890abcdef](?i)',hexc):
-		showMessage('Error','Invalid Hex Color')
-		hexc = doKeyboard('Enter 6-Digit Hex Color',default=hexc)
+		showMessage(__language__(30050),__language__(30474))
+		hexc = doKeyboard(__language__(30475),default=hexc)
 		if not hexc: return None
 	return hexc
 

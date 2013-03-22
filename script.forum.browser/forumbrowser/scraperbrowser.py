@@ -1118,7 +1118,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.browser[self.forms[pre + 'post_message']] = post.message
 			self.setControls(pre + 'post_controls%s')
 			wait = int(self.forms.get(pre + 'post_submit_wait',0))
-			if wait: callback(60,__language__(30107) % wait)
+			if wait: callback(60,__language__(30107).format(wait))
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
 			callback(80,__language__(30106))
 			res = self.browserSubmit(name=self.forms.get(pre + 'post_submit_name'),label=self.forms.get(pre + 'post_submit_value'))

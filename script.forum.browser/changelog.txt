@@ -5,10 +5,11 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Check on optional import behavior
-  Check for new parser rules automatically or add option to check for new rules
   Somehow handle Notifications dialog opening when Forum Browser is open
+  Finish translation system updating
   
  Long Term:
+ Check for new parser rules automatically or add option to check for new rules
   Image zoom/rotate etc
   Look at using the AlarmClock builtin for the service - Easier to restart and less overall memory usage perhaps?
   When adding a forum, ask for logo background color (or image?) or ask later
@@ -31,7 +32,14 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.3
+Current Version : 1.4.4
+
+*** 1.4.4 ***
+
+Convert raw strings into translatable strings
+Choose logo splash now stays until logo list appears
+Improved dialogs with custom buttons for edit/browsing logo and clear/browse existing login url
+Changes to ensure skin refreshed on FB restart after installing/removing skin mod
 
 *** 1.4.3 ***
 

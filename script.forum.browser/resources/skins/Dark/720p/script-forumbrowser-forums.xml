@@ -78,7 +78,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Forums[/B]</label>
+				<label>[B]$LOCALIZE[SCRIPT3005][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -92,7 +92,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Loading...</label>
+				<label>$LOCALIZE[SCRIPT3015]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			<control type="image" id="300">
@@ -556,7 +556,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search User</label>
+						<label>$LOCALIZE[SCRIPT3019]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -595,7 +595,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search Threads</label>
+						<label>$LOCALIZE[SCRIPT3018]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -634,7 +634,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search Posts</label>
+						<label>$LOCALIZE[SCRIPT3017]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -658,7 +658,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Search</label>
+					<label>$LOCALIZE[SCRIPT3016]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -681,7 +681,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Search</label>
+					<label>$LOCALIZE[SCRIPT3016]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>

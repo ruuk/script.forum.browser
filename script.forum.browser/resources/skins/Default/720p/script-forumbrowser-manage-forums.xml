@@ -205,25 +205,7 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
-				<!--<control type="button" id="206">
-					<description>Theme</description>
-					<onleft>220</onleft>
-					
-					<onup>205</onup>
-					<ondown>207</ondown>
-					<posx>40</posx>
-					<posy>300</posy>
-					<width>290</width>
-					<height>40</height>
-					<font>ForumBrowser-font13</font>
-					<align>center</align>
-					<label>Edit Theme</label>
-					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
-					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
-				</control> -->
+
 				<control type="button" id="207">
 					<description>Add Online</description>
 					<onleft>220</onleft>
@@ -262,26 +244,7 @@
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
-				<!--<control type="button" id="209">
-					<description>Parser Browser</description>
-					<onleft>220</onleft>
-					
-					<onup>208</onup>
-					<ondown>210</ondown>
-					<posx>40</posx>
-					<posy>450</posy>
-					<width>290</width>
-					<height>40</height>
-					<font>ForumBrowser-font13</font>
-					<align>center</align>
-					<label>Parser Browser</label>
-					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
-					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
-					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
-					<enable>StringCompare(Container(220).ListItem.Property(type),GB)</enable>
-				</control> -->
+
 				<control type="button" id="210">
 					<description>Help</description>
 					<onleft>220</onleft>

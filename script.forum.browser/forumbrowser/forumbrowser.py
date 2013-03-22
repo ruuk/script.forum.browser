@@ -115,7 +115,7 @@ class FBOnlineDatabase():
 		final = {}
 		try:
 			for r in rlist:
-				if r:
+				if r and '=' in r:
 					k,v = r.split('=')
 					final[k] = v
 		except:

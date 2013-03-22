@@ -1,0 +1,1863 @@
+# XBMC Media Center language file
+# Addon Name: Forum Browser
+# Addon id: script.forum.browser
+# Addon version: 1.4.3
+# Addon Provider: Rick Phillips (ruuk)
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC-Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: 2013-03-22 22:01+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "Addon Summary"
+msgid "Browse forums within XBMC"
+msgstr ""
+
+msgctxt "Addon Description"
+msgid "Browse Forums in XBMC. Supports Tapatalk enabled forums (over 30000) and Forumrunner enabled forums. Also supports boxee.tv. View forums, threads, posts, subscriptions and private messages. Follow links in Web Viewer. Post replies, send private messages, delete posts, quote posts. View images in posts, follow post forum links and download post links."
+msgstr ""
+
+#All {0},{1},{2} must remain in string but can change position
+
+#. Previous
+msgctxt "#3000"
+msgid "Prev"
+msgstr ""
+
+msgctxt "#3001"
+msgid "Next"
+msgstr ""
+
+msgctxt "#3002"
+msgid "Post Reply"
+msgstr ""
+
+msgctxt "#3003"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#3004"
+msgid "Subscriptions"
+msgstr ""
+
+msgctxt "#3005"
+msgid "Forums"
+msgstr ""
+
+msgctxt "#3006"
+msgid "Add Line"
+msgstr ""
+
+msgctxt "#3007"
+msgid "Add Lines"
+msgstr ""
+
+msgctxt "#3008"
+msgid "Submit Post"
+msgstr ""
+
+msgctxt "#3009"
+msgid "Messages"
+msgstr ""
+
+msgctxt "#3010"
+msgid "STOP"
+msgstr ""
+
+msgctxt "#3011"
+msgid "Posts:"
+msgstr ""
+
+msgctxt "#3012"
+msgid "Join:"
+msgstr ""
+
+msgctxt "#3013"
+msgid "OK"
+msgstr ""
+
+msgctxt "#3014"
+msgid "New Search"
+msgstr ""
+
+msgctxt "#3015"
+msgid "Loading..."
+msgstr ""
+
+msgctxt "#3016"
+msgid "Search"
+msgstr ""
+
+msgctxt "#3017"
+msgid "Search Posts"
+msgstr ""
+
+msgctxt "#3018"
+msgid "Search Threads"
+msgstr ""
+
+msgctxt "#3019"
+msgid "Search User"
+msgstr ""
+
+#empty strings from id 3020 to 29999
+
+msgctxt "#30000"
+msgid "General"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Open Thread At Newest Post"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Reverse Sort Posts"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Language"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Always Login If Possible"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Skin (changes require a restart)"
+msgstr ""
+
+msgctxt "#30006"
+msgid "Use Text Editor (Experimental)"
+msgstr ""
+
+msgctxt "#30007"
+msgid "Use Forum Colors"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Automatically Open Subscriptions"
+msgstr ""
+
+msgctxt "#30010"
+msgid "PIP"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Dark"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Light"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Hide Signatures In Posts"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Always Show OK Button In Message Dialogs"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Confirm Exit On Quit"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Parser Browser: Ignore Forum Images In Posts"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Disable Activity Splash"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Notifications"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Enable Notifications (Enabling Requires XBMC Restart)"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Check Interval (In Minutes)"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Only At XBMC Start (Disabling Requires XBMC Restart)"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Video"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Method"
+msgstr ""
+
+msgctxt "#30024"
+msgid "Method (During Video)"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Normal XBMC Popup"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Small Dialog"
+msgstr ""
+
+msgctxt "#30027"
+msgid "Full Dialog"
+msgstr ""
+
+msgctxt "#30028"
+msgid "XBMC Notice Duration (Seconds)"
+msgstr ""
+
+msgctxt "#30029"
+msgid "Dialog Timeout (Seconds - 0 For None)"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Only When Playing Video"
+msgstr ""
+
+msgctxt "#30031"
+msgid "Activity Stops Timeout"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Ask Before Interrupting Video"
+msgstr ""
+
+msgctxt "#30033"
+msgid "Return To Interrupted Video"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Pause Video On Dialogs"
+msgstr ""
+
+msgctxt "#30035"
+msgid "Hide Video Overlay"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Stop Forum Video On Forum Browser Close"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Allow Return To Interrupted Video After Close"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Bypass XBMC Resume Dialog"
+msgstr ""
+
+msgctxt "#30039"
+msgid "Pre-Offset (Seconds)"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Hours Until Notify Data Considered Stale"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Dialog: Only Show Notify Enabled Forums"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Resume Video In Overlay"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Start Video In Overlay"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Show Post Media Indicators"
+msgstr ""
+
+msgctxt "#30045"
+msgid "Count Link Images As Images"
+msgstr ""
+
+msgctxt "#30046"
+msgid "Searching Posts: Open Thread On Post Click"
+msgstr ""
+
+msgctxt "#30047"
+msgid "Search: Show Search History"
+msgstr ""
+
+msgctxt "#30048"
+msgid "Show Traceback Dialog On Errors"
+msgstr ""
+
+#empty string with id 30049
+
+msgctxt "#30050"
+msgid "ERROR"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Options"
+msgstr ""
+
+msgctxt "#30052"
+msgid "Done"
+msgstr ""
+
+msgctxt "#30053"
+msgid "Please try again."
+msgstr ""
+
+msgctxt "#30054"
+msgid "Refresh"
+msgstr ""
+
+#empty strings from id 30055 to 30099
+
+msgctxt "#30100"
+msgid "Logging In"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Opening URL"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Reading Data"
+msgstr ""
+
+msgctxt "#30103"
+msgid "Parsing Data"
+msgstr ""
+
+#empty string with id 30104
+
+msgctxt "#30105"
+msgid "Processing Form"
+msgstr ""
+
+msgctxt "#30106"
+msgid "Submitting Form"
+msgstr ""
+
+msgctxt "#30107"
+msgid "Wating {0} seconds"
+msgstr ""
+
+msgctxt "#30108"
+msgid "Clearing Notifications"
+msgstr ""
+
+#empty string with id 30109
+
+msgctxt "#30110"
+msgid "First Page"
+msgstr ""
+
+msgctxt "#30111"
+msgid "Last Page"
+msgstr ""
+
+msgctxt "#30112"
+msgid "Newest Post"
+msgstr ""
+
+msgctxt "#30113"
+msgid "Oldest Post"
+msgstr ""
+
+msgctxt "#30114"
+msgid "Go to..."
+msgstr ""
+
+msgctxt "#30115"
+msgid "Go to page number"
+msgstr ""
+
+msgctxt "#30116"
+msgid "Enter page number"
+msgstr ""
+
+#empty strings from id 30117 to 30119
+
+msgctxt "#30120"
+msgid "Set Title"
+msgstr ""
+
+#empty string with id 30121
+
+msgctxt "#30122"
+msgid "Delete Line"
+msgstr ""
+
+msgctxt "#30123"
+msgid "Enter Text"
+msgstr ""
+
+msgctxt "#30124"
+msgid "Edit Line"
+msgstr ""
+
+msgctxt "#30125"
+msgid "Enter Post Title"
+msgstr ""
+
+msgctxt "#30126"
+msgid "Posting"
+msgstr ""
+
+msgctxt "#30127"
+msgid "Posting. Please wait..."
+msgstr ""
+
+msgctxt "#30128"
+msgid "Add Line Before"
+msgstr ""
+
+msgctxt "#30129"
+msgid "Save Image"
+msgstr ""
+
+msgctxt "#30130"
+msgid "Posts"
+msgstr ""
+
+msgctxt "#30131"
+msgid "Error getting posts"
+msgstr ""
+
+#empty string with id 30132
+
+msgctxt "#30133"
+msgid "Error filling post list"
+msgstr ""
+
+msgctxt "#30134"
+msgid "Quote"
+msgstr ""
+
+msgctxt "#30135"
+msgid "Error getting private messages"
+msgstr ""
+
+msgctxt "#30136"
+msgid "View Images"
+msgstr ""
+
+msgctxt "#30137"
+msgid "View Link Images"
+msgstr ""
+
+msgctxt "#30138"
+msgid "Follow Thread Link"
+msgstr ""
+
+msgctxt "#30139"
+msgid "Follow Post Link"
+msgstr ""
+
+msgctxt "#30140"
+msgid "Download A Link"
+msgstr ""
+
+msgctxt "#30141"
+msgid "Delete"
+msgstr ""
+
+msgctxt "#30142"
+msgid "Post ID"
+msgstr ""
+
+msgctxt "#30143"
+msgid "Thread ID"
+msgstr ""
+
+msgctxt "#30144"
+msgid "Choose Target Directory"
+msgstr ""
+
+msgctxt "#30145"
+msgid "Downloading File"
+msgstr ""
+
+msgctxt "#30146"
+msgid "Downloaded File: "
+msgstr ""
+
+#empty string with id 30147
+
+msgctxt "#30148"
+msgid "Downloading Images"
+msgstr ""
+
+msgctxt "#30149"
+msgid "Deleting"
+msgstr ""
+
+msgctxt "#30150"
+msgid "Deleting. Please wait..."
+msgstr ""
+
+msgctxt "#30151"
+msgid "PMs"
+msgstr ""
+
+#empty strings from id 30152 to 30159
+
+msgctxt "#30160"
+msgid "Threads"
+msgstr ""
+
+msgctxt "#30161"
+msgid "Error getting threads."
+msgstr ""
+
+msgctxt "#30162"
+msgid "Last Post By:"
+msgstr ""
+
+msgctxt "#30163"
+msgid "Error filling threads list."
+msgstr ""
+
+msgctxt "#30164"
+msgid "FORUM"
+msgstr ""
+
+#empty strings from id 30165 to 30169
+
+msgctxt "#30170"
+msgid "Forums"
+msgstr ""
+
+msgctxt "#30171"
+msgid "Error getting forums."
+msgstr ""
+
+msgctxt "#30172"
+msgid "No Description"
+msgstr ""
+
+msgctxt "#30173"
+msgid "Sub-Forum"
+msgstr ""
+
+msgctxt "#30174"
+msgid "Error filling forum list."
+msgstr ""
+
+msgctxt "#30175"
+msgid "Subscriptions"
+msgstr ""
+
+msgctxt "#30176"
+msgid "Private Messages"
+msgstr ""
+
+msgctxt "#30177"
+msgid "Send PM"
+msgstr ""
+
+msgctxt "#30178"
+msgid "Send Message"
+msgstr ""
+
+#empty string with id 30179
+
+msgctxt "#30180"
+msgid "Quote:"
+msgstr ""
+
+msgctxt "#30181"
+msgid "Originally posted by:"
+msgstr ""
+
+msgctxt "#30182"
+msgid "Link:"
+msgstr ""
+
+msgctxt "#30183"
+msgid "Code:"
+msgstr ""
+
+msgctxt "#30184"
+msgid "PHP Code:"
+msgstr ""
+
+msgctxt "#30185"
+msgid "HTML Code:"
+msgstr ""
+
+#empty strings from id 30186 to 30199
+
+msgctxt "#30200"
+msgid "Select Forum"
+msgstr ""
+
+msgctxt "#30201"
+msgid "Enter Username"
+msgstr ""
+
+msgctxt "#30202"
+msgid "Enter Password"
+msgstr ""
+
+msgctxt "#30203"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#30204"
+msgid "Set Logins"
+msgstr ""
+
+msgctxt "#30205"
+msgid "Downloading"
+msgstr ""
+
+msgctxt "#30206"
+msgid "Downloading {0}"
+msgstr ""
+
+msgctxt "#30207"
+msgid "Turn On Notifications"
+msgstr ""
+
+msgctxt "#30208"
+msgid "Turn Off Notifications"
+msgstr ""
+
+msgctxt "#30209"
+msgid "Manage Notifications"
+msgstr ""
+
+#empty strings from id 30210 to 30219
+
+msgctxt "#30220"
+msgid "Waiting..."
+msgstr ""
+
+msgctxt "#30221"
+msgid "Waiting for thread to stop..."
+msgstr ""
+
+msgctxt "#30222"
+msgid "Add A Forum"
+msgstr ""
+
+msgctxt "#30223"
+msgid "Add Current Forum To Favorites"
+msgstr ""
+
+msgctxt "#30224"
+msgid "Remove Forums"
+msgstr ""
+
+msgctxt "#30225"
+msgid "Remove A Forum From Favorites"
+msgstr ""
+
+msgctxt "#30226"
+msgid "Add A Forum From The Online Database"
+msgstr ""
+
+msgctxt "#30227"
+msgid "Posting A Reply Failed:"
+msgstr ""
+
+msgctxt "#30228"
+msgid "Enable Log Debugging"
+msgstr ""
+
+msgctxt "#30229"
+msgid "Empty Forum"
+msgstr ""
+
+msgctxt "#30230"
+msgid "There are no threads in this forum."
+msgstr ""
+
+msgctxt "#30231"
+msgid "Checking Messages"
+msgstr ""
+
+msgctxt "#30232"
+msgid "Edit"
+msgstr ""
+
+msgctxt "#30233"
+msgid "Enable MyBB edit post bug re-subscribe fix"
+msgstr ""
+
+msgctxt "#30234"
+msgid "Use skin modifications (Recommended)"
+msgstr ""
+
+msgctxt "#30235"
+msgid "Enable SSL connections (https)"
+msgstr ""
+
+msgctxt "#30236"
+msgid "Subscribe To Thread"
+msgstr ""
+
+msgctxt "#30237"
+msgid "Use keyboard mod"
+msgstr ""
+
+msgctxt "#30238"
+msgid "Password Encryption Type"
+msgstr ""
+
+msgctxt "#30239"
+msgid "Encryption Key File (Optional)"
+msgstr ""
+
+msgctxt "#30240"
+msgid "Unsubscribe Thread"
+msgstr ""
+
+msgctxt "#30241"
+msgid "Add Current Forum To Online Database"
+msgstr ""
+
+msgctxt "#30242"
+msgid "Unsubscribe From Forum"
+msgstr ""
+
+msgctxt "#30243"
+msgid "Subscribe To Forum"
+msgstr ""
+
+msgctxt "#30244"
+msgid "Help"
+msgstr ""
+
+msgctxt "#30245"
+msgid "Cache Logo Images Locally"
+msgstr ""
+
+msgctxt "#30246"
+msgid "Sending a private message failed:"
+msgstr ""
+
+msgctxt "#30247"
+msgid "Disable SSL For Forumrunner"
+msgstr ""
+
+msgctxt "#30248"
+msgid "Please wait..."
+msgstr ""
+
+msgctxt "#30249"
+msgid "Reply/Forward"
+msgstr ""
+
+msgctxt "#30250"
+msgid "No posts"
+msgstr ""
+
+msgctxt "#30251"
+msgid "No messages"
+msgstr ""
+
+msgctxt "#30252"
+msgid "Create New Thread"
+msgstr ""
+
+msgctxt "#30253"
+msgid "Send PM to {0}"
+msgstr ""
+
+msgctxt "#30254"
+msgid "Will Restart After Finish."
+msgstr ""
+
+msgctxt "#30255"
+msgid "Video Playing"
+msgstr ""
+
+msgctxt "#30256"
+msgid "Interrupt Current Video?"
+msgstr ""
+
+msgctxt "#30257"
+msgid "Failed"
+msgstr ""
+
+msgctxt "#30258"
+msgid "Failed to download file."
+msgstr ""
+
+msgctxt "#30259"
+msgid "Enter Filename"
+msgstr ""
+
+msgctxt "#30260"
+msgid "Select Directory"
+msgstr ""
+
+msgctxt "#30261"
+msgid "File Exists"
+msgstr ""
+
+msgctxt "#30262"
+msgid "File Exists!"
+msgstr ""
+
+msgctxt "#30263"
+msgid "Save As:"
+msgstr ""
+
+msgctxt "#30264"
+msgid "Enter New"
+msgstr ""
+
+msgctxt "#30265"
+msgid "Yes"
+msgstr ""
+
+msgctxt "#30266"
+msgid "Finished"
+msgstr ""
+
+msgctxt "#30267"
+msgid "File Saved Successfully:"
+msgstr ""
+
+msgctxt "#30268"
+msgid "Settings Changed"
+msgstr ""
+
+msgctxt "#30269"
+msgid "Settings changed."
+msgstr ""
+
+msgctxt "#30270"
+msgid "Really discard changes?"
+msgstr ""
+
+msgctxt "#30271"
+msgid "Enter New Value"
+msgstr ""
+
+msgctxt "#30272"
+msgid "Choose"
+msgstr ""
+
+msgctxt "#30273"
+msgid "Choose 'Clear' to clear the URL"
+msgstr ""
+
+msgctxt "#30274"
+msgid "Choose 'New' to browse a new URL"
+msgstr ""
+
+msgctxt "#30275"
+msgid "Clear"
+msgstr ""
+
+msgctxt "#30276"
+msgid "New"
+msgstr ""
+
+msgctxt "#30277"
+msgid "Choose 'Edit' to edit the URL"
+msgstr ""
+
+msgctxt "#30278"
+msgid "Choose 'Browse' to browse site images"
+msgstr ""
+
+msgctxt "#30279"
+msgid "Edit"
+msgstr ""
+
+msgctxt "#30280"
+msgid "Browse"
+msgstr ""
+
+msgctxt "#30281"
+msgid "Edit URL:"
+msgstr ""
+
+msgctxt "#30282"
+msgid "Bad Value"
+msgstr ""
+
+msgctxt "#30283"
+msgid "Value must be an integer"
+msgstr ""
+
+msgctxt "#30284"
+msgid "Value must be in format {0}"
+msgstr ""
+
+msgctxt "#30285"
+msgid "Getting Images"
+msgstr ""
+
+msgctxt "#30286"
+msgid "Login User"
+msgstr ""
+
+msgctxt "#30287"
+msgid "Login Password"
+msgstr ""
+
+msgctxt "#30288"
+msgid "Post Attributes"
+msgstr ""
+
+msgctxt "#30289"
+msgid "Time Offset"
+msgstr ""
+
+msgctxt "#30290"
+msgid "Description"
+msgstr ""
+
+msgctxt "#30291"
+msgid "Logo"
+msgstr ""
+
+msgctxt "#30292"
+msgid "Header Color"
+msgstr ""
+
+msgctxt "#30293"
+msgid "Login Page"
+msgstr ""
+
+msgctxt "#30294"
+msgid "Post Parser Rules"
+msgstr ""
+
+msgctxt "#30295"
+msgid "Forum Browser: New Posts"
+msgstr ""
+
+msgctxt "#30296"
+msgid "Failed post found"
+msgstr ""
+
+msgctxt "#30297"
+msgid "Re-use previous failed post?"
+msgstr ""
+
+msgctxt "#30298"
+msgid "Note"
+msgstr ""
+
+msgctxt "#30299"
+msgid "Posting appears to be moderated"
+msgstr ""
+
+msgctxt "#30300"
+msgid "Your message may not appear right away"
+msgstr ""
+
+msgctxt "#30301"
+msgid "Are You Sure?"
+msgstr ""
+
+msgctxt "#30302"
+msgid "Really close?"
+msgstr ""
+
+msgctxt "#30303"
+msgid "Changes will be lost."
+msgstr ""
+
+msgctxt "#30304"
+msgid "Success"
+msgstr ""
+
+msgctxt "#30305"
+msgid "Message Sent."
+msgstr ""
+
+msgctxt "#30306"
+msgid "Message Posted."
+msgstr ""
+
+msgctxt "#30307"
+msgid "Error creating post:"
+msgstr ""
+
+msgctxt "#30308"
+msgid "Paste From Clipboard Before:"
+msgstr ""
+
+msgctxt "#30309"
+msgid "Paste From Clipboard:"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Enter Link Text"
+msgstr ""
+
+msgctxt "#30311"
+msgid "Getting Video Info..."
+msgstr ""
+
+msgctxt "#30312"
+msgid "Link Options"
+msgstr ""
+
+msgctxt "#30313"
+msgid "Copy Link To Clipboard"
+msgstr ""
+
+msgctxt "#30314"
+msgid "Copy Image URL To Clipboard"
+msgstr ""
+
+msgctxt "#30315"
+msgid "Copy Video URL To Clipboard"
+msgstr ""
+
+msgctxt "#30316"
+msgid "Image Options"
+msgstr ""
+
+msgctxt "#30317"
+msgid "User/Post Extra Info"
+msgstr ""
+
+msgctxt "#30318"
+msgid "Getting Post For Edit..."
+msgstr ""
+
+msgctxt "#30319"
+msgid "Enter Recipient(s)"
+msgstr ""
+
+msgctxt "#30320"
+msgid "Really Delete?"
+msgstr ""
+
+msgctxt "#30321"
+msgid "Are you sure you want to delete this message?"
+msgstr ""
+
+msgctxt "#30322"
+msgid "Deleting"
+msgstr ""
+
+msgctxt "#30323"
+msgid "Failed"
+msgstr ""
+
+msgctxt "#30324"
+msgid "Failed to delete:"
+msgstr ""
+
+msgctxt "#30325"
+msgid "Reason unknown"
+msgstr ""
+
+msgctxt "#30326"
+msgid "Message deleted."
+msgstr ""
+
+msgctxt "#30327"
+msgid "Post deleted."
+msgstr ""
+
+msgctxt "#30328"
+msgid "Error while deleting post:"
+msgstr ""
+
+msgctxt "#30329"
+msgid "User/Post Info"
+msgstr ""
+
+msgctxt "#30330"
+msgid "Enter Search Terms"
+msgstr ""
+
+msgctxt "#30331"
+msgid "Select Box"
+msgstr ""
+
+msgctxt "#30332"
+msgid "Change PM Box"
+msgstr ""
+
+msgctxt "#30333"
+msgid "Like Post"
+msgstr ""
+
+msgctxt "#30334"
+msgid "Unlike Post"
+msgstr ""
+
+msgctxt "#30335"
+msgid "Open Post Thread"
+msgstr ""
+
+msgctxt "#30336"
+msgid "Quote?"
+msgstr ""
+
+msgctxt "#30337"
+msgid "Quote the message?"
+msgstr ""
+
+msgctxt "#30338"
+msgid "Liking"
+msgstr ""
+
+msgctxt "#30339"
+msgid "Un-Liking"
+msgstr ""
+
+msgctxt "#30340"
+msgid "Subscribed to thread."
+msgstr ""
+
+msgctxt "#30341"
+msgid "Failed to subscribe to thread:"
+msgstr ""
+
+msgctxt "#30342"
+msgid "Unsubscribed from thread."
+msgstr ""
+
+msgctxt "#30343"
+msgid "Failed to unsubscribe from thread:"
+msgstr ""
+
+msgctxt "#30344"
+msgid "Subscribed to forum."
+msgstr ""
+
+msgctxt "#30345"
+msgid "Failed to subscribe to forum:"
+msgstr ""
+
+msgctxt "#30346"
+msgid "Unsubscribed from forum."
+msgstr ""
+
+msgctxt "#30347"
+msgid "Failed to unsubscribe from forum:"
+msgstr ""
+
+msgctxt "#30348"
+msgid "Unknown"
+msgstr ""
+
+msgctxt "#30349"
+msgid "Creating Thread..."
+msgstr ""
+
+msgctxt "#30350"
+msgid "Thread created:"
+msgstr ""
+
+msgctxt "#30351"
+msgid "Failed to create thread:"
+msgstr ""
+
+msgctxt "#30352"
+msgid "Login Required"
+msgstr ""
+
+msgctxt "#30353"
+msgid "This forum does not allow guest access."
+msgstr ""
+
+msgctxt "#30354"
+msgid "Login required."
+msgstr ""
+
+msgctxt "#30355"
+msgid "Set login info now?"
+msgstr ""
+
+msgctxt "#30356"
+msgid "Getting User List"
+msgstr ""
+
+msgctxt "#30357"
+msgid "Not Available"
+msgstr ""
+
+msgctxt "#30358"
+msgid "Online Users"
+msgstr ""
+
+msgctxt "#30359"
+msgid "Search posts of {0}"
+msgstr ""
+
+msgctxt "#30360"
+msgid "View User Info"
+msgstr ""
+
+msgctxt "#30361"
+msgid "Getting Info"
+msgstr ""
+
+msgctxt "#30362"
+msgid "Name"
+msgstr ""
+
+msgctxt "#30363"
+msgid "Status"
+msgstr ""
+
+msgctxt "#30364"
+msgid "Post Count"
+msgstr ""
+
+msgctxt "#30365"
+msgid "Join Date"
+msgstr ""
+
+msgctxt "#30366"
+msgid "Current Activity"
+msgstr ""
+
+msgctxt "#30367"
+msgid "Last Activity Date"
+msgstr ""
+
+msgctxt "#30368"
+msgid "Info"
+msgstr ""
+
+msgctxt "#30369"
+msgid "View Online Users"
+msgstr ""
+
+msgctxt "#30370"
+msgid "View Forum Info"
+msgstr ""
+
+msgctxt "#30371"
+msgid "Search"
+msgstr ""
+
+msgctxt "#30372"
+msgid "Forum Info"
+msgstr ""
+
+msgctxt "#30373"
+msgid "Really Exit?"
+msgstr ""
+
+msgctxt "#30374"
+msgid "Skin Changed"
+msgstr ""
+
+msgctxt "#30375"
+msgid "Skin changed. Restart Forum Browser to apply."
+msgstr ""
+
+msgctxt "#30376"
+msgid "Search Options"
+msgstr ""
+
+msgctxt "#30377"
+msgid "New Search"
+msgstr ""
+
+msgctxt "#30378"
+msgid "Post Search Results"
+msgstr ""
+
+msgctxt "#30379"
+msgid "Thread Search Results"
+msgstr ""
+
+msgctxt "#30380"
+msgid "User Options"
+msgstr ""
+
+msgctxt "#30381"
+msgid "New User"
+msgstr ""
+
+msgctxt "#30382"
+msgid "Enter Name Of User To Search"
+msgstr ""
+
+msgctxt "#30383"
+msgid "Recent Threads"
+msgstr ""
+
+msgctxt "#30384"
+msgid "Recent Posts"
+msgstr ""
+
+msgctxt "#30385"
+msgid "Post Search Results"
+msgstr ""
+
+msgctxt "#30386"
+msgid "Choose Forum"
+msgstr ""
+
+msgctxt "#30387"
+msgid "Login Not Set"
+msgstr ""
+
+msgctxt "#30388"
+msgid "Username and password not set."
+msgstr ""
+
+msgctxt "#30389"
+msgid "Login Set"
+msgstr ""
+
+msgctxt "#30390"
+msgid "Username and password set."
+msgstr ""
+
+msgctxt "#30391"
+msgid "Use URL?"
+msgstr ""
+
+msgctxt "#30392"
+msgid "Use this URL?"
+msgstr ""
+
+msgctxt "#30393"
+msgid "Update"
+msgstr ""
+
+msgctxt "#30394"
+msgid "Skin modifications need to be updated. Click OK to continue."
+msgstr ""
+
+msgctxt "#30395"
+msgid "Select Rule:"
+msgstr ""
+
+msgctxt "#30396"
+msgid "EXTRA"
+msgstr ""
+
+msgctxt "#30397"
+msgid "FILTER"
+msgstr ""
+
+#empty string with id 30398
+
+msgctxt "#30399"
+msgid "Add Rule"
+msgstr ""
+
+msgctxt "#30400"
+msgid "Share"
+msgstr ""
+
+msgctxt "#30401"
+msgid "Save"
+msgstr ""
+
+msgctxt "#30402"
+msgid "Type"
+msgstr ""
+
+msgctxt "#30403"
+msgid "Head Filter"
+msgstr ""
+
+msgctxt "#30404"
+msgid "Tail Filter"
+msgstr ""
+
+msgctxt "#30405"
+msgid "Enter Name"
+msgstr ""
+
+msgctxt "#30406"
+msgid "Enter Python Regular Expression"
+msgstr ""
+
+msgctxt "#30407"
+msgid "Enter Phrase"
+msgstr ""
+
+msgctxt "#30408"
+msgid "Select"
+msgstr ""
+
+msgctxt "#30409"
+msgid "Remove"
+msgstr ""
+
+msgctxt "#30410"
+msgid "HEAD FILTERS"
+msgstr ""
+
+msgctxt "#30411"
+msgid "TAIL FILTERS"
+msgstr ""
+
+msgctxt "#30412"
+msgid "Current Rules"
+msgstr ""
+
+msgctxt "#30413"
+msgid "Rules Already Exist For This Forum:"
+msgstr ""
+
+msgctxt "#30414"
+msgid "Overwrite?"
+msgstr ""
+
+msgctxt "#30415"
+msgid "Overwrite existing rules?"
+msgstr ""
+
+msgctxt "#30416"
+msgid "Added"
+msgstr ""
+
+msgctxt "#30417"
+msgid "Removed"
+msgstr ""
+
+msgctxt "#30418"
+msgid "Forum added to favorites!"
+msgstr ""
+
+msgctxt "#30419"
+msgid "Forum removed from favorites."
+msgstr ""
+
+msgctxt "#30420"
+msgid "Select Category"
+msgstr ""
+
+msgctxt "#30421"
+msgid "Search Database"
+msgstr ""
+
+msgctxt "#30422"
+msgid "Show All"
+msgstr ""
+
+msgctxt "#30423"
+msgid "Add Forum"
+msgstr ""
+
+msgctxt "#30424"
+msgid "Enter Name And Address"
+msgstr ""
+
+msgctxt "#30425"
+msgid "Forum not found or not compatible"
+msgstr ""
+
+msgctxt "#30426"
+msgid "Enter forum URL"
+msgstr ""
+
+msgctxt "#30427"
+msgid "Testing Forum"
+msgstr ""
+
+msgctxt "#30428"
+msgid "Question..."
+msgstr ""
+
+msgctxt "#30429"
+msgid "Does this forum require a login?"
+msgstr ""
+
+msgctxt "#30430"
+msgid "Click YES to set login details."
+msgstr ""
+
+msgctxt "#30431"
+msgid "Forum not found or not compatible."
+msgstr ""
+
+msgctxt "#30432"
+msgid "Found"
+msgstr ""
+
+msgctxt "#30433"
+msgid "Forum {0} found"
+msgstr ""
+
+msgctxt "#30434"
+msgid "Getting Description And Images"
+msgstr ""
+
+msgctxt "#30435"
+msgid "Enter Description"
+msgstr ""
+
+msgctxt "#30436"
+msgid "Choose Logo"
+msgstr ""
+
+msgctxt "#30437"
+msgid "Add To Online Database"
+msgstr ""
+
+msgctxt "#30438"
+msgid "Getting Forum List"
+msgstr ""
+
+msgctxt "#30439"
+msgid "No forums"
+msgstr ""
+
+msgctxt "#30440"
+msgid "No forums in that category/search"
+msgstr ""
+
+msgctxt "#30441"
+msgid "Category"
+msgstr ""
+
+msgctxt "#30442"
+msgid "Forum Added"
+msgstr ""
+
+msgctxt "#30443"
+msgid "Online database forum rules updated."
+msgstr ""
+
+msgctxt "#30444"
+msgid "Failed to update the online database."
+msgstr ""
+
+msgctxt "#30445"
+msgid "Add To Database?"
+msgstr ""
+
+msgctxt "#30446"
+msgid "Share to the Forum Browser online datbase?"
+msgstr ""
+
+msgctxt "#30447"
+msgid "Forum must be rated in order to be added to the online database."
+msgstr ""
+
+msgctxt "#30448"
+msgid "Saving To Database"
+msgstr ""
+
+msgctxt "#30449"
+msgid "Updated"
+msgstr ""
+
+msgctxt "#30450"
+msgid "Not Added"
+msgstr ""
+
+msgctxt "#30451"
+msgid "Forum added successfully."
+msgstr ""
+
+msgctxt "#30452"
+msgid "Forum entry exists. Updated successfully."
+msgstr ""
+
+msgctxt "#30453"
+msgid "Forum not added"
+msgstr ""
+
+msgctxt "#30454"
+msgid "Function Rating"
+msgstr ""
+
+msgctxt "#30455"
+msgid "Fully Functional"
+msgstr ""
+
+msgctxt "#30456"
+msgid "Partially Functional"
+msgstr ""
+
+msgctxt "#30457"
+msgid "Not Functional"
+msgstr ""
+
+msgctxt "#30458"
+msgid "Accuracy Rating"
+msgstr ""
+
+msgctxt "#30459"
+msgid "Full Accuracy"
+msgstr ""
+
+msgctxt "#30460"
+msgid "OK Accuracy"
+msgstr ""
+
+msgctxt "#30461"
+msgid "Poor Accuracy"
+msgstr ""
+
+msgctxt "#30462"
+msgid "Color set!"
+msgstr ""
+
+msgctxt "#30463"
+msgid "Online database color updated."
+msgstr ""
+
+msgctxt "#30464"
+msgid "Failed to update the online database."
+msgstr ""
+
+msgctxt "#30465"
+msgid "Choose Forum To Remove"
+msgstr ""
+
+msgctxt "#30466"
+msgid "Remove?"
+msgstr ""
+
+msgctxt "#30467"
+msgid "Really remove forum?"
+msgstr ""
+
+msgctxt "#30468"
+msgid "Forum Removed"
+msgstr ""
+
+msgctxt "#30469"
+msgid "File {0} of {1}"
+msgstr ""
+
+msgctxt "#30470"
+msgid "Error accessing forum.\n\nIt apppears the forum may have moved. Check the forum address in a browser and try re-adding it, or if there is a URL listed below, you can try re-adding it with that URL."
+msgstr ""
+
+msgctxt "#30471"
+msgid "Error accessing forum.\n\nIt apppears the forum interface ({0}) is no longer installed, is missing or has moved.\n\nVerify the forum's URL in a browser and then try re-adding it.\n\nCheck with the forum administrator if the problem persists."
+msgstr ""
+
+msgctxt "#30472"
+msgid "Error accessing forum.\n\nForum interface appears to have changed from {0} to {1}.\n\nTry re-adding it."
+msgstr ""
+
+msgctxt "#30473"
+msgid "Error accessing forum.\n\nPlease contact the forum administrator if this problem continues."
+msgstr ""
+
+msgctxt "#30474"
+msgid "Invalid Hex Color"
+msgstr ""
+
+msgctxt "#30475"
+msgid "Enter 6-Digit Hex Color"
+msgstr ""
+
+msgctxt "#30476"
+msgid "Keyboard Mod Removed"
+msgstr ""
+
+msgctxt "#30477"
+msgid "Forum Browser will need to be restarted before it takes effect."
+msgstr ""
+
+msgctxt "#30478"
+msgid "Copying files:"
+msgstr ""
+
+msgctxt "#30479"
+msgid "Skin Mods"
+msgstr ""
+
+msgctxt "#30480"
+msgid "Recommended skin modifications not installed."
+msgstr ""
+
+msgctxt "#30481"
+msgid "(Requires Forum Browser restart to take effect.)"
+msgstr ""
+
+msgctxt "#30482"
+msgid "Install now?"
+msgstr ""
+
+msgctxt "#30483"
+msgid "Aborted"
+msgstr ""
+
+msgctxt "#30484"
+msgid "Skin modifications were NOT installed."
+msgstr ""
+
+msgctxt "#30485"
+msgid "Enable 'Use skin modifications (Recommended)' in settings if you want to install them at a later time."
+msgstr ""
+
+msgctxt "#30486"
+msgid "Skin Mod Install"
+msgstr ""
+
+msgctxt "#30487"
+msgid "{0} skin not installed in user path."
+msgstr ""
+
+msgctxt "#30488"
+msgid "Click Yes to copy"
+msgstr ""
+
+msgctxt "#30489"
+msgid "Click No to Abort"
+msgstr ""
+
+msgctxt "#30490"
+msgid "Copying Files"
+msgstr ""
+
+msgctxt "#30491"
+msgid "Please wait..."
+msgstr ""
+
+msgctxt "#30492"
+msgid "Failed to copy files, aborting."
+msgstr ""
+
+msgctxt "#30493"
+msgid "Files copied."
+msgstr ""
+
+msgctxt "#30494"
+msgid "Forum Browser needs to be restarted for the mod to take effect."
+msgstr ""
+
+msgctxt "#30495"
+msgid "Font installed."
+msgstr ""
+
+msgctxt "#30496"
+msgid "Keyboard Mod"
+msgstr ""
+
+msgctxt "#30497"
+msgid "Install keyboard skin mod?"
+msgstr ""
+
+msgctxt "#30498"
+msgid "THIS WILL REPLACE THE CURRENT XBMC KEYBOARD"
+msgstr ""
+
+msgctxt "#30499"
+msgid "Keyboard installed."
+msgstr ""
+
+msgctxt "#30500"
+msgid "Miscellaneous"
+msgstr ""
+
+msgctxt "#30501"
+msgid "Audio/Video Software & Technology"
+msgstr ""
+
+msgctxt "#30502"
+msgid "Science & Technology"
+msgstr ""
+
+msgctxt "#30503"
+msgid "Automotive/Motorcycle/Powersports"
+msgstr ""
+
+msgctxt "#30504"
+msgid "Pets"
+msgstr ""
+
+msgctxt "#30505"
+msgid "Wildlife & Nature"
+msgstr ""
+
+msgctxt "#30506"
+msgid "Games (Video/Board/Etc)"
+msgstr ""
+
+msgctxt "#30507"
+msgid "Sports (Fans)"
+msgstr ""
+
+msgctxt "#30508"
+msgid "Outdoor & Travel"
+msgstr ""
+
+msgctxt "#30509"
+msgid "Society & Culture"
+msgstr ""
+
+msgctxt "#30510"
+msgid "Food, Drink & Dining"
+msgstr ""
+
+msgctxt "#30511"
+msgid "Computers & Software"
+msgstr ""
+
+msgctxt "#30512"
+msgid "Gadgets & Phones"
+msgstr ""
+
+msgctxt "#30513"
+msgid "Hobbies & Collecting"
+msgstr ""
+
+msgctxt "#30514"
+msgid "Sports (Recreational)"
+msgstr ""
+
+msgctxt "#30515"
+msgid "Internet"
+msgstr ""
+
+msgctxt "#30516"
+msgid "Entertainment (TV/Movies/Music)"
+msgstr ""
+
+msgctxt "#30517"
+msgid "Enter Keywords or Use Wildcards *?"
+msgstr ""
+
+msgctxt "#30518"
+msgid "Post User Attributes To Display"
+msgstr ""
+
+msgctxt "#30519"
+msgid "Open Subscriptions/PMs Window Automatically On Open Forum"
+msgstr ""
+
+msgctxt "#30520"
+msgid "If Both Subs and PMs, Open Subs Window Instead"
+msgstr ""
+
+msgctxt "#30521"
+msgid "Keyboard NOT installed."
+msgstr ""
+
+msgctxt "#30522"
+msgid "Enable 'Use keyboard mod' in settings if you want to install it at a later time."
+msgstr ""
+
+msgctxt "#30523"
+msgid "Select Skin"
+msgstr ""

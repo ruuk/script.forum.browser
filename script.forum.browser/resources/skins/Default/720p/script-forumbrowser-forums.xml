@@ -70,7 +70,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Forums[/B]</label>
+				<label>[B]$LOCALIZE[SCRIPT3005][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -84,7 +84,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>Loading...</label>
+				<label>$LOCALIZE[SCRIPT3015]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			
@@ -572,10 +572,9 @@
 						<width>232</width>
 						<height>40</height>
 						<visible>true</visible>
-						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search User</label>
+						<label>$LOCALIZE[SCRIPT3019]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>black</textcolor>
@@ -611,10 +610,9 @@
 						<width>232</width>
 						<height>40</height>
 						<visible>true</visible>
-						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search Threads</label>
+						<label>$LOCALIZE[SCRIPT3018]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>black</textcolor>
@@ -650,10 +648,9 @@
 						<width>232</width>
 						<height>40</height>
 						<visible>true</visible>
-						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>Search Posts</label>
+						<label>$LOCALIZE[SCRIPT3017]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>black</textcolor>
@@ -677,7 +674,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Search</label>
+					<label>$LOCALIZE[SCRIPT3016]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -700,7 +697,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Search</label>
+					<label>$LOCALIZE[SCRIPT3016]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
