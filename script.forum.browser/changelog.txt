@@ -6,7 +6,7 @@ TODO:
  Short Term:
   Check on optional import behavior
   Somehow handle Notifications dialog opening when Forum Browser is open
-  Finish translation system updating
+  Finish translation system updating and stuff
   
  Long Term:
  Check for new parser rules automatically or add option to check for new rules
