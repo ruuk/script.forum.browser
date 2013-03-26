@@ -8,7 +8,7 @@ CACHE_PATH = None
 getSetting = None
 setSetting = None
 __addon__ = sys.modules["__main__"].__addon__
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 
 def copyKeyboardModImages(skinPath):
 	dst = os.path.join(skinPath,'media','forum-browser-keyboard')
@@ -46,7 +46,7 @@ def copyTree(source,target,dialog=None):
 		subpath = path[sourcelen:]
 		xbmcvfs.mkdir(os.path.join(target,subpath))
 		for f in files:
-			if dialog: dialog.update(pct,__language__(30478),f)
+			if dialog: dialog.update(pct,T(32478),f)
 			xbmcvfs.copy(os.path.join(path,f),os.path.join(target,subpath,f))
 			pct += mod
 			if pct > 100:
@@ -75,7 +75,7 @@ def checkKBModRemove(skinPath):
 		if backupPath and dialogPath:
 			xbmcvfs.delete(dialogPath)
 			xbmcvfs.rename(backupPath,dialogPath)
-			dialogs.showMessage(__language__(30476),__language__(30476),' ',__language__(30477))
+			dialogs.showMessage(T(32476),T(32476),' ',T(32477))
 			return True
 				
 def checkForSkinMods():
@@ -115,10 +115,10 @@ def checkForSkinMods():
 			return
 	
 	dialogs.showInfo('skinmods')
-	yes = xbmcgui.Dialog().yesno(__language__(30479),__language__(30480),__language__(30481),__language__(30482))
+	yes = xbmcgui.Dialog().yesno(T(32479),T(32480),T(32481),T(32482))
 	if not yes:
 		__addon__.setSetting('use_skin_mods','false')
-		dialogs.showMessage(__language__(30482),__language__(30484),' ',__language__(30485))
+		dialogs.showMessage(T(32482),T(32484),' ',T(32485))
 		return
 	LOG('Installing Skin Mods')
 	return installSkinMods()
@@ -139,20 +139,20 @@ def installSkinMods(update=False):
 	version2 = getSkinVersion(localSkinPath)
 	
 	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
-		yesno = xbmcgui.Dialog().yesno(__language__(30484),__language__(30487).format(currentSkin),__language__(30488),__language__(30489))
+		yesno = xbmcgui.Dialog().yesno(T(32484),T(32487).format(currentSkin),T(32488),T(32489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
-		dialog.create(__language__(30490),__language__(30491))
+		dialog.create(T(32490),T(32491))
 		try:
 			copyTree(skinPath,localSkinPath,dialog)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
-			dialogs.showMessage(__language__(30050),err,__language__(30492),error=True)
+			dialogs.showMessage(T(32050),err,T(32492),error=True)
 			return
 		finally:
 			dialog.close()
 		#restart = True
-		dialogs.showMessage(__language__(30304),__language__(30493),__language__(30494),success=True)
+		dialogs.showMessage(T(32304),T(32493),T(32494),success=True)
 		
 	skinPath = localSkinPath
 	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.xml')
@@ -184,11 +184,11 @@ def installSkinMods(update=False):
 		original = open(fontPath,'r').read()
 		modded = original.replace('<font>',open(sourceFontXMLPath,'r').read() + '<font>',1)
 		open(fontPath,'w').write(modded)
-	dialogs.showMessage(__language__(30052),'',__language__(30495))
+	dialogs.showMessage(T(32052),'',T(32495))
 	
 	if update and not getSetting('use_keyboard_mod',False): return True
 	
-	yes = xbmcgui.Dialog().yesno(__language__(30496),__language__(30497),__language__(30498))
+	yes = xbmcgui.Dialog().yesno(T(32496),T(32497),T(32498))
 	setSetting('use_keyboard_mod',yes and 'true' or 'false')
 	
 	if yes:
@@ -206,9 +206,9 @@ def installSkinMods(update=False):
 			LOG('Replacing DialogKeyboard.xml with: ' + sourcePath)
 			os.remove(dialogPath)
 			open(dialogPath,'w').write(open(sourcePath,'r').read())
-		dialogs.showMessage(__language__(30052),'',__language__(30499))
+		dialogs.showMessage(T(32052),'',T(32499))
 	else:
-		dialogs.showMessage(__language__(30483),__language__(30521),' ',__language__(30522))
+		dialogs.showMessage(T(32483),T(32521),' ',T(32522))
 	return True
 
 def chooseKeyboardFile(fbPath,currentSkin):
@@ -218,6 +218,6 @@ def chooseKeyboardFile(fbPath,currentSkin):
 		if f.startswith('DialogKeyboard-'):
 			skinName = f.split('-',1)[-1].rsplit('.',1)[0].lower()
 			if skinName in currentSkin.lower() or skinName == 'generic': skins.append(skinName.title())
-	idx = xbmcgui.Dialog().select(__language__(30523),skins)
+	idx = xbmcgui.Dialog().select(T(32523),skins)
 	if idx < 0: return None
 	return 'DialogKeyboard-%s.xml' % skins[idx].lower()

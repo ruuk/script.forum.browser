@@ -34,6 +34,13 @@ TODO:
 
 Current Version : 1.4.4
 
+*** 1.4.5 ***
+
+Fix string IDs in skins
+Change remaining static strings in skins to ID refrences
+Change On label on notifications full dialog to "!" icon
+Shortened translation function name for easier reading
+
 *** 1.4.4 ***
 
 Convert raw strings into translatable strings

@@ -11,7 +11,7 @@ DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 __addon__ = sys.modules["__main__"].__addon__
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 
 def checkVersion(version1, version2):
 	def normalize(v):
@@ -530,7 +530,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.forumConfig = {}
 		self.needsLogin = True
 		self.alwaysLogin = always_login
-		self.lang = sys.modules["__main__"].__language__
+		self.lang = sys.modules["__main__"].T
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self.loginError = ''

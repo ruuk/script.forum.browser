@@ -170,7 +170,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
-		self.lang = sys.modules["__main__"].__language__
+		self.T = sys.modules["__main__"].T
 		self.online = {}
 		self.lastOnlineCheck = 0
 		self.version = {}
@@ -297,7 +297,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		if self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
-			if not callback(callback_percent,self.lang(30100)): return False
+			if not callback(callback_percent,self.T(32100)): return False
 			if not self.login():
 				return False
 		return True
@@ -306,7 +306,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		logo = None
 		while True:
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.T(32102)): break
 			try:
 				data = self.client.get_forum()
 				base = data.get('forums')
@@ -327,18 +327,18 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,'%s' % em)
 				if donecallback: donecallback(FBData(error=em))
 				return FBData(error=em)
-			if not callback(40,self.lang(30103)): break
+			if not callback(40,self.T(32103)): break
 			forums = []
 			for forum,sub in flist:
 				forums.append(self.createForumDict(forum,sub))
-			if not callback(80,self.lang(30231)): break
+			if not callback(80,self.T(32231)): break
 			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
 				pm_counts = self.getPMCounts(80)
 			except:
 				ERROR('Failed to get PM Counts')
 				pm_counts = None
-			callback(100,self.lang(30052))
+			callback(100,self.T(32052))
 			
 			result = FBData(forums,extra={'logo':logo,'pmcounts':pm_counts})
 			if donecallback: donecallback(result)
@@ -361,13 +361,13 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		while True:
 			threads = []
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.T(32102)): break
 			data = self.client.get_forum(forumid=forumid,page=page,perpage=20)
-			if not callback(40,self.lang(30103)): break
+			if not callback(40,self.T(32103)): break
 			for s in data.get('threads_sticky'): threads.append(self.createThreadDict(s,True))
-			if not callback(60,self.lang(30102)): break
+			if not callback(60,self.T(32102)): break
 			for t in data.get('threads'): threads.append(self.createThreadDict(t))
-			if not callback(80,self.lang(30103)): break
+			if not callback(80,self.T(32103)): break
 			total = int(data.get('total_threads',1))
 			current = len(data.get('threads',[]))
 			pd = self.getPageData(page=page,total_items=total,current_total=current)
@@ -381,13 +381,13 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		return self.getThreads(None, page, callback, donecallback)
 	
 	def _getSubscriptions(self,page,callback,perpage=20):
-		callback(20,self.lang(30102))
+		callback(20,self.T(32102))
 		sub = self.client.get_subscriptions(page=page,perpage=perpage)
 		total = int(sub.get('total_threads',1))
 		current = len(sub.get('threads',[]))
 		pd = self.getPageData(page=page,total_items=total,current_total=current)
 		normal = sub.get('threads',[])
-		if not callback(70,self.lang(30103)): return None,None
+		if not callback(70,self.T(32103)): return None,None
 		for n in normal:
 			self.createThreadDict(n)
 			n['subscribed'] = True
@@ -413,7 +413,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			callback(-1,'%s' % em)
 			return self.finish(FBData(error=em),donecallback)
 		
-		callback(100,self.lang(30052))
+		callback(100,self.T(32052))
 		return self.finish(FBData(threads,pd),donecallback)
 		
 	def canGetOnlineUsers(self): return True
@@ -552,9 +552,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 			try: page = int(page)
 			except: page = 1
 			
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.T(32102)): break
 			oDict = self.getOnlineUsers(for_replies=True)
-			if not callback(40,self.lang(30102)): break
+			if not callback(40,self.T(32102)): break
 			try:
 				sreplies = []
 				if announcement:
@@ -581,7 +581,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 							posts = posts2
 						else:
 							LOG('Failed to get last page')
-				if not callback(60,self.lang(30103)): break
+				if not callback(60,self.T(32103)): break
 				ct = pd.current + 1
 				for p in posts:
 					fp = self.getForumPost(p)
@@ -594,10 +594,10 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
 			
-			if not callback(80,self.lang(30103)): break
+			if not callback(80,self.T(32103)): break
 			
 			pd.tid = threadid
-			callback(100,self.lang(30052))
+			callback(100,self.T(32052))
 			
 			return self.finish(FBData(sreplies,pd),donecallback)
 			
@@ -657,7 +657,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		
 		while True:
 			oDict = self.getOnlineUsers(for_replies=True)
-			if not callback(30,self.lang(30102)): break
+			if not callback(30,self.T(32102)): break
 			try:
 				if boxid:
 					messages = self.client.get_pms(folderid=boxid,page=1,perpage=50)
@@ -668,14 +668,14 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
 			pms = []
-			if not callback(80,self.lang(30103)): break
+			if not callback(80,self.T(32103)): break
 			for p in messages.get('pms',[]):
 				fp = self.getForumPost(p)
 				fp.isPM = True
 				fp.online = fp.userName in oDict
 				pms.append(fp)
 			
-			callback(100,self.lang(30052))
+			callback(100,self.T(32052))
 			return self.finish(FBData(pms),donecallback)
 		
 		return self.finish(FBData(error='CANCEL'),donecallback)
@@ -686,9 +686,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		LOG('Posting reply')
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False
-		callback(40,self.lang(30106))
+		callback(40,self.T(32106))
 		result = self.client.post_reply(threadid=post.tid,message=post.message,title=post.title)
-		callback(100,self.lang(30052))
+		callback(100,self.T(32052))
 		if not result:
 			LOG('Failed To Post: ' + result.message)
 			post.error = result.message
@@ -738,7 +738,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def doPrivateMessage(self,post,callback=None):
 		if not self.checkLogin(): return False
 		result = self.client.send_pm(recipients=post.to,title=post.title,message=post.message)
-		callback(100,self.lang(30052))
+		callback(100,self.T(32052))
 		if not result:
 			LOG('Failed to send PM: ' + result.message)
 			post.error = result.message

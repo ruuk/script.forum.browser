@@ -4,7 +4,7 @@ DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 __addon__ = sys.modules["__main__"].__addon__
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 FB = sys.modules["__main__"].FB
 
 def cUConvert(m): return unichr(int(m.group(1)))
@@ -102,16 +102,16 @@ class MessageConverter:
 		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
 		
 	def setReplaces(self):
-		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR]'+__language__(30181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
-		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+__language__(30180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
+		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+T(32180)+'[/B][CR]'+T(32181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
+		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+T(32180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
 		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
-		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % __language__(30182),'utf8')
-		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % __language__(30182),'utf8')
+		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % T(32182),'utf8')
+		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % T(32182),'utf8')
 		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
 		
 		if __addon__.getSetting('use_skin_mods') == 'true':
-			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
 			self.quoteVert = u'\u2502'
 			self.hrReplace = u'[COLOR FF808080][B]'+u'\u2500'*300+u'[/B][/COLOR]'
@@ -119,7 +119,7 @@ class MessageConverter:
 			self.codeEndReplace = u'\u2514'+u'\u2500'*300
 			self.bullet = u'\u2022'
 		else:
-			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+__language__(30180)+u' %s[/B]'
+			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
 			self.quoteVert = u'|'
 			self.hrReplace = u'[COLOR FF808080][B]'+u'_'*300+u'[/B][/COLOR]'
@@ -127,24 +127,24 @@ class MessageConverter:
 			self.codeEndReplace = u'`'+u'-'*300
 			self.bullet = u'*'
 			
-		self.codeReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30183)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
-		self.phpReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30184)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
-		self.htmlReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+__language__(30185)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		self.codeReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32183)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		self.phpReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32184)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
+		self.htmlReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32185)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
 		
 	def codeConvert(self,m):
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
 		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
-		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30183)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+T(32183)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
 
 	def phpConvert(self,m):
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
 		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
-		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30184)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+T(32184)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
 	
 	def htmlConvert(self,m):
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))
 		code = self.quoteVert + '[COLOR FF999999]' + code.replace('\n','\n[/COLOR]'+self.quoteVert+'[COLOR FF999999]') + '[/COLOR]'
-		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+__language__(30185)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
+		return self.codeStartReplace + '[CR]'+self.quoteVert+'[B]'+T(32185)+r'[/B][CR]%s[CR]' % code + self.codeEndReplace
 	
 	def indentConvert(self,m):
 		code = self.textwrap.fill(m.group(1).replace('[CR]','\n'))

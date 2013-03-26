@@ -11,7 +11,7 @@ DEBUG = sys.modules["__main__"].DEBUG
 LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 __addon__ = sys.modules["__main__"].__addon__
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 
 ######################################################################################
@@ -688,7 +688,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		if not self.browser or self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
-			if not callback(5,__language__(30100)): return False
+			if not callback(5,T(32100)): return False
 			if not self.login(loginURL):
 				self._loggedIn = False
 			else:
@@ -706,10 +706,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		
 		
 	def browserReadURL(self,url,callback):
-		if not callback(30,__language__(30101)): return ''
+		if not callback(30,T(32101)): return ''
 		response = self.browserOpen(url)
 		self.lastURL = response.geturl()
-		if not callback(60,__language__(30102)): return ''
+		if not callback(60,T(32102)): return ''
 		return response.read()
 	
 	def readURL(self,url,callback=None,force_login=False,is_html=True,force_browser=False):
@@ -728,11 +728,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				self.login()
 				data = self.browserReadURL(url,callback)
 		else:
-			if not callback(5,__language__(30101)): return ''
+			if not callback(5,T(32101)): return ''
 			req = urllib2.urlopen(url)
 			self.lastURL = req.geturl()
 			encoding = req.info().get('content-type').split('charset=')[-1]
-			if not callback(50,__language__(30102)): return ''
+			if not callback(50,T(32102)): return ''
 			data = unicode(req.read(),encoding).encode(ENCODING)
 			req.close()
 		if is_html: self.lastHTML = data
@@ -783,14 +783,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			callback(-1,'%s' % em)
 			return self.finish(FBData(error=em),donecallback)
 		
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
 		html = self.MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = self.getLogo(html)
 		pm_counts = self.getPMCounts(html)
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 		
@@ -798,14 +798,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
 		html = self.readURL(url,callback=callback)
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		if self.filters.get('threads_start_after'): html = html.split(self.filters.get('threads_start_after'),1)[-1]
 		threads = re.finditer(self.filters['threads'],self.MC.lineFilter.sub('',html))
 		if self.formats.get('forums_in_threads','False') == 'True':
 			forums = re.finditer(self.filters['forums'],html)
 			threads = (forums,threads)
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
 		
@@ -813,7 +813,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
 		html = self.readURL(url,callback=callback)
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		html = self.MC.lineFilter.sub('',html)
 		replies = re.findall(self.filters['replies'],html)
@@ -832,7 +832,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				sreplies.append(post)
 		pd = self.getPageInfo(html,page,page_type='replies')
 		pd.setThreadData(topic,threadid)
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		
 		return self.finish(FBData(sreplies,pd),donecallback)
 		
@@ -860,7 +860,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pms = None
 		if self.urls.get('private_messages_xml'):
 			xml = self.readURL(self.getURL('private_messages_xml'),callback=callback,force_login=True,is_html=False)
-			if not xml or not callback(80,__language__(30103)):
+			if not xml or not callback(80,T(32103)):
 				return self.finish(FBData(error=xml and 'CANCEL' or 'NO MESSAGES'),donecallback)
 			folders = re.search(self.filters.get('pm_xml_folders'),xml,re.S)
 			if not folders:
@@ -881,7 +881,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				csvstring = self.getPMCSVFromForm(self.getURL('private_messages_csv'))
 			else:
 				csvstring = self.readURL(self.getURL('private_messages_csv'),callback=callback,force_login=True,is_html=False)
-			if not csvstring or not callback(80,__language__(30103)):
+			if not csvstring or not callback(80,T(32103)):
 				return self.finish(FBData(error=csvstring and 'CANCEL' or 'NO MESSAGES'),donecallback)
 			columns = self.formats.get('pm_csv_columns','').split(',')
 			import csv
@@ -904,7 +904,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if get_boxes: return boxes
 		if get_boxes: return None
 			
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		pms.reverse()
 		return self.finish(FBData(pms),donecallback)
 		
@@ -930,10 +930,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		#if not self.checkLogin(callback=callback): return None
 		url = self.getPageUrl(page,'subscriptions')
 		html = self.readURL(url,callback=callback,force_login=True)
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		threads = re.finditer(self.filters['subscriptions'],self.MC.lineFilter.sub('',html))
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
 		
@@ -1071,13 +1071,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		#open('/home/ruuk/test.txt','w').write(html)
 		if self.forms.get('login_action','@%+#') in html:
-			callback(5,__language__(30100))
+			callback(5,T(32100))
 			if not self.login():
 				post.error = 'Could not log in'
 				return False
 			res = self.browserOpen(url)
 			html = res.read()
-		callback(40,__language__(30105))
+		callback(40,T(32105))
 		selected = False
 		try:
 			if self.forms.get(pre + 'post_name'):
@@ -1118,9 +1118,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			self.browser[self.forms[pre + 'post_message']] = post.message
 			self.setControls(pre + 'post_controls%s')
 			wait = int(self.forms.get(pre + 'post_submit_wait',0))
-			if wait: callback(60,__language__(30107).format(wait))
+			if wait: callback(60,T(32107).format(wait))
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
-			callback(80,__language__(30106))
+			callback(80,T(32106))
 			res = self.browserSubmit(name=self.forms.get(pre + 'post_submit_name'),label=self.forms.get(pre + 'post_submit_value'))
 			html = res.read()
 			#open('/home/ruuk/test.txt','w').write(html)
@@ -1132,7 +1132,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				else:
 					post.successMessage = err.message
 					
-			callback(100,__language__(30052))
+			callback(100,T(32052))
 		except:
 			post.error = ERROR('FORM ERROR')
 			return False
@@ -1197,11 +1197,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		res = self.browserOpen(url)
 		html = res.read()
 		if self.forms.get('login_action','@%+#') in html:
-			callback(5,__language__(30100))
+			callback(5,T(32100))
 			if not self.login(): return False
 			res = self.browserOpen(url)
 			html = res.read()
-		callback(40,__language__(30105))
+		callback(40,T(32105))
 		selected = False
 		try:
 			if form_name:
@@ -1233,11 +1233,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				if field_dict[k]: self.browser[k] = field_dict[k]
 			self.setControls(controls)
 			wait = int(wait)
-			if wait: callback(60,__language__(30107) % wait)
+			if wait: callback(60,T(32107) % wait)
 			time.sleep(wait) #or this will fail on some forums. I went round and round to find this out.
-			callback(80,__language__(30106))
+			callback(80,T(32106))
 			res = self.browserSubmit(name=submit_name,label=submit_value)
-			callback(100,__language__(30052))
+			callback(100,T(32052))
 		except:
 			ERROR('FORM ERROR')
 			return False

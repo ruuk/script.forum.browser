@@ -8,7 +8,7 @@ getSetting = None
 setSetting = None
 
 __addon__ = sys.modules["__main__"].__addon__
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 
 
 ACTION_MOVE_LEFT      = 1
@@ -273,7 +273,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 	def doFilter(self):
 		self.getControl(199).setVisible(False)
 		try:
-			terms = doKeyboard(__language__(30517),self.terms)
+			terms = doKeyboard(T(32517),self.terms)
 			self.terms = terms or ''
 			if '*' in terms or '?' in terms:
 				self.filter = terms.lower()
@@ -377,7 +377,7 @@ class FakeActivitySplash():
 	def close(self):
 		pass
 		
-def showActivitySplash(caption=__language__(30248)):
+def showActivitySplash(caption=T(32248)):
 	if getSetting('hide_activity_splash',False):
 		s = FakeActivitySplash(caption)
 	else:
@@ -464,11 +464,11 @@ class ImageChoiceMenu(ChoiceMenu):
 		return self.items[result]['id']
 
 def getHexColor(hexc=None):
-	hexc = doKeyboard(__language__(30475),default=hexc)
+	hexc = doKeyboard(T(32475),default=hexc)
 	if not hexc: return None
 	while len(hexc) != 6 or re.search('[^1234567890abcdef](?i)',hexc):
-		showMessage(__language__(30050),__language__(30474))
-		hexc = doKeyboard(__language__(30475),default=hexc)
+		showMessage(T(32050),T(32474))
+		hexc = doKeyboard(T(32475),default=hexc)
 		if not hexc: return None
 	return hexc
 

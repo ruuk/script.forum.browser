@@ -7,7 +7,7 @@ LOG = sys.modules["__main__"].LOG
 ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 loadForumSettings = sys.modules["__main__"].loadForumSettings
-__language__ = sys.modules["__main__"].__language__
+T = sys.modules["__main__"].T
 getSetting = sys.modules["__main__"].getSetting
 
 def testForum(url,user=None,password=None):
@@ -135,7 +135,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em or 'ERROR'),donecallback)
 		
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		
 		forums = self.forumParser.getForums(html,callback,80,20)
@@ -160,7 +160,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 		#pm_counts = self.getPMCounts(html)
 		pm_counts = None
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 	
@@ -181,7 +181,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not url: url = self.getPageUrl(page,'threads',fid=forumid,prefix=self.forumParser.getPrefix())
 		LOG('Forum URL: %s' % url)
 		html = self.readURL(url,callback=callback,force_browser=True)
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		threads = self.threadParser.getThreads(html,pagesURL)
 		LOG('Detected Threads Type: ' + self.threadParser.forumType)
@@ -194,7 +194,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		#if forums: extra = {'forums':forums}
 		if subs:
 			for t in threads: t['subscribed'] = True
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads',page_urls=self.threadParser.pages,page_data=page_data)
 		if self.threadParser.getForumType() == 'u0': pd.useURLs = True
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
@@ -247,7 +247,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid,prefix=self.forumParser.getPrefix())
 		LOG('Thread URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
-		if not html or not callback(80,__language__(30103)):
+		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		replies = self.postParser.getPosts(html,pagesURL,callback=callback,filters=self.filters,page_url=url,progress_base=80,progress_range=20)
 		LOG('Detected Posts Type: ' + self.postParser.forumType)
@@ -277,7 +277,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		except:
 			extra = None
 			
-		callback(100,__language__(30052))
+		callback(100,T(32052))
 		
 		return self.finish(FBData(sreplies,pd,extra=extra),donecallback)
 	
