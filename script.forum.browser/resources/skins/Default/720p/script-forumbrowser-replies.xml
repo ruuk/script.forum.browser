@@ -53,7 +53,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Posts[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32912][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			
@@ -79,7 +79,7 @@
 				<font>ForumBrowser-font12</font>
 				<align>center</align>
 				<aligny>center</aligny>
-				<label>$LOCALIZE[SCRIPT3002]</label>
+				<label>$ADDON[script.forum.browser 32902]</label>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
@@ -212,7 +212,7 @@
 					<focusedcolor>FF000000</focusedcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
+					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
 					<pulseonselect>false</pulseonselect>
 					<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>

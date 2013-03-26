@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: Forum Browser
 # Addon id: script.forum.browser
-# Addon version: 1.4.3
+# Addon version: 1.4.4
 # Addon Provider: Rick Phillips (ruuk)
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-03-22 22:01+0000\n"
+"POT-Creation-Date: 2013-03-26 19:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -26,89 +26,6 @@ msgid "Browse Forums in XBMC. Supports Tapatalk enabled forums (over 30000) and 
 msgstr ""
 
 #All {0},{1},{2} must remain in string but can change position
-
-#. Previous
-msgctxt "#3000"
-msgid "Prev"
-msgstr ""
-
-msgctxt "#3001"
-msgid "Next"
-msgstr ""
-
-msgctxt "#3002"
-msgid "Post Reply"
-msgstr ""
-
-msgctxt "#3003"
-msgid "Settings"
-msgstr ""
-
-msgctxt "#3004"
-msgid "Subscriptions"
-msgstr ""
-
-msgctxt "#3005"
-msgid "Forums"
-msgstr ""
-
-msgctxt "#3006"
-msgid "Add Line"
-msgstr ""
-
-msgctxt "#3007"
-msgid "Add Lines"
-msgstr ""
-
-msgctxt "#3008"
-msgid "Submit Post"
-msgstr ""
-
-msgctxt "#3009"
-msgid "Messages"
-msgstr ""
-
-msgctxt "#3010"
-msgid "STOP"
-msgstr ""
-
-msgctxt "#3011"
-msgid "Posts:"
-msgstr ""
-
-msgctxt "#3012"
-msgid "Join:"
-msgstr ""
-
-msgctxt "#3013"
-msgid "OK"
-msgstr ""
-
-msgctxt "#3014"
-msgid "New Search"
-msgstr ""
-
-msgctxt "#3015"
-msgid "Loading..."
-msgstr ""
-
-msgctxt "#3016"
-msgid "Search"
-msgstr ""
-
-msgctxt "#3017"
-msgid "Search Posts"
-msgstr ""
-
-msgctxt "#3018"
-msgid "Search Threads"
-msgstr ""
-
-msgctxt "#3019"
-msgid "Search User"
-msgstr ""
-
-#empty strings from id 3020 to 29999
 
 msgctxt "#30000"
 msgid "General"
@@ -1860,4 +1777,145 @@ msgstr ""
 
 msgctxt "#30523"
 msgid "Select Skin"
+msgstr ""
+
+#empty strings from id 30524 to 32899
+
+#. Previous
+msgctxt "#32900"
+msgid "Prev"
+msgstr ""
+
+msgctxt "#32901"
+msgid "Next"
+msgstr ""
+
+msgctxt "#32902"
+msgid "Post Reply"
+msgstr ""
+
+msgctxt "#32903"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#32904"
+msgid "Subscriptions"
+msgstr ""
+
+msgctxt "#32905"
+msgid "Forums"
+msgstr ""
+
+msgctxt "#32906"
+msgid "Add Line"
+msgstr ""
+
+msgctxt "#32907"
+msgid "Add Lines"
+msgstr ""
+
+msgctxt "#32908"
+msgid "Submit Post"
+msgstr ""
+
+msgctxt "#32909"
+msgid "Messages"
+msgstr ""
+
+msgctxt "#32910"
+msgid "STOP"
+msgstr ""
+
+msgctxt "#32911"
+msgid "Threads"
+msgstr ""
+
+msgctxt "#32912"
+msgid "Posts"
+msgstr ""
+
+msgctxt "#32913"
+msgid "OK"
+msgstr ""
+
+msgctxt "#32914"
+msgid "New Search"
+msgstr ""
+
+msgctxt "#32915"
+msgid "Loading..."
+msgstr ""
+
+msgctxt "#32916"
+msgid "Search"
+msgstr ""
+
+msgctxt "#32917"
+msgid "Search Posts"
+msgstr ""
+
+msgctxt "#32918"
+msgid "Search Threads"
+msgstr ""
+
+msgctxt "#32919"
+msgid "Search User"
+msgstr ""
+
+msgctxt "#32920"
+msgid "Post Reply"
+msgstr ""
+
+msgctxt "#32921"
+msgid "Set Title"
+msgstr ""
+
+msgctxt "#32922"
+msgid "Post"
+msgstr ""
+
+msgctxt "#32923"
+msgid "Add Forum"
+msgstr ""
+
+msgctxt "#32924"
+msgid "Add From Online"
+msgstr ""
+
+msgctxt "#32925"
+msgid "Remove Forum"
+msgstr ""
+
+msgctxt "#32926"
+msgid "Add To Favorites"
+msgstr ""
+
+msgctxt "#32927"
+msgid "Remove From Favs"
+msgstr ""
+
+msgctxt "#32928"
+msgid "Forum Settings"
+msgstr ""
+
+msgctxt "#32929"
+msgid "Share To Online DB"
+msgstr ""
+
+msgctxt "#32930"
+msgid "Share Theme To ODB"
+msgstr ""
+
+msgctxt "#32931"
+msgid "Help"
+msgstr ""
+
+#. Short for Subscriptions
+msgctxt "#32932"
+msgid "Subs"
+msgstr ""
+
+#. Short for Private Messages
+msgctxt "#32933"
+msgid "PMs"
 msgstr ""

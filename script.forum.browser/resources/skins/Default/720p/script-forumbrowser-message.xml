@@ -59,7 +59,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Post[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32922][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 

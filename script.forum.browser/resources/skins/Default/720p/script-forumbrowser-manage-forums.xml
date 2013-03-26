@@ -82,7 +82,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Add Forum</label>
+					<label>$ADDON[script.forum.browser 32923]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -118,7 +118,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Add From Online</label>
+					<label>$ADDON[script.forum.browser 32924]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -139,7 +139,7 @@
 					<colordiffuse>FFFF9999</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Remove Forum</label>
+					<label>$ADDON[script.forum.browser 32925]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -159,7 +159,7 @@
 					<visible>!StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Add To Favorites</label>
+					<label>$ADDON[script.forum.browser 32926]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -179,7 +179,7 @@
 					<visible>StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Remove From Favs</label>
+					<label>$ADDON[script.forum.browser 32927]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -198,7 +198,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Forum Settings</label>
+					<label>$ADDON[script.forum.browser 32928]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -218,7 +218,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Share To Online DB</label>
+					<label>$ADDON[script.forum.browser 32929]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -237,7 +237,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Share Theme To ODB</label>
+					<label>$ADDON[script.forum.browser 32930]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -256,7 +256,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>Help</label>
+					<label>$ADDON[script.forum.browser 32931]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>
@@ -281,7 +281,7 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
-				<label>[B]Forums[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
 			</control>
 			<control type="label">
 				<posx>426</posx>
@@ -292,7 +292,7 @@
 				<aligny>center</aligny>
 				<textcolor>black</textcolor>
 				<align>left</align>
-				<label>Subs</label>
+				<label>$ADDON[script.forum.browser 32932]</label>
 			</control>
 			<control type="label">
 				<posx>516</posx>
@@ -303,7 +303,7 @@
 				<aligny>center</aligny>
 				<textcolor>black</textcolor>
 				<align>left</align>
-				<label>PMs</label>
+				<label>$ADDON[script.forum.browser 32933]</label>
 			</control>
 			
 			<control type="image" id="253">

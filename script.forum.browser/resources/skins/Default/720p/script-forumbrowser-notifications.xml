@@ -37,7 +37,7 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>left</align>
-				<label>[B]Manage Notifications[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32940][/B]</label>
 			</control>
 			<control type="label">
 				<posx>426</posx>
@@ -48,7 +48,7 @@
 				<aligny>center</aligny>
 				<textcolor>black</textcolor>
 				<align>left</align>
-				<label>Subs</label>
+				<label>$ADDON[script.forum.browser 32932]</label>
 			</control>
 			<control type="label">
 				<posx>516</posx>
@@ -59,19 +59,18 @@
 				<aligny>center</aligny>
 				<textcolor>black</textcolor>
 				<align>left</align>
-				<label>PMs</label>
+				<label>$ADDON[script.forum.browser 32933]</label>
 			</control>
-			<control type="label">
-				<posx>584</posx>
-				<posy>-35</posy>
-				<width>40</width>
-				<height>38</height>
-				<font>ForumBrowser-font13</font>
-				<aligny>center</aligny>
-				<textcolor>black</textcolor>
-				<align>left</align>
-				<label>On</label>
+			
+			<control type="image" id="253">
+				<posx>581</posx>
+				<posy>-28</posy>
+				<width>24</width>
+				<height>24</height>
+				<texture flipy="true">forum-browser-info.png</texture>
+				<colordiffuse>FF001100</colordiffuse>
 			</control>
+			
 			<control type="image" id="251">
 				<posx>0</posx>
 				<posy>0</posy>

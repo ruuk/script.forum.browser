@@ -62,7 +62,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Threads[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32911][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -191,7 +191,7 @@
 					<focusedcolor>FF000000</focusedcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
+					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
 					<colordiffuse>FFFF0000</colordiffuse>
 					<pulseonselect>false</pulseonselect>
 					<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>

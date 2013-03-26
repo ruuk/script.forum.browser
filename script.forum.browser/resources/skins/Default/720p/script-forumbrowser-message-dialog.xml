@@ -132,7 +132,7 @@
 					<visible>true</visible>
 					<font>font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3013]</label>
+					<label>$ADDON[script.forum.browser 32913]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>black</textcolor>

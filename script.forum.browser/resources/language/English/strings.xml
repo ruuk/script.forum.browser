@@ -482,25 +482,48 @@ Please contact the forum administrator if this problem continues.</string>
     <string id="30522">Enable 'Use keyboard mod' in settings if you want to install it at a later time.</string>
     <string id="30523">Select Skin</string>
 
-    <string id="3000">Prev</string> <!-- Previous -->
-    <string id="3001">Next</string>
-    <string id="3002">Post Reply</string>
-    <string id="3003">Settings</string>
-    <string id="3004">Subscriptions</string>
-    <string id="3005">Forums</string>
-    <string id="3006">Add Line</string>
-    <string id="3007">Add Lines</string>
-    <string id="3008">Submit Post</string>
-    <string id="3009">Messages</string>
-    <string id="3010">STOP</string>
-    <string id="3011">Posts:</string>
-    <string id="3012">Join:</string>
-    <string id="3013">OK</string>
-    <string id="3014">New Search</string>
-    <string id="3015">Loading...</string>
-    <string id="3016">Search</string>
-    <string id="3017">Search Posts</string>
-    <string id="3018">Search Threads</string>
-    <string id="3019">Search User</string>
-
+    <string id="32900">Prev</string> <!-- Previous -->
+    <string id="32901">Next</string>
+    <string id="32902">Post Reply</string>
+    <string id="32903">Settings</string>
+    <string id="32904">Subscriptions</string>
+    <string id="32905">Forums</string>
+    <string id="32906">Add Line</string>
+    <string id="32907">Add Lines</string>
+    <string id="32908">Submit Post</string>
+    <string id="32909">Messages</string>
+    <string id="32910">STOP</string>
+    <string id="32911">Threads</string>
+    <string id="32912">Posts</string>
+    
+    <string id="32913">OK</string>
+    <string id="32914">New Search</string>
+    <string id="32915">Loading...</string>
+    <string id="32916">Search</string>
+    <string id="32917">Search Posts</string>
+    <string id="32918">Search Threads</string>
+    <string id="32919">Search User</string>
+    <string id="32920">Post Reply</string>
+    <string id="32921">Set Title</string>
+    <string id="32922">Post</string>
+    
+    <string id="32923">Add Forum</string>
+    <string id="32924">Add From Online</string>
+    <string id="32925">Remove Forum</string>
+    <string id="32926">Add To Favorites</string>
+    <string id="32927">Remove From Favs</string>
+    <string id="32928">Forum Settings</string>
+    <string id="32929">Share To Online DB</string>
+    <string id="32930">Share Theme To ODB</string>
+    <string id="32931">Help</string>
+    <string id="32932">Subs</string> <!-- Short for Subscriptions -->
+    <string id="32933">PMs</string> <!-- Short for Private Messages -->
+    
+    <string id="32934">Header Color</string>
+    <string id="32935">All</string>
+    <string id="32936">Functionality</string>
+    <string id="32937">Accuracy</string>
+    <string id="32938">OK</string>
+    <string id="32939">Cancel</string>
+    <string id="32940">Forum Browser: New Posts</string>
 </strings>

@@ -62,7 +62,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]Post Reply[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32920][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			<control type="button" id="110">
@@ -103,7 +103,7 @@
 				<focusedcolor>white</focusedcolor>
 				<font>ForumBrowser-font13</font>
 				<align>center</align>
-				<label>Set Title</label>
+				<label>$ADDON[script.forum.browser 32921]</label>
 			</control>
 			
 			<control type="image">
@@ -159,7 +159,7 @@
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<disabledcolor>80555555</disabledcolor>
-				<label>$LOCALIZE[SCRIPT3006]</label>
+				<label>$ADDON[script.forum.browser 32906]</label>
 			</control>
 			<control type="button" id="201">
 				<description>The Button</description>
@@ -175,7 +175,7 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 				<font>ForumBrowser-font13</font>
 				<align>center</align>
-				<label>$LOCALIZE[SCRIPT3007]</label>
+				<label>$ADDON[script.forum.browser 32907]</label>
 				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-dark-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
@@ -201,7 +201,7 @@
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>white</focusedcolor>
 				<disabledcolor>80555555</disabledcolor>
-				<label>$LOCALIZE[SCRIPT3008]</label>
+				<label>$ADDON[script.forum.browser 32908]</label>
 			</control>
 
       

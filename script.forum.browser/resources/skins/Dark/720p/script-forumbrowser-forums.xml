@@ -78,7 +78,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]$LOCALIZE[SCRIPT3005][/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
       
@@ -92,7 +92,7 @@
 				<textcolor>black</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>$LOCALIZE[SCRIPT3015]</label>
+				<label>$ADDON[script.forum.browser 32915]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			<control type="image" id="300">
@@ -146,7 +146,7 @@
 				<focusedcolor>FF000000</focusedcolor>
 				<aligny>center</aligny>
 				<align>center</align>
-				<label>[B]$LOCALIZE[SCRIPT3010][/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
 				<colordiffuse>FFFF0000</colordiffuse>
 				<pulseonselect>false</pulseonselect>
 				<texturefocus border="20">forum-browser-dark-white-trans-boxr.png</texturefocus>
@@ -244,7 +244,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3005]</label>
+					<label>$ADDON[script.forum.browser 32905]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -266,7 +266,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3004]</label>
+					<label>$ADDON[script.forum.browser 32904]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -288,7 +288,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3009]</label>
+					<label>$ADDON[script.forum.browser 32909]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -310,7 +310,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3003]</label>
+					<label>$ADDON[script.forum.browser 32903]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -556,7 +556,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>$LOCALIZE[SCRIPT3019]</label>
+						<label>$ADDON[script.forum.browser 32919]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -595,7 +595,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>$LOCALIZE[SCRIPT3018]</label>
+						<label>$ADDON[script.forum.browser 32918]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -634,7 +634,7 @@
 						<colordiffuse>FFCCCCCC</colordiffuse>
 						<font>ForumBrowser-font13</font>
 						<align>center</align>
-						<label>$LOCALIZE[SCRIPT3017]</label>
+						<label>$ADDON[script.forum.browser 32917]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 						<textcolor>white</textcolor>
@@ -658,7 +658,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3016]</label>
+					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>
@@ -681,7 +681,7 @@
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
 					<align>center</align>
-					<label>$LOCALIZE[SCRIPT3016]</label>
+					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
 					<textcolor>white</textcolor>

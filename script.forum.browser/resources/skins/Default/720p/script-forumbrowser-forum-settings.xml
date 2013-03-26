@@ -34,7 +34,7 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<align>center</align>
-				<label>[B]Forum Settings[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32928][/B]</label>
 			</control>
 			<control type="image">
 				<posx>410</posx>
@@ -77,7 +77,7 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 				<font>ForumBrowser-font13</font>
 				<align>center</align>
-				<label>OK</label>
+				<label>$ADDON[script.forum.browser 32938]</label>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>black</textcolor>
@@ -98,7 +98,7 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 				<font>ForumBrowser-font13</font>
 				<align>center</align>
-				<label>Cancel</label>
+				<label>$ADDON[script.forum.browser 32939]</label>
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>black</textcolor>
