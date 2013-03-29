@@ -155,7 +155,7 @@ def installSkinMods(update=False):
 		dialogs.showMessage(T(32304),T(32493),T(32494),success=True)
 		
 	skinPath = localSkinPath
-	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.xml')
+	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.txt')
 	sourceFontPath = os.path.join(fbPath,'keyboard','ForumBrowser-DejaVuSans.ttf')
 	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
 	backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
