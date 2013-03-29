@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import urllib2, re, os, sys, time, urlparse, binascii, math, fnmatch
+import urllib2, re, os, sys, time, urlparse, binascii, math
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
@@ -2833,10 +2833,10 @@ class ForumsWindow(BaseWindow):
 				self.openThreadsWindow(forumElements)
 				self.forumElements = None
 		elif forumElements.get('thread'):
-			tid = forumElements.get('thread')
+			#tid = forumElements.get('thread')
 			self.forumElements = None
 		elif forumElements.get('post'):
-			pid = forumElements.get('post')
+			#pid = forumElements.get('post')
 			self.forumElements = None
 		
 	def setVersion(self):

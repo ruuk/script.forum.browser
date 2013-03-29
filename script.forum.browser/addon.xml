@@ -4,10 +4,9 @@
        version="1.4.5"
        provider-name="Rick Phillips (ruuk)">
   <requires>
-    <import addon="xbmc.python" version="2.0"/>
+    <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.module.simplejson" version="2.0.9"/>
     <import addon="script.web.viewer" version="0.9.6"/>
-    <import addon="script.module.sharesocial" version="0.2.0" optional="true"/>
   </requires>
   <extension point="xbmc.python.script"
              library="default.py">
@@ -18,5 +17,8 @@
     <platform>all</platform>
     <summary lang="en">Browse forums within XBMC</summary>
     <description lang="en">Browse Forums in XBMC. Supports Tapatalk enabled forums (over 30000) and Forumrunner enabled forums. Also supports boxee.tv. View forums, threads, posts, subscriptions and private messages. Follow links in Web Viewer. Post replies, send private messages, delete posts, quote posts. View images in posts, follow post forum links and download post links.</description>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+    <forum>http://forum.xbmc.org/showthread.php?tid=85018</forum>
+    <source>http://github.com/ruuk/script.forum.browser</source>
   </extension>
 </addon>
