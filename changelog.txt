@@ -31,7 +31,7 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.5
+Current Version : 1.4.6
 
 *** 1.4.6 ***
 
