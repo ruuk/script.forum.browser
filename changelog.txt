@@ -33,6 +33,11 @@ TODO:
 
 Current Version : 1.4.6
 
+*** 1.4.7 ***
+
+Removed strings.xml
+Removed polish language (Will return when transifex translation available. Was probably no longer accurate, and only about 15% complete anyway)
+
 *** 1.4.6 ***
 
 Added shadow behind wrench tab on forums manager window
