@@ -2778,7 +2778,7 @@ class ForumsWindow(BaseWindow):
 		self.forumsManagerWindowIsOpen = False
 	
 	def newPostsCallback(self,signal,data):
-		self.openForumsManager()
+		self.openForumsManager(external=True)
 	
 	def onClose(self):
 		SIGNALHUB.unRegister('NEW_POSTS', self)
@@ -3176,10 +3176,18 @@ class ForumsWindow(BaseWindow):
 			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
 	
-	def openForumsManager(self):
+	def openForumsManager(self,external=False):
 		if self.forumsManagerWindowIsOpen: return
 		self.forumsManagerWindowIsOpen = True
-		forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
+		size = 'manage'
+		if external:
+			methods = ('manage','small','full')
+			if video.isPlaying():
+				size = methods[getSetting('notify_method_video',0)]
+			else:
+				size = methods[getSetting('notify_method',0)]
+			
+		forumsManager(self,size=size,forumID=FB and FB.getForumID() or None)
 		self.forumsManagerWindowIsOpen = False
 		if not FB: return
 		forumID = FB.getForumID()

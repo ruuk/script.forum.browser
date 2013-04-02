@@ -36,7 +36,7 @@ Current Version : 1.4.6
 
 Removed strings.xml
 Removed polish language (Will return when transifex translation available. Was probably no longer accurate, and only about 15% complete anyway)
-When Forum Browser is open and service notifies, it will now trigger Forum Browser to open the Forums Manager window instead of the normal dialog. If its already open, it will refresh it instead.
+When Forum Browser is open and service notifies, it will now trigger Forum Browser to open the dialog instead of opening from the service. If the forums manager is open, it will be refresh instead.
 
 *** 1.4.6 ***
 
