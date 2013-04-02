@@ -89,17 +89,20 @@ class ForumBrowserService:
 			self.log('CHANGED: STARTUP ONLY - STOPPING SERVICE')
 			self.stop = True
 		
-	def notify(self,message='',header='Forum Browser',type='all'):
+	def notify(self,message='',header='Forum Browser',ntype='all'):
 		if video.isPlaying():
 			method = self.notifyMethodVideo
 		else:
 			method = self.notifyMethod
 			
-		if method == 'normal' and type == 'single':
+		if method == 'normal' and ntype == 'single':
 			mtime=self.notifyXbmcDuration
 			image=ADDON.getAddonInfo('icon')
 			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
-		elif method != 'normal' and type == 'all':
+		elif method != 'normal' and ntype == 'all':
+			if getSetting('FBIsRunning',False):
+				xbmcaddon.Addon().setSetting('manageForums','true')
+				return
 			forumsManager(size=method)
 		
 	def getUsername(self):
@@ -198,7 +201,7 @@ class ForumBrowserService:
 			log += 'Subs: %s/%s PMs: %s/%s' % (unread,ct,fdata['PM'],pmtotal)
 			
 			if flag:
-				self.notify(log,type='single')
+				self.notify(log,ntype='single')
 				self.log(log + ' - SHOWING NOTICE')
 				anyflag = True
 			else:

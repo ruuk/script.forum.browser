@@ -4,11 +4,10 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Check on optional import behavior
-  Somehow handle Notifications dialog opening when Forum Browser is open
   
  Long Term:
- Check for new parser rules automatically or add option to check for new rules
+  Check on optional import behavior
+  Check for new parser rules automatically or add option to check for new rules
   Image zoom/rotate etc
   Look at using the AlarmClock builtin for the service - Easier to restart and less overall memory usage perhaps?
   When adding a forum, ask for logo background color (or image?) or ask later
@@ -37,6 +36,7 @@ Current Version : 1.4.6
 
 Removed strings.xml
 Removed polish language (Will return when transifex translation available. Was probably no longer accurate, and only about 15% complete anyway)
+When Forum Browser is open and service notifies, it will now trigger Forum Browser to open the Forums Manager window instead of the normal dialog. If its already open, it will refresh it instead.
 
 *** 1.4.6 ***
 

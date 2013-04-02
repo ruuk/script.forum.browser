@@ -59,6 +59,7 @@ ACTION_CONTEXT_MENU   = 117
 ACTION_RUN_IN_MAIN = 27
 
 PLAYER = None
+MONITOR = None
 
 MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
@@ -410,6 +411,7 @@ class ThreadWindow:
 class BaseWindowFunctions(ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''
+		MONITOR.register(self)
 		self.closed = False
 		self.headerTextFormat = '%s'
 		ThreadWindow.__init__(self)
@@ -422,10 +424,14 @@ class BaseWindowFunctions(ThreadWindow):
 			action = ACTION_PREVIOUS_MENU
 		if ThreadWindow.onAction(self,action): return
 		if action == ACTION_PREVIOUS_MENU:
-			self.closed = True
-			self.close()
+			self.doClose()
 		#xbmcgui.WindowXML.onAction(self,action)
 	
+	def doClose(self):
+		self.closed = True
+		MONITOR.unRegister(self)
+		self.close()
+			
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
 		#self.getControl(310).setVisible(True)
@@ -472,10 +478,55 @@ class BaseWindowFunctions(ThreadWindow):
 		words += re.sub('(?P<quote>["\'])(.+?)(?P=quote)','',text).split()
 		return words
 		
+class FBMonitor(xbmc.Monitor): # @UndefinedVariable
+	def __init__(self):
+		self.currID = 0
+		self.changingSetting = False
+		self.registry = []
+		xbmc.Monitor.__init__(self)  # @UndefinedVariable
+		
+	def register(self,registrant,callback=None):
+		if DEBUG: LOG('FBMonitor registering: %s' % repr(registrant))
+		registrant.__monitorID = self.currID
+		self.currID += 1
+		self.registry.append((registrant,callback))
+		
+	def unRegister(self,registrant):
+		i=0
+		for reg, cb in self.registry:  # @UnusedVariable
+			if reg.__monitorID == registrant.__monitorID:
+				if DEBUG: LOG('FBMonitor un-registering (%s): %s' % (registrant.__monitorID,repr(registrant)))
+				self.registry.pop(i)
+				return
+			i+=1 
+
+	def onSettingsChanged(self):
+		if self.changingSetting: return
+		global __addon__
+		__addon__ = xbmcaddon.Addon(id='script.forum.browser')
+		if not getSetting('manageForums',False): return
+		for reg,cb in self.registry:  # @UnusedVariable
+			if not isinstance(reg,ForumsWindow):
+				#print repr(self.owner)
+				if isinstance(reg,NotificationsDialog):
+					reg.refresh()
+				#self.owner.close()
+				return
+			reg.openForumsManager()
+			self.changeSetting('manageForums', False)
+		
+	def changeSetting(self,key,val):
+		self.changingSetting = True
+		xbmc.sleep(300)
+		setSetting(key,val)
+		xbmc.sleep(300)
+		self.changingSetting = False
+	
 class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 	def __init__(self, *args, **kwargs):
 		BaseWindowFunctions.__init__(self, *args, **kwargs)
 		xbmcgui.WindowXML.__init__( self )
+		self.closed
 		
 	def onInit(self):
 		pass
@@ -713,7 +764,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 			self.editSetting()		
 		elif controlID == 100:
 			self.OK = True
-			self.close()
+			self.doClose()
 		elif controlID == 101:
 			self.cancel()
 		
@@ -727,7 +778,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 		if self.settingsChanged:
 			yes = xbmcgui.Dialog().yesno(T(32268),T(32269),T(32270))
 			if not yes: return
-		self.close()
+		self.doClose()
 		
 	def editSetting(self):
 		item = self.getControl(320).getSelectedItem()
@@ -974,7 +1025,7 @@ class NotificationsDialog(BaseWindowDialog):
 		if duration:
 			xbmc.sleep(1000 * duration)
 			if self.stopTimeout and getSetting('notify_dialog_close_activity_stops',True): return
-			self.close()
+			self.doClose()
 	
 	def isVideoPlaying(self):
 		return xbmc.getCondVisibility('Player.Playing') and xbmc.getCondVisibility('Player.HasVideo')
@@ -1010,7 +1061,7 @@ class NotificationsDialog(BaseWindowDialog):
 					if not section: section = item.getProperty('new_subs') and 'SUBSCRIPTIONS' or ''
 			furl = util.createForumBrowserURL(forumID,section)
 			xbmc.executebuiltin("RunScript(script.forum.browser,%s)" % furl)
-		self.close()
+		self.doClose()
 		
 	def createItems(self):
 		favs = []
@@ -1091,11 +1142,11 @@ class NotificationsDialog(BaseWindowDialog):
 		self.initialIndex = 0
 		
 	def refresh(self,forumID=None):
-		self.initialForumID = forumID
+		self.initialForumID = forumID or self.getSelectedForumID()
 		self.getControl(220).reset()
 		self.createItems()
 		self.fillList()
-		
+	
 	def makeColorFile(self,color,path):
 		try:
 			replace = binascii.unhexlify(color)
@@ -1129,6 +1180,7 @@ def getNotifyList():
 			if data:
 				if data['notify']: nlist.append(f)
 		return nlist
+	
 ######################################################################################
 # Post Dialog
 ######################################################################################
@@ -1228,7 +1280,7 @@ class PostDialog(BaseWindowDialog):
 		self.post.setMessage(self.title,message)
 		self.posted = True
 		if self.doNotPost:
-			self.close()
+			self.doClose()
 			return
 		splash = dialogs.showActivitySplash(T(32126))
 		try:
@@ -1252,7 +1304,7 @@ class PostDialog(BaseWindowDialog):
 			splash.close()
 		if not self.moderated and self.post.moderated:
 			dialogs.showMessage(T(32298),T(32299),T(32300))
-		self.close()
+		self.doClose()
 		
 	def parseCodes(self,text):
 		return FB.MC.parseCodes(text)
@@ -1664,7 +1716,7 @@ class MessageWindow(BaseWindow):
 			self.showImage(link.url)
 		elif link.isPost() or link.isThread():
 			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
-			self.close()
+			self.doClose()
 		else:
 			try:
 				webviewer.getWebResult(link.url,dialog=True,browser=FB.browser)
@@ -1755,7 +1807,7 @@ class MessageWindow(BaseWindow):
 			if openPostDialog(editPM=pm):
 				self.action = forumbrowser.Action('REFRESH-REOPEN')
 				self.action.pid = pm.pid
-				self.close()
+				self.doClose()
 		elif result == 'extras':
 			showUserExtras(self.post)
 		elif result == 'help':
@@ -1764,14 +1816,14 @@ class MessageWindow(BaseWindow):
 	def deletePost(self):
 		result = deletePost(self.post,is_pm=self.post.isPM)
 		self.action = forumbrowser.Action('REFRESH')
-		if result: self.close()
+		if result: self.doClose()
 		
 	def openPostDialog(self,quote=False):
 		pm = openPostDialog(quote and self.post or None,pid=self.post.postId,tid=self.post.tid,fid=self.post.fid)
 		if pm:
 			self.action = forumbrowser.PostMessage(pid=pm.pid)
 			self.action.action = 'GOTOPOST'
-			self.close()
+			self.doClose()
 		
 	def setLoggedIn(self):
 		if FB.isLoggedIn():
@@ -2756,6 +2808,7 @@ class ForumsWindow(BaseWindow):
 		self.headerIsDark = False
 		self.forumElements = None
 		self.headerTextFormat = '[B]%s[/B]'
+		self.forumsManagerWindowIsOpen = False
 	
 	def getUsername(self):
 		data = loadForumSettings(FB.getForumID())
@@ -2781,6 +2834,7 @@ class ForumsWindow(BaseWindow):
 		try:
 			self.setLoggedIn() #So every time we return to the window we check
 			if self.started: return
+			xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty('ForumBrowserMAIN','MAIN')
 			self.setVersion()
 			self.setStopControl(self.getControl(105))
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
@@ -3082,6 +3136,7 @@ class ForumsWindow(BaseWindow):
 			s.close()
 		
 	def changeForum(self,forum=None):
+		if not self.closeSubWindows(): return
 		if not forum: forum = askForum()
 		if not forum: return False
 		url = None
@@ -3092,6 +3147,21 @@ class ForumsWindow(BaseWindow):
 		self.startGetForumBrowser(forum,url=url)
 		return True
 
+	def closeSubWindows(self):
+		for x in range(0,10):  # @UnusedVariable
+			winid = xbmcgui.getCurrentWindowId()
+			if winid > 0:
+				window = xbmcgui.Window(winid)
+				if window.getProperty('ForumBrowserMAIN'): return True
+				print winid
+				#window.close()
+				xbmc.executebuiltin('Action(PreviousMenu)')
+				xbmc.sleep(100)
+			else:
+				print winid
+			
+		return False
+		
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
@@ -3133,7 +3203,10 @@ class ForumsWindow(BaseWindow):
 		BaseWindow.onAction(self,action)
 	
 	def openForumsManager(self):
+		if self.forumsManagerWindowIsOpen: return
+		self.forumsManagerWindowIsOpen = True
 		forumsManager(self,size='manage',forumID=FB and FB.getForumID() or None)
+		self.forumsManagerWindowIsOpen = False
 		if not FB: return
 		forumID = FB.getForumID()
 		fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
@@ -4382,8 +4455,9 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	return FB
 
 def startForumBrowser(forumID=None):
-	global PLAYER, STARTFORUM
+	global PLAYER, MONITOR, STARTFORUM
 	PLAYER = PlayerMonitor()
+	MONITOR = FBMonitor()
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	try:
@@ -4414,5 +4488,10 @@ if __name__ == '__main__':
 	elif sys.argv[-1].startswith('settingshelp_'):
 		dialogs.showHelp('settings-' + sys.argv[-1].split('_')[-1])
 	else:
-		startForumBrowser()
+		try:
+			setSetting('FBIsRunning',True)
+			setSetting('manageForums',False)
+			startForumBrowser()
+		finally:
+			setSetting('FBIsRunning',False)
 		
