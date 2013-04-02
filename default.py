@@ -4,7 +4,7 @@ import urllib2, re, os, sys, time, urlparse, binascii, math
 import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
-from lib import util
+from lib import util, signals
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -59,7 +59,7 @@ ACTION_CONTEXT_MENU   = 117
 ACTION_RUN_IN_MAIN = 27
 
 PLAYER = None
-MONITOR = None
+SIGNALHUB = None
 
 MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
@@ -86,6 +86,9 @@ def ERROR(message,hide_tb=False):
 	
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
+
+signals.LOG = LOG
+signals.ERROR = ERROR
 
 LOG('Version: ' + __version__)
 LOG('Python Version: ' + sys.version)
@@ -411,7 +414,6 @@ class ThreadWindow:
 class BaseWindowFunctions(ThreadWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''
-		MONITOR.register(self)
 		self.closed = False
 		self.headerTextFormat = '%s'
 		ThreadWindow.__init__(self)
@@ -429,9 +431,11 @@ class BaseWindowFunctions(ThreadWindow):
 	
 	def doClose(self):
 		self.closed = True
-		MONITOR.unRegister(self)
 		self.close()
+		self.onClose()
 			
+	def onClose(self): pass
+	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
 		#self.getControl(310).setVisible(True)
@@ -477,50 +481,6 @@ class BaseWindowFunctions(ThreadWindow):
 		for q in quoted: words.append(q[1])
 		words += re.sub('(?P<quote>["\'])(.+?)(?P=quote)','',text).split()
 		return words
-		
-class FBMonitor(xbmc.Monitor): # @UndefinedVariable
-	def __init__(self):
-		self.currID = 0
-		self.changingSetting = False
-		self.registry = []
-		xbmc.Monitor.__init__(self)  # @UndefinedVariable
-		
-	def register(self,registrant,callback=None):
-		if DEBUG: LOG('FBMonitor registering: %s' % repr(registrant))
-		registrant.__monitorID = self.currID
-		self.currID += 1
-		self.registry.append((registrant,callback))
-		
-	def unRegister(self,registrant):
-		i=0
-		for reg, cb in self.registry:  # @UnusedVariable
-			if reg.__monitorID == registrant.__monitorID:
-				if DEBUG: LOG('FBMonitor un-registering (%s): %s' % (registrant.__monitorID,repr(registrant)))
-				self.registry.pop(i)
-				return
-			i+=1 
-
-	def onSettingsChanged(self):
-		if self.changingSetting: return
-		global __addon__
-		__addon__ = xbmcaddon.Addon(id='script.forum.browser')
-		if not getSetting('manageForums',False): return
-		for reg,cb in self.registry:  # @UnusedVariable
-			if not isinstance(reg,ForumsWindow):
-				#print repr(self.owner)
-				if isinstance(reg,NotificationsDialog):
-					reg.refresh()
-				#self.owner.close()
-				return
-			reg.openForumsManager()
-			self.changeSetting('manageForums', False)
-		
-	def changeSetting(self,key,val):
-		self.changingSetting = True
-		xbmc.sleep(300)
-		setSetting(key,val)
-		xbmc.sleep(300)
-		self.changingSetting = False
 	
 class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 	def __init__(self, *args, **kwargs):
@@ -940,8 +900,15 @@ class NotificationsDialog(BaseWindowDialog):
 		self.createItems()
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
+	def newPostsCallback(self,signal,data):
+		self.refresh()
+		
+	def onClose(self):
+		SIGNALHUB.unRegister('NEW_POSTS', self)
+		
 	def onInit(self):
 		if self.started: return
+		SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
 		self.started = True
 		BaseWindowDialog.onInit(self)
 		if not self.forumsWindow: self.getControl(250).setLabel(T(32295))
@@ -2810,6 +2777,12 @@ class ForumsWindow(BaseWindow):
 		self.headerTextFormat = '[B]%s[/B]'
 		self.forumsManagerWindowIsOpen = False
 	
+	def newPostsCallback(self,signal,data):
+		self.openForumsManager()
+	
+	def onClose(self):
+		SIGNALHUB.unRegister('NEW_POSTS', self)
+		
 	def getUsername(self):
 		data = loadForumSettings(FB.getForumID())
 		if data and data['username']: return data['username']
@@ -2834,6 +2807,7 @@ class ForumsWindow(BaseWindow):
 		try:
 			self.setLoggedIn() #So every time we return to the window we check
 			if self.started: return
+			SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
 			xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty('ForumBrowserMAIN','MAIN')
 			self.setVersion()
 			self.setStopControl(self.getControl(105))
@@ -4455,9 +4429,9 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	return FB
 
 def startForumBrowser(forumID=None):
-	global PLAYER, MONITOR, STARTFORUM
+	global PLAYER, SIGNALHUB, STARTFORUM
 	PLAYER = PlayerMonitor()
-	MONITOR = FBMonitor()
+	SIGNALHUB = signals.SignalHub()
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	try:

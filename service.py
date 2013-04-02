@@ -1,4 +1,5 @@
 import os, sys, time, xbmc, xbmcaddon
+from lib import signals
 
 DEBUG = False
 def ERROR(txt):
@@ -12,6 +13,8 @@ def ERROR(txt):
 	return short
 	
 def LOG(txt): pass
+
+signals.ERROR = ERROR
 
 ADDON = __addon__ = xbmcaddon.Addon()
 T = ADDON.getLocalizedString
@@ -101,7 +104,7 @@ class ForumBrowserService:
 			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
 		elif method != 'normal' and ntype == 'all':
 			if getSetting('FBIsRunning',False):
-				xbmcaddon.Addon().setSetting('manageForums','true')
+				signals.sendSignal('NEW_POSTS')
 				return
 			forumsManager(size=method)
 		
