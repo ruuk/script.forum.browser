@@ -1,6 +1,6 @@
 import xbmc, xbmcaddon
 
-DEBUG = True
+DEBUG = False
 
 def LOG(msg): print 'FORUMBROWSER: %s' % msg
 def ERROR(msg): LOG(msg)
@@ -16,24 +16,30 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 		xbmc.Monitor.__init__(self)  # @UndefinedVariable
 		
 	def registerReceiver(self,signal,registrant,callback):
-		if not hasattr(registrant,'__receiverID'):
-			registrant.__receiverID = self.currID
+		if not hasattr(registrant,'_receiverID'):
+			registrant._receiverID = self.currID
 			self.currID += 1
-		if DEBUG: LOG('SignalHub registering signal %s: [%s] %s' % (signal,registrant.__receiverID,repr(registrant)))
+		if DEBUG: LOG('SignalHub registering signal %s: [%s] %s' % (signal,registrant._receiverID,repr(registrant)))
 		if signal in self.registry:
 			self.registry[signal].append((registrant,callback))
 		else:
 			self.registry[signal] = [(registrant,callback)]
 		
 	def unRegister(self,signal,registrant):
-		if not signal in self.registry: return
-		i=0
-		for reg, cb in self.registry[signal]:  # @UnusedVariable
-			if reg.__receiverID == registrant.__receiverID:
-				if DEBUG: LOG('SignalHub un-registering signal %s: [%s] %s' % (signal,registrant.__receiverID,repr(registrant)))
-				self.registry[signal].pop(i)
-				return
-			i+=1 
+		if signal and not signal in self.registry: return
+		if signal:
+			signals = [signal]
+		else:
+			signals = self.registry.keys()
+			
+		for signal in signals:
+			i=0
+			for reg, cb in self.registry[signal]:  # @UnusedVariable
+				if reg._receiverID == registrant._receiverID:
+					if DEBUG: LOG('SignalHub un-registering signal %s: [%s] %s' % (signal,registrant._receiverID,repr(registrant)))
+					self.registry[signal].pop(i)
+					break
+				i+=1 
 
 	def getSignal(self):
 		self.settings = xbmcaddon.Addon(id='script.forum.browser')
@@ -46,7 +52,7 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 		if not signal: return
 		if not signal in self.registry: return
 		for reg,cb in self.registry[signal]:  # @UnusedVariable
-			if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s' % (signal,reg.__receiverID,repr(reg)))
+			if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s' % (signal,reg._receiverID,repr(reg)))
 			try:
 				cb(signal,None)
 			except:

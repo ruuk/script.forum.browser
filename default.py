@@ -87,9 +87,6 @@ def ERROR(message,hide_tb=False):
 def LOG(message):
 	print 'FORUMBROWSER: %s' % message
 
-signals.LOG = LOG
-signals.ERROR = ERROR
-
 LOG('Version: ' + __version__)
 LOG('Python Version: ' + sys.version)
 DEBUG = __addon__.getSetting('debug') == 'true'
@@ -135,6 +132,10 @@ from crypto import passmanager
 from forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, mods
+
+signals.LOG = LOG
+signals.ERROR = ERROR
+signals.DEBUG = DEBUG
 
 dialogs.CACHE_PATH = CACHE_PATH
 dialogs.DEBUG = DEBUG
@@ -322,6 +323,7 @@ class ThreadWindow:
 		self._progressCommand = None
 		self._endCommand = None
 		self._isMain = False
+		SIGNALHUB.registerReceiver('RUN_IN_MAIN', self, self.runInMainCallback)
 		self._resetFunction()
 			
 	def setAsMain(self):
@@ -336,12 +338,19 @@ class ThreadWindow:
 		self._progressCommand = progress
 		self._endCommand = end
 		
+	def runInMainCallback(self,signal,data):
+		if self._functionStack:
+			func,args,kwargs = self.getNextFunction()
+			func(*args,**kwargs)
+	
 	def onAction(self,action):
 		if action == ACTION_RUN_IN_MAIN:
-			if self._function:
-				func,args,kwargs = self.getFunction()
-				func(*args,**kwargs)
+			#print 'yy %s' % repr(self._functionStack)
+			if self._functionStack:
+				self.runInMainCallback(None, None)
 				return True
+			else:
+				signals.sendSignal('RUN_IN_MAIN')
 		elif action == ACTION_PREVIOUS_MENU:
 			if self._currentThread and self._currentThread.isAlive():
 				self._currentThread.stop()
@@ -359,6 +368,9 @@ class ThreadWindow:
 			return False
 		return False
 	
+	def onClose(self):
+		SIGNALHUB.unRegister(None, self)
+		
 	def stopThreads(self):
 		for t in threading.enumerate():
 			if isinstance(t,StoppableThread): t.stop()
@@ -368,23 +380,20 @@ class ThreadWindow:
 				#if t != threading.currentThread(): t.join()
 				if isinstance(t,StoppableThread): t.raiseExc(Exception)
 			time.sleep(1)
-		
-	def getFunction(self):
-		func = self._function
-		args = self._functionArgs
-		kwargs = self._functionKwargs
-		self._resetFunction()
-		return func,args,kwargs
 	
 	def _resetFunction(self):
-		self._function = None
-		self._functionArgs = []
-		self._functionKwargs = {}
+		self._functionStack = []
+	
+	def getNextFunction(self):
+		if self._functionStack: return self._functionStack.pop(0)
+		return (None,None,None)
+		
+	def addFunction(self,function,args,kwargs):
+		self._functionStack.append((function,args,kwargs))
 		
 	def runInMain(self,function,*args,**kwargs):
-		self._function = function
-		self._functionArgs = args
-		self._functionKwargs = kwargs
+		#print 'xx %s' % repr(function)
+		self.addFunction(function, args, kwargs)
 		xbmc.executebuiltin('Action(codecinfo)')
 		
 	def endInMain(self,function,*args,**kwargs):
@@ -433,8 +442,6 @@ class BaseWindowFunctions(ThreadWindow):
 		self.closed = True
 		self.close()
 		self.onClose()
-			
-	def onClose(self): pass
 	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
@@ -902,9 +909,6 @@ class NotificationsDialog(BaseWindowDialog):
 	
 	def newPostsCallback(self,signal,data):
 		self.refresh()
-		
-	def onClose(self):
-		SIGNALHUB.unRegister('NEW_POSTS', self)
 		
 	def onInit(self):
 		if self.started: return
@@ -2497,6 +2501,7 @@ class ThreadsWindow(PageWindow):
 		t.start()
 		
 	def doFillThreadList(self,data):
+		self.endProgress()
 		if 'newforumid' in data: self.fid = data['newforumid']
 		if not data:
 			if data.error == 'CANCEL': return
@@ -2779,9 +2784,6 @@ class ForumsWindow(BaseWindow):
 	
 	def newPostsCallback(self,signal,data):
 		self.openForumsManager(external=True)
-	
-	def onClose(self):
-		SIGNALHUB.unRegister('NEW_POSTS', self)
 		
 	def getUsername(self):
 		data = loadForumSettings(FB.getForumID())
@@ -3127,8 +3129,7 @@ class ForumsWindow(BaseWindow):
 			if winid > 0:
 				window = xbmcgui.Window(winid)
 				if window.getProperty('ForumBrowserMAIN'): return True
-				print winid
-				#window.close()
+				#print winid
 				xbmc.executebuiltin('Action(PreviousMenu)')
 				xbmc.sleep(100)
 			else:

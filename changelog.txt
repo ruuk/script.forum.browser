@@ -30,13 +30,15 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.6
+Current Version : 1.4.7
 
 *** 1.4.7 ***
 
 Removed strings.xml
 Removed polish language (Will return when transifex translation available. Was probably no longer accurate, and only about 15% complete anyway)
 When Forum Browser is open and service notifies, it will now trigger Forum Browser to open the dialog instead of opening from the service. If the forums manager is open, it will be refresh instead.
+Fix string IDs in tapatalk.py
+Forum loading is no longer interrupted by dialogs
 
 *** 1.4.6 ***
 

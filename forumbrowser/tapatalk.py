@@ -670,7 +670,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		if self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
-			if not callback(callback_percent,self.lang(30100)): return False
+			if not callback(callback_percent,self.lang(32100)): return False
 			if not self.login():
 				return False
 		return True
@@ -729,7 +729,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not self.guestOK(): self.checkLogin(callback, 5)
 		logo = None
 		while True:
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.lang(32102)): break
 			
 			try:
 				flist = self.server.get_forum()
@@ -741,7 +741,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				em = unicode(str(flist.get('result_text')),'utf-8')
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
-			if not callback(40,self.lang(30103)): break
+			if not callback(40,self.lang(32103)): break
 			forums = []
 			for general in flist:
 				if not general.get('sub_only'): forums.append(self.createForumDict(general))
@@ -749,14 +749,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					if not forum.get('sub_only'): forums.append(self.createForumDict(forum))
 					for sub in forum.get('child',[]):
 						if not sub.get('sub_only'): forums.append(self.createForumDict(sub,True))
-			if not callback(80,self.lang(30231)): break
+			if not callback(80,self.lang(32231)): break
 			logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 			try:
 				pm_counts = self.getPMCounts(80)
 			except:
 				ERROR('Failed to get PM Counts')
 				pm_counts = None
-			callback(100,self.lang(30052))
+			callback(100,self.lang(32052))
 			
 			return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 			
@@ -765,7 +765,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def getSubscribedForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		while True:
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.lang(32102)): break
 			try:
 				flist = self.server.get_subscribed_forum()
 			except:
@@ -773,13 +773,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
 			
-			if not callback(40,self.lang(30103)): break
+			if not callback(40,self.lang(32103)): break
 			forums = []
 			for f in flist.get('forums',[]):
 				f = self.createForumDict(f)
 				f['subscribed'] = True
 				forums.append(f)
-			if not callback(80,self.lang(30231)): break
+			if not callback(80,self.lang(32231)): break
 			
 			return self.finish(FBData(forums),donecallback)
 			
@@ -818,17 +818,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def _getThreads(self,forumid,topic_num,callback,donecallback):
 		if not callback: callback = self.fakeCallback
 		while True:
-			if not callback(10,self.lang(30102)): break
+			if not callback(10,self.lang(32102)): break
 			announces = self.server.get_topic(forumid,0,49,'ANN').get('topics',[])
-			if not callback(30,self.lang(30103)): break
+			if not callback(30,self.lang(32103)): break
 			for a in announces: self.createThreadDict(a,True)
-			if not callback(40,self.lang(30102)): break
+			if not callback(40,self.lang(32102)): break
 			stickys = self.server.get_topic(forumid,0,49,'TOP').get('topics',[])
-			if not callback(60,self.lang(30103)): break
+			if not callback(60,self.lang(32103)): break
 			for s in stickys: self.createThreadDict(s,True)
-			if not callback(70,self.lang(30102)): break
+			if not callback(70,self.lang(32102)): break
 			topics = self.server.get_topic(forumid,topic_num,int(topic_num) + 19)
-			if not callback(90,self.lang(30103)): break
+			if not callback(90,self.lang(32103)): break
 			pd = self.getPageData(topics,topic_num)
 			normal = topics.get('topics',[])
 			for n in normal: self.createThreadDict(n)
@@ -840,13 +840,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def _getSubscriptions(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		callback(20,self.lang(30102))
+		callback(20,self.lang(32102))
 		sub = self.server.get_subscribed_topic()
 		pd = self.getPageData({},0)
 		#if not sub.get('result'):
 		#	raise Exception(sub.get('result_text'))
 		normal = sub.get('topics',[])
-		if not callback(70,self.lang(30103)):
+		if not callback(70,self.lang(32103)):
 			if donecallback: donecallback(None,None)
 			return (None,None)
 		for n in normal: self.createThreadDict(n)
@@ -864,7 +864,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				err = str(result.get('result_text',''))
 				LOG('Search: %s' % err)
 				return self.finish(FBData(error=err),donecallback)
-			if not callback(90,self.lang(30103)): break
+			if not callback(90,self.lang(32103)): break
 			pd = self.getPageData(result,page)
 			pd.searchID = result.get('search_id')
 			threads = result.get('topics',[])
@@ -904,7 +904,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				return self.finish(FBData(error=err),donecallback)
 			pd = self.getPageData(result,page)
 			pd.searchID = result.get('search_id')
-			if not callback(90,self.lang(30103)): break
+			if not callback(90,self.lang(32103)): break
 			if fid:
 				normal = result.get('topics',[])
 				for n in normal: self.createThreadDict(n)
@@ -953,7 +953,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			callback(-1,'%s' % em)
 			return self.finish(FBData(error='em'))
 		
-		callback(100,self.lang(30052))
+		callback(100,self.lang(32052))
 		return self.finish(FBData(threads,pd),donecallback)
 	
 	def canGetUserPosts(self): return 50
@@ -976,7 +976,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				page = int(page)
 			except:
 				page = 0
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.lang(32102)): break
 			try:
 				if pid:
 					test = self.server.get_thread_by_post(pid,20)
@@ -1015,7 +1015,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,em)
 				return self.finish(FBData(error=em),donecallback)
 			
-			if not callback(80,self.lang(30103)): break
+			if not callback(80,self.lang(32103)): break
 			pd = self.getPageData(thread,page or 0)
 			pd.searchID = thread.get('search_id')
 			if not search: pd.tid = threadid
@@ -1026,7 +1026,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 #					self.server.mark_topic_read([threadid])
 #				except:
 #					ERROR('Failed to mark topic as read')
-			callback(100,self.lang(30052))
+			callback(100,self.lang(32052))
 			return self.finish(FBData(sreplies,pd),donecallback)
 			
 		return self.finish(FBData(error='CANCEL'),donecallback)
@@ -1037,7 +1037,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not posts:
 			callback(-1,'NO POSTS')
 			return self.finish(FBData(error='NO POSTS'),donecallback)
-		if not callback(60,self.lang(30103)): return None
+		if not callback(60,self.lang(32103)): return None
 		infos = {}
 		ct = page + 1
 		for p in posts:
@@ -1062,7 +1062,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not callback: callback = self.fakeCallback
 		
 		while True:
-			if not callback(20,self.lang(30102)): break
+			if not callback(20,self.lang(32102)): break
 			if not boxid:
 				try:
 					pmInfo = self.getPMCounts(20)
@@ -1073,7 +1073,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				if not pmInfo: break
 				boxid = pmInfo.get('boxid')
 			if not boxid: break
-			if not callback(50,self.lang(30102)): break
+			if not callback(50,self.lang(32102)): break
 			try:
 				messages = self.server.get_box(boxid,0,49)
 			except:
@@ -1081,7 +1081,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em),donecallback)
 			pms = []
-			if not callback(80,self.lang(30103)): break
+			if not callback(80,self.lang(32103)): break
 			infos = {}
 			for p in messages.get('list',[]):
 				p['boxid'] = boxid
@@ -1101,7 +1101,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				fp.isPM = True
 				pms.append(fp)
 			
-			callback(100,self.lang(30052))
+			callback(100,self.lang(32052))
 			return self.finish(FBData(pms),donecallback)
 		
 		return self.finish(FBData(error='CANCEL'),donecallback)
@@ -1134,11 +1134,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		LOG('Posting reply')
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback): return False
-		callback(40,self.lang(30106))
+		callback(40,self.lang(32106))
 		fid = post.fid
 		if fid == 'subscriptions': fid = ''
 		result = self.server.reply_post(fid or '',post.tid or '',xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
-		callback(100,self.lang(30052))
+		callback(100,self.lang(32052))
 		status = result.get('result',False)
 		if not status:
 			post.error = str(result.get('result_text'))
@@ -1192,7 +1192,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		toArray = []
 		for t in post.to.split(','): toArray.append(xmlrpclib.Binary(t))
 		result = self.server.create_message(toArray,xmlrpclib.Binary(post.title),xmlrpclib.Binary(post.message))
-		callback(100,self.lang(30052))
+		callback(100,self.lang(32052))
 		if not result.get('result'):
 			LOG('Failed to send PM: ' + str(result.get('result_text')))
 			post.error = str(result.get('result_text'))
