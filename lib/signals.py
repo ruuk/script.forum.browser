@@ -16,14 +16,22 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 		xbmc.Monitor.__init__(self)  # @UndefinedVariable
 		
 	def registerReceiver(self,signal,registrant,callback):
-		if not hasattr(registrant,'_receiverID'):
-			registrant._receiverID = self.currID
-			self.currID += 1
+		self.setRegistrantID(registrant)
 		if DEBUG: LOG('SignalHub registering signal %s: [%s] %s' % (signal,registrant._receiverID,repr(registrant)))
 		if signal in self.registry:
 			self.registry[signal].append((registrant,callback))
 		else:
 			self.registry[signal] = [(registrant,callback)]
+			
+	def registerSelfReceiver(self,signal,registrant,callback):
+		self.setRegistrantID(registrant)
+		signal = signal + '.' + str(registrant._receiverID)
+		return self.registerReceiver(signal, registrant, callback)
+	
+	def setRegistrantID(self,registrant):
+		if not hasattr(registrant,'_receiverID'):
+			registrant._receiverID = self.currID
+			self.currID += 1	
 		
 	def unRegister(self,signal,registrant):
 		if signal and not signal in self.registry: return
@@ -39,7 +47,11 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 					if DEBUG: LOG('SignalHub un-registering signal %s: [%s] %s' % (signal,registrant._receiverID,repr(registrant)))
 					self.registry[signal].pop(i)
 					break
-				i+=1 
+				i+=1
+				
+	def unSelfRegister(self,signal,registrant):
+		signal = signal + '.' + str(registrant._receiverID)
+		return self.unRegister(signal, registrant)
 
 	def getSignal(self):
 		self.settings = xbmcaddon.Addon(id='script.forum.browser')
@@ -50,6 +62,9 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 	def onSettingsChanged(self):
 		signal = self.getSignal()
 		if not signal: return
+		if DEBUG:
+			import threading
+			LOG('SignalHub: Thread: %s' % repr(threading.currentThread()))
 		if not signal in self.registry: return
 		for reg,cb in self.registry[signal]:  # @UnusedVariable
 			if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s' % (signal,reg._receiverID,repr(reg)))
@@ -64,3 +79,8 @@ def sendSignal(signal,data=''):
 	xbmcaddon.Addon(id='script.forum.browser').setSetting('SignalHubSignal',signal + ':' + str(SIGNAL_COUNTER))
 	if DEBUG: LOG('SignalHub: Sending signal %s' % signal)
 	SIGNAL_COUNTER+=1
+	
+def sendSelfSignal(sender,signal,data=''):
+	if not hasattr(sender,'_receiverID'): return
+	signal = signal + '.' + str(sender._receiverID)
+	return sendSignal(signal,data)

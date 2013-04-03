@@ -32,6 +32,10 @@ TODO:
 
 Current Version : 1.4.7
 
+*** 1.4.8 ***
+
+Change to more robust method of signaling for asynchronous operations
+
 *** 1.4.7 ***
 
 Removed strings.xml

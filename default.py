@@ -323,7 +323,7 @@ class ThreadWindow:
 		self._progressCommand = None
 		self._endCommand = None
 		self._isMain = False
-		SIGNALHUB.registerReceiver('RUN_IN_MAIN', self, self.runInMainCallback)
+		SIGNALHUB.registerSelfReceiver('RUN_IN_MAIN', self, self.runInMainCallback)
 		self._resetFunction()
 			
 	def setAsMain(self):
@@ -394,7 +394,8 @@ class ThreadWindow:
 	def runInMain(self,function,*args,**kwargs):
 		#print 'xx %s' % repr(function)
 		self.addFunction(function, args, kwargs)
-		xbmc.executebuiltin('Action(codecinfo)')
+		signals.sendSelfSignal(self,'RUN_IN_MAIN')
+		#xbmc.executebuiltin('Action(codecinfo)')
 		
 	def endInMain(self,function,*args,**kwargs):
 		if self._endCommand: self._endCommand()
@@ -3672,6 +3673,7 @@ def doSettings(window=None):
 		del w
 	global DEBUG
 	DEBUG = getSetting('debug',False)
+	signals.DEBUG = DEBUG
 	if FB: FB.MC.resetRegex()
 	if mods.checkForSkinMods():
 		setSetting('refresh_skin',True)
