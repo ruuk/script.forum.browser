@@ -394,7 +394,7 @@ class ThreadWindow:
 	def runInMain(self,function,*args,**kwargs):
 		#print 'xx %s' % repr(function)
 		self.addFunction(function, args, kwargs)
-		signals.sendSelfSignal(self,'RUN_IN_MAIN')
+		signals.sendSelfSignal(self,'RUN_IN_MAIN',function.__name__)
 		#xbmc.executebuiltin('Action(codecinfo)')
 		
 	def endInMain(self,function,*args,**kwargs):
@@ -909,6 +909,8 @@ class NotificationsDialog(BaseWindowDialog):
 		BaseWindowDialog.__init__( self, *args, **kwargs )
 	
 	def newPostsCallback(self,signal,data):
+		winid = xbmcgui.getCurrentWindowDialogId()
+		xbmcgui.Window(winid).setProperty('PulseNotify', '1')
 		self.refresh()
 		
 	def onInit(self):
@@ -3196,9 +3198,8 @@ class ForumsWindow(BaseWindow):
 		fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 		logo = fdata.urls.get('logo','')
 		self.setLogo(logo)
-		
-		hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
-		self.getControl(100).setColorDiffuse(hc.upper())
+		FB.theme = fdata.theme
+		self.setTheme()
 		
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
@@ -3674,6 +3675,7 @@ def doSettings(window=None):
 	global DEBUG
 	DEBUG = getSetting('debug',False)
 	signals.DEBUG = DEBUG
+	tapatalk.DEBUG = DEBUG
 	if FB: FB.MC.resetRegex()
 	if mods.checkForSkinMods():
 		setSetting('refresh_skin',True)

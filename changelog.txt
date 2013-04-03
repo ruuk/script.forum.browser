@@ -35,6 +35,7 @@ Current Version : 1.4.7
 *** 1.4.8 ***
 
 Change to more robust method of signaling for asynchronous operations
+Added a pulsing indicator when notifications causes a forums manager window refresh
 
 *** 1.4.7 ***
 
