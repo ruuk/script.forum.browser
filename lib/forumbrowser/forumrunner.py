@@ -1,10 +1,9 @@
 import forumbrowser, json, urllib2, urllib, sys, os,re, time
 from forumbrowser import FBData
 from texttransform import BBMessageConverter
+from lib.util import LOG, ERROR
+
 DEBUG = sys.modules["__main__"].DEBUG
-LOG = sys.modules["__main__"].LOG
-ERROR = sys.modules["__main__"].ERROR
-__addon__ = sys.modules["__main__"].__addon__
 
 def testForum(forum):
 	url3 = None
@@ -187,7 +186,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 #		url = self._url
 #		self.client = None
 #		result = None
-#		if __addon__.getSetting('enable_ssl') == 'true' and not __addon__.getSetting('forumrunner_disable_ssl') == 'true':
+#		if __addon__.getSetting('enable_ssl') == 'true' and not getSetting('forumrunner_disable_ssl') == 'true':
 #			LOG('Enabling SSL')
 #			url = url.replace('http://','https://')
 #			self.client = ForumrunnerClient(url)

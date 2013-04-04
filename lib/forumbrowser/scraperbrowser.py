@@ -1,6 +1,8 @@
 import sys, re, time, os, urllib2
 import forumbrowser, texttransform
 from forumbrowser import FBData
+from lib import util
+from lib.util import LOG, ERROR
 
 import locale
 loc = locale.getdefaultlocale()
@@ -8,9 +10,9 @@ print loc
 ENCODING = loc[1] or 'utf-8'
 
 DEBUG = sys.modules["__main__"].DEBUG
-LOG = sys.modules["__main__"].LOG
-ERROR = sys.modules["__main__"].ERROR
-__addon__ = sys.modules["__main__"].__addon__
+
+__addon__ = util.__addon__
+
 T = sys.modules["__main__"].T
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 

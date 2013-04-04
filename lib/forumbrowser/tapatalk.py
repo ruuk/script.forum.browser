@@ -4,13 +4,11 @@ import urllib2
 import iso8601, forumbrowser
 from forumbrowser import FBData
 from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode
-
+from lib.util import LOG, ERROR, getSetting
 #import xbmc #@UnresolvedImport
 
 DEBUG = sys.modules["__main__"].DEBUG
-LOG = sys.modules["__main__"].LOG
-ERROR = sys.modules["__main__"].ERROR
-__addon__ = sys.modules["__main__"].__addon__
+
 T = sys.modules["__main__"].T
 
 def checkVersion(version1, version2):
@@ -562,7 +560,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.forum = forum
 		self.transport = CookieTransport()
 		url = self._url
-		#if __addon__.getSetting('enable_ssl') == 'true':
+		#if getSetting('enable_ssl') == 'true':
 		#	LOG('Enabling SSL')
 		#	url = url.replace('http://','https://')
 		#	self.SSL = True
@@ -1157,7 +1155,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def checkMyBBEditFix(self,pm):
 		if self.getForumType() == 'mb' and checkVersion('2.0.0',self.getForumPluginVersion()) > -1:
-			if __addon__.getSetting('do_mybb_edit_bug_fix'):
+			if getSetting('do_mybb_edit_bug_fix'):
 				if pm.tid:
 					try:
 						sub = self.server.get_subscribed_topic()

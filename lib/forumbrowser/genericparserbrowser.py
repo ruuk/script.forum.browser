@@ -2,9 +2,8 @@ import sys, os
 import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
+from lib.util import LOG, ERROR
 
-LOG = sys.modules["__main__"].LOG
-ERROR = sys.modules["__main__"].ERROR
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 loadForumSettings = sys.modules["__main__"].loadForumSettings
 T = sys.modules["__main__"].T
