@@ -1,11 +1,8 @@
 import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
+from util import getSetting, ERROR
 
 DEBUG = None
-LOG = None
-ERROR = None
 CACHE_PATH = None
-getSetting = None
-setSetting = None
 
 __addon__ = sys.modules["__main__"].__addon__
 T = sys.modules["__main__"].T

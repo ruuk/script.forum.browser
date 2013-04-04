@@ -1,9 +1,7 @@
 import xbmc, xbmcaddon, os, filelock
+from util import LOG, ERROR
 
 DEBUG = False
-
-def LOG(msg): print 'FORUMBROWSER: %s' % msg
-def ERROR(msg): LOG(msg)
 
 SIGNAL_COUNTER = 0
 

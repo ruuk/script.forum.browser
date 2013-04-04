@@ -1,12 +1,10 @@
 import os, sys, xbmc, xbmcgui, xbmcvfs, dialogs
 from distutils.version import StrictVersion
+from util import LOG, ERROR, getSetting, setSetting
 
 DEBUG = None
-LOG = None
-ERROR = None
 CACHE_PATH = None
-getSetting = None
-setSetting = None
+
 __addon__ = sys.modules["__main__"].__addon__
 T = sys.modules["__main__"].T
 

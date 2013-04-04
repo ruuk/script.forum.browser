@@ -5,6 +5,7 @@ import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
 from lib import util, signals
+from lib.util import LOG, ERROR, getSetting, setSetting
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -72,21 +73,6 @@ if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
 
 STARTFORUM = None
 
-def ERROR(message,hide_tb=False):
-	LOG('ERROR: ' + message)
-	short = str(sys.exc_info()[1])
-	if hide_tb:
-		LOG('ERROR Message: ' + short)
-	else:
-		import traceback #@Reimport
-		traceback.print_exc()
-		if getSetting('debug_show_traceback_dialog',False):
-			dialogs.showText('Traceback', traceback.format_exc())
-	return short
-	
-def LOG(message):
-	print 'FORUMBROWSER: %s' % message
-
 LOG('Version: ' + __version__)
 LOG('Python Version: ' + sys.version)
 DEBUG = __addon__.getSetting('debug') == 'true'
@@ -100,29 +86,6 @@ try:
 	LOG('Clipboard Enabled')
 except:
 	LOG('Clipboard Disabled: No SSClipboard')
-
-def getSetting(key,default=None):
-	setting = __addon__.getSetting(key)
-	return _processSetting(setting,default)
-
-def _processSetting(setting,default):
-	if not setting: return default
-	if isinstance(default,bool):
-		return setting == 'true'
-	elif isinstance(default,int):
-		return int(float(setting or 0))
-	elif isinstance(default,list):
-		if setting: return setting.split(':!,!:')
-		else: return default
-	
-	return setting
-
-def setSetting(key,value):
-	if isinstance(value,list):
-		value = ':!,!:'.join(value)
-	elif isinstance(value,bool):
-		value = value and 'true' or 'false'
-	__addon__.setSetting(key,value)
 	
 FB = None
 
@@ -133,24 +96,13 @@ from forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, mods
 
-signals.LOG = LOG
-signals.ERROR = ERROR
 signals.DEBUG = DEBUG
 
 dialogs.CACHE_PATH = CACHE_PATH
 dialogs.DEBUG = DEBUG
-dialogs.LOG = LOG
-dialogs.ERROR = ERROR
-dialogs.getSetting = getSetting
-dialogs.setSetting = setSetting
 
 mods.CACHE_PATH = CACHE_PATH
 mods.DEBUG = DEBUG
-mods.LOG = LOG
-mods.ERROR = ERROR
-mods.getSetting = getSetting
-mods.setSetting = setSetting
-
 
 video.LOG = LOG
 video.ERROR = ERROR
@@ -3406,7 +3358,7 @@ def getCachedLogo(logo,forumID,clear=False):
 
 def getForumSetting(forumID,key,default=None):
 	data = loadForumSettings(forumID)
-	return _processSetting(data.get(key),default)
+	return util._processSetting(data.get(key),default)
 
 def loadForumSettings(forumID,get_rules=False,get_both=False):
 	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)

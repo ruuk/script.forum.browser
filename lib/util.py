@@ -1,3 +1,46 @@
+import sys, xbmcaddon
+
+__addon__ = xbmcaddon.Addon(id='script.forum.browser')
+
+def ERROR(message,hide_tb=False):
+	LOG('ERROR: ' + message)
+	short = str(sys.exc_info()[1])
+	if hide_tb:
+		LOG('ERROR Message: ' + short)
+	else:
+		import traceback #@Reimport
+		traceback.print_exc()
+		if getSetting('debug_show_traceback_dialog',False):
+			import dialogs #import dialogs here so we can import this module into dialogs
+			dialogs.showText('Traceback', traceback.format_exc())
+	return short
+	
+def LOG(message):
+	print 'FORUMBROWSER: %s' % message
+
+def getSetting(key,default=None):
+	setting = __addon__.getSetting(key)
+	return _processSetting(setting,default)
+
+def _processSetting(setting,default):
+	if not setting: return default
+	if isinstance(default,bool):
+		return setting == 'true'
+	elif isinstance(default,int):
+		return int(float(setting or 0))
+	elif isinstance(default,list):
+		if setting: return setting.split(':!,!:')
+		else: return default
+	
+	return setting
+
+def setSetting(key,value):
+	if isinstance(value,list):
+		value = ':!,!:'.join(value)
+	elif isinstance(value,bool):
+		value = value and 'true' or 'false'
+	__addon__.setSetting(key,value)
+	
 def parseForumBrowserURL(url):
 	if not url.startswith('forumbrowser://'):
 		return {'forumID':url}
