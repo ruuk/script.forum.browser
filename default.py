@@ -91,7 +91,7 @@ FB = None
 
 from lib.forumbrowser import forumbrowser
 from lib.forumbrowser import texttransform
-from crypto import passmanager
+from lib.crypto import passmanager
 from lib.forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, mods
