@@ -30,12 +30,14 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.7
+Current Version : 1.4.8
 
 *** 1.4.8 ***
 
 Change to more robust method of signaling for asynchronous operations
 Added a pulsing indicator when notifications causes a forums manager window refresh
+Reorganized code structure
+Fix bug with Category strings (ie blank categories when searching database)
 
 *** 1.4.7 ***
 

@@ -213,7 +213,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.started = False
 		self.gifReplace = chr(255)*6
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):

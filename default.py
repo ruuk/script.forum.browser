@@ -641,7 +641,7 @@ class ImagesDialog(BaseWindowDialog):
 class ForumSettingsDialog(BaseWindowDialog):
 	def __init__( self, *args, **kwargs ):
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = []
 		self.data = {}
@@ -859,7 +859,7 @@ class NotificationsDialog(BaseWindowDialog):
 		self.initialIndex = 0
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		if not os.path.exists(self.colorsDir): os.makedirs(self.colorsDir)
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = None
 		self.stopTimeout = False
@@ -3807,7 +3807,7 @@ def selectForumCategory(with_all=False):
 		d.addItem('search',T(32421))
 		d.addItem('all',T(32422))
 	for x in range(0,17):
-		d.addItem(str(x), str(T(30500 + x)))
+		d.addItem(str(x), str(T(32500 + x)))
 	return d.getResult()
 
 def addForum(current=False):
@@ -3939,7 +3939,7 @@ def addForumFromOnline(stay_open_on_select=False):
 			dialogs.showMessage(T(32439),T(32440))
 			continue
 		if cat and cat.isdigit():
-			caption = '[COLOR FF9999FF]'+str(T(30500 + int(cat)))+'[/COLOR]'
+			caption = '[COLOR FF9999FF]'+str(T(32500 + int(cat)))+'[/COLOR]'
 		else:
 			caption = '[COLOR FF9999FF]All[/COLOR]'
 		menu = dialogs.ImageChoiceMenu(caption)
@@ -3950,7 +3950,7 @@ def addForumFromOnline(stay_open_on_select=False):
 				rf = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_function'),'')
 				ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
 			desc = f.get('desc','None') or 'None'
-			desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(30500 + f.get('cat',0))),T(32290),desc)
+			desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(32500 + f.get('cat',0))),T(32290),desc)
 			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
 			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		f = True
