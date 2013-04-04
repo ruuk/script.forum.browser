@@ -14,8 +14,6 @@ def ERROR(txt):
 	
 def LOG(txt): pass
 
-signals.ERROR = ERROR
-
 ADDON = __addon__ = xbmcaddon.Addon()
 T = ADDON.getLocalizedString
 FB = None

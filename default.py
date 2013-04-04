@@ -89,10 +89,10 @@ except:
 	
 FB = None
 
-from forumbrowser import forumbrowser
-from forumbrowser import texttransform
+from lib.forumbrowser import forumbrowser
+from lib.forumbrowser import texttransform
 from crypto import passmanager
-from forumbrowser import tapatalk
+from lib.forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, mods
 
@@ -525,7 +525,7 @@ class PageWindow(BaseWindow):
 		if pageData:
 			self.pageData = pageData
 		else:
-			from forumbrowser.forumbrowser import PageData
+			from lib.forumbrowser.forumbrowser import PageData
 			pageData = PageData(None)
 		self.getControl(200).setVisible(pageData.prev)
 		self.getControl(202).setVisible(pageData.next)
@@ -3826,7 +3826,7 @@ def addForum(current=False):
 			url = tapatalk.testForum(url)
 			if url: pageURL = url.split('/mobiquo/',1)[0]
 			if not url:
-				from forumbrowser import forumrunner
+				from lib.forumbrowser import forumrunner
 				url = forumrunner.testForum(orig)
 			if url: pageURL = url.split('/forumrunner/',1)[0]
 			if not url:
@@ -3846,7 +3846,7 @@ def addForum(current=False):
 				pageURL = url.split('/mobiquo/',1)[0]
 			else:
 				dialog.update(13,'%s: Forumrunner' % T(32427))
-				from forumbrowser import forumrunner #@Reimport
+				from lib.forumbrowser import forumrunner #@Reimport
 				url = forumrunner.testForum(forum)
 				if url:
 					ftype = 'FR'
@@ -3859,7 +3859,7 @@ def addForum(current=False):
 				if yes:
 					user = dialogs.doKeyboard(T(32201))
 					if user: password = dialogs.doKeyboard(T(32202),hidden=True)
-				from forumbrowser import genericparserbrowser
+				from lib.forumbrowser import genericparserbrowser
 				url,info,parser = genericparserbrowser.testForum(forum,user,password)
 				if url:
 					ftype = 'GB'
@@ -4357,14 +4357,14 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	try:
 		if forum.startswith('GB.'):
 			err = 'getForumBrowser(): General'
-			from forumbrowser import genericparserbrowser
+			from lib.forumbrowser import genericparserbrowser
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('TT.'):
 			err = 'getForumBrowser(): Tapatalk'
 			FB = tapatalk.TapatalkForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('FR.'):
 			err = 'getForumBrowser(): Forumrunner'
-			from forumbrowser import forumrunner
+			from lib.forumbrowser import forumrunner
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=getSetting('always_login',False))
 		#else:
 		#	err = 'getForumBrowser(): Boxee'
