@@ -23,7 +23,7 @@ from webviewer import video #@UnresolvedImport
 ADDONID = ADDON.getAddonInfo('id')
 
 def getSetting(key,default=None):
-	setting = xbmcaddon.Addon().getSetting(key)
+	setting = xbmcaddon.Addon('script.forum.browser').getSetting(key)
 	if not setting: return default
 	if isinstance(default,bool):
 		return setting == 'true'

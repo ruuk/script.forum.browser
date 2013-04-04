@@ -83,7 +83,6 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 					continue
 		
 def clearSignals():
-	#UNUSED
 	f = open(SIGNAL_CACHE_PATH,'w')
 	f.write('')
 	f.close()

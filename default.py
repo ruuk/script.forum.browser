@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import urllib2, re, os, sys, time, urlparse, binascii, math
-import xbmc, xbmcgui, xbmcaddon #@UnresolvedImport
+import xbmc, xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
 from lib import util, signals
@@ -26,13 +26,13 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__addon__ = xbmcaddon.Addon(id='script.forum.browser')
+__addon__ = util.__addon__
 __version__ = __addon__.getAddonInfo('version')
 T = __addon__.getLocalizedString
 
 THEME = 'Default'
 SKINS = ['Default','Dark']
-if __addon__.getSetting('skin') == '1':
+if getSetting('skin') == '1':
 	THEME = 'Dark'
 
 ACTION_MOVE_LEFT      = 1
@@ -75,7 +75,7 @@ STARTFORUM = None
 
 LOG('Version: ' + __version__)
 LOG('Python Version: ' + sys.version)
-DEBUG = __addon__.getSetting('debug') == 'true'
+DEBUG = getSetting('debug') == 'true'
 if DEBUG: LOG('DEBUG LOGGING ON')
 LOG('Skin: ' + THEME)
 
@@ -612,9 +612,9 @@ class ImagesDialog(BaseWindowDialog):
 			source = result[0]
 		filename = dialogs.doKeyboard(T(32259), firstfname)
 		if filename == None: return
-		default = __addon__.getSetting('last_download_path') or ''
+		default = getSetting('last_download_path') or ''
 		result = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True,default)
-		__addon__.setSetting('last_download_path',result)
+		setSetting('last_download_path',result)
 		if not os.path.exists(source): return
 		target = os.path.join(result,filename)
 		ct = 1
@@ -1519,8 +1519,8 @@ class MessageWindow(BaseWindow):
 		if self.started: return
 		self.started = True
 		self.setLoggedIn()
-#		if __addon__.getSetting('use_forum_colors') == 'true':
-#			if (FB.theme.get('mode') == 'dark' or __addon__.getSetting('color_mode') == '1') and __addon__.getSetting('color_mode') != '2':
+#		if getSetting('use_forum_colors') == 'true':
+#			if (FB.theme.get('mode') == 'dark' or getSetting('color_mode') == '1') and getSetting('color_mode') != '2':
 #				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 #			else:
 #				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
@@ -1931,7 +1931,7 @@ class RepliesWindow(PageWindow):
 			page = ''
 		else:
 			page = '1'
-			if __addon__.getSetting('open_thread_to_newest') == 'true':
+			if getSetting('open_thread_to_newest') == 'true':
 				if not self.search: page = '-1'
 		self.fillRepliesList(FB.getPageData(is_replies=True).getPageNumber(page))
 		
@@ -2734,7 +2734,7 @@ class ThreadsWindow(PageWindow):
 class ForumsWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		BaseWindow.__init__( self, *args, **kwargs )
-		#FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true')
+		#FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true')
 		self.parent = self
 		self.empty = True
 		self.setAsMain()
@@ -2803,7 +2803,7 @@ class ForumsWindow(BaseWindow):
 		self.getControl(112).setVisible(False)
 		self.resetForum()
 		self.fillForumList(True)
-		__addon__.setSetting('last_forum',FB.getForumID())
+		setSetting('last_forum',FB.getForumID())
 		self.forumElements = forumElements
 		
 	def openElements(self):
@@ -2889,7 +2889,7 @@ class ForumsWindow(BaseWindow):
 				self.setFocusId(202)
 				return
 		self.setFocusId(105)
-		if first and __addon__.getSetting('auto_thread_subscriptions_window') == 'true':
+		if first and getSetting('auto_thread_subscriptions_window') == 'true':
 			if self.hasLogin() and FB.hasSubscriptions():
 				FB.getForums(callback=self.setProgress,donecallback=self.doFillForumList)
 				self.openSubscriptionsWindow()
@@ -3206,16 +3206,16 @@ class ForumsWindow(BaseWindow):
 		dialogs.showMessage(T(32372),out,scroll=True)
 				
 	def preClose(self):
-		if not __addon__.getSetting('ask_close_on_exit') == 'true': return True
+		if not getSetting('ask_close_on_exit') == 'true': return True
 		if self.closed: return True
 		return xbmcgui.Dialog().yesno(T(32373),T(32373))
 		
 	def resetForum(self,hidelogo=True):
 		if not FB: return
-		FB.setLogin(self.getUsername(),self.getPassword(),always=__addon__.getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
+		FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
 		self.setButtons()
 		if hidelogo: self.getControl(250).setImage('')
-		__addon__.setSetting('last_forum',FB.getForumID())
+		setSetting('last_forum',FB.getForumID())
 		self.setTheme()
 		self.setLogoFromFile()
 		
@@ -3781,7 +3781,7 @@ def addFavorite(forum=None):
 	favs = getFavorites()
 	if forum in favs: return
 	favs.append(forum)
-	__addon__.setSetting('favorites','*:*'.join(favs))
+	setSetting('favorites','*:*'.join(favs))
 	dialogs.showMessage(T(32416),T(32418))
 	
 def removeFavorite(forum=None):
@@ -3790,11 +3790,11 @@ def removeFavorite(forum=None):
 	favs = getFavorites()
 	if not forum in favs: return
 	favs.pop(favs.index(forum))
-	__addon__.setSetting('favorites','*:*'.join(favs))
+	setSetting('favorites','*:*'.join(favs))
 	dialogs.showMessage(T(32417),T(32419))
 	
 def getFavorites():
-	favs = __addon__.getSetting('favorites')
+	favs = getSetting('favorites')
 	if favs:
 		favs = favs.split('*:*')
 	else:
@@ -4158,7 +4158,7 @@ def getFile(url,target=None):
 def getLanguage():
 		langs = ['Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Azerbaijani', 'Basque', 'Belarusian', 'Bengali', 'Bihari', 'Breton', 'Bulgarian', 'Burmese', 'Catalan', 'Cherokee', 'Chinese', 'Chinese_Simplified', 'Chinese_Traditional', 'Corsican', 'Croatian', 'Czech', 'Danish', 'Dhivehi', 'Dutch', 'English', 'Esperanto', 'Estonian', 'Faroese', 'Filipino', 'Finnish', 'French', 'Frisian', 'Galician', 'Georgian', 'German', 'Greek', 'Gujarati', 'Haitian_Creole', 'Hebrew', 'Hindi', 'Hungarian', 'Icelandic', 'Indonesian', 'Inuktitut', 'Irish', 'Italian', 'Japanese', 'Javanese', 'Kannada', 'Kazakh', 'Khmer', 'Korean', 'Kurdish', 'Kyrgyz', 'Lao', 'Latin', 'Latvian', 'Lithuanian', 'Luxembourgish', 'Macedonian', 'Malay', 'Malayalam', 'Maltese', 'Maori', 'Marathi', 'Mongolian', 'Nepali', 'Norwegian', 'Occitan', 'Oriya', 'Pashto', 'Persian', 'Polish', 'Portuguese', 'Portuguese_Portugal', 'Punjabi', 'Quechua', 'Romanian', 'Russian', 'Sanskrit', 'Scots_Gaelic', 'Serbian', 'Sindhi', 'Sinhalese', 'Slovak', 'Slovenian', 'Spanish', 'Sundanese', 'Swahili', 'Swedish', 'Syriac', 'Tajik', 'Tamil', 'Tatar', 'Telugu', 'Thai', 'Tibetan', 'Tonga', 'Turkish', 'Uighur', 'Ukrainian', 'Urdu', 'Uzbek', 'Vietnamese', 'Welsh', 'Yiddish', 'Yoruba', 'Unknown']
 		try:
-			idx = int(__addon__.getSetting('language'))
+			idx = int(getSetting('language'))
 		except:
 			return ''
 		return langs[idx]
@@ -4344,7 +4344,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			
 	if not forum:
 		if no_default: return False
-		forum = __addon__.getSetting('last_forum') or 'TT.xbmc.org'
+		forum = getSetting('last_forum') or 'TT.xbmc.org'
 	#global FB
 	#if forum.startswith('GB.') and not url:
 	#	url = getSetting('exp_general_forums_last_url')
@@ -4369,7 +4369,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		#else:
 		#	err = 'getForumBrowser(): Boxee'
 		#	from forumbrowser import parserbrowser
-		#	FB = parserbrowser.ParserForumBrowser(forum,always_login=__addon__.getSetting('always_login') == 'true')
+		#	FB = parserbrowser.ParserForumBrowser(forum,always_login=getSetting('always_login') == 'true')
 	except forumbrowser.ForumMovedException,e:
 		showError(T(32050),T(32470),'\n' + e.message,error=True)
 		return False
