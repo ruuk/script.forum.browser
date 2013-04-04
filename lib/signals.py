@@ -1,4 +1,4 @@
-import xbmc, xbmcaddon, os
+import xbmc, xbmcaddon, os, filelock
 
 DEBUG = False
 
@@ -34,7 +34,7 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 	def setRegistrantID(self,registrant):
 		if not hasattr(registrant,'_receiverID'):
 			registrant._receiverID = self.currID
-			self.currID += 1	
+			self.currID += 1
 		
 	def unRegister(self,signal,registrant):
 		if signal and not signal in self.registry: return
@@ -65,7 +65,6 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 	def onSettingsChanged(self):
 		if not self.validSignal(): return
 		signals = getSignals()
-		clearSignals()
 		if not signals: return
 		if DEBUG:
 			import threading
@@ -80,29 +79,40 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 			for reg,cb in self.registry[signal]:  # @UnusedVariable
 				if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s (%s)' % (signal,reg._receiverID,reg.__class__.__name__,data))
 				try:
-					cb(signal,None)
+					cb(signal,data)
 				except:
 					ERROR('SignalHub: Callback Error')
 					continue
 		
 def clearSignals():
+	#UNUSED
 	f = open(SIGNAL_CACHE_PATH,'w')
 	f.write('')
 	f.close()
 	
 def getSignals():
-	f = open(SIGNAL_CACHE_PATH,'r')
+	lock = filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5,delay=0.1)
+	lock.acquire()
+	f = open(SIGNAL_CACHE_PATH,'r+')
 	signals = f.read()
+	f.truncate(0)
 	f.close()
 	if not signals: return []
 	return signals.split('\n')
+	lock.release()
+	del lock
 
 def addSignal(signal):
 	signals = getSignals()
 	signals.append(signal)
+	
+	lock = filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5)
+	lock.acquire()
 	f = open(SIGNAL_CACHE_PATH,'w')
 	f.write('\n'.join(signals))
 	f.close()
+	lock.release()
+	del lock
 	
 def sendSignal(signal,data=''):
 	addSignal(signal + ':' + str(data))

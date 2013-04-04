@@ -73,7 +73,6 @@ class CookieTransport(xmlrpclib.Transport):
 	def request(self, host, handler, request_body, verbose=0):
 		self._connection = None
 		#retry request once if cached connection has gone cold
-		now = time.time()
 		#if now - self.lastCall < 0.1: time.sleep(0.1)
 		for i in (0, 1):
 			try:

@@ -323,7 +323,8 @@ class ThreadWindow:
 		self._progressCommand = None
 		self._endCommand = None
 		self._isMain = False
-		SIGNALHUB.registerSelfReceiver('RUN_IN_MAIN', self, self.runInMainCallback)
+		self._funcID = 0
+		if SIGNALHUB: SIGNALHUB.registerSelfReceiver('RUN_IN_MAIN', self, self.runInMainCallback)
 		self._resetFunction()
 			
 	def setAsMain(self):
@@ -340,7 +341,8 @@ class ThreadWindow:
 		
 	def runInMainCallback(self,signal,data):
 		if self._functionStack:
-			func,args,kwargs = self.getNextFunction()
+			func,args,kwargs = self.getNextFunction(data)
+			if not func: return
 			func(*args,**kwargs)
 	
 	def onAction(self,action):
@@ -369,7 +371,7 @@ class ThreadWindow:
 		return False
 	
 	def onClose(self):
-		SIGNALHUB.unRegister(None, self)
+		if SIGNALHUB: SIGNALHUB.unRegister(None, self)
 		
 	def stopThreads(self):
 		for t in threading.enumerate():
@@ -384,17 +386,22 @@ class ThreadWindow:
 	def _resetFunction(self):
 		self._functionStack = []
 	
-	def getNextFunction(self):
-		if self._functionStack: return self._functionStack.pop(0)
+	def getNextFunction(self,funcID):
+		if self._functionStack:
+			for i in range(0,len(self._functionStack)):
+				if funcID == self._functionStack[i][3]: return self._functionStack.pop(i)[:-1]
 		return (None,None,None)
 		
-	def addFunction(self,function,args,kwargs):
-		self._functionStack.append((function,args,kwargs))
+	def addFunction(self,function,args,kwargs,funcID):
+		self._functionStack.append((function,args,kwargs,funcID))
 		
 	def runInMain(self,function,*args,**kwargs):
 		#print 'xx %s' % repr(function)
-		self.addFunction(function, args, kwargs)
-		signals.sendSelfSignal(self,'RUN_IN_MAIN',function.__name__)
+		funcID = function.__name__ + ':' + str(self._funcID)
+		self.addFunction(function, args, kwargs,funcID)
+		signals.sendSelfSignal(self,'RUN_IN_MAIN',funcID)
+		self._funcID+=1
+		if self._funcID > 9999: self._funcID = 0
 		#xbmc.executebuiltin('Action(codecinfo)')
 		
 	def endInMain(self,function,*args,**kwargs):
@@ -915,7 +922,7 @@ class NotificationsDialog(BaseWindowDialog):
 		
 	def onInit(self):
 		if self.started: return
-		SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
+		if SIGNALHUB: SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
 		self.started = True
 		BaseWindowDialog.onInit(self)
 		if not self.forumsWindow: self.getControl(250).setLabel(T(32295))

@@ -1,4 +1,4 @@
-import HTMLParser, re, htmlentitydefs, os
+import HTMLParser, re, htmlentitydefs, time
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
@@ -738,16 +738,20 @@ class HTML5Parser(TreeWalker):
 	
 	def updateFeedProgress(self):
 		if not self.callback: return
+		now = time.time()
+		if now - self.lastProg < 0.2: return
 		pct = int(self.feedProgressBase + (self.feedProgressRange * (self.currentSize/self.total)))
 		if pct == self.progPct: return
 		self.progPct = pct
 		if pct > self.feedProgressMax: pct = self.feedProgressMax
+		self.lastProg = now
 		self.callback(pct,'Processing HTML')
 		
 	def feed(self,data,progress_base=0,progress_range=0):
 		self.feedProgressBase = progress_base
 		self.feedProgressRange = progress_range
 		self.feedProgressMax = progress_base + progress_range
+		self.lastProg = 0 
 		#open('/home/ruuk/test.txt','w').write(data.encode('ascii','replace'))
 		data = re.sub('(?<=[^\s])&nbsp;(?=[^\s])',' ',data)
 		data = re.sub(r"(&)(#?[\w\d]+;)(?=[^<]*?<)",r'%\2',data)
@@ -760,11 +764,10 @@ class HTML5Parser(TreeWalker):
 		while currentNode is not None:
 			self.updateFeedProgress()
 			details = self.getNodeDetails(currentNode)
-			type, details = details[0], details[1:]
+			ttype, details = details[0], details[1:]
 			hasChildren = False
-			endTag = None
 
-			if type == TEXT:
+			if ttype == TEXT:
 				currentText += unicode(details[0])
 				self.currentSize += len(currentText)
 				#for token in self.text(*details):
@@ -773,27 +776,26 @@ class HTML5Parser(TreeWalker):
 				if currentText:
 					for t in re.split('[\n\r\t]',currentText): self.handle_data(t)
 					currentText = ''
-				if type == ELEMENT:
+				if ttype == ELEMENT:
 					namespace, name, attributes, hasChildren = details
 					self.lastTagText = '<' + str(name) + ' ' + str(attributes) + '>'
 					self.currentSize += len(self.lastTagText)
 					if name in voidElements:
-						for token in self.emptyTag(namespace, name, attributes, 
+						for token in self.emptyTag(namespace, name, attributes,  # @UnusedVariable
 												   hasChildren):
 							self.handle_starttag(name, attributes)
 							self.handle_endtag(name)
 						hasChildren = False
 					else:
-						endTag = name
 						self.handle_starttag(name, attributes)
 	
-				#elif type == COMMENT:
+				#elif ttype == COMMENT:
 				#	yield self.comment(details[0])
 	
-				#elif type == ENTITY:
+				#elif ttype == ENTITY:
 				#	yield self.entity(details[0])
 	
-				elif type == DOCUMENT:
+				elif ttype == DOCUMENT:
 					hasChildren = True
 	
 				#else:
@@ -809,8 +811,8 @@ class HTML5Parser(TreeWalker):
 			else:
 				while currentNode is not None:
 					details = self.getNodeDetails(currentNode)
-					type, details = details[0], details[1:]
-					if type == ELEMENT:
+					ttype, details = details[0], details[1:]
+					if ttype == ELEMENT:
 						if currentText:
 							for t in re.split('[\n\r\t]',currentText): self.handle_data(t)
 							currentText = ''
