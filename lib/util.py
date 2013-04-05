@@ -2,7 +2,22 @@ import sys, xbmcaddon
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 
+class AbortRequestedException(Exception): pass
+class StopRequestedException(Exception): pass
+
+LOG_PREFIX = 'FORUMBROWSER' 
+
 def ERROR(message,hide_tb=False):
+	if sys.exc_info()[0] == AbortRequestedException:
+		import threading
+		LOG('Abort Requested (%s): Exiting....' % str(threading.currentThread().getName()))
+		import thread
+		thread.interrupt_main()
+		return 'AbortRequested'
+	elif sys.exc_info()[0] == StopRequestedException:
+		LOG('Stop exception handled')
+		return
+	
 	LOG('ERROR: ' + message)
 	short = str(sys.exc_info()[1])
 	if hide_tb:
@@ -16,7 +31,7 @@ def ERROR(message,hide_tb=False):
 	return short
 	
 def LOG(message):
-	print 'FORUMBROWSER: %s' % message
+	print '%s: %s' % (LOG_PREFIX,message)
 
 def getSetting(key,default=None):
 	setting = __addon__.getSetting(key)

@@ -30,7 +30,14 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.4.8
+Current Version : 1.4.9
+
+*** 1.4.9 ***
+
+Tapatalk: Fixed an error message bug where some errors would display as 'em'
+Fixed string ids for settings with miltiple choices
+Most connections now asynchronous (can be cancelled) - may default this to off by default until it's tested more
+Added setting 'Disable asynchronous connections' to settttings:advanced
 
 *** 1.4.8 ***
 

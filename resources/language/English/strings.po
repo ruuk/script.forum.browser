@@ -1779,6 +1779,10 @@ msgctxt "#32523"
 msgid "Select Skin"
 msgstr ""
 
+msgctxt "#32524"
+msgid "Disable Asynchronous Connections"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

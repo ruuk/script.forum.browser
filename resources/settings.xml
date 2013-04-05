@@ -16,7 +16,7 @@
     <setting id="use_keyboard_mod" type="bool" label="32237" subsetting="true" default="false"  enable="eq(-1,true)"/>
     <setting id="enable_ssl" type="bool" label="32235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="32245" default="false" />
-    <setting id="skin" type="enum" label="32005" lvalues="30012|30011" default="0" />
+    <setting id="skin" type="enum" label="32005" lvalues="32012|32011" default="0" />
     <setting id="show_media_indicators" type="bool" label="32044" default="true" />
     <setting id="smi_count_link_images" type="bool" label="32045" subsetting="true" default="false" enable="eq(-1,true)"/>
     <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
@@ -26,8 +26,8 @@
     <setting id="notify_only_on_start" type="bool" label="32021" default="false" enable="eq(-1,true)"/>
     <setting label="32020" type="slider" id="notify_interval" default="20" range="5,5,600" option="int"  enable="eq(-2,true)"/>
     <setting label="32040" type="slider" id="notify_stale_time" default="1" range="1,1,48" option="int"  enable="eq(-3,true)"/>
-    <setting id="notify_method" type="enum" label="32023" lvalues="30025|30026|30027" default="0" enable="eq(-4,true)"/>
-    <setting id="notify_method_video" type="enum" label="32024" lvalues="30025|30026|30027" default="0" enable="eq(-5,true)"/>
+    <setting id="notify_method" type="enum" label="32023" lvalues="32025|32026|32027" default="0" enable="eq(-4,true)"/>
+    <setting id="notify_method_video" type="enum" label="32024" lvalues="32025|32026|32027" default="0" enable="eq(-5,true)"/>
     <setting label="32028" type="slider" id="notify_xbmc_duration" default="3" range="1,1,30" option="int"  enable="eq(-6,true)"/>
     <setting label="32029" type="slider" id="notify_dialog_timout" default="0" range="0,1,60" option="int"  enable="eq(-7,true)"/>
     <setting id="notify_dialog_close_only_video" type="bool" label="32030" subsetting="true"  default="true" enable="eq(-8,true)"/>
@@ -58,6 +58,7 @@
     <setting id="do_mybb_edit_bug_fix" type="bool" label="32233" default="true" />
     <setting id="hide_activity_splash" type="bool" label="32017" default="false" />
     <setting id="forumrunner_disable_ssl" type="bool" label="32247" default="true" visible="false"/>
+    <setting id="disable_async_connections" type="bool" label="32524" default="false" />
     <setting id="experimental" type="bool" label="Experimental Stuff" default="false" />
     <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_advanced)"/>
   </category>

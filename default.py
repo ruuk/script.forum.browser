@@ -4,7 +4,7 @@ import urllib2, re, os, sys, time, urlparse, binascii, math
 import xbmc, xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 import threading
-from lib import util, signals
+from lib import util, signals, asyncconnections
 from lib.util import LOG, ERROR, getSetting, setSetting
 
 try:
@@ -306,6 +306,7 @@ class ThreadWindow:
 			else:
 				signals.sendSignal('RUN_IN_MAIN')
 		elif action == ACTION_PREVIOUS_MENU:
+			asyncconnections.StopConnection()
 			if self._currentThread and self._currentThread.isAlive():
 				self._currentThread.stop()
 				if self._endCommand: self._endCommand()
@@ -332,7 +333,7 @@ class ThreadWindow:
 		while len(threading.enumerate()) > 1:
 			for t in threading.enumerate():
 				#if t != threading.currentThread(): t.join()
-				if isinstance(t,StoppableThread): t.raiseExc(Exception)
+				if isinstance(t,StoppableThread) and t.isAlive(): t.raiseExc(Exception)
 			time.sleep(1)
 	
 	def _resetFunction(self):
@@ -374,6 +375,7 @@ class ThreadWindow:
 		return t
 		
 	def stopThread(self):
+		asyncconnections.StopConnection()
 		if self._stopControl: self._stopControl.setVisible(False)
 		if self._currentThread:
 			self._currentThread.stop()
@@ -4332,7 +4334,7 @@ def checkForInterface(url):
 	except:
 		return None
 		
-def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_default=False):
+def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_default=False,log_function=None):
 	showError = dialogs.showMessage
 	if silent: showError = dialogs.showMessageSilent
 	global STARTFORUM
@@ -4358,6 +4360,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		if forum.startswith('GB.'):
 			err = 'getForumBrowser(): General'
 			from lib.forumbrowser import genericparserbrowser
+			if log_function: genericparserbrowser.LOG = log_function
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
 		elif forum.startswith('TT.'):
 			err = 'getForumBrowser(): Tapatalk'
@@ -4365,6 +4368,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		elif forum.startswith('FR.'):
 			err = 'getForumBrowser(): Forumrunner'
 			from lib.forumbrowser import forumrunner
+			if log_function: forumrunner.LOG = log_function
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=getSetting('always_login',False))
 		#else:
 		#	err = 'getForumBrowser(): Boxee'
@@ -4438,6 +4442,8 @@ if __name__ == '__main__':
 			setSetting('FBIsRunning',True)
 			setSetting('manageForums',False)
 			startForumBrowser()
+		except KeyboardInterrupt:
+			LOG('XBMC - abort requested: Shutting down...')
 		finally:
 			setSetting('FBIsRunning',False)
 		

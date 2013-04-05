@@ -1,4 +1,8 @@
 print "FORUMBROWSER: xmlrpclib imported local copy"
+from lib import asyncconnections
+import httplib
+httplib.HTTPConnection.response_class = asyncconnections.AsyncHTTPResponse
+
 #
 # XML-RPC CLIENT LIBRARY
 # $Id$
@@ -139,10 +143,10 @@ Exported functions:
 
 import re, string, time, operator
 
-from types import *
+from types import *  # @UnusedWildImport
 import socket
 import errno
-import httplib
+#import httplib #Forum Browser imported at top
 try:
     import gzip
 except ImportError:
@@ -154,7 +158,7 @@ except ImportError:
 try:
     unicode
 except NameError:
-    unicode = None # unicode support not available
+    unicode = None # unicode support not available @ReservedAssignment
 
 try:
     import datetime
@@ -529,7 +533,7 @@ except (AttributeError, ImportError):
     FastParser = FastUnmarshaller = None
 
 try:
-    import _xmlrpclib #@UnresolvedImport
+    import _xmlrpclib #@UnresolvedImport @Reimport
     FastMarshaller = _xmlrpclib.Marshaller
 except (AttributeError, ImportError):
     FastMarshaller = None
@@ -885,7 +889,7 @@ class Unmarshaller:
     def end_struct(self, data):
         mark = self._marks.pop()
         # map structs to Python dictionaries
-        dict = {}
+        dict = {}  # @ReservedAssignment
         items = self._stack[mark:]
         for i in range(0, len(items), 2):
             dict[_stringify(items[i])] = items[i+1]
@@ -1342,7 +1346,7 @@ class Transport:
         auth, host = urllib.splituser(host)
 
         if auth:
-            import base64
+            import base64 # @Reimport
             auth = base64.encodestring(urllib.unquote(auth))
             auth = string.join(string.split(auth), "") # get rid of whitespace
             extra_headers = [
@@ -1366,7 +1370,7 @@ class Transport:
             return self._connection[1]
 
         # create a HTTP connection object from a host descriptor
-        chost, self._extra_headers, x509 = self.get_host_info(host)
+        chost, self._extra_headers, x509 = self.get_host_info(host)  # @UnusedVariable
         #store the host argument along with the connection object
         self._connection = host, httplib.HTTPConnection(chost)
         return self._connection[1]
@@ -1542,7 +1546,7 @@ class ServerProxy:
 
         # get the url
         import urllib
-        type, uri = urllib.splittype(uri)
+        type, uri = urllib.splittype(uri)  # @ReservedAssignment
         if type not in ("http", "https"):
             raise IOError, "unsupported XML-RPC protocol"
         self.__host, self.__handler = urllib.splithost(uri)

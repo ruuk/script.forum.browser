@@ -1,10 +1,13 @@
+from lib.util import LOG, ERROR, getSetting
+from lib import asyncconnections
+asyncconnections.LOG = LOG
 import xmlrpclib, httplib, sys, re, time, os
 import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
 from forumbrowser import FBData
 from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode
-from lib.util import LOG, ERROR, getSetting
+
 #import xbmc #@UnresolvedImport
 
 DEBUG = sys.modules["__main__"].DEBUG
@@ -948,7 +951,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			em = ERROR('ERROR GETTING THREADS')
 			callback(-1,'%s' % em)
-			return self.finish(FBData(error='em'))
+			return self.finish(FBData(error=em))
 		
 		callback(100,self.lang(32052))
 		return self.finish(FBData(threads,pd),donecallback)

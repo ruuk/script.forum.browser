@@ -1,5 +1,9 @@
 import os, sys, time, xbmc, xbmcaddon
 from lib import signals
+from lib.util import AbortRequestedException
+
+from lib import util
+util.LOG_PREFIX = 'FORUMBROWSER-SERVICE'
 
 DEBUG = False
 def ERROR(txt):
@@ -17,9 +21,14 @@ def LOG(txt): pass
 ADDON = __addon__ = xbmcaddon.Addon()
 T = ADDON.getLocalizedString
 FB = None
+import default
 from default import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
 from default import getForumBrowser, listForumSettings, loadForumSettings, forumsManager, getNotifyList #@UnusedImport
 from webviewer import video #@UnresolvedImport
+
+default.LOG = LOG
+default.tapatalk.LOG = LOG
+
 ADDONID = ADDON.getAddonInfo('id')
 
 def getSetting(key,default=None):
@@ -120,7 +129,7 @@ class ForumBrowserService:
 		return self.getUsername() != '' and self.getPassword() != ''
 		
 	def setForumBrowser(self,forum):
-		self.FB = getForumBrowser(forum,no_default=True)
+		self.FB = getForumBrowser(forum,silent=True,no_default=True,log_function=LOG)
 		return self.FB
 		
 	def checkLast(self,forum,ID,count=1):
@@ -166,6 +175,9 @@ class ForumBrowserService:
 				pmcounts = self.FB.getPMCounts()
 				xbmc.sleep(300)
 				subs = self.FB.getSubscriptions()
+			except AbortRequestedException:
+				self.stop = True
+				return
 			except:
 				ERROR('Failed to get data for forum: %s' % forum)
 				fdata = self.lastData.get(forum)
