@@ -1,6 +1,6 @@
 <window>
 	<zorder>1</zorder>
-	<defaultcontrol>200</defaultcontrol>
+	<!--   defaultcontrol>200</defaultcontrol -->
 	<coordinates>
 		<system>1</system>
 		<posx>556</posx>
@@ -57,6 +57,7 @@
 				<pulseonselect>false</pulseonselect>
 				<texturefocus></texturefocus>
 				<texturenofocus></texturenofocus>
+				<visible>false</visible>
 			</control>
 	</controls>
 </window>

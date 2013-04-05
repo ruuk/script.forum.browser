@@ -8,6 +8,7 @@
     <setting id="show_search_history" type="bool" label="32047" default="true" />
     <setting id="auto_thread_subscriptions_window" type="bool" label="32009" default="false" />
     <setting id="reverse_sort" type="bool" label="32002" default="false" />
+    <setting id="reverse_sort_search" type="bool" label="32525" default="false" />
     <setting id="hide_signatures" type="bool" label="32013" default="false" />
     <setting id="ignore_forum_images" type="bool" label="32016" default="true" />
     <setting label="32518" type="text" id="post_user_info" default="status,postcount,reputation,joindate,location"/>

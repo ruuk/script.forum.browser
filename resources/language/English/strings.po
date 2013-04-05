@@ -1783,6 +1783,10 @@ msgctxt "#32524"
 msgid "Disable Asynchronous Connections"
 msgstr ""
 
+msgctxt "#32525"
+msgid "Reverse Sort Search Results"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

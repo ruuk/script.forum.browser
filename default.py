@@ -2050,6 +2050,16 @@ class RepliesWindow(PageWindow):
 			item.setProperty('extras','extras')
 			item.setProperty('usedExtras',','.join(altused))
 			
+	def shouldReverse(self):
+		if self.isPM(): return False
+		if self.search: return getSetting('reverse_sort_search',False)
+		return getSetting('reverse_sort',False)
+	
+	def shouldDropToBottom(self):
+		if self.isPM(): return False
+		if self.search: return getSetting('reverse_sort_search',False)
+		return not getSetting('reverse_sort',False)
+			
 	def doFillRepliesList(self,data):
 		if 'newthreadid' in data: self.tid = data['newthreadid']
 		if not data:
@@ -2079,7 +2089,7 @@ class RepliesWindow(PageWindow):
 			if not self.topic: self.topic = data.pageData.topic
 			if not self.tid: self.tid = data.pageData.tid
 			self.setupPage(data.pageData)
-			if getSetting('reverse_sort',False) and not self.isPM() and self.search != '@!RECENT!@':
+			if self.shouldReverse():
 				data.data.reverse()
 			alt = self.getUserInfoAttributes()
 			self.posts = {}
@@ -2100,7 +2110,7 @@ class RepliesWindow(PageWindow):
 			self.setFocusId(120)
 			if select > -1:
 				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and not self.isPM() and not getSetting('reverse_sort',False) and FB.canOpenLatest() and not self.search:
+			elif self.firstRun and getSetting('open_thread_to_newest',False) and FB.canOpenLatest() and self.shouldDropToBottom():
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
