@@ -29,6 +29,7 @@ def resetStopRequest():
 	STOP_REQUESTED = False
 	
 class _AsyncHTTPResponse(httplib.HTTPResponse):
+	_prog_callback = None
 	def _read_status(self):
 		## Do non-blocking checks for server response until something arrives.
 		setStoppable(True)
@@ -45,7 +46,12 @@ class _AsyncHTTPResponse(httplib.HTTPResponse):
 				elif STOP_REQUESTED:
 					LOG('Stop requested during wait for server response: raising exception')
 					resetStopRequest()
-					raise StopRequestedException('socket[asyncconnections].create_connection')
+					raise StopRequestedException('httplib.HTTPResponse._read_status')
+				
+				if self._prog_callback:
+					if not self._prog_callback(-1):
+						resetStopRequest()
+						raise StopRequestedException('httplib.HTTPResponse._read_status')
 					
 				time.sleep(0.1)
 			return httplib.HTTPResponse._read_status(self)
@@ -64,6 +70,22 @@ class Connection(httplib.HTTPConnection):
 class Handler(urllib2.HTTPHandler):
 	def http_open(self, req):
 		return self.do_open(Connection, req)
+
+def createHandlerWithCallback(callback):
+	if getSetting('disable_async_connections',False):
+		return urllib2.HTTPHandler
+	
+	class rc(AsyncHTTPResponse):
+		_prog_callback = callback
+		
+	class conn(httplib.HTTPConnection):
+		response_class = rc
+		
+	class handler(urllib2.HTTPHandler):
+		def http_open(self, req):
+			return self.do_open(conn, req)
+	
+	return handler
 
 def create_connection(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
 					  source_address=None):

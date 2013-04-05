@@ -1,14 +1,8 @@
 #Forum browser common
-import sys, os, re, urllib, urllib2, texttransform, binascii
+import sys, os, re, urllib, urllib2, texttransform, binascii, time
+from lib import asyncconnections
+from lib.util import LOG, ERROR
 
-def LOG(message):
-	print 'FORUMBROWSER: %s' % message
-
-def ERROR(message):
-	LOG('ERROR: ' + message)
-	import traceback #@Reimport
-	traceback.print_exc()
-	return str(sys.exc_info()[1])
 
 def durationToShortText(unixtime):
 	days = int(unixtime/86400)
@@ -123,8 +117,14 @@ class FBOnlineDatabase():
 		return final
 
 class HTMLPageInfo:
-	def __init__(self,url,html=''):
+	def __init__(self,url,html='',progress_callback=None):
 		self.url = url
+		self.progressCallback = progress_callback
+		self.currMaxProgress = 0
+		self.currentProgress = 0
+		self.lastProgTime = 0
+		self.progWait = 1
+		self.lastProgMessage = ''
 		
 		self.base = url
 		if not self.base.endswith('/'): self.base += '/'
@@ -143,23 +143,50 @@ class HTMLPageInfo:
 		else:
 			self._getHTML()
 		
+	def updateProgress(self,pct,msg=''):
+		if not self.progressCallback: return True
+		msg = msg or self.lastProgMessage
+		self.lastProgMessage = msg
+		if pct < 0:
+			now = time.time()
+			if self.currentProgress < self.currMaxProgress and now - self.lastProgTime >= self.progWait:
+				self.lastProgTime = now
+				self.progWait += 0.1
+				self.currentProgress += abs(pct)
+		else:
+			self.currentProgress = pct
+			
+		callback, arg = self.progressCallback
+		return callback(arg,self.currentProgress,msg)
+		
+	def updateProgressMax(self,maxp):
+		self.currMaxProgress = maxp
+		self.progWait = 1
+		
 	def _getHTML(self):
+		self.updateProgressMax(50)
+		if not self.updateProgress(0, 'Searching Forum Page'):
+			self.isValid = False
+			return
 		try:
 			self.html = self.getHTML(self.url)
 		except:
 			self.isValid = False
-			LOG('HTMLPageInfo 1: FAILED')
+			ERROR('HTMLPageInfo 1: FAILED',hide_tb=True)
 			
 		if self.url == self.base2: return
-		
+		self.updateProgressMax(100)
+		if not self.updateProgress(50, 'Searching Main Page'):
+			self.isValid = False
+			return
 		try:
 			self.html2 = self.getHTML(self.base2)
 			self.isValid = True
 		except:
-			LOG('HTMLPageInfo 2: FAILED')
+			ERROR('HTMLPageInfo 2: FAILED',hide_tb=True)
 		
 	def getHTML(self,url):
-		opener = urllib2.build_opener()
+		opener = urllib2.build_opener(asyncconnections.createHandlerWithCallback(self.updateProgress))
 		try:
 			o = opener.open(urllib2.Request(url,None,{'User-Agent':'Mozilla/5.0'}))
 		except urllib2.HTTPError,e:

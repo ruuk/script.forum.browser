@@ -137,7 +137,7 @@ def installSkinMods(update=False):
 	version2 = getSkinVersion(localSkinPath)
 	
 	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
-		yesno = xbmcgui.Dialog().yesno(T(32484),T(32487).format(currentSkin),T(32488),T(32489))
+		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(currentSkin),T(32488),T(32489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
 		dialog.create(T(32490),T(32491))

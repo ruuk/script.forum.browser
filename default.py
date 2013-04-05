@@ -9,11 +9,11 @@ from lib.util import LOG, ERROR, getSetting, setSetting
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
-	print 'FORUM BROWSER: WEB VIEWER IMPORTED'
+	print 'FORUMBROWSER: WEB VIEWER IMPORTED'
 except:
 	import traceback
 	traceback.print_exc()
-	print 'FORUM BROWSER: COULD NOT IMPORT WEB VIEWER'
+	print 'FORUMBROWSER: COULD NOT IMPORT WEB VIEWER'
 
 '''
 TODO:
@@ -791,15 +791,25 @@ class ForumSettingsDialog(BaseWindowDialog):
 		self.setFocusId(100)
 		self.setFocusId(cid)
 		
+	def handleXBMCDialogProgress(self,dialog,pct,msg):
+		if pct > -1: dialog.update(pct,msg)
+		if dialog.iscanceled(): asyncconnections.StopConnection()
+		return not dialog.iscanceled()
+	
 	def getWebImage(self,url):
-		splash = dialogs.showActivitySplash(T(32285))
+		d = xbmcgui.DialogProgress()
+		d.create(T(32285))
 		try:
-			info = forumbrowser.HTMLPageInfo(url)
-		
+			info = forumbrowser.HTMLPageInfo(url,progress_callback=(self.handleXBMCDialogProgress,d))
+			if d.iscanceled():
+				d.close()
+				return ''
 			domain = url.split('://',1)[-1].split('/',1)[0]
-			logo = chooseLogo(domain,info.images(),keep_colors=True,splash=splash)
+			logo = chooseLogo(domain,info.images(),keep_colors=True,splash=d)
+		except util.StopRequestedException:
+			return ''
 		finally:
-			splash.close()
+			d.close()
 		return logo
 	
 	def makeColorFile(self,color):
@@ -895,7 +905,7 @@ class NotificationsDialog(BaseWindowDialog):
 			forumID = addForum()
 			if forumID: self.refresh(forumID)
 		elif controlID == 201:
-			forumID = addForumFromOnline()
+			forumID = addForumFromOnline(True)
 			if forumID: self.refresh(forumID)
 		elif controlID == 202:
 			if removeForum(forumID): self.refresh()
@@ -1996,13 +2006,17 @@ class RepliesWindow(PageWindow):
 		self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
 		self.setFocusId(120)
 		
+	def fixAvatar(self,url):
+		if not 'http%3A%2F%2F' in url: return url
+		return url + '&time=%s' % str(time.time())
+		
 	def _updateItem(self,item,post,defAvatar,showIndicators,countLinkImages,webvid,alt):
 		url = defAvatar
 		if post.avatar: url = FB.makeURL(post.avatar)
 		post.avatarFinal = url
 		self.setMessageProperty(post,item,True)
 		item.setProperty('post',str(post.postId))
-		item.setProperty('avatar',url)
+		item.setProperty('avatar',self.fixAvatar(url))
 		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
 		item.setProperty('date',post.getDate(self.timeOffset))
 		item.setProperty('online',post.online and 'online' or '')
@@ -2065,7 +2079,7 @@ class RepliesWindow(PageWindow):
 			if not self.topic: self.topic = data.pageData.topic
 			if not self.tid: self.tid = data.pageData.tid
 			self.setupPage(data.pageData)
-			if getSetting('reverse_sort',False) and not self.isPM():
+			if getSetting('reverse_sort',False) and not self.isPM() and self.search != '@!RECENT!@':
 				data.data.reverse()
 			alt = self.getUserInfoAttributes()
 			self.posts = {}
@@ -2801,9 +2815,9 @@ class ForumsWindow(BaseWindow):
 	def endGetForumBrowser(self,fb,forumElements):
 		global FB
 		FB = fb
-		self.setTheme()
+		#self.setTheme()
 		self.getControl(112).setVisible(False)
-		self.resetForum()
+		self.resetForum(no_theme=True)
 		self.fillForumList(True)
 		setSetting('last_forum',FB.getForumID())
 		self.forumElements = forumElements
@@ -2945,6 +2959,7 @@ class ForumsWindow(BaseWindow):
 		if self.empty: self.setFocusId(202)
 		#xbmcgui.unlock()
 		self.setLoggedIn()
+		self.resetForum()
 		if not FB.guestOK() and not FB.isLoggedIn():
 			yes = xbmcgui.Dialog().yesno(T(32352),T(32353),T(32354),T(32355))
 			if yes:
@@ -3212,12 +3227,13 @@ class ForumsWindow(BaseWindow):
 		if self.closed: return True
 		return xbmcgui.Dialog().yesno(T(32373),T(32373))
 		
-	def resetForum(self,hidelogo=True):
+	def resetForum(self,hidelogo=True,no_theme=False):
 		if not FB: return
 		FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
 		self.setButtons()
-		if hidelogo: self.getControl(250).setImage('')
 		setSetting('last_forum',FB.getForumID())
+		if no_theme: return
+		if hidelogo: self.getControl(250).setImage('')
 		self.setTheme()
 		self.setLogoFromFile()
 		
@@ -3267,17 +3283,21 @@ def appendSettingList(key,value,limit=0):
 	setSetting(key,slist)
 	
 def getSearchDefault(setting,default='',with_global=True,heading=T(32376),new=T(32377),extra=None):
-	if not getSetting('show_search_history',True): return default
-	slist = getSetting(setting,[])
-	slistDisplay = slist[:]
-	if with_global:
-		glist = getSetting('last_search',[])
-		glist.reverse()
-		for g in glist:
-			if not g in slist:
-				slistDisplay.insert(0,'[COLOR FFAAAA00]%s[/COLOR]' % g)
-				slist.insert(0,g)
-	if slist:
+	if getSetting('show_search_history',True): 
+		slist = getSetting(setting,[])
+		slistDisplay = slist[:]
+		if with_global:
+			glist = getSetting('last_search',[])
+			glist.reverse()
+			for g in glist:
+				if not g in slist:
+					slistDisplay.insert(0,'[COLOR FFAAAA00]%s[/COLOR]' % g)
+					slist.insert(0,g)
+	else:
+		slist = []
+		slistDisplay = []
+		
+	if slist or extra:
 		slist.reverse()
 		slistDisplay.reverse()
 		if extra:
@@ -3921,10 +3941,10 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 def addForumFromOnline(stay_open_on_select=False):
 	odb = forumbrowser.FBOnlineDatabase()
 	res = True
-	added = False
+	added = None
 	while res:
 		res = selectForumCategory(with_all=True)
-		if not res: return
+		if not res: return added
 		cat = res
 		terms = None
 		if cat == 'all': cat = None

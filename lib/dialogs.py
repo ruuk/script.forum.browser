@@ -333,10 +333,18 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
 		self.caption = kwargs.get('caption')
+		self.cancelStopsConnections = kwargs.get('cancel_stops_connections')
+		self.modal_callback = kwargs.get('modal_callback')
 		self.canceled = False
+		xbmcgui.WindowXMLDialog.__init__(self)
 		
 	def onInit(self):
 		self.getControl(100).setLabel(self.caption)
+		if self.modal_callback:
+			callback, args, kwargs = self.modal_callback
+			args = args or []
+			kwargs = kwargs = {} 
+			callback(self,*args,**kwargs)
 		
 	def update(self,message):
 		self.getControl(100).setLabel(message)
@@ -345,14 +353,21 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2: action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
-			self.canceled = True
+			self.cancel()
+			
+	def cancel(self):
+		self.canceled = True
+		if self.cancelStopsConnections:
+			from lib import asyncconnections
+			asyncconnections.StopConnection()
 	
 	def onClick(self,controlID):
-		pass
+		if controlID == 200:
+			self.cancel()
 	
 class ActivitySplash():
-	def __init__(self,caption=''):
-		self.splash = openWindow(ActivitySplashWindow,'script-forumbrowser-loading-splash.xml',return_window=True,modal=False,theme='Default',caption=caption)
+	def __init__(self,caption='',cancel_stops_connections=False,modal_callback=None):
+		self.splash = openWindow(ActivitySplashWindow,'script-forumbrowser-loading-splash.xml',return_window=True,modal=bool(modal_callback),theme='Default',caption=caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
 		self.splash.show()
 		
 	def update(self,pct,message):
@@ -374,11 +389,11 @@ class FakeActivitySplash():
 	def close(self):
 		pass
 		
-def showActivitySplash(caption=T(32248)):
+def showActivitySplash(caption=T(32248),cancel_stops_connections=False,modal_callback=None):
 	if getSetting('hide_activity_splash',False):
 		s = FakeActivitySplash(caption)
 	else:
-		s = ActivitySplash(caption)
+		s = ActivitySplash(caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
 	s.update(0,caption)
 	return s
 	
