@@ -1,5 +1,5 @@
 import xbmc, xbmcaddon, os, filelock
-from util import LOG, ERROR
+from util import LOG, ERROR, getSettingExternal, setSettingExternal
 
 DEBUG = False
 
@@ -11,7 +11,6 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 	def __init__(self):
 		self.currID = 0
 		self.registry = {}
-		self.settings = xbmcaddon.Addon(id='script.forum.browser')
 		self._lastSignal = ''
 		clearSignals()
 		xbmc.Monitor.__init__(self)  # @UndefinedVariable
@@ -55,7 +54,7 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 		return self.unRegister(signal, registrant)
 	
 	def validSignal(self):
-		trigger = xbmcaddon.Addon(id='script.forum.browser').getSetting('SignalHubSignal')
+		trigger = getSettingExternal('SignalHubSignal')
 		if trigger == self._lastSignal: return False
 		self._lastSignal = trigger
 		return True
@@ -103,7 +102,7 @@ def addSignal(signal):
 	signals = getSignals()
 	signals.append(signal)
 	
-	lock = filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5)
+	lock = filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5, delay=0.1)
 	lock.acquire()
 	f = open(SIGNAL_CACHE_PATH,'w')
 	f.write('\n'.join(signals))
@@ -114,7 +113,7 @@ def addSignal(signal):
 def sendSignal(signal,data=''):
 	addSignal(signal + ':' + str(data))
 	global SIGNAL_COUNTER
-	xbmcaddon.Addon(id='script.forum.browser').setSetting('SignalHubSignal',str(SIGNAL_COUNTER))
+	setSettingExternal('SignalHubSignal',str(SIGNAL_COUNTER))
 	SIGNAL_COUNTER+=1
 	if DEBUG: LOG('SignalHub: Sending signal %s (%s)' % (signal,data))
 	

@@ -4470,6 +4470,8 @@ def startForumBrowser(forumID=None):
 	dialogs.openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
 	#sys.modules.clear()
 	PLAYER.finish()
+	del PLAYER
+	del SIGNALHUB
 	
 ######################################################################################
 # Startup
