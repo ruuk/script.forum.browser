@@ -2769,6 +2769,7 @@ class ForumsWindow(BaseWindow):
 		self.forumElements = None
 		self.headerTextFormat = '[B]%s[/B]'
 		self.forumsManagerWindowIsOpen = False
+		self.lastFB = None
 	
 	def newPostsCallback(self,signal,data):
 		self.openForumsManager(external=True)
@@ -2896,10 +2897,20 @@ class ForumsWindow(BaseWindow):
 		self.getControl(104).setLabel(self.headerTextFormat % FB.getDisplayName())
 		
 	def errorCallback(self,error):
+		self.failedToGetForum()
 		dialogs.showMessage(T(32050),T(32171),error.message,error=True)
 		self.setFocusId(202)
 		self.endProgress()
 	
+	def failedToGetForum(self):
+		global FB
+		FB = self.lastFB
+		if FB: setSetting('last_forum',FB.getForumID())
+	
+	def stopThread(self):
+		self.failedToGetForum()
+		ThreadWindow.stopThread(self)
+		
 	def fillForumList(self,first=False):
 		if not FB: return
 		self.setLabels()
@@ -2926,6 +2937,7 @@ class ForumsWindow(BaseWindow):
 		
 	def doFillForumList(self,data):
 		self.endProgress()
+		self.lastFB = FB
 		self.setLogo(data.getExtra('logo'))
 		if not data:
 			self.setFocusId(202)

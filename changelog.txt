@@ -35,6 +35,7 @@ Current Version : 1.5.1 RC4
 *** 1.5.1 RC4 ***
 
 Added setting 'Reverse Sort Search Results'
+When loading a forum, logo and theme will now not change unless it succeeds. On failure, underlying forum interface reverts to the currently displayed forum
 
 *** 1.5.0 RC3 ***
 
