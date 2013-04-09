@@ -2,7 +2,7 @@ import os, sys, xbmc, xbmcaddon, filelock
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 
-SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','settings.xml')
+SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
 
 class AbortRequestedException(Exception): pass
 class StopRequestedException(Exception): pass

@@ -31,9 +31,11 @@ __version__ = __addon__.getAddonInfo('version')
 T = __addon__.getLocalizedString
 
 THEME = 'Default'
-SKINS = ['Default','Dark']
-if getSetting('skin') == '1':
-	THEME = 'Dark'
+SKINS = ['Default','Dark','Video']
+try:
+	THEME = SKINS[getSetting('skin',0)]
+except:
+	THEME = 'Default'
 
 ACTION_MOVE_LEFT      = 1
 ACTION_MOVE_RIGHT     = 2
@@ -3015,6 +3017,7 @@ class ForumsWindow(BaseWindow):
 			image = 'forum-browser-logo-128.png'
 		else:
 			image = 'forum-browser-%s.png' % FB.browserType or ''
+		image = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','skins','Default','media',image)
 		self.getControl(249).setImage(image)
 			
 	def setPMCounts(self,pm_counts=False):

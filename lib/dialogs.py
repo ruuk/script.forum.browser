@@ -48,6 +48,8 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	theme = theme or sys.modules["__main__"].THEME
 	path = __addon__.getAddonInfo('path')
+	src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
+	if not os.path.exists(src): theme = 'Default'
 	if not getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
 		#path = __addon__.getAddonInfo('profile')
