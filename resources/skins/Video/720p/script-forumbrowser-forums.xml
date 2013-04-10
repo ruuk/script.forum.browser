@@ -114,7 +114,7 @@
 				<textcolor>FF4488AA</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
-				<label>[B]SHOW MENU[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32527][/B]</label>
 			</control>
 		</control>
 		
@@ -143,7 +143,7 @@
 				<textcolor>FF4488AA</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
-				<label>[B]CLOSE MENU[/B]</label>
+				<label>[B]$ADDON[script.forum.browser 32528][/B]</label>
 			</control>
 		</control>
 		

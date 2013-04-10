@@ -1787,6 +1787,26 @@ msgctxt "#32525"
 msgid "Reverse Sort Search Results"
 msgstr ""
 
+msgctxt "#32526"
+msgid "Started By:"
+msgstr ""
+
+msgctxt "#32527"
+msgid "SHOW MENU"
+msgstr ""
+
+msgctxt "#32528"
+msgid "CLOSE MENU"
+msgstr ""
+
+msgctxt "#32529"
+msgid "Previous Page"
+msgstr ""
+
+msgctxt "#32530"
+msgid "Next Page"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous
