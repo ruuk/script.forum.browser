@@ -2462,8 +2462,12 @@ class ThreadsWindow(PageWindow):
 			
 	def setTheme(self):
 		self.desc_base = unicode.encode(T(32162)+' %s','utf8')
-		self.getControl(103).setLabel('[B]%s[/B]' % (self.fid != 'subscriptions' and T(32160) or ''))
-		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
+		if self.fid == 'subscriptions':
+			self.getControl(103).setLabel('[B]%s[/B]' % T(32175))
+			self.getControl(104).setLabel('')
+		else:
+			self.getControl(103).setLabel('[B]%s[/B]' % T(32160))
+			self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 	
 	def errorCallback(self,error):
 		dialogs.showMessage(T(32050),T(32161),error.message,error=True)
@@ -2558,15 +2562,18 @@ class ThreadsWindow(PageWindow):
 			item.setProperty("id",unicode(tid))
 			item.setProperty("fid",unicode(fid))
 			item.setProperty("lastposter",last)
+			preview = tdict.get('short_content','')
+			if preview: preview = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(preview))
+			
 			if last:
 				last = self.desc_base % last
-				short = tdict.get('short_content','')
-				if short: last += '[CR]' + re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(short))[:100]
+				if preview: last += '[CR]' + preview
 			else:
-				last = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(tdict.get('short_content','')))
+				last = preview
 			if self.searchRE: last = self.highlightTerms(last)
+			item.setProperty("preview",preview)
 			item.setProperty("last",last)
-			
+			item.setProperty("starter",starter)
 			item.setProperty("lastid",tdict.get('lastid',''))
 			item.setProperty('title',title)
 			item.setProperty('announcement',unicode(tdict.get('announcement','')))
@@ -2646,6 +2653,11 @@ class ThreadsWindow(PageWindow):
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
+		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2 or action == ACTION_PREVIOUS_MENU:
+			if THEME == 'Video':
+				if self.getFocusId() in (105,200,202,106):
+					self.setFocusId(120)
+					if self.getControl(120).size(): return
 		PageWindow.onAction(self,action)
 		
 	def doMenu(self):
@@ -3178,6 +3190,13 @@ class ForumsWindow(BaseWindow):
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
+			if THEME == 'Video':
+				if self.getFocusId() in (205,206,207):
+					self.setFocusId(202)
+					return
+				elif self.getFocusId() in (200,201,202,203,204,105):
+					self.setFocusId(120)
+					if self.getControl(120).size(): return
 			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
 	
