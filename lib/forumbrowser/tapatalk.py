@@ -1,4 +1,5 @@
 from lib.util import LOG, ERROR, getSetting
+from lib import util
 from lib import asyncconnections
 asyncconnections.LOG = LOG
 import xmlrpclib, httplib, sys, re, time, os
@@ -528,7 +529,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.forumConfig = {}
 		self.needsLogin = True
 		self.alwaysLogin = always_login
-		self.lang = sys.modules["__main__"].T
+		self.lang = util.T
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self.loginError = ''

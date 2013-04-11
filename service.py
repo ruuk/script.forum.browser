@@ -18,8 +18,6 @@ def ERROR(txt):
 	
 def LOG(txt): pass
 
-ADDON = __addon__ = xbmcaddon.Addon()
-T = ADDON.getLocalizedString
 FB = None
 import default
 from default import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
@@ -29,7 +27,7 @@ from webviewer import video #@UnresolvedImport
 default.LOG = LOG
 default.tapatalk.LOG = LOG
 
-ADDONID = ADDON.getAddonInfo('id')
+ADDONID = util.__addon__.getAddonInfo('id')
 
 def getSetting(key,default=None):
 	setting = xbmcaddon.Addon('script.forum.browser').getSetting(key)
@@ -107,7 +105,7 @@ class ForumBrowserService:
 			
 		if method == 'normal' and ntype == 'single':
 			mtime=self.notifyXbmcDuration
-			image=ADDON.getAddonInfo('icon')
+			image=util.__addon__.getAddonInfo('icon')
 			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
 		elif method != 'normal' and ntype == 'all':
 			if getSetting('FBIsRunning',False):
