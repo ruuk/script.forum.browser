@@ -12,8 +12,6 @@ from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode
 
 DEBUG = sys.modules["__main__"].DEBUG
 
-T = sys.modules["__main__"].T
-
 def checkVersion(version1, version2):
 	def normalize(v):
 		return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]

@@ -1,12 +1,9 @@
-import os, sys, xbmc, xbmcgui, xbmcvfs, dialogs
+import os, xbmc, xbmcgui, xbmcvfs, dialogs
 from distutils.version import StrictVersion
-from util import LOG, ERROR, getSetting, setSetting
+from util import LOG, ERROR, getSetting, setSetting, __addon__, T
 
 DEBUG = None
 CACHE_PATH = None
-
-__addon__ = sys.modules["__main__"].__addon__
-T = sys.modules["__main__"].T
 
 def copyKeyboardModImages(skinPath):
 	dst = os.path.join(skinPath,'media','forum-browser-keyboard')

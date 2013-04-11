@@ -26,9 +26,8 @@ __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
 __url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
-__addon__ = util.__addon__
-__version__ = __addon__.getAddonInfo('version')
-T = __addon__.getLocalizedString
+__version__ = util.__addon__.getAddonInfo('version')
+T = util.T
 
 THEME = 'Default'
 SKINS = ['Default','Dark','Video']
@@ -64,11 +63,11 @@ ACTION_RUN_IN_MAIN = 27
 PLAYER = None
 SIGNALHUB = None
 
-MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
-FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
-FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums'))
-FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums_settings'))
-CACHE_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'cache'))
+MEDIA_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
+FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'forums'))
+FORUMS_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forums'))
+FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forums_settings'))
+CACHE_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'cache'))
 if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
 if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
@@ -599,7 +598,7 @@ class ImagesDialog(BaseWindowDialog):
 			dialogs.showHelp('imageviewer')
 			
 	def downloadImage(self,url):
-		base = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'slideshow'))
+		base = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'slideshow'))
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
 		return Downloader(message=T(32148)).downloadURLs(base,[url],'.jpg')
@@ -645,7 +644,7 @@ class ImagesDialog(BaseWindowDialog):
 class ForumSettingsDialog(BaseWindowDialog):
 	def __init__( self, *args, **kwargs ):
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = []
 		self.data = {}
@@ -873,7 +872,7 @@ class NotificationsDialog(BaseWindowDialog):
 		self.initialIndex = 0
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		if not os.path.exists(self.colorsDir): os.makedirs(self.colorsDir)
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		self.gifReplace = chr(255)*6
 		self.items = None
 		self.stopTimeout = False
@@ -1612,7 +1611,7 @@ class MessageWindow(BaseWindow):
 			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
 			item.setProperty('url',url)
 			self.getControl(150).addItem(item)
-		#targetdir = os.path.join(__addon__.getAddonInfo('profile'),'messageimages')
+		#targetdir = os.path.join(util.__addon__.getAddonInfo('profile'),'messageimages')
 		#TD.startDownload(targetdir,self.post.imageURLs(),ext='.jpg',callback=self.getImagesCallback)
 		
 	def getImagesCallback(self,file_dict):
@@ -1677,7 +1676,7 @@ class MessageWindow(BaseWindow):
 		if url in image_files:
 			image_files.pop(image_files.index(url))
 			image_files.insert(0,url)
-		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
+		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,util.__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
 		w.doModal()
 		del w
 			
@@ -1997,7 +1996,7 @@ class RepliesWindow(PageWindow):
 	
 	def updateItem(self,item,post):
 		alt = self.getUserInfoAttributes()
-		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
+		defAvatar = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
 		webvid = video.WebVideo()
 		showIndicators = getSetting('show_media_indicators',True)
 		countLinkImages = getSetting('smi_count_link_images',False)
@@ -2084,7 +2083,7 @@ class RepliesWindow(PageWindow):
 			return
 		
 		self.empty = False
-		defAvatar = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
+		defAvatar = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins',THEME,'media','forum-browser-avatar-none.png'))
 		#xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
@@ -2208,6 +2207,11 @@ class RepliesWindow(PageWindow):
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
+		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2 or action == ACTION_PREVIOUS_MENU:
+			if util.Control.HasFocus(group=196):
+					if self.getControl(120).size():
+						self.setFocusId(120)
+						return
 		PageWindow.onAction(self,action)
 	
 	def newSearch(self):
@@ -2654,10 +2658,10 @@ class ThreadsWindow(PageWindow):
 		if action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2 or action == ACTION_PREVIOUS_MENU:
-			if THEME == 'Video':
-				if self.getFocusId() in (105,200,202,106):
+			if util.Control.HasFocus(group=196):
+				if self.getControl(120).size():
 					self.setFocusId(120)
-					if self.getControl(120).size(): return
+					return
 		PageWindow.onAction(self,action)
 		
 	def doMenu(self):
@@ -3190,13 +3194,13 @@ class ForumsWindow(BaseWindow):
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
-			if THEME == 'Video':
-				if self.getFocusId() in (205,206,207):
-					self.setFocusId(202)
-					return
-				elif self.getFocusId() in (200,201,202,203,204,105):
+			if util.Control.HasFocus(group=198):
+				self.setFocusId(204)
+				return
+			elif util.Control.HasFocus(group=196):
+				if self.getControl(120).size():
 					self.setFocusId(120)
-					if self.getControl(120).size(): return
+					return
 			if not self.preClose(): return
 		BaseWindow.onAction(self,action)
 	
@@ -3693,7 +3697,7 @@ def toggleNotify(forumID=None):
 def doSettings(window=None):
 	w = dialogs.openWindow(xbmcgui.WindowXMLDialog,'script-forumbrowser-overlay.xml',return_window=True,modal=False,theme='Default')
 	try:
-		__addon__.openSettings()
+		util.__addon__.openSettings()
 	finally:
 		w.close()
 		del w

@@ -1,6 +1,7 @@
 import os, sys, xbmc, xbmcaddon, filelock
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
+T = __addon__.getLocalizedString
 
 SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
 
@@ -115,3 +116,22 @@ def selectListItemByProperty(clist,prop,value):
 			clist.selectItem(idx)
 			return item
 	return None
+
+class XBMCControlConditionalVisiblity:
+	def __init__(self):
+		self.cache = {}
+		
+	def __getattr__(self,attr):
+		if attr in self.cache: return self.cache[attr]
+		def method(control=0,group=None):
+			if group:
+				return bool(xbmc.getCondVisibility('ControlGroup(%s).%s(%s)' % (group,attr,control)))
+			else:
+				return bool(xbmc.getCondVisibility('Control.%s(%s)' % (attr,control)))
+										
+		self.cache[attr] = method
+		return method		
+		
+Control = XBMCControlConditionalVisiblity()
+
+		

@@ -1,11 +1,8 @@
-import sys, binascii, getpass, xbmc #@UnresolvedImport
+import binascii, getpass, xbmc #@UnresolvedImport
 import easypassword
 
-__addon__ = sys.modules["__main__"].__addon__
-ERROR = sys.modules["__main__"].ERROR
+from lib.util import getSetting, setSetting, ERROR
 
-def getSetting(sett,default=None):
-	return __addon__.getSetting(sett) or default
 
 def getXBMCUser():
 		return xbmc.getInfoLabel('System.ProfileName')
@@ -55,7 +52,7 @@ def parsePassword(password):
 	return type_c,keyfile,password
 
 def savePassword(key,user,password):
-	__addon__.setSetting(key,encryptPassword(user,password))
+	setSetting(key,encryptPassword(user,password))
 
 def getPassword(key,user):
 	if not user: return ''

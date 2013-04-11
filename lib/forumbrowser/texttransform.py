@@ -1,11 +1,10 @@
 import sys, re, textwrap, htmlentitydefs
+from lib import util
 
 DEBUG = sys.modules["__main__"].DEBUG
-LOG = sys.modules["__main__"].LOG
-ERROR = sys.modules["__main__"].ERROR
-__addon__ = sys.modules["__main__"].__addon__
-T = sys.modules["__main__"].T
 FB = sys.modules["__main__"].FB
+
+T = util.T
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
@@ -53,7 +52,7 @@ class MessageConverter:
 			def get(self,key,default=None): return default
 			
 		new = SmiliesList()
-		if __addon__.getSetting('use_skin_mods') == 'true':
+		if util.getSetting('use_skin_mods',True):
 			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
 				f = '(\s)'+ re.escape(f)
 				if '[/COLOR]' in r:
@@ -110,7 +109,7 @@ class MessageConverter:
 		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % T(32182),'utf8')
 		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
 		
-		if __addon__.getSetting('use_skin_mods') == 'true':
+		if util.getSetting('use_skin_mods',True):
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
 			self.quoteVert = u'\u2502'

@@ -2,12 +2,10 @@ import sys, os
 import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
-from lib.util import LOG, ERROR
+from lib.util import getSetting, LOG, ERROR, T
 
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 loadForumSettings = sys.modules["__main__"].loadForumSettings
-T = sys.modules["__main__"].T
-getSetting = sys.modules["__main__"].getSetting
 
 def testForum(url,user=None,password=None):
 	if not url.startswith('http'):

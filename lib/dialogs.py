@@ -1,12 +1,8 @@
 import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
-from util import getSetting, ERROR
+import util
 
 DEBUG = None
 CACHE_PATH = None
-
-__addon__ = sys.modules["__main__"].__addon__
-T = sys.modules["__main__"].T
-
 
 ACTION_MOVE_LEFT      = 1
 ACTION_MOVE_RIGHT     = 2
@@ -45,14 +41,14 @@ def doKeyboard(prompt,default='',hidden=False,mod=False):
 	return keyboard.getText()
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
-	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
+	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	theme = theme or sys.modules["__main__"].THEME
-	path = __addon__.getAddonInfo('path')
+	path = util.__addon__.getAddonInfo('path')
 	src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
 	if not os.path.exists(src): theme = 'Default'
-	if not getSetting('use_skin_mods',True):
+	if not util.getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
-		#path = __addon__.getAddonInfo('profile')
+		#path = util.util.__addon__.getAddonInfo('profile')
 		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
 		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
@@ -70,17 +66,17 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
-	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success,scroll=scroll)
-	if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(util.__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success,scroll=scroll)
+	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 	w.doModal()
 	del w
-	if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 
 def showMessageSilent(caption,text,text2='',text3='',error=False,success=None,scroll=False): pass
 
 def loadHelp(helpfile,as_list=False):
 	lang = xbmc.getLanguage().split(' ',1)[0]
-	addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+	addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 	helpfilefull = os.path.join(addonPath,'resources','language',lang,helpfile)
 	if not os.path.exists(helpfilefull):
 		helpfilefull = os.path.join(addonPath,'resources','language','English',helpfile)
@@ -111,7 +107,7 @@ def loadHelp(helpfile,as_list=False):
 def showText(caption,text,text_is_file=False):
 	if text_is_file:
 		lang = xbmc.getLanguage().split(' ',1)[0]
-		addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 		textfilefull = os.path.join(addonPath,'resources','language',lang,text)
 		if not os.path.exists(textfilefull):
 			textfilefull = os.path.join(addonPath,'resources','language','English',text)
@@ -132,14 +128,14 @@ def showHelp(helptype):
 			dialog.addItem(h['id'],h['name'],'forum-browser-info.png',h['help'])
 	result = dialog.getResult()
 	if result == 'changelog':
-		addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 		changelogPath = os.path.join(addonPath,'changelog.txt')
 		showText('Changelog',open(changelogPath,'r').read())
 
 def showInfo(infotype):
 	infotype += '.info'
 	lang = xbmc.getLanguage().split(' ',1)[0]
-	addonPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+	addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 	infofilefull = os.path.join(addonPath,'resources','language',lang,infotype)
 	if not os.path.exists(infofilefull):
 		infofilefull = os.path.join(addonPath,'resources','language','English',infotype)
@@ -170,7 +166,7 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 				self.getControl(250).setColorDiffuse('FF009900')
 			else:
 				self.getControl(250).setColorDiffuse('FF999900')
-		if self.scroll and not getSetting('message_dialog_always_show_ok',False):
+		if self.scroll and not util.getSetting('message_dialog_always_show_ok',False):
 			self.getControl(112).setVisible(False)
 			self.setFocusId(123)
 		else:
@@ -215,7 +211,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.started = False
 		self.gifReplace = chr(255)*6
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
-		self.colorGif = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
+		self.colorGif = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
 		xbmcgui.WindowXMLDialog.__init__( self )
 	
 	def onInit(self):
@@ -272,7 +268,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 	def doFilter(self):
 		self.getControl(199).setVisible(False)
 		try:
-			terms = doKeyboard(T(32517),self.terms)
+			terms = doKeyboard(util.T(32517),self.terms)
 			self.terms = terms or ''
 			if '*' in terms or '?' in terms:
 				self.filter = terms.lower()
@@ -285,7 +281,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 				
 			self.showItems()
 		except:
-			ERROR('Error handling search terms')
+			util.ERROR('Error handling search terms')
 		finally:
 			self.getControl(199).setVisible(True)
 	
@@ -392,8 +388,8 @@ class FakeActivitySplash():
 	def close(self):
 		pass
 		
-def showActivitySplash(caption=T(32248),cancel_stops_connections=False,modal_callback=None):
-	if getSetting('hide_activity_splash',False):
+def showActivitySplash(caption=util.T(32248),cancel_stops_connections=False,modal_callback=None):
+	if util.getSetting('hide_activity_splash',False):
 		s = FakeActivitySplash(caption)
 	else:
 		s = ActivitySplash(caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
@@ -443,25 +439,25 @@ class ChoiceMenu():
 	def getResult(self,close_on_context=True):
 		self.closeContext = close_on_context
 		self.hideSplash()
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 		idx = self.getChoiceIndex()
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 		if idx < 0: return None
 		if self.items[idx]['disabled']: return None
 		return self.items[idx]['id']
 
 def dialogSelect(heading,ilist,autoclose=0):
-	if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 	result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
-	if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 	return result
 	
 class OptionsChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None,close_on_context=True):
 		self.closeContext = close_on_context
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None
@@ -470,20 +466,20 @@ class OptionsChoiceMenu(ChoiceMenu):
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None,filtering=False,keep_colors=False):
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select,filtering=filtering,keep_colors=keep_colors)
-		if getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None
 		return self.items[result]['id']
 
 def getHexColor(hexc=None):
-	hexc = doKeyboard(T(32475),default=hexc)
+	hexc = doKeyboard(util.T(32475),default=hexc)
 	if not hexc: return None
 	while len(hexc) != 6 or re.search('[^1234567890abcdef](?i)',hexc):
-		showMessage(T(32050),T(32474))
-		hexc = doKeyboard(T(32475),default=hexc)
+		showMessage(util.T(32050),util.T(32474))
+		hexc = doKeyboard(util.T(32475),default=hexc)
 		if not hexc: return None
 	return hexc
 

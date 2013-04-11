@@ -394,8 +394,8 @@
 					<align>center</align>
 					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
 					<pulseonselect>false</pulseonselect>
-					<texturefocus border="10">forumbrowser-video-box-red-semi-trans-white-border.png</texturefocus>
-					<texturenofocus border="10">forumbrowser-video-box-red-semi-trans.png</texturenofocus>
+					<texturefocus border="10">forum-browser-video-box-red-semi-trans-white-border.png</texturefocus>
+					<texturenofocus border="10">forum-browser-video-box-red-semi-trans.png</texturenofocus>
 				</control>
 			</control>
 		</control>
@@ -423,7 +423,6 @@
 				<textcolor>white</textcolor>
 				<aligny>top</aligny>
 				<align>left</align>
-				<wrapmultiline>true</wrapmultiline>
 				<label>[B]$INFO[Container(120).ListItem.Property(title)][/B]</label>
 			</control>
 			<control type="label">
