@@ -497,13 +497,13 @@
 					<colordiffuse>FF555555</colordiffuse>
 				</control>
 			</control>
-			<control  type="group" id="198">
-				<control type="group" id="199">
+			<control  type="group" id="199">
+				<control type="group" id="198">
 					<defaultcontrol>205</defaultcontrol>
 					<posx>20</posx>
 					<posy>665</posy>
 					<control type="group">
-						<animation effect="slide" end="0,-220" time="400" condition="ControlGroup(199).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
+						<animation effect="slide" end="0,-220" time="400" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<posx>746</posx>
 						<posy>55</posy>
 						<control type="image">
@@ -525,7 +525,7 @@
 					</control>
 					
 					<control type="button">
-						<visible>ControlGroup(198).HasFocus(0) + Control.IsEnabled(207)</visible>
+						<visible>ControlGroup(199).HasFocus(0) + Control.IsEnabled(207)</visible>
 						<description>Mouse Focus</description>
 						<onleft>206</onleft>
 						<onup>206</onup>
@@ -540,9 +540,9 @@
 					</control>
 					
 					<control type="button" id="207">
-						<animation effect="slide" end="0,-150" time="200" delay="200" condition="ControlGroup(199).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
+						<animation effect="slide" end="0,-150" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<hitrect x="746" y="-15" w="252" h="55" />
-						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
+						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search User</description>
 						<onleft>203</onleft>
 						<onright>200</onright>
@@ -565,7 +565,7 @@
 					</control>
 					
 					<control type="button">
-						<visible>ControlGroup(198).HasFocus(0) + !Control.IsEnabled(206)</visible>
+						<visible>ControlGroup(199).HasFocus(0) + !Control.IsEnabled(206)</visible>
 						<description>Mouse Focus</description>
 						<onleft>206</onleft>
 						<onup>206</onup>
@@ -580,8 +580,8 @@
 					</control>
 					
 					<control type="button" id="206">
-						<animation effect="slide" end="0,-100" time="200" delay="200" condition="ControlGroup(199).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
-						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
+						<animation effect="slide" end="0,-100" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
+						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Threads</description>
 						<onleft>203</onleft>
 						<onright>200</onright>
@@ -604,7 +604,7 @@
 					</control>
 					
 					<control type="button">
-						<visible>ControlGroup(198).HasFocus(0) + !Control.IsEnabled(205)</visible>
+						<visible>ControlGroup(199).HasFocus(0) + !Control.IsEnabled(205)</visible>
 						<description>Mouse Focus</description>
 						<onleft>206</onleft>
 						<onup>206</onup>
@@ -619,8 +619,8 @@
 					</control>
 					
 					<control type="button" id="205">
-						<animation effect="slide" end="0,-50" time="200" delay="200" condition="ControlGroup(199).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
-						<visible allowhiddenfocus="true">ControlGroup(199).HasFocus(0) | Control.HasFocus(197)</visible>
+						<animation effect="slide" end="0,-50" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
+						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Posts</description>
 						<onleft>203</onleft>
 						<onright>200</onright>
@@ -645,7 +645,7 @@
 				<control type="button" id="204">
 					<description>Search</description>
 					<visible allowhiddenfocus="true">Control.HasFocus(204)</visible>
-					<onclick>Control.SetFocus(199)</onclick>
+					<onclick>Control.SetFocus(198)</onclick>
 					<onleft>203</onleft>
 					<onright>200</onright>
 					<onup>120</onup>

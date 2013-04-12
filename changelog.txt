@@ -4,6 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Reset logged in indicator when returning to windows
   
  Long Term:
   Check on optional import behavior

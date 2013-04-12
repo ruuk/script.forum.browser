@@ -1524,6 +1524,8 @@ class MessageWindow(BaseWindow):
 		self.action = None
 		self.started = False
 		self.interruptedVideo = None
+		self.hasImages = False
+		self.hasLinks = False
 		self.videoHandler = video.WebVideo()
 		BaseWindow.__init__( self, *args, **kwargs )
 		
@@ -1532,6 +1534,7 @@ class MessageWindow(BaseWindow):
 		if self.started: return
 		self.started = True
 		self.setLoggedIn()
+		self.setWindowProperties()
 #		if getSetting('use_forum_colors') == 'true':
 #			if (FB.theme.get('mode') == 'dark' or getSetting('color_mode') == '1') and getSetting('color_mode') != '2':
 #				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
@@ -1546,17 +1549,22 @@ class MessageWindow(BaseWindow):
 			s.close()
 			
 		if self.searchRE: text = self.highlightTerms(text)
-		self.getControl(122).setText(text)
+		try:
+			self.getControl(122).setLabel(text)
+		except:
+			self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
 		self.getImages()
 		self.getLinks()
+		self.setWindowProperties()
 		
 	def setTheme(self):
 		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
-		title = ''
-		if self.post.postNumber: title = '#' + str(self.post.postNumber) + ' '
-		title += self.post.title or ''
+		title = []
+		if self.post.postNumber: title.append('#' + str(self.post.postNumber))
+		if self.post.title: title.append(self.post.title)
+		title = ' '.join(title)
 		self.getControl(104).setLabel('[B]%s[/B]' % title)
 		self.getControl(105).setLabel(self.post.date or '')
 		
@@ -1571,6 +1579,7 @@ class MessageWindow(BaseWindow):
 			if checkVideo: break
 		s = None
 		if checkVideo: s = dialogs.showActivitySplash(T(32311))
+		if links: self.hasLinks = True
 		try:
 			for link in links:
 				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
@@ -1602,7 +1611,9 @@ class MessageWindow(BaseWindow):
 	def getImages(self):
 		i=0
 		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
-		for url in self.post.imageURLs():
+		urls = self.post.imageURLs()
+		if urls: self.hasImages = True
+		for url in urls:
 			i+=1
 			while urlParentDirFilter.search(url):
 				#TODO: Limit
@@ -1611,6 +1622,7 @@ class MessageWindow(BaseWindow):
 			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
 			item.setProperty('url',url)
 			self.getControl(150).addItem(item)
+			
 		#targetdir = os.path.join(util.__addon__.getAddonInfo('profile'),'messageimages')
 		#TD.startDownload(targetdir,self.post.imageURLs(),ext='.jpg',callback=self.getImagesCallback)
 		
@@ -1618,7 +1630,16 @@ class MessageWindow(BaseWindow):
 		for fname,idx in zip(file_dict.values(),range(0,self.getControl(150).size())):
 			fname = xbmc.translatePath(fname)
 			self.getControl(150).getListItem(idx).setIconImage(fname)
-			
+		
+	def setWindowProperties(self):
+		window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+		extras = showUserExtras(self.post,just_return=True)
+		window.setProperty('extras',extras)
+		window.setProperty('avatar',self.post.avatarFinal)
+		if self.hasLinks: window.setProperty('haslinks','1')
+		if self.hasImages: window.setProperty('hasimages','1')
+		if self.post.online: window.setProperty('online','1')
+	
 	def onFocus( self, controlId ):
 		self.controlId = controlId
 		
@@ -1681,7 +1702,6 @@ class MessageWindow(BaseWindow):
 		del w
 			
 	def onAction(self,action):
-		BaseWindow.onAction(self,action)
 		if action == ACTION_CONTEXT_MENU:
 			if self.getFocusId() == 148:
 				self.doLinkMenu()
@@ -1689,6 +1709,12 @@ class MessageWindow(BaseWindow):
 				self.doImageMenu()
 			else:
 				self.doMenu()
+			return
+		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2 or action == ACTION_PREVIOUS_MENU:
+			if self.getFocusId() == 148 or self.getFocusId() == 150:
+				self.setFocusId(127)
+				return
+		BaseWindow.onAction(self,action)
 		
 	def doLinkMenu(self):
 		link = self.getSelectedLink()
@@ -1827,10 +1853,13 @@ def deletePost(post,is_pm=False):
 		splash.close()
 	return result
 
-def showUserExtras(post,ignore=None):
+def showUserExtras(post,ignore=None,just_return=False):
 	out = ''
+	color = 'FF550000'
+	if just_return: color = 'FFBBBBBB'
 	for k,v in post.getExtras(ignore=ignore).items():
-		out += '[B]' + k.title() + ':[/B] [COLOR FF550000]' + texttransform.convertHTMLCodes(str(v)) + '[/COLOR]\n'
+		out += '[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v)))
+	if just_return: return out
 	dialogs.showMessage(T(32329),out,scroll=True)
 
 ######################################################################################

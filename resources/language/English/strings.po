@@ -1796,7 +1796,7 @@ msgid "SHOW MENU"
 msgstr ""
 
 msgctxt "#32528"
-msgid "CLOSE MENU"
+msgid "CLOSE"
 msgstr ""
 
 msgctxt "#32529"
@@ -1805,6 +1805,14 @@ msgstr ""
 
 msgctxt "#32530"
 msgid "Next Page"
+msgstr ""
+
+msgctxt "#32531"
+msgid "LINKS"
+msgstr ""
+
+msgctxt "#32532"
+msgid "IMAGES"
 msgstr ""
 
 #empty strings from id 32524 to 32899
