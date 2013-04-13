@@ -31,7 +31,11 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.5.3 RC6
+Current Version : 2.0.0
+
+*** 2.0.0 ***
+
+Added translations from translations project
 
 *** 1.5.3 RC6 ***
 
