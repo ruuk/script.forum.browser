@@ -31,7 +31,12 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 1.5.2 RC5
+Current Version : 1.5.3 RC6
+
+*** 1.5.3 RC6 ***
+
+Some minor code changes
+Preview of Video skin (will be removed as an option for the 2.0 release)
 
 *** 1.5.2 RC5 ***
 
