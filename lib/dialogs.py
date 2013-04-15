@@ -42,10 +42,15 @@ def doKeyboard(prompt,default='',hidden=False,mod=False):
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
 	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
-	theme = theme or sys.modules["__main__"].THEME
+	THEME = sys.modules["__main__"].THEME
 	path = util.__addon__.getAddonInfo('path')
-	src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
-	if not os.path.exists(src): theme = 'Default'
+	src = os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)
+	src2 = os.path.join(path,'resources','skins',theme or THEME,'720p',xmlFilename)
+	if os.path.exists(src):
+		theme = THEME
+	elif not os.path.exists(src2):
+		theme = 'Default'
+		
 	if not util.getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
 		#path = util.util.__addon__.getAddonInfo('profile')
@@ -396,6 +401,30 @@ def showActivitySplash(caption=util.T(32248),cancel_stops_connections=False,moda
 	s.update(0,caption)
 	return s
 	
+class DialogSelect(xbmcgui.WindowXMLDialog):
+	def __init__( self, *args, **kwargs ):
+		self.caption = kwargs.get('caption','')
+		self.select = kwargs.get('select',[])
+		self.choice = None
+		xbmcgui.WindowXMLDialog.__init__(self)
+		
+	def onInit(self):
+		window = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
+		window.setProperty('caption',self.caption)
+		items = []
+		for i in self.select:
+			items.append(xbmcgui.ListItem(i))
+		self.getControl(111).addItems(items)
+		self.setFocusId(111)
+			
+	def onClick(self,controlID):
+		if controlID == 111:
+			pos = self.getControl(111).getSelectedPosition()
+			if pos < 0: return
+			self.choice = pos
+			self.close()
+			
+		
 class ChoiceMenu():
 	def __init__(self,caption,with_splash=False):
 		self.caption = caption
@@ -434,7 +463,11 @@ class ChoiceMenu():
 	def getChoiceIndex(self):
 		options = []
 		for i in self.items: options.append(i.get('disp'))
-		return xbmcgui.Dialog().select(self.caption,options)
+		w = openWindow(DialogSelect,'script-forumbrowser-dialog-select.xml',return_window=True,caption=self.caption,select=options)
+		idx = w.choice
+		del w
+		return idx
+		#return xbmcgui.Dialog().select(self.caption,options)
 	
 	def getResult(self,close_on_context=True):
 		self.closeContext = close_on_context

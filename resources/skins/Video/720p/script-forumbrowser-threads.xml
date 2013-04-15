@@ -13,41 +13,6 @@
 			<height>720</height>
 			<texture>forum-browser-video-black.png</texture>
 		</control>
-
-		<control type="image" id="100">
-			<description>Header color</description>
-			<posx>10</posx>
-			<posy>560</posy>
-			<width>290</width>
-			<height>150</height>
-			<texture>forum-browser-video-white.png</texture>
-		</control>
-
-		<control type="image" id="251">
-			<description>Normally for when no header color is set</description>
-			<posx>10</posx>
-			<posy>560</posy>
-			<width>290</width>
-			<height>150</height>
-			<texture>forum-browser-video-white.png</texture>
-		</control>
-
-		<control type="image" id="250">
-			<description>Forum Logo</description>
-			<posx>10</posx>
-			<posy>560</posy>
-			<width>290</width>
-			<height>150</height>
-			<aspectratio align="left">keep</aspectratio>
-		</control>
-
-		<control type="image" id="249">
-			<description>Type Logo</description>
-			<posx>260</posx>
-			<posy>670</posy>
-			<width>32</width>
-			<height>32</height>
-		</control>
 		
 		<control type="image">
 			<description>Forums List Background</description>
@@ -598,7 +563,6 @@
 				<posy>0</posy>
 				<width>960</width>
 				<height>540</height>
-				<visible>true</visible>
 			</control>
 		</control>
 	</controls>

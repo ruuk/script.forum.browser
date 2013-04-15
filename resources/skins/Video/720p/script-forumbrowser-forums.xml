@@ -18,33 +18,41 @@
 			<description>Header color</description>
 			<posx>10</posx>
 			<posy>560</posy>
-			<width>290</width>
+			<width>1260</width>
 			<height>150</height>
-			<texture>forum-browser-video-white.png</texture>
+			<texture border="10">forum-browser-video-box-white.png</texture>
 		</control>
 
 		<control type="image" id="251">
 			<description>Normally for when no header color is set</description>
 			<posx>10</posx>
 			<posy>560</posy>
-			<width>290</width>
+			<width>1260</width>
 			<height>150</height>
-			<texture>forum-browser-video-white.png</texture>
+			<texture border="20">forum-browser-video-box-white-dark-edges.png</texture>
+		</control>
+		
+		<control type="image">
+			<posx>10</posx>
+			<posy>560</posy>
+			<width>1260</width>
+			<height>150</height>
+			<texture border="10">forum-browser-video-box-outline.png</texture>
 		</control>
 
 		<control type="image" id="250">
 			<description>Forum Logo</description>
-			<posx>10</posx>
-			<posy>560</posy>
-			<width>290</width>
-			<height>150</height>
+			<posx>20</posx>
+			<posy>570</posy>
+			<width>280</width>
+			<height>130</height>
 			<aspectratio align="left">keep</aspectratio>
 		</control>
 
 		<control type="image" id="249">
 			<description>Type Logo</description>
-			<posx>260</posx>
-			<posy>670</posy>
+			<posx>280</posx>
+			<posy>668</posy>
 			<width>32</width>
 			<height>32</height>
 		</control>
@@ -542,16 +550,16 @@
 		</control>
 
 		<control type="group">
-			<posx>310</posx>
-			<posy>560</posy>
-			<width>960</width>
-			<height>150</height>
+			<posx>320</posx>
+			<posy>570</posy>
+			<width>940</width>
+			<height>130</height>
 			<control type="image">
 				<description>Info Area Background</description>
 				<posx>0</posx>
 				<posy>0</posy>
-				<width>960</width>
-				<height>150</height>
+				<width>940</width>
+				<height>130</height>
 				<texture border="10">forum-browser-video-box.png</texture>
 			</control>
 			<control type="label">
@@ -583,7 +591,7 @@
 			<control type="label" id="103">
 				<description>Forum Label</description>
 				<posx>10</posx>
-				<posy>95</posy>
+				<posy>75</posy>
 				<width>230</width>
 				<height>60</height>
 				<font>ForumBrowser-font30</font>
@@ -596,7 +604,7 @@
 			<control type="label" id="104">
 				<description>Forum Title - Loading Status</description>
 				<posx>120r</posx>
-				<posy>98</posy>
+				<posy>78</posy>
 				<width>350</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
@@ -622,7 +630,7 @@
 			<control type="label" id="109">
 				<description>Version</description>
 				<posx>10r</posx>
-				<posy>130</posy>
+				<posy>110</posy>
 				<width>100</width>
 				<height>10</height>
 				<font>ForumBrowser-font10</font>
@@ -650,6 +658,7 @@
 				<width>16</width>
 				<height>16</height>
 				<texture>forum-browser-video-box.png</texture>
+				<visible>false</visible>
 			</control>
 			<control type="label" id="160">
 				<description>Login Error</description>
@@ -683,7 +692,7 @@
 			<control type="image">
 				<description>Loading</description>
 				<posx>42r</posx>
-				<posy>72</posy>
+				<posy>69</posy>
 				<width>32</width>
 				<height>32</height>
 				<texture>forum-browser-video-loading.gif</texture>
@@ -701,7 +710,6 @@
 				<posy>0</posy>
 				<width>960</width>
 				<height>540</height>
-				<visible>true</visible>
 			</control>
 		</control>
 	</controls>

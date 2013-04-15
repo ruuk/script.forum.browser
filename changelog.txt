@@ -5,6 +5,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Reset logged in indicator when returning to windows
+  Back on video also goes back a window - see what I can do (and see if other controls are affected)
   
  Long Term:
   Check on optional import behavior
@@ -31,7 +32,16 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (ie followers) - TTv4
 
-Current Version : 2.0.0
+Current Version : 2.0.1
+
+*** 2.0.1 ***
+
+Fixed: When viewing a forum that was selected in 'Subscriptions' the context menu would show 'Unsubscribe from forum: ' without the forum name.
+In the image viewer, moving left and right now navigates the images instead of navigating the buttons and highlights the button for the direction pressed
+Re-enable the Video skin in settings
+Fix the image viewer window for the Video skin
+Generic select dialogs now have a custom skin for all skins and move out of the way of video
+Various video skin tweaks
 
 *** 2.0.0 ***
 

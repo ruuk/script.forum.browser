@@ -965,9 +965,9 @@
 		
 		<control type="image">
 			<posx>298</posx>
-			<posy>360</posy>
+			<posy>20</posy>
 			<width>2</width>
-			<height>200</height>
+			<height>540</height>
 			<texture>forum-browser-video-white.png</texture>
 			<visible>Control.isVisible(115)</visible>
 		</control>

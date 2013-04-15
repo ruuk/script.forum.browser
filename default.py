@@ -578,10 +578,12 @@ class ImagesDialog(BaseWindowDialog):
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
-		elif action == ACTION_NEXT_ITEM:
+		elif action == ACTION_NEXT_ITEM or action == ACTION_MOVE_RIGHT:
 			self.nextImage()
-		elif action == ACTION_PREV_ITEM:
+			self.setFocusId(202)
+		elif action == ACTION_PREV_ITEM or action == ACTION_MOVE_LEFT:
 			self.prevImage()
+			self.setFocusId(200)
 		elif action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 		BaseWindowDialog.onAction(self,action)
@@ -2631,6 +2633,7 @@ class ThreadsWindow(PageWindow):
 			item.setInfo('video',{"Genre":'is_forum'})
 			item.setProperty("last",self.forum_desc_base % texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
 			item.setProperty("title",title)
+			item.setProperty("topic",title)
 			item.setProperty("id",fid)
 			item.setProperty("fid",fid)
 			item.setProperty("is_forum",'True')
