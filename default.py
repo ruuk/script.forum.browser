@@ -388,8 +388,15 @@ class BaseWindowFunctions(ThreadWindow):
 		self._progMessageSave = ''
 		self.closed = False
 		self.headerTextFormat = '%s'
+		self._externalWindow = None
 		ThreadWindow.__init__(self)
 		
+	def externalWindow(self):
+		if not self._externalWindow: self._externalWindow = self._getExternalWindow()
+		return self._externalWindow
+		
+	def _getExternalWindow(self): pass
+	
 	def onClick( self, controlID ):
 		return False
 			
@@ -463,6 +470,12 @@ class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 		
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
+	
+	def setProperty(self,key,value):
+		self.externalWindow().setProperty(key,value)
+		
+	def _getExternalWindow(self):
+		return xbmcgui.Window(xbmcgui.getCurrentWindowId())
 		
 class BaseWindowDialog(xbmcgui.WindowXMLDialog,BaseWindowFunctions):
 	def __init__(self, *args, **kwargs):
@@ -474,6 +487,12 @@ class BaseWindowDialog(xbmcgui.WindowXMLDialog,BaseWindowFunctions):
 		
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
+	
+	def setProperty(self,key,value):
+		self.externalWindow().setProperty(key,value)
+		
+	def _getExternalWindow(self):
+		return xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
 
 class PageWindow(BaseWindow):
 	def __init__( self, *args, **kwargs ):
@@ -1178,14 +1197,16 @@ class PostDialog(BaseWindowDialog):
 	
 	def setTheme(self):
 		if self.isPM():
-			self.getControl(103).setLabel('[B]%s[/B]' % T(32177))
-			self.getControl(202).setLabel(T(32178))
+			self.setProperty('posttype',T(32177))
+			self.setProperty('submit_button',T(32178))
 		else:
-			self.getControl(103).setLabel('[B]%s[/B]' % T(32902))
-		if self.post.title:
-			self.getControl(104).setLabel(self.post.title)
-		else:
-			self.getControl(104).setLabel(T(32120))
+			self.setProperty('posttype',T(32902))
+			self.setProperty('submit_button',T(32908))
+		self.showTitle(self.post.title)
+			
+	def showTitle(self,title):
+		self.setProperty('title',title or '')
+		self.setProperty('toggle_title',title or T(32921))
 		
 	def onClick( self, controlID ):
 		if BaseWindow.onClick(self, controlID): return
@@ -1216,7 +1237,7 @@ class PostDialog(BaseWindowDialog):
 		keyboard.doModal()
 		if not keyboard.isConfirmed(): return
 		title = keyboard.getText()
-		self.getControl(104).setLabel(title)
+		self.showTitle(title)
 		self.title = title
 	
 	def dialogCallback(self,pct,message):
@@ -1634,13 +1655,12 @@ class MessageWindow(BaseWindow):
 			self.getControl(150).getListItem(idx).setIconImage(fname)
 		
 	def setWindowProperties(self):
-		window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
 		extras = showUserExtras(self.post,just_return=True)
-		window.setProperty('extras',extras)
-		window.setProperty('avatar',self.post.avatarFinal)
-		if self.hasLinks: window.setProperty('haslinks','1')
-		if self.hasImages: window.setProperty('hasimages','1')
-		if self.post.online: window.setProperty('online','1')
+		self.setProperty('extras',extras)
+		self.setProperty('avatar',self.post.avatarFinal)
+		if self.hasLinks: self.setProperty('haslinks','1')
+		if self.hasImages: self.setProperty('hasimages','1')
+		if self.post.online: self.setProperty('online','1')
 	
 	def onFocus( self, controlId ):
 		self.controlId = controlId

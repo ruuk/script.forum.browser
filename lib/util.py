@@ -37,11 +37,8 @@ def LOG(message):
 	print '%s: %s' % (LOG_PREFIX,message)
 
 def getSetting(key,default=None):
-	lock = filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1)
-	lock.acquire()
-	setting = __addon__.getSetting(key)
-	lock.release()
-	del lock
+	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
+		setting = __addon__.getSetting(key)
 	return _processSetting(setting,default)
 
 def _processSetting(setting,default):
@@ -58,11 +55,8 @@ def _processSetting(setting,default):
 
 def setSetting(key,value):
 	value = _processSettingForWrite(value)
-	lock = filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1)
-	lock.acquire()
-	__addon__.setSetting(key,value)
-	lock.release()
-	del lock
+	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
+		__addon__.setSetting(key,value)
 	
 def _processSettingForWrite(value):
 	if isinstance(value,list):
@@ -72,20 +66,14 @@ def _processSettingForWrite(value):
 	return value
 		
 def getSettingExternal(key,default=None):
-	lock = filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1)
-	lock.acquire()
-	setting = xbmcaddon.Addon(id='script.forum.browser').getSetting(key)
-	lock.release()
-	del lock
+	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
+		setting = xbmcaddon.Addon(id='script.forum.browser').getSetting(key)
 	return _processSetting(setting,default)
 
 def setSettingExternal(key,value):
 	value = _processSettingForWrite(value)
-	lock = filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1)
-	lock.acquire()
-	xbmcaddon.Addon(id='script.forum.browser').setSetting(key,value)
-	lock.release()
-	del lock
+	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
+		xbmcaddon.Addon(id='script.forum.browser').setSetting(key,value)
 	
 def parseForumBrowserURL(url):
 	if not url.startswith('forumbrowser://'):

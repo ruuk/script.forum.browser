@@ -1897,10 +1897,6 @@ msgctxt "#32919"
 msgid "Search User"
 msgstr ""
 
-msgctxt "#32920"
-msgid "Post Reply"
-msgstr ""
-
 msgctxt "#32921"
 msgid "Set Title"
 msgstr ""

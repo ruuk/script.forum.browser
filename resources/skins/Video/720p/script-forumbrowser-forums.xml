@@ -346,10 +346,11 @@
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32905]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -367,10 +368,11 @@
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32904]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -388,10 +390,11 @@
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32909]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -410,10 +413,11 @@
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32916]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -431,10 +435,11 @@
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32903]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -498,10 +503,11 @@
 					<height>38</height>
 					<visible>true</visible>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32917]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -518,10 +524,12 @@
 					<height>38</height>
 					<visible>true</visible>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32918]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
@@ -538,10 +546,12 @@
 					<height>38</height>
 					<visible>true</visible>
 					<font>ForumBrowser-font13</font>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
+					<textoffsetx>40</textoffsetx>
 					<label>$ADDON[script.forum.browser 32919]</label>
-					<texturefocus border="10">forum-browser-video-select.png</texturefocus>
-					<texturenofocus></texturenofocus>
+					<texturefocus border="0,0,37,0">forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus border="0,0,37,0">forum-browser-video-unselect.png</texturenofocus>
 					<textcolor>white</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>

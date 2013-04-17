@@ -30,9 +30,17 @@ TODO:
   Skip forward on remote causes XBMC dialog
  
  Awaiting Future Developments:
-  Show more extra info in tapatalk (ie followers) - TTv4
+  Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.0.1
+Current Version : 2.0.2
+
+*** 2.0.2 ***
+
+Fixed a bug where settings/signals file could become permanently locked causing failure to open Forum Browser
+Fixed a bug where '[size]' tags that included a '-' in the tag (for example [size=x-large]) were not parsed out
+Added post editor skin to Video skin
+Added forums manager skin to Video skin
+Added some elements to buttons on the Video skin forums window and forums manager
 
 *** 2.0.1 ***
 
@@ -43,7 +51,7 @@ Fix the image viewer window for the Video skin
 Generic select dialogs now have a custom skin for all skins and move out of the way of video
 Various video skin tweaks
 
-*** 2.0.0 ***
+*** 2.0.0 *** 04-14-2013 ***
 
 Added translations from translations project
 
