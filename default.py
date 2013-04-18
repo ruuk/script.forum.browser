@@ -672,6 +672,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 		self.help = {}
 		self.helpSep = FB.MC.hrReplace
 		self.header = ''
+		self.headerColor = ''
 		self.settingsChanged = False
 		self.OK = False
 		BaseWindowDialog.__init__( self, *args, **kwargs )
@@ -693,6 +694,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 		elif vtype == 'boolean': valueDisplay = value and 'booleanTrue' or 'booleanFalse'
 		elif vtype.startswith('color.'):
 			valueDisplay = self.makeColorFile(value.upper())
+			self.headerColor = valueDisplay
 		item = xbmcgui.ListItem(name,valueDisplay)
 		item.setProperty('value_type',vtype.split('.',1)[0])
 		item.setProperty('value',str(value))
@@ -708,6 +710,8 @@ class ForumSettingsDialog(BaseWindowDialog):
 		if len(self.items) > 0: self.items[-1].setProperty('separator','separator')
 			
 	def fillList(self):
+		for i in self.items:
+			if i.getProperty('id') == 'logo': i.setProperty('header_color', str(self.headerColor))
 		self.getControl(320).addItems(self.items)
 		
 	def onClick(self,controlID):
@@ -749,7 +753,7 @@ class ForumSettingsDialog(BaseWindowDialog):
 			item.setLabel2(data['value'] and 'booleanTrue' or 'booleanFalse')
 		elif data['type'].startswith('text'):
 			if data['type'] == 'text.long':
-				val = dialogs.doKeyboard(T(32271),data['value'])
+				val = dialogs.doKeyboard(T(32271),data['value'],mod=True)
 				item.setProperty('help',self.help.get(dID,'') + '[CR][COLOR FF999999]%s[/COLOR][CR][B]Current:[/B][CR][CR]%s' % (self.helpSep,val))
 			elif data['type'].startswith('text.url'):
 				if data['value']:
@@ -782,7 +786,10 @@ class ForumSettingsDialog(BaseWindowDialog):
 			color = askColor(forumID,data['value'],logo=(self.data.get('logo') or {}).get('value'))
 			if not color: return
 			data['value'] = color
-			item.setLabel2(self.makeColorFile(color))
+			colorFile = self.makeColorFile(color)
+			item.setLabel2(colorFile)
+			self.headerColor = colorFile
+			self.updateHeaderColor()
 		elif data['type'] == 'function':
 			data['value'][0](*data['value'][1:])
 		
@@ -807,10 +814,19 @@ class ForumSettingsDialog(BaseWindowDialog):
 			return False
 		return True
 				
+	def updateHeaderColor(self):
+		clist = self.getControl(320)
+		for idx in range(0,clist.size()):
+			i = clist.getListItem(idx)
+			if i.getProperty('id') == 'logo':
+				i.setProperty('header_color', str(self.headerColor))
+				self.refreshImage()
+				return
+			
 	def refreshImage(self):
 		cid = self.getFocusId()
 		if not cid: return
-		self.setFocusId(100)
+		#self.setFocusId(100)
 		self.setFocusId(cid)
 		
 	def handleXBMCDialogProgress(self,dialog,pct,msg):
@@ -842,7 +858,9 @@ class ForumSettingsDialog(BaseWindowDialog):
 			replace = chr(255)
 		replace += replace
 		target = os.path.join(path,color + '.gif')
-		open(target,'w').write(open(self.colorGif,'r').read().replace(self.gifReplace,replace))
+		with open(target,'w') as t:
+			with open(self.colorGif,'r') as c:
+				t.write(c.read().replace(self.gifReplace,replace))
 		return target
 		
 def editForumSettings(forumID):
@@ -1151,7 +1169,7 @@ def getNotifyList():
 ######################################################################################
 # Post Dialog
 ######################################################################################
-class PostDialog(BaseWindowDialog):
+class PostDialog(BaseWindow):
 	failedPM = None
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
@@ -1160,10 +1178,10 @@ class PostDialog(BaseWindowDialog):
 		self.posted = False
 		self.moderated = False
 		self.display_base = '%s\n \n'
-		BaseWindowDialog.__init__( self, *args, **kwargs )
+		BaseWindow.__init__( self, *args, **kwargs )
 	
 	def onInit(self):
-		BaseWindowDialog.onInit(self)
+		BaseWindow.onInit(self)
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.failedPM:
 			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
@@ -1196,6 +1214,7 @@ class PostDialog(BaseWindowDialog):
 		if self.isPM() or self.doNotPost: self.setTitle() #We're creating a thread
 	
 	def setTheme(self):
+		self.setProperty('loggedin',FB.isLoggedIn() and 'loggedin' or '')
 		if self.isPM():
 			self.setProperty('posttype',T(32177))
 			self.setProperty('submit_button',T(32178))
@@ -1221,7 +1240,7 @@ class PostDialog(BaseWindowDialog):
 	def onAction(self,action):
 		if action == ACTION_PREVIOUS_MENU:
 			if not self.confirmExit(): return
-		BaseWindowDialog.onAction(self,action)
+		BaseWindow.onAction(self,action)
 		
 	def confirmExit(self):
 		if not self.getOutput() and not self.title: return True
@@ -4012,7 +4031,7 @@ def addForum(current=False):
 		tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
 		images = info.images()
 		dialog.update(30,T(32435))
-		desc = dialogs.doKeyboard(T(32435),default=tmp_desc)
+		desc = dialogs.doKeyboard(T(32435),default=tmp_desc,mod=True)
 		if not desc: desc = tmp_desc
 		dialog.update(40,T(32436))
 		logo = chooseLogo(forum,images)

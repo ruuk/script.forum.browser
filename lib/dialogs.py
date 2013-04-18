@@ -71,7 +71,12 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
-	w = MessageDialog('script-forumbrowser-message-dialog.xml' ,xbmc.translatePath(util.__addon__.getAddonInfo('path')),'Default',caption=caption,text=text,error=error,success=success,scroll=scroll)
+	xmlFilename = 'script-forumbrowser-message-dialog.xml'
+	THEME = sys.modules["__main__"].THEME
+	path = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
+	theme = 'Default'
+	if os.path.join(path,'resources','skins',THEME,'720p',xmlFilename): theme = THEME
+	w = MessageDialog(xmlFilename ,path,theme,caption=caption,text=text,error=error,success=success,scroll=scroll)
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 	w.doModal()
 	del w
@@ -147,7 +152,23 @@ def showInfo(infotype):
 	if not os.path.exists(infofilefull): return None
 	showText('Info',open(infofilefull,'r').read())
 	
-class MessageDialog(xbmcgui.WindowXMLDialog):
+
+class BaseDialog(xbmcgui.WindowXMLDialog):
+	def __init__(self, *args, **kwargs):
+		self._externalWindow = None
+		xbmcgui.WindowXMLDialog.__init__( self )
+		
+	def externalWindow(self):
+		if not self._externalWindow: self._externalWindow = self._getExternalWindow()
+		return self._externalWindow
+			
+	def setProperty(self,key,value):
+		self.externalWindow().setProperty(key,value)
+		
+	def _getExternalWindow(self):
+		return xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
+	
+class MessageDialog(BaseDialog):
 	def __init__( self, *args, **kwargs ):
 		self.text = kwargs.get('text') or ''
 		self.caption = kwargs.get('caption') or ''
@@ -155,27 +176,25 @@ class MessageDialog(xbmcgui.WindowXMLDialog):
 		self.success = kwargs.get('success')
 		self.scroll = kwargs.get('scroll')
 		self.started = False
-		xbmcgui.WindowXMLDialog.__init__( self )
+		BaseDialog.__init__( self )
 	
 	def onInit(self):
 		if self.started: return
 		self.started = True
-		self.getControl(104).setLabel(self.caption)
-		textbox = self.getControl(122)
-		textbox.reset()
-		textbox.setText(self.text)
+		self.setProperties()
+		
+	def setProperties(self):
+		self.setProperty('caption',self.caption)
+		self.setProperty('message',self.text)
 		if self.error:
-			self.getControl(250).setColorDiffuse('FFFF0000')
+			self.setProperty('error','error')
 		elif self.success is not None:
 			if self.success:
-				self.getControl(250).setColorDiffuse('FF009900')
+				self.setProperty('error','success')
 			else:
-				self.getControl(250).setColorDiffuse('FF999900')
+				self.setProperty('error','warning')
 		if self.scroll and not util.getSetting('message_dialog_always_show_ok',False):
-			self.getControl(112).setVisible(False)
-			self.setFocusId(123)
-		else:
-			self.setFocusId(111)
+			self.setProperty('hidebutton','hidebutton')
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
@@ -370,9 +389,15 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 			self.cancel()
 	
 class ActivitySplash():
-	def __init__(self,caption='',cancel_stops_connections=False,modal_callback=None):
+	def __init__(self,caption=util.T(32248),cancel_stops_connections=False,modal_callback=None):
 		self.splash = openWindow(ActivitySplashWindow,'script-forumbrowser-loading-splash.xml',return_window=True,modal=bool(modal_callback),theme='Default',caption=caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
 		self.splash.show()
+		
+	def __enter__(self):
+		return self
+	
+	def __exit__(self):
+		self.close()
 		
 	def update(self,pct,message):
 		self.splash.update(message)

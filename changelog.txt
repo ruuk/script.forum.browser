@@ -34,6 +34,16 @@ TODO:
 
 Current Version : 2.0.2
 
+*** 2.0.3 ***
+
+Made logged-in indicator on post editor in Video skin work
+Extended button decorations to all skins in Video skin and made it look better
+Added Message dialog skin to Video skin
+When adding a new forum or editing a forum, setting the description now brings up the large keyboard if installed
+The forum logo in forum settings now shows the header color as a background
+Added forum settings skin to Video skin
+Post editor now opens as a window instead of as a dialog, this lowers CPU usage (especially when video is playing) because it stops it from having to render both windows
+
 *** 2.0.2 ***
 
 Fixed a bug where settings/signals file could become permanently locked causing failure to open Forum Browser
