@@ -29,12 +29,8 @@ __date__ = '1-28-2013'
 __version__ = util.__addon__.getAddonInfo('version')
 T = util.T
 
-THEME = 'Default'
-SKINS = ['Default','Dark','Video']
-try:
-	THEME = SKINS[getSetting('skin',0)]
-except:
-	THEME = 'Default'
+THEME = util.getSavedTheme()
+
 
 ACTION_MOVE_LEFT      = 1
 ACTION_MOVE_RIGHT     = 2
@@ -3388,7 +3384,7 @@ class ForumsWindow(BaseWindow):
 			self.setPMCounts()
 		self.setLoggedIn()
 		self.resetForum(False)
-		skin = SKINS[getSetting('skin',0)]
+		skin = util.getSavedTheme(current=THEME)
 		if skin != THEME:
 			dialogs.showMessage(T(32374),T(32375))
 		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)

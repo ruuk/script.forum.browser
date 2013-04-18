@@ -32,7 +32,7 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.0.2
+Current Version : 2.0.3
 
 *** 2.0.3 ***
 
@@ -43,6 +43,7 @@ When adding a new forum or editing a forum, setting the description now brings u
 The forum logo in forum settings now shows the header color as a background
 Added forum settings skin to Video skin
 Post editor now opens as a window instead of as a dialog, this lowers CPU usage (especially when video is playing) because it stops it from having to render both windows
+Fixed a bug causing the notifications service to fail
 
 *** 2.0.2 ***
 

@@ -42,7 +42,7 @@ def doKeyboard(prompt,default='',hidden=False,mod=False):
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
 	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
-	THEME = sys.modules["__main__"].THEME
+	THEME = util.getSavedTheme(get_current=True)
 	path = util.__addon__.getAddonInfo('path')
 	src = os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)
 	src2 = os.path.join(path,'resources','skins',theme or THEME,'720p',xmlFilename)
@@ -72,10 +72,10 @@ def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=F
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3
 	xmlFilename = 'script-forumbrowser-message-dialog.xml'
-	THEME = sys.modules["__main__"].THEME
+	THEME = util.getSavedTheme(get_current=True)
 	path = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 	theme = 'Default'
-	if os.path.join(path,'resources','skins',THEME,'720p',xmlFilename): theme = THEME
+	if os.path.exists(os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)): theme = THEME
 	w = MessageDialog(xmlFilename ,path,theme,caption=caption,text=text,error=error,success=success,scroll=scroll)
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 	w.doModal()

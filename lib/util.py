@@ -4,6 +4,7 @@ __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
 
 SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
+CURRENT_THEME = None
 
 class AbortRequestedException(Exception): pass
 class StopRequestedException(Exception): pass
@@ -105,6 +106,16 @@ def selectListItemByProperty(clist,prop,value):
 			return item
 	return None
 
+def getSavedTheme(current=None,get_current=False):
+	if current:
+		global CURRENT_THEME
+		CURRENT_THEME = current
+	if get_current and CURRENT_THEME: return CURRENT_THEME
+	try:			
+		return ('Default','Dark','Video')[getSetting('skin',0)]
+	except:
+		return 'Default'
+	
 class XBMCControlConditionalVisiblity:
 	def __init__(self):
 		self.cache = {}
