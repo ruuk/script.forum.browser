@@ -56,8 +56,8 @@
 		<control type="group">
 			<animation effect="fade" time="300" delay="200">Visible</animation>
 			<animation effect="fade" time="300">Hidden</animation>
-			<animation effect="slide" end="-252,0" time="500" condition="Control.HasFocus(120)">Conditional</animation>
-			<visible>Control.HasFocus(120)</visible>
+			<animation effect="slide" end="-252,0" time="500" condition="!ControlGroup(196).HasFocus(0)">Conditional</animation>
+			<visible>!ControlGroup(196).HasFocus(0)</visible>
 			<posx>260</posx>
 			<posy>10</posy>
 			<control type="image">
@@ -85,8 +85,8 @@
 		
 		<control type="group">
 			<animation effect="fade" time="300" delay="200">VisibleChange</animation>
-			<animation effect="slide" end="260,0" time="500" condition="!Control.HasFocus(120)">Conditional</animation>
-			<visible>!Control.HasFocus(120)</visible>
+			<animation effect="slide" end="260,0" time="500" condition="ControlGroup(196).HasFocus(0)">Conditional</animation>
+			<visible>ControlGroup(196).HasFocus(0)</visible>
 			<posx>0</posx>
 			<posy>10</posy>
 			<control type="image">
@@ -238,7 +238,7 @@
 		</control>
 
 		<control type="group" id="196">
-			<animation effect="slide" end="290,0" time="200" delay="200" condition="!Control.HasFocus(120)">Conditional</animation>
+			<animation effect="slide" end="290,0" time="200" delay="200" condition="ControlGroup(196).HasFocus(0)">Conditional</animation>
 			<defaultcontrol>197</defaultcontrol>
 			<description>The Buttons</description>
 			<posx>-300</posx>
@@ -328,43 +328,57 @@
 					<focusedcolor>white</focusedcolor>
 				</control>
 		
-				<control type="image" id="300">
-					<posx>270r</posx>
-					<posy>220</posy>
-					<width>240</width>
-					<height>30</height>
-					<texture></texture>
-				</control>
-				<control type="image" id="310">
-					<description>Progress</description>
-					<posx>270r</posx>
-					<posy>220</posy>
-					<width>240</width>
-					<height>30</height>
-					<texture border="10">forum-browser-video-white.png</texture>
-					<colordiffuse>FFAAAAAA</colordiffuse>
-					<visible>Control.isVisible(106)</visible>
-				</control>
-		
 				<control type="button" id="106">
 					<description>Stop Button</description>
-					<posx>270r</posx>
-					<posy>220</posy>
-					<width>240</width>
-					<height>30</height>
+					<posx>300r</posx>
+					<posy>141</posy>
+					<width>300</width>
+					<height>38</height>
 					<onright>120</onright>
-					<onup>105</onup>
+					<onup>202</onup>
 					<ondown>200</ondown>
-					<font>ForumBrowser-font12</font>
-					<textcolor>FF000000</textcolor>
-					<focusedcolor>FFFFFFFF</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<textcolor>white</textcolor>
+					<focusedcolor>white</focusedcolor>
 					<aligny>center</aligny>
-					<align>center</align>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
 					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
 					<pulseonselect>false</pulseonselect>
-					<texturefocus border="10">forum-browser-video-box-red-semi-trans-white-border.png</texturefocus>
-					<texturenofocus border="10">forum-browser-video-box-red-semi-trans.png</texturenofocus>
+					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
+					<colordiffuse>FFFF0000</colordiffuse>
 				</control>
+				<control type="group">
+					<visible>Control.isVisible(106)</visible>
+					<posx>260r</posx>
+					<posy>220</posy>
+					<control type="image" id="300">
+						<posx>0</posx>
+						<posy>55</posy>
+						<width>240</width>
+						<height>16</height>
+						<texture border="8,0,8,0">forum-browser-video-progress-back.png</texture>
+						<colordiffuse>FF444444</colordiffuse>
+					</control>
+					<control type="image" id="310">
+						<description>Progress</description>
+						<posx>0</posx>
+						<posy>55</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture border="8,0,8,0">forum-browser-video-progress-bar.png</texture>
+					</control>
+					<control type="image" id="310">
+						<description>Progress</description>
+						<posx>-3</posx>
+						<posy>52</posy>
+						<width>246</width>
+						<height>20</height>
+						<texture>forum-browser-video-progress-over.png</texture>
+					</control>
+				</control>
+				
 			</control>
 		</control>
 		

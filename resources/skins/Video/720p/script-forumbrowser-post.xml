@@ -127,7 +127,7 @@
 		<control type="group">
 			<animation effect="fade" time="300" delay="200">Visible</animation>
 			<animation effect="fade" time="300">Hidden</animation>
-			<animation effect="slide" end="-252,0" time="500" condition="Control.HasFocus(120)">Conditional</animation>
+			<animation effect="slide" end="-252,0" time="500" condition="!ControlGroup(196).HasFocus(0)">Conditional</animation>
 			<visible>Control.HasFocus(120)</visible>
 			<posx>260</posx>
 			<posy>10</posy>
@@ -156,8 +156,8 @@
 		
 		<control type="group">
 			<animation effect="fade" time="300" delay="200">VisibleChange</animation>
-			<animation effect="slide" end="260,0" time="500" condition="!Control.HasFocus(120)">Conditional</animation>
-			<visible>!Control.HasFocus(120)  + !Control.HasFocus(123)</visible>
+			<animation effect="slide" end="260,0" time="500" condition="ControlGroup(196).HasFocus(0)">Conditional</animation>
+			<visible>ControlGroup(196).HasFocus(0)  + !Control.HasFocus(123)</visible>
 			<posx>0</posx>
 			<posy>10</posy>
 			<control type="image">
@@ -251,7 +251,7 @@
 					<width>290</width>
 					<height>38</height>
 					<texture border="10">forum-browser-video-select.png</texture>
-					<visible>Control.HasFocus(120) + Control.IsVisible(115)</visible>
+					<visible>!ControlGroup(196).HasFocus(0) + Control.IsVisible(115)</visible>
 				</control>
 				<control type="image">
 					<posx>0</posx>
@@ -259,7 +259,7 @@
 					<width>1260</width>
 					<height>38</height>
 					<texture border="10">forum-browser-video-select.png</texture>
-					<visible>Control.HasFocus(120) + !Control.IsVisible(115)</visible>
+					<visible>!ControlGroup(196).HasFocus(0) + !Control.IsVisible(115)</visible>
 				</control>
 				<control type="image">
 					<posx>2</posx>
@@ -268,7 +268,7 @@
 					<height>38</height>
 					<texture border="10">forum-browser-video-select.png</texture>
 					<colordiffuse>FF444444</colordiffuse>
-					<visible>!Control.HasFocus(120) + Control.IsVisible(115)</visible>
+					<visible>ControlGroup(196).HasFocus(0) + Control.IsVisible(115)</visible>
 				</control>
 				<control type="image">
 					<posx>2</posx>
@@ -277,7 +277,7 @@
 					<height>38</height>
 					<texture border="10">forum-browser-video-select.png</texture>
 					<colordiffuse>FF444444</colordiffuse>
-					<visible>!Control.HasFocus(120) + !Control.IsVisible(115)</visible>
+					<visible>ControlGroup(196).HasFocus(0) + !Control.IsVisible(115)</visible>
 				</control>
 				<control type="label">
 					<posx>10</posx>
@@ -307,7 +307,7 @@
 		</control>
 
 		<control type="group" id="196">
-			<animation effect="slide" end="290,0" time="200" delay="200" condition="!Control.HasFocus(120) + !Control.HasFocus(123)">Conditional</animation>
+			<animation effect="slide" end="290,0" time="200" delay="200" condition="ControlGroup(196).HasFocus(0) + !Control.HasFocus(123)">Conditional</animation>
 			<defaultcontrol>197</defaultcontrol>
 			<description>The Buttons</description>
 			<posx>-300</posx>

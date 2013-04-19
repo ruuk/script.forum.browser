@@ -68,6 +68,7 @@ if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
 if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
 
+
 STARTFORUM = None
 
 LOG('Version: ' + __version__)
@@ -103,6 +104,9 @@ mods.DEBUG = DEBUG
 
 video.LOG = LOG
 video.ERROR = ERROR
+
+asyncconnections.LOG = LOG
+asyncconnections.setEnabled(not getSetting('disable_async_connections',False))
 
 ######################################################################################
 # Base Window Classes
