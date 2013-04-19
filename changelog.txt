@@ -4,7 +4,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Reset logged in indicator when returning to windows
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   Fix double error messages
   
@@ -34,6 +33,15 @@ TODO:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
 Current Version : 2.0.4
+
+*** 2.0.5 ***
+
+Moved the base windows classes to their own module
+Moved XBMC constants to their own module
+Fixed skin error with Video skin for missing default avatar file
+Moved some of the Video skins lists into groups to get rid of the "Control BLAH in window BLAH has been asked to focus, but it can't" log messages
+In Video skin, made back/edit close the slide out menu (if open) to match rest of skin behavior
+Logged in indicator now refresh when returning to a window
 
 *** 2.0.4 ***
 

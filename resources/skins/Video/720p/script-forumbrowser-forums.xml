@@ -1,5 +1,5 @@
 <window>
-	<defaultcontrol>120</defaultcontrol>
+	<defaultcontrol>119</defaultcontrol>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>
@@ -178,134 +178,136 @@
 			</control>
 		</control>
 		
-		<control type="list" id="120">
-			<posx>10</posx>
-			<posy>40</posy>
-			<width>1260</width>
-			<height>510</height>
-			<onleft>196</onleft>
-			<onright>196</onright>
-			<onup>120</onup>
-			<ondown>120</ondown>
-			<viewtype label="535">list</viewtype>
-			<pagecontrol>121</pagecontrol>
-			<scrolltime>200</scrolltime>
-			<itemlayout height="38">
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>270</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>white</textcolor>
-					<align>left</align>
-					<label>[B]$INFO[ListItem.Label][/B]</label>
-					<visible>StringCompare(ListItem.Genre,) + Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>270</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>FFBBBBBB</textcolor>
-					<align>left</align>
-					<label>[I] $INFO[ListItem.Label] [/I]</label>
-					<visible>StringCompare(ListItem.Genre,sub) + Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>1240</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>white</textcolor>
-					<align>left</align>
-					<label>[B]$INFO[ListItem.Label][/B]</label>
-					<visible>StringCompare(ListItem.Genre,) + !Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>1240</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>FFBBBBBB</textcolor>
-					<align>left</align>
-					<label>[I] $INFO[ListItem.Label] [/I]</label>
-					<visible>StringCompare(ListItem.Genre,sub) + !Control.IsVisible(115)</visible>
-				</control>
-			</itemlayout>
-			<focusedlayout height="38">
-				<control type="image">
-					<posx>0</posx>
-					<posy>8</posy>
-					<width>290</width>
-					<height>38</height>
-					<texture border="10">forum-browser-video-select.png</texture>
-					<visible>Control.HasFocus(120) + Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>270</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>white</textcolor>
-					<align>left</align>
-					<label>[B]$INFO[ListItem.Label][/B]</label>
-					<visible>StringCompare(ListItem.Genre,) + Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>270</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>FFDDDDDD</textcolor>
-					<align>left</align>
-					<label>[I] $INFO[ListItem.Label] [/I]</label>
-					<visible>StringCompare(ListItem.Genre,sub) + Control.IsVisible(115)</visible>
-				</control>
-				<control type="image">
-					<posx>0</posx>
-					<posy>8</posy>
-					<width>1260</width>
-					<height>38</height>
-					<texture border="10">forum-browser-video-select.png</texture>
-					<visible>Control.HasFocus(120) + !Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>1240</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>white</textcolor>
-					<align>left</align>
-					<label>[B]$INFO[ListItem.Label][/B]</label>
-					<visible>StringCompare(ListItem.Genre,) + !Control.IsVisible(115)</visible>
-				</control>
-				<control type="label">
-					<posx>10</posx>
-					<posy>8</posy>
-					<width>1240</width>
-					<height>38</height>
-					<font>ForumBrowser-font13</font>
-					<aligny>center</aligny>
-					<textcolor>FFDDDDDD</textcolor>
-					<align>left</align>
-					<label>[I] $INFO[ListItem.Label] [/I]</label>
-					<visible>StringCompare(ListItem.Genre,sub) + !Control.IsVisible(115)</visible>
-				</control>
-			</focusedlayout>
+		<control type="group" id="119">
+			<control type="list" id="120">
+				<posx>10</posx>
+				<posy>40</posy>
+				<width>1260</width>
+				<height>510</height>
+				<onleft>196</onleft>
+				<onright>196</onright>
+				<onup>120</onup>
+				<ondown>120</ondown>
+				<viewtype label="535">list</viewtype>
+				<pagecontrol>121</pagecontrol>
+				<scrolltime>200</scrolltime>
+				<itemlayout height="38">
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>270</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Label][/B]</label>
+						<visible>StringCompare(ListItem.Genre,) + Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>270</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFBBBBBB</textcolor>
+						<align>left</align>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
+						<visible>StringCompare(ListItem.Genre,sub) + Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>1240</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Label][/B]</label>
+						<visible>StringCompare(ListItem.Genre,) + !Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>1240</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFBBBBBB</textcolor>
+						<align>left</align>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
+						<visible>StringCompare(ListItem.Genre,sub) + !Control.IsVisible(115)</visible>
+					</control>
+				</itemlayout>
+				<focusedlayout height="38">
+					<control type="image">
+						<posx>0</posx>
+						<posy>8</posy>
+						<width>290</width>
+						<height>38</height>
+						<texture border="10">forum-browser-video-select.png</texture>
+						<visible>Control.HasFocus(120) + Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>270</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Label][/B]</label>
+						<visible>StringCompare(ListItem.Genre,) + Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>270</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFDDDDDD</textcolor>
+						<align>left</align>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
+						<visible>StringCompare(ListItem.Genre,sub) + Control.IsVisible(115)</visible>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>8</posy>
+						<width>1260</width>
+						<height>38</height>
+						<texture border="10">forum-browser-video-select.png</texture>
+						<visible>Control.HasFocus(120) + !Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>1240</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<label>[B]$INFO[ListItem.Label][/B]</label>
+						<visible>StringCompare(ListItem.Genre,) + !Control.IsVisible(115)</visible>
+					</control>
+					<control type="label">
+						<posx>10</posx>
+						<posy>8</posy>
+						<width>1240</width>
+						<height>38</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFDDDDDD</textcolor>
+						<align>left</align>
+						<label>[I] $INFO[ListItem.Label] [/I]</label>
+						<visible>StringCompare(ListItem.Genre,sub) + !Control.IsVisible(115)</visible>
+					</control>
+				</focusedlayout>
+			</control>
 		</control>
 
 		<control type="group" id="196">

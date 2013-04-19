@@ -99,7 +99,7 @@
 				<posy>0</posy>
 				<width>80</width>
 				<height>80</height>
-				<texture fallback="forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
+				<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
 			</control>
 			<control type="label" id="105">
 				<description>Date</description>
@@ -252,7 +252,7 @@
 				<posy>3</posy>
 				<width>44</width>
 				<height>44</height>
-				<texture fallback="forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
+				<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
 			</control>
 			<control type="image">
 				<description>Logged In</description>

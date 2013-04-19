@@ -102,7 +102,7 @@
 				<height>20</height>
 				<texture>forum-browser-video-logged-in-back.png</texture>
 			</control>
-			<control type="image" id="111">
+			<control type="image">
 				<description>Logged In</description>
 				<posx>19r</posx>
 				<posy>3</posy>
@@ -112,7 +112,7 @@
 				<colordiffuse>FF555555</colordiffuse>
 				<visible>StringCompare(Window.Property(loggedin),)</visible>
 			</control>
-			<control type="image" id="111">
+			<control type="image">
 				<description>Logged In</description>
 				<posx>19r</posx>
 				<posy>3</posy>
