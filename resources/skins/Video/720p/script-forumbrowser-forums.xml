@@ -47,6 +47,7 @@
 			<width>280</width>
 			<height>130</height>
 			<aspectratio align="left">keep</aspectratio>
+			<fadetime>500</fadetime>
 		</control>
 
 		<control type="image" id="249">

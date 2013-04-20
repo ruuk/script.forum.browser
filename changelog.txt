@@ -32,16 +32,19 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.0.4
+Current Version : 2.0.5
 
 *** 2.0.5 ***
 
 Moved the base windows classes to their own module
 Moved XBMC constants to their own module
+Logged in indicator now refreshes when returning to a window
+Page menu now uses FB dialog instead of XBMC dialog
 Fixed skin error with Video skin for missing default avatar file
 Moved some of the Video skins lists into groups to get rid of the "Control BLAH in window BLAH has been asked to focus, but it can't" log messages
 In Video skin, made back/edit close the slide out menu (if open) to match rest of skin behavior
-Logged in indicator now refresh when returning to a window
+In Video skin, in the full message view, fixed the links list so that it doesn't overflow the background
+In posts view in Video skin, selected post now better highlighted. Changed own post highlight color
 
 *** 2.0.4 ***
 

@@ -557,7 +557,7 @@
 			<height>500</height>
 
 			<control type="image">
-				<description>Buttons Background</description>
+				<description>Links Background</description>
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>300</width>
@@ -568,7 +568,7 @@
 				<posx>10</posx>
 				<posy>2</posy>
 				<width>290</width>
-				<height>720</height>
+				<height>486</height>
 				<onleft>127</onleft>
 				<onright>127</onright>
 				<onup>148</onup>

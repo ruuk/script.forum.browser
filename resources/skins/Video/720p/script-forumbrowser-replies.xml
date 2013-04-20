@@ -66,7 +66,7 @@
 							<width>286</width>
 							<height>174</height>
 							<texture>forum-browser-video-white.png</texture>
-							<colordiffuse>FF222222</colordiffuse>
+							<colordiffuse>FF0E1C23</colordiffuse>
 							<visible>StringCompare(ListItem.Director,me)</visible>
 						</control>
 						<control type="image">
@@ -156,8 +156,7 @@
 								<posy>0</posy>
 								<width>970</width>
 								<height>174</height>
-								<texture border="10">forum-browser-video-white.png</texture>
-								<colordiffuse>FF0B0B0B</colordiffuse>
+								<texture border="10">forum-browser-video-black.png</texture>
 							</control>
 							<control type="label">
 								<posx>10</posx>
@@ -317,7 +316,7 @@
 							<width>286</width>
 							<height>200</height>
 							<texture>forum-browser-video-white.png</texture>
-							<colordiffuse>FF222222</colordiffuse>
+							<colordiffuse>FF0E1C23</colordiffuse>
 							<visible>StringCompare(ListItem.Director,me)</visible>
 						</control>
 						<control type="image">
@@ -624,6 +623,38 @@
 			<colordiffuse>FF224466</colordiffuse>
 		</control>
 		
+		<control type="group">
+			<visible>!Control.isVisible(115)</visible>
+			<control type="image">
+				<description>Haze Upper</description>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>1260</width>
+				<height>322</height>
+				<texture border="10">forum-browser-video-white.png</texture>
+				<colordiffuse>18FFFFFF</colordiffuse>
+			</control>
+			<control type="image">
+				<description>Haze Lower</description>
+				<posx>10</posx>
+				<posy>534</posy>
+				<width>1260</width>
+				<height>176</height>
+				<texture border="10">forum-browser-video-white.png</texture>
+				<colordiffuse>18FFFFFF</colordiffuse>
+			</control>
+		</control>
+		
+		<control type="image">
+			<description>Haze Upper</description>
+			<posx>10</posx>
+			<posy>10</posy>
+			<width>289</width>
+			<height>551</height>
+			<texture border="10">forum-browser-video-white.png</texture>
+			<visible>Control.isVisible(115)</visible>
+			<colordiffuse>18FFFFFF</colordiffuse>
+		</control>
 		<control type="image">
 			<description>Outline</description>
 			<posx>10</posx>
@@ -635,25 +666,25 @@
 			<colordiffuse>FF66AACC</colordiffuse>
 		</control>
 		
-		<control type="image">
-			<description>Outline</description>
-			<posx>10</posx>
-			<posy>10</posy>
-			<width>1260</width>
-			<height>700</height>
-			<texture border="10">forum-browser-video-box-outline.png</texture>
+		<control type="group">
 			<visible>!Control.isVisible(115)</visible>
-		</control>
-		
-		<control type="image">
-			<description>Outline</description>
-			<posx>10</posx>
-			<posy>332</posy>
-			<width>1260</width>
-			<height>202</height>
-			<texture border="10">forum-browser-video-box-outline.png</texture>
-			<colordiffuse>FF66AACC</colordiffuse>
-			<visible>!Control.isVisible(115)</visible>
+			<control type="image">
+				<description>Outline</description>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>1260</width>
+				<height>700</height>
+				<texture border="10">forum-browser-video-box-outline.png</texture>
+			</control>
+			<control type="image">
+				<description>Outline</description>
+				<posx>10</posx>
+				<posy>332</posy>
+				<width>1260</width>
+				<height>202</height>
+				<texture border="10">forum-browser-video-box-outline.png</texture>
+				<colordiffuse>FF66AACC</colordiffuse>
+			</control>
 		</control>
 		
 		<control type="image">

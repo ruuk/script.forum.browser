@@ -456,7 +456,7 @@ class ChoiceMenu():
 		self.hideSplash()
 		
 	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF',**kwargs):
-		if not ID: return self.addSep()
+		if ID is None: return self.addSep()
 		if disabled:
 			display = "[COLOR FF444444]%s[/COLOR]" % display
 			display2 = "[B]DISABLED[/B][CR][CR][COLOR FF444444]%s[/COLOR]" % display2
@@ -486,7 +486,14 @@ class ChoiceMenu():
 
 def dialogSelect(heading,ilist,autoclose=0):
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
-	result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
+	c = ChoiceMenu(heading)
+	i=0
+	print ilist
+	for disp in ilist:
+		c.addItem(i,disp)
+		i+=1
+	result = c.getResult()
+	#result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 	return result
 	
