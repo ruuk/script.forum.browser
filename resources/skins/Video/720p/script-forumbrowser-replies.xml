@@ -689,18 +689,18 @@
 		
 		<control type="image">
 			<description>Menu Indicator Background</description>
-			<posx>-10</posx>
+			<posx>10</posx>
 			<posy>10</posy>
-			<width>310</width>
+			<width>290</width>
 			<height>30</height>
 			<texture border="10">forum-browser-video-box-header.png</texture>
 			<visible>Control.IsVisible(115)</visible>
 		</control>
 		<control type="image">
 			<description>Menu Indicator Background</description>
-			<posx>-10</posx>
+			<posx>10</posx>
 			<posy>10</posy>
-			<width>1280</width>
+			<width>1260</width>
 			<height>30</height>
 			<texture border="10">forum-browser-video-box-header.png</texture>
 			<visible>!Control.IsVisible(115)</visible>
@@ -793,7 +793,7 @@
 			<animation effect="fade" time="300">Hidden</animation>
 			<animation effect="slide" end="-252,0" time="500" condition="!ControlGroup(196).HasFocus(0)">Conditional</animation>
 			<visible>!ControlGroup(196).HasFocus(0)</visible>
-			<posx>260</posx>
+			<posx>270</posx>
 			<posy>10</posy>
 			<control type="image">
 				<description>Left Arrow</description>
@@ -819,7 +819,8 @@
 		</control>
 		
 		<control type="group">
-			<animation effect="fade" time="300" delay="200">VisibleChange</animation>
+			<animation effect="fade" time="300" delay="200">Visible</animation>
+			<animation effect="fade" time="300">Hidden</animation>
 			<animation effect="slide" end="260,0" time="500" condition="ControlGroup(196).HasFocus(0)">Conditional</animation>
 			<visible>ControlGroup(196).HasFocus(0)</visible>
 			<posx>0</posx>
@@ -916,6 +917,29 @@
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
+				<control type="button">
+					<enable>false</enable>
+					<visible>!Control.IsVisible(200)</visible>
+					<description>Prev</description>
+					<onright>120</onright>
+					<onup>201</onup>
+					<ondown>105</ondown>
+					<posx>300r</posx>
+					<posy>48</posy>
+					<width>300</width>
+					<height>38</height>
+					<visible>true</visible>
+					<colordiffuse>FFFFFFFF</colordiffuse>
+					<font>ForumBrowser-font13</font>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
+					<label>$INFO[Control.GetLabel(200)]</label>
+					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
+					<textcolor>white</textcolor>
+					<disabledcolor>FF555555</disabledcolor>
+					<focusedcolor>white</focusedcolor>
+				</control>
 
 				<control type="button" id="105">
 					<description>Page</description>
@@ -959,6 +983,29 @@
 					<disabledcolor>FF555555</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
+				<control type="button">
+					<description>Next Disabled</description>
+					<enable>false</enable>
+					<visible>!Control.IsVisible(202)</visible>
+					<onright>120</onright>
+					<onup>105</onup>
+					<ondown>106</ondown>
+					<posx>300r</posx>
+					<posy>124</posy>
+					<width>300</width>
+					<height>38</height>
+					<visible>true</visible>
+					<colordiffuse>FFFFFFFF</colordiffuse>
+					<font>ForumBrowser-font13</font>
+					<align>right</align>
+					<textoffsetx>40</textoffsetx>
+					<label>$INFO[Control.GetLabel(202)]</label>
+					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
+					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
+					<textcolor>white</textcolor>
+					<disabledcolor>FF555555</disabledcolor>
+					<focusedcolor>white</focusedcolor>
+				</control>
 		
 				<control type="button" id="106">
 					<description>Stop Button</description>
@@ -981,36 +1028,6 @@
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
 					<colordiffuse>FFFF0000</colordiffuse>
 				</control>
-				<control type="group">
-					<visible>Control.isVisible(106)</visible>
-					<posx>260r</posx>
-					<posy>220</posy>
-					<control type="image" id="300">
-						<posx>0</posx>
-						<posy>55</posy>
-						<width>240</width>
-						<height>16</height>
-						<texture border="8,0,8,0">forum-browser-video-progress-back.png</texture>
-						<colordiffuse>FF444444</colordiffuse>
-					</control>
-					<control type="image" id="310">
-						<description>Progress</description>
-						<posx>0</posx>
-						<posy>55</posy>
-						<width>16</width>
-						<height>16</height>
-						<texture border="8,0,8,0">forum-browser-video-progress-bar.png</texture>
-					</control>
-					<control type="image" id="310">
-						<description>Progress</description>
-						<posx>-3</posx>
-						<posy>52</posy>
-						<width>246</width>
-						<height>20</height>
-						<texture>forum-browser-video-progress-over.png</texture>
-					</control>
-				</control>
-				
 			</control>
 		</control>
 		
@@ -1030,7 +1047,54 @@
 			<texture>forum-browser-video-black.png</texture>
 			<visible>Control.isVisible(115)</visible>
 		</control>
-					
+		
+		<control type="group">
+			<animation effect="slide" end="0,-90" time="500" condition="Control.IsVisible(106)">Conditional</animation>
+			<posx>515</posx>
+			<posy>735</posy>
+			<control type="image">
+				<description>Progress Back</description>
+				<posx>-20</posx>
+				<posy>0</posy>
+				<width>290</width>
+				<height>80</height>
+				<texture border="10">forum-browser-video-box-light.png</texture>
+			</control>
+			<control type="image">
+				<description>Progress Under</description>
+				<posx>-5</posx>
+				<posy>20</posy>
+				<width>250</width>
+				<height>24</height>
+				<texture>forum-browser-video-progress-over.png</texture>
+				<colordiffuse>33FFFFFF</colordiffuse>
+			</control>
+			<control type="image" id="300">
+				<posx>0</posx>
+				<posy>25</posy>
+				<width>240</width>
+				<height>16</height>
+				<texture border="8,0,8,0">forum-browser-video-progress-back.png</texture>
+				<colordiffuse>FF444444</colordiffuse>
+			</control>
+			<control type="image" id="310">
+				<description>Progress</description>
+				<posx>0</posx>
+				<posy>25</posy>
+				<width>16</width>
+				<height>16</height>
+				<texture border="8,0,8,0">forum-browser-video-progress-bar.png</texture>
+			</control>
+			<control type="image">
+				<description>Progress Over</description>
+				<posx>-3</posx>
+				<posy>22</posy>
+				<width>246</width>
+				<height>20</height>
+				<texture>forum-browser-video-progress-over.png</texture>
+			</control>
+		</control>
+		
 		<control type="group" id="115">
 			<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 			<posx>310</posx>

@@ -205,6 +205,7 @@ class BaseWindowFunctions(ThreadWindow):
 		self.closed = False
 		self.headerTextFormat = '%s'
 		self._externalWindow = None
+		self._progressWidth = 1
 		ThreadWindow.__init__(self)
 		
 	def externalWindow(self):
@@ -231,6 +232,7 @@ class BaseWindowFunctions(ThreadWindow):
 	
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
+		self._progressWidth = self.getControl(300).getWidth()
 		#self.getControl(310).setVisible(True)
 	
 	def setProgress(self,pct,message=''):
@@ -238,7 +240,7 @@ class BaseWindowFunctions(ThreadWindow):
 			self.stopThread()
 			dialogs.showMessage('ERROR',message,error=True)
 			return False
-		w = int((pct/100.0)*self.getControl(300).getWidth())
+		w = int((pct/100.0)*self._progressWidth)
 		self.getControl(310).setWidth(w)
 		self.getControl(104).setLabel(self.headerTextFormat % message)
 		return True

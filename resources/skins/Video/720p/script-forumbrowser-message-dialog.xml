@@ -17,7 +17,7 @@
 				<width>820</width>
 				<height>472</height>
 				<texture border="10">forum-browser-video-box-white.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
+				<colordiffuse>44000000</colordiffuse>
 			</control>
 			<control type="image">
 				<description>Large Back</description>
@@ -155,7 +155,7 @@
 				<width>310</width>
 				<height>690</height>
 				<texture border="10">forum-browser-video-box-white.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
+				<colordiffuse>44000000</colordiffuse>
 			</control>
 			<control type="image">
 				<description>Large Back</description>

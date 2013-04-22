@@ -5,7 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
-  Fix double error messages
   
  Long Term:
   Check on optional import behavior
@@ -32,7 +31,16 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.0.5
+Current Version : 2.0.6
+
+*** 2.0.6 ***
+
+Fixed duplicate error message dialogs
+Fixed a bug causing some signatures not to show
+Tapatalk: Improved progress bar updates on posts view
+Video Skin: Moved progress bar to a slide-out at the bottom of the screen
+Video Skin: Made previous and next page buttons appear disabled (instead of hidden) when no prev/next page
+Added a button on the keyboard mod skins that toggles the large/small view
 
 *** 2.0.5 ***
 

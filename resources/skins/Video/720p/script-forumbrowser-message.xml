@@ -216,9 +216,9 @@
 		
 		<control type="image">
 			<description>Menu Indicator Background</description>
-			<posx>-10</posx>
+			<posx>10</posx>
 			<posy>10</posy>
-			<width>310</width>
+			<width>290</width>
 			<height>30</height>
 			<texture border="10">forum-browser-video-box-header.png</texture>
 			<visible>Control.IsVisible(115)</visible>
@@ -232,19 +232,19 @@
 			<height>22</height>
 			<control type="image">
 				<description>Menu Indicator Background</description>
-				<posx>-320</posx>
+				<posx>-300</posx>
 				<posy>-4</posy>
-				<width>1280</width>
+				<width>1260</width>
 				<height>60</height>
 				<texture border="10">forum-browser-video-box-header.png</texture>
 			</control>
 			<control type="image">
-				<description>Menu Indicator Background</description>
-				<posx>-320</posx>
+				<description>Divider</description>
+				<posx>-12</posx>
 				<posy>-4</posy>
-				<width>310</width>
-				<height>30</height>
-				<texture flipy="true" border="10">forum-browser-video-box-header.png</texture>
+				<width>2</width>
+				<height>60</height>
+				<texture>forum-browser-video-white.png</texture>
 			</control>
 			<control type="image">
 				<description>Avatar</description>
