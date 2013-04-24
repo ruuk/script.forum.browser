@@ -182,24 +182,24 @@ class MessageDialog(BaseDialog):
 		
 	def onFocus( self, controlId ): self.controlId = controlId
 
-class TextDialog(xbmcgui.WindowXMLDialog):
+class TextDialog(BaseDialog):
 	def __init__( self, *args, **kwargs ):
 		self.text = kwargs.get('text') or ''
 		self.caption = kwargs.get('caption') or ''
-		xbmcgui.WindowXMLDialog.__init__( self )
+		BaseDialog.__init__( self )
 	
 	def onInit(self):
-		self.getControl(104).setLabel(self.caption)
-		textbox = self.getControl(122)
-		textbox.reset()
-		textbox.setText(self.text)
+		self.setProperty('caption', self.caption)
+		self.setProperty('text', self.text)
+		#self.getControl(104).setLabel(self.caption)
+		#textbox = self.getControl(122)
+		#textbox.reset()
+		#textbox.setText(self.text)
 		
 	def onAction(self,action):
 		if action == 92 or action == 10:
 			self.close()
-		
-	def onFocus( self, controlId ): self.controlId = controlId
-	
+			
 class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
 		self.result = None
@@ -303,7 +303,8 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		if action == 92 or action == 10:
 			self.doClose()
 		elif action == 7:
-			self.finish()
+			pass
+			#self.finish()
 		elif action == ACTION_CONTEXT_MENU:
 			self.doMenu()
 	
@@ -313,7 +314,8 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		
 	def onClick( self, controlID ):
 		if controlID == 120:
-			self.finish()
+			pass
+			#self.finish()
 		
 	def doMenu(self):
 		if self.menu.contextCallback:
@@ -405,6 +407,36 @@ def showActivitySplash(caption=util.T(32248),cancel_stops_connections=False,moda
 		s = ActivitySplash(caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
 	s.update(0,caption)
 	return s
+
+class DialogYesNo(BaseDialog):
+	def __init__( self, *args, **kwargs ):
+		self.caption = kwargs.get('caption','')
+		self.yesLabel = kwargs.get('yes_label','')
+		self.noLabel = kwargs.get('no_label','')
+		self.text = kwargs.get('text','')
+		self.yesno = None
+		BaseDialog.__init__(self)
+		
+	def onInit(self):
+		self.setProperty('caption',self.caption)
+		self.setProperty('yes_label',self.yesLabel or 'Yes')
+		self.setProperty('no_label',self.noLabel or 'No')
+		self.setProperty('text', self.text)
+		
+	def onClick(self,controlID):
+		if controlID == 110:
+			self.yesno = True
+			self.close()
+		elif controlID == 111:
+			self.yesno = False
+			self.close()
+		
+def dialogYesNo(heading, line1='', line2='', line3='', no_label='', yes_label=''):
+	text = '[CR]'.join(filter(bool,(line1,line2,line3)))
+	w = openWindow(DialogYesNo,'script-forumbrowser-dialog-yesno.xml',return_window=True,caption=heading,text=text,no_label=no_label,yes_label=yes_label)
+	yesno = w.yesno
+	del w
+	return yesno
 	
 class DialogSelect(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):
@@ -427,8 +459,7 @@ class DialogSelect(xbmcgui.WindowXMLDialog):
 			pos = self.getControl(111).getSelectedPosition()
 			if pos < 0: return
 			self.choice = pos
-			self.close()
-			
+			self.close()	
 		
 class ChoiceMenu():
 	def __init__(self,caption,with_splash=False):

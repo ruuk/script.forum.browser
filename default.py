@@ -179,7 +179,7 @@ class ImagesDialog(windows.BaseWindowDialog):
 			filename = fname + '_' + str(ct) + ext
 			ct+=1
 			if os.path.exists(os.path.join(result,filename)): continue
-			yes = xbmcgui.Dialog().yesno(T(32261),T(32262),T(32263),filename + '?',T(32264),T(32265))
+			yes = dialogs.dialogYesNo(T(32261),T(32262),T(32263),filename + '?',T(32264),T(32265))
 			if not yes:
 				ct = 0
 				filename = dialogs.doKeyboard(T(32259), filename)
@@ -264,7 +264,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		
 	def cancel(self):
 		if self.settingsChanged:
-			yes = xbmcgui.Dialog().yesno(T(32268),T(32269),T(32270))
+			yes = dialogs.dialogYesNo(T(32268),T(32269),T(32270))
 			if not yes: return
 		self.doClose()
 		
@@ -290,7 +290,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 				item.setProperty('help',self.help.get(dID,'') + '[CR][COLOR FF999999]%s[/COLOR][CR][B]Current:[/B][CR][CR]%s' % (self.helpSep,val))
 			elif data['type'].startswith('text.url'):
 				if data['value']:
-					yes = xbmcgui.Dialog().yesno(T(32272),T(32274),T(32273),'',T(32276),T(32275))
+					yes = dialogs.dialogYesNo(T(32272),T(32274),T(32273),'',T(32276),T(32275))
 					if yes:
 						data['value'] = ''
 						item.setLabel2('')
@@ -304,7 +304,8 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 			item.setLabel2(data['type'] != 'text.password' and val or len(val) * '*')
 		elif data['type'].startswith('webimage.'):
 			url = data['type'].split('.',1)[-1]
-			yes = xbmcgui.Dialog().yesno(T(32272),T(32278),T(32277),'',T(32280),T(32279))
+			yes = dialogs.dialogYesNo(T(32272),T(32278),T(32277),'',T(32280),T(32279))
+			if yes is None: return
 			if yes:
 				logo = dialogs.doKeyboard(T(32281),data['value'] or 'http://')
 				logo = logo or ''
@@ -722,7 +723,7 @@ class PostDialog(windows.BaseWindow):
 		self.getControl(122).setText(' ') #to remove scrollbar
 		if self.failedPM:
 			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
-				yes = xbmcgui.Dialog().yesno(T(32296),T(32297))
+				yes = dialogs.dialogYesNo(T(32296),T(32297))
 				if yes:
 					self.post = self.failedPM
 					for line in self.post.message.split('\n'): self.addQuote(line)
@@ -785,7 +786,7 @@ class PostDialog(windows.BaseWindow):
 		
 	def confirmExit(self):
 		if not self.getOutput() and not self.title: return True
-		return xbmcgui.Dialog().yesno(T(32301),T(32302),T(32303))
+		return dialogs.dialogYesNo(T(32301),T(32302),T(32303))
 	
 	def isPM(self):
 		return str(self.post.pid).startswith('PM') or self.post.to
@@ -1124,7 +1125,7 @@ class MessageWindow(windows.BaseWindow):
 	def showVideo(self,source):
 		if video.isPlaying() and getSetting('video_ask_interrupt',True):
 			line2 = getSetting('video_return_interrupt',True) and T(32254) or ''
-			if not xbmcgui.Dialog().yesno(T(32255),T(32256),line2):
+			if not dialogs.dialogYesNo(T(32255),T(32256),line2):
 				return
 		PLAYER.start(source)
 		#video.play(source)
@@ -1302,7 +1303,7 @@ def openPostDialog(post=None,pid='',tid='',fid='',editPM=None,donotpost=False,no
 def deletePost(post,is_pm=False):
 	pm = forumbrowser.PostMessage().fromPost(post)
 	if not pm.pid: return
-	yes = xbmcgui.Dialog().yesno(T(32320),T(32321))
+	yes = dialogs.dialogYesNo(T(32320),T(32321))
 	if not yes: return
 	splash = dialogs.showActivitySplash(T(32322))
 	try:
@@ -1805,7 +1806,7 @@ class RepliesWindow(windows.PageWindow):
 		elif result == 'extras':
 			showUserExtras(post,ignore=(item.getProperty('usedExtras') or '').split(','))
 		elif result == 'pm':
-			quote = xbmcgui.Dialog().yesno(T(32336),T(32337))
+			quote = dialogs.dialogYesNo(T(32336),T(32337))
 			self.openPostDialog(post,force_pm=True,no_quote=not quote)
 		elif result == 'like':
 			splash = dialogs.showActivitySplash(T(32338))
@@ -2436,7 +2437,7 @@ class ForumsWindow(windows.BaseWindow):
 		if not FB: return
 		self.setLabels()
 		if not FB.guestOK() and not self.hasLogin():
-			yes = xbmcgui.Dialog().yesno(T(32352),T(32353),T(32354),T(32355))
+			yes = dialogs.dialogYesNo(T(32352),T(32353),T(32354),T(32355))
 			if yes:
 				setLogins()
 				if not self.hasLogin():
@@ -2504,7 +2505,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.setLoggedIn()
 		self.resetForum()
 		if not FB.guestOK() and not FB.isLoggedIn():
-			yes = xbmcgui.Dialog().yesno(T(32352),T(32353),T(32354),T(32355))
+			yes = dialogs.dialogYesNo(T(32352),T(32353),T(32354),T(32355))
 			if yes:
 				setLogins()
 				self.resetForum()
@@ -2776,7 +2777,7 @@ class ForumsWindow(windows.BaseWindow):
 	def preClose(self):
 		if not getSetting('ask_close_on_exit') == 'true': return True
 		if self.closed: return True
-		return xbmcgui.Dialog().yesno(T(32373),T(32373))
+		return dialogs.dialogYesNo(T(32373),T(32373))
 		
 	def resetForum(self,hidelogo=True,no_theme=False):
 		if not FB: return
@@ -3256,7 +3257,7 @@ def setLoginPage(forumID=None):
 def browseWebURL(url):
 	(url,html) = webviewer.getWebResult(url,dialog=True) #@UnusedVariable
 	if not url: return None
-	yes = xbmcgui.Dialog().yesno(T(32391),str(url),'',T(32392))
+	yes = dialogs.dialogYesNo(T(32391),str(url),'',T(32392))
 	if not yes: return None
 	return url
 	
@@ -3449,7 +3450,7 @@ def shareForumRules(forumID,rules):
 			elif k == 'tail':
 				out.append('[%s] = ' % T(32411) + ', '.join(v.split(';&;')))
 		dialogs.showMessage(T(32412),'%s\n\n%s' % (T(32413),'[CR]'.join(out)),scroll=True)
-		yes = xbmcgui.Dialog().yesno(T(32414),T(32415))
+		yes = dialogs.dialogYesNo(T(32414),T(32415))
 		if not yes: return
 	setRulesODB(forumID, rules)
 	
@@ -3539,7 +3540,7 @@ def addForum(current=False):
 					
 			if not url:
 				dialog.update(16,'%s: Parser Browser' % T(32427))
-				yes = xbmcgui.Dialog().yesno(T(32428),T(32429),'',T(32430))
+				yes = dialogs.dialogYesNo(T(32428),T(32429),'',T(32430))
 				if yes:
 					user = dialogs.doKeyboard(T(32201))
 					if user: password = dialogs.doKeyboard(T(32202),hidden=True)
@@ -3686,7 +3687,7 @@ def addCurrentForumToOnlineDatabase(forumID=None):
 	addForumToOnlineDatabase(fdata.name,url,fdata.description,fdata.urls.get('logo'),forumID[:2],header_color=fdata.theme.get('header_color','FFFFFF'))
 	
 def addForumToOnlineDatabase(name,url,desc,logo,ftype,header_color='FFFFFF',dialog=None):
-	if not xbmcgui.Dialog().yesno(T(32445),T(32446)): return
+	if not dialogs.dialogYesNo(T(32445),T(32446)): return
 	LOG('Adding Forum To Online Database: %s at URL: %s' % (name,url))
 	frating = arating = '0'
 	if ftype == 'GB':
@@ -3819,7 +3820,7 @@ def removeForum(forum=None):
 		doRemoveForum(forum)
 		
 def doRemoveForum(forum):
-	yes = xbmcgui.Dialog().yesno(T(32466),T(32467),'',forum[3:])
+	yes = dialogs.dialogYesNo(T(32466),T(32467),'',forum[3:])
 	if not yes: return False
 	path = os.path.join(FORUMS_PATH,forum)
 	if not os.path.exists(path): return
