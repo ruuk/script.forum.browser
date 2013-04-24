@@ -13,7 +13,7 @@
 			<posx>315</posx>
 			<posy>85</posy>
 			<control type="button">
-				<description>Add Forum</description>
+				<description>Wrench Button</description>
 				<onleft>260</onleft>
 				<onright>260</onright>
 				<onup>260</onup>

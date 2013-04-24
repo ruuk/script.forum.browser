@@ -419,8 +419,8 @@ class DialogYesNo(BaseDialog):
 		
 	def onInit(self):
 		self.setProperty('caption',self.caption)
-		self.setProperty('yes_label',self.yesLabel or 'Yes')
-		self.setProperty('no_label',self.noLabel or 'No')
+		self.setProperty('yes_label',self.yesLabel or xbmc.getLocalizedString(107))
+		self.setProperty('no_label',self.noLabel or xbmc.getLocalizedString(106))
 		self.setProperty('text', self.text)
 		
 	def onClick(self,controlID):

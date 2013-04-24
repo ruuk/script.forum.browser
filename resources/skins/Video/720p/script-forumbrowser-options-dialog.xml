@@ -102,7 +102,7 @@
 						<textcolor>FF4488AA</textcolor>
 						<aligny>center</aligny>
 						<align>right</align>
-						<label>[B]SHOW HELP[/B]</label>
+						<label>[B]$ADDON[script.forum.browser 32534][/B]</label>
 					</control>
 				</control>
 				<control type="group">
@@ -126,7 +126,7 @@
 						<textcolor>FF4488AA</textcolor>
 						<aligny>center</aligny>
 						<align>left</align>
-						<label>[B]HELP TOPICS[/B]</label>
+						<label>[B]$ADDON[script.forum.browser 32533][/B]</label>
 					</control>
 				</control>
 			</control>

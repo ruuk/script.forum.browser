@@ -31,14 +31,15 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.0.6
+Current Version : 2.1.0
 
-*** 2.0.7 ***
+*** 2.1.0 *** 04-24-2013 ***
 
 Created custom skins and handling for Yes/No style dialogs
 When editing a forum logo in the forum settings dialog, now does nothing if you exit the Edit/Browse dialog instead of choosing
 Added text dialog skin for the Video skin (eg. the dialog where you view the changelog)
 Added help dialog skin for the Video skin
+Updated translations
 
 *** 2.0.6 ***
 
