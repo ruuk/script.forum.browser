@@ -1822,6 +1822,14 @@ msgctxt "#32534"
 msgid "SHOW HELP"
 msgstr ""
 
+msgctxt "#32535"
+msgid "Show Thread In WebViewer"
+msgstr ""
+
+msgctxt "#32536"
+msgid "Disable Window Stacking (Requires Restart)"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

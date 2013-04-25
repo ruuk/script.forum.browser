@@ -2,10 +2,10 @@ import warnings
 import re
 
 import _base
-from html5lib.constants import DataLossWarning
-import html5lib.constants as constants
+from lib.forumbrowser.html5lib.constants import DataLossWarning
+import lib.forumbrowser.html5lib.constants as constants
 import etree as etree_builders
-from html5lib import ihatexml
+from lib.forumbrowser.html5lib import ihatexml
 
 try:
     import lxml.etree as etree
@@ -278,7 +278,7 @@ class TreeBuilder(_base.TreeBuilder):
         publicId = token["publicId"]
         systemId = token["systemId"]
 
-        if not name or ihatexml.nonXmlNameBMPRegexp.search(name) or name[0] == '"':
+        if not name or ihatexml.nonXmlNameBMPRegexp.search(name) or name[0] == '"':  # @UndefinedVariable
             warnings.warn("lxml cannot represent null or non-xml doctype", DataLossWarning)
 
         doctype = self.doctypeClass(name, publicId, systemId)

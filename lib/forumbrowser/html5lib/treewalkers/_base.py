@@ -76,7 +76,7 @@ class TreeWalker(object):
 
 class RecursiveTreeWalker(TreeWalker):
     def walkChildren(self, node):
-        raise NodeImplementedError
+        raise NodeImplementedError  # @UndefinedVariable
 
     def element(self, node, namespace, name, attrs, hasChildren):
         if name in voidElements:

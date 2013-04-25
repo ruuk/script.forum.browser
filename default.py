@@ -1744,6 +1744,9 @@ class RepliesWindow(windows.PageWindow):
 				boxes = FB.getPMBoxes(update=False)
 				if boxes and len(boxes) > 1:
 					d.addItem('changebox',T(32332))
+			else:
+				if FB.canGetRepliesURL():
+					d.addItem('webviewer',T(32535))
 			if item:
 				post = self.posts.get(item.getProperty('post'))
 				if FB.canPost() and not self.search:
@@ -1778,6 +1781,10 @@ class RepliesWindow(windows.PageWindow):
 		if not result: return
 		if result == 'changebox':
 			self.selectNewPMBox()
+			return
+		elif result == 'webviewer':
+			url = FB.getRepliesURL(self.tid,self.fid,self.pageData.getPageNumber())
+			webviewer.getWebResult(url,dialog=True,browser=hasattr(FB,'browser') and FB.browser)
 			return
 		elif result == 'quote':
 			self.stopThread()
@@ -2292,6 +2299,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.headerTextFormat = '[B]%s[/B]'
 		self.forumsManagerWindowIsOpen = False
 		self.lastFB = None
+		self.data = kwargs.get('data')
 	
 	def newPostsCallback(self,signal,data):
 		self.openForumsManager(external=True)
@@ -2321,18 +2329,22 @@ class ForumsWindow(windows.BaseWindow):
 		try:
 			if self.started: return
 			SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
-			xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty('ForumBrowserMAIN','MAIN')
+			self.setProperty('ForumBrowserMAIN','MAIN')
 			self.setVersion()
 			self.setStopControl(self.getControl(105))
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
 			self.started = True
-			self.getControl(105).setVisible(True)
-			self.setFocusId(105)
-			self.startGetForumBrowser()
+			if self.data:
+				self.startProgress()
+				self.fillForumList(data=self.data)
+			else:
+				self.showProgress()
+				self.setFocusId(105)
+				self.startGetForumBrowser()
 		except:
 			self.setStopControl(self.getControl(105)) #In case the error happens before we do this
 			self.setProgressCommands(self.startProgress,self.setProgress,self.endProgress)
-			self.getControl(105).setVisible(False)
+			self.hideProgress()
 			self.endProgress() #resets the status message to the forum name
 			self.setFocusId(202)
 			raise
@@ -2433,9 +2445,12 @@ class ForumsWindow(windows.BaseWindow):
 		self.failedToGetForum()
 		windows.ThreadWindow.stopThread(self)
 		
-	def fillForumList(self,first=False):
+	def fillForumList(self,first=False,data=None):
 		if not FB: return
 		self.setLabels()
+		if data:
+			self.doFillForumList(data)
+			return
 		if not FB.guestOK() and not self.hasLogin():
 			yes = dialogs.dialogYesNo(T(32352),T(32353),T(32354),T(32355))
 			if yes:
@@ -2466,6 +2481,7 @@ class ForumsWindow(windows.BaseWindow):
 			if data.error == 'CANCEL': return
 			dialogs.showMessage(T(32050),T(32171),T(32053),'[CR]'+data.error,success=False)
 			return
+		self.data = data
 		self.empty = True
 		
 		try:
@@ -2550,7 +2566,9 @@ class ForumsWindow(windows.BaseWindow):
 		self.setLoggedIn()
 		
 	def openPMWindow(self,forumElements=None):
-		dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements)
+		if self.nextWindow(self.data,RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements):
+			return
+		#dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements)
 		self.setPMCounts(FB.getPMCounts())
 	
 	def openThreadsWindow(self,forumElements=None):
@@ -2571,8 +2589,8 @@ class ForumsWindow(windows.BaseWindow):
 				return self.openLink(link)
 			if not fid: fid = item.getProperty('id')
 			topic = item.getProperty('topic')
-			
-		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item,forumElements=forumElements)
+		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item,forumElements=forumElements):
+			return True
 		self.setPMCounts(FB.getPMCounts())
 		return True
 		
@@ -2583,7 +2601,8 @@ class ForumsWindow(windows.BaseWindow):
 	def openSubscriptionsWindow(self,forumElements=None):
 		fid = 'subscriptions'
 		topic = T(32175)
-		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,forumElements=forumElements)
+		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,forumElements=forumElements):
+			return
 		self.setPMCounts(FB.getPMCounts())
 	
 	def showOnlineUsers(self):
@@ -2599,19 +2618,20 @@ class ForumsWindow(windows.BaseWindow):
 		d = dialogs.OptionsChoiceMenu(T(32358))
 		d.setContextCallback(self.showOnlineContext)
 		for u in users:
-			d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or '',u.get('status'))
+			d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or '../../Default/media/forum-browser-avatar-none.png',u.get('status'))
 		d.getResult(close_on_context=False)
 		
 	def showOnlineContext(self,menu,item):
 		d = dialogs.ChoiceMenu(T(32051))
-		if FB.canPrivateMessage(): d.addItem('pm',T(32253) % item.get('disp'))
+		if FB.canPrivateMessage(): d.addItem('pm',T(32253).format(item.get('disp')))
 		if FB.canSearchAdvanced('UID'): d.addItem('search',T(32359).format(item.get('disp')))
 		if FB.canGetUserInfo(): d.addItem('info',T(32360))
 		result = d.getResult()
 		if not result: return
 		if result == 'pm':
 			menu.close()
-			openPostDialog(tid='private_messages',to=item.get('disp'))
+			self.function(self.data,'script-forumbrowser-forums.xml',openPostDialog,tid='private_messages',to=item.get('disp'))
+			return
 		elif result == 'search':
 			menu.close()
 			searchUser(self,item.get('id'))
@@ -2821,11 +2841,14 @@ class ForumsWindow(windows.BaseWindow):
 			self.setPMCounts()
 		self.setLoggedIn()
 		self.resetForum(False)
+		global THEME
 		skin = util.getSavedTheme(current=THEME)
-		if skin != THEME:
-			dialogs.showMessage(T(32374),T(32375))
 		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
-		
+		if skin != THEME:
+			THEME = util.getSavedTheme(current=skin,get_current=True)
+			self.hop(self.data,"script-forumbrowser-forums.xml")
+			#dialogs.showMessage(T(32374),T(32375))
+
 ######################################################################################
 #
 # PlayerMonitor
@@ -4088,7 +4111,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	return FB
 
 def startForumBrowser(forumID=None):
-	global PLAYER, SIGNALHUB, STARTFORUM
+	global PLAYER, SIGNALHUB, STARTFORUM, WM
 	PLAYER = PlayerMonitor()
 	SIGNALHUB = signals.SignalHub()
 	windows.SIGNALHUB = SIGNALHUB
@@ -4109,7 +4132,9 @@ def startForumBrowser(forumID=None):
 		STARTFORUM = sys.argv[-1].split('=',1)[-1]
 	elif sys.argv[-1].startswith('forumbrowser://'):
 		STARTFORUM = sys.argv[-1]
-	dialogs.openWindow(ForumsWindow,"script-forumbrowser-forums.xml")
+		
+	WM = windows.WindowManager()
+	WM.start(ForumsWindow,"script-forumbrowser-forums.xml")
 	#sys.modules.clear()
 	PLAYER.finish()
 	del PLAYER

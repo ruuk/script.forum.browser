@@ -33,6 +33,13 @@ TODO:
 
 Current Version : 2.1.0
 
+*** 2.1.1 ***
+
+ParserBrowser: Added context menu option to Posts view: 'View Thread In WebViewer' useful if no posts show, or whatever
+Can now change themes without restarting forum browser
+Fixed a bug preventing the display of the context menu on the online users display
+Fixed a bug with avatars on the online users display in the Video skin
+
 *** 2.1.0 *** 04-24-2013 ***
 
 Created custom skins and handling for Yes/No style dialogs

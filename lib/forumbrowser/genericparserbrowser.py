@@ -223,6 +223,27 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			data.extra['forums'] = forums.data
 		return self.finish(data, donecallback)
 	
+	def canGetRepliesURL(self): return True
+	
+	def getRepliesURL(self,threadid,forumid,page='',lastid='',pid=''):
+		url = None
+		if self.threadParser.isGeneric:
+			url = self._getGenericRepliesURL(threadid, url)
+			if page and not str(page).replace('-','').isdigit(): url = self._url + page
+		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid,prefix=self.forumParser.getPrefix())
+		return url
+	
+	def _getGenericRepliesURL(self,threadid,url):
+		for f in self.threadParser.threads:
+			if threadid == f.get('threadid'):
+				url = f.get('url')
+				if not url: break
+				if not url.startswith('http'):
+					if url.startswith('/'): url = url[1:]
+					url = self._url + url
+				break
+		return url
+	
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = None
@@ -231,14 +252,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.postParser.ignoreForumImages = getSetting('ignore_forum_images',True)
 		self.postParser.setDomain(self._url)
 		if self.threadParser.isGeneric:
-			for f in self.threadParser.threads:
-				if threadid == f.get('threadid'):
-					url = f.get('url')
-					if not url: break
-					if not url.startswith('http'):
-						if url.startswith('/'): url = url[1:]
-						url = self._url + url
-					break
+			url = self._getGenericRepliesURL(threadid, url)
 			pagesURL = url
 			if page and not str(page).replace('-','').isdigit(): url = self._url + page
 		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid,prefix=self.forumParser.getPrefix())

@@ -43,14 +43,28 @@
 			<texture border="10">forum-browser-video-box-header.png</texture>
 			<visible>Control.IsVisible(115)</visible>
 		</control>
-		<control type="image">
-			<description>Menu Indicator Background</description>
-			<posx>10</posx>
-			<posy>10</posy>
-			<width>1260</width>
-			<height>30</height>
-			<texture border="10">forum-browser-video-box-header.png</texture>
+		<control type="group">
 			<visible>!Control.IsVisible(115)</visible>
+			<control type="image">
+				<description>Menu Indicator Background</description>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>1260</width>
+				<height>30</height>
+				<texture border="10">forum-browser-video-box-header.png</texture>
+			</control>
+			<control type="label">
+				<description>Page</description>
+				<posx>20r</posx>
+				<posy>10</posy>
+				<width>150</width>
+				<height>30</height>
+				<font>ForumBrowser-font12</font>
+				<textcolor>FF4488AA</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
+				<label>$INFO[Control.GetLabel(105)]</label>
+			</control>
 		</control>
 		
 		<control type="group">

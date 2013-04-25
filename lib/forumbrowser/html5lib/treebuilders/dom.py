@@ -1,14 +1,14 @@
 
 from xml.dom import minidom, Node, XML_NAMESPACE, XMLNS_NAMESPACE
 try:
-    from types import ModuleType
+    from types import ModuleType  # @UnusedImport
 except:
-    from new import module as ModuleType
-import re
+    from new import module as ModuleType  # @Reimport
+import re  # @UnusedImport
 import weakref
 
 import _base
-from .. import constants, ihatexml
+from .. import constants, ihatexml  # @UnusedImport
 from ..constants import namespaces
 
 moduleCache = {}

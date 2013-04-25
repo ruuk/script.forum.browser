@@ -1,13 +1,13 @@
 from lxml import etree
-from html5lib.treebuilders.etree import tag_regexp
+from lib.forumbrowser.html5lib.treebuilders.etree import tag_regexp
 
 from gettext import gettext
 _ = gettext
 
 import _base
 
-from html5lib.constants import voidElements
-from html5lib import ihatexml
+from lib.forumbrowser.html5lib.constants import voidElements  # @UnusedImport
+from lib.forumbrowser.html5lib import ihatexml
 
 class Root(object):
     def __init__(self, et):

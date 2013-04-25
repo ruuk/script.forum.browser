@@ -1,14 +1,14 @@
 try:
-    from types import ModuleType
+    from types import ModuleType  # @UnusedImport
 except:
-    from new import module as ModuleType
+    from new import module as ModuleType  # @Reimport
 import re
 import types
 
 import _base
-from html5lib import ihatexml
-from html5lib import constants
-from html5lib.constants import namespaces
+from lib.forumbrowser.html5lib import ihatexml
+from lib.forumbrowser.html5lib import constants
+from lib.forumbrowser.html5lib.constants import namespaces
 
 tag_regexp = re.compile("{([^}]*)}(.*)")
 

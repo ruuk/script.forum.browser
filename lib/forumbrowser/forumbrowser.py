@@ -1119,6 +1119,8 @@ class ForumBrowser:
 	
 	def canOpenLatest(self): return True
 	
+	def canGetRepliesURL(self): return False
+	
 	def updateProgress(self,callback,start,length,ct,tot,text):
 		pct = start + int((ct/float(tot)) * length)
 		#print 'ct: %s tot: %s pct: %s' % (ct,tot,pct)

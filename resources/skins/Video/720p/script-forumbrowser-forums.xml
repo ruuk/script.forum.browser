@@ -489,6 +489,7 @@
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
 					<colordiffuse>FFFF0000</colordiffuse>
+					<visible>true</visible>
 				</control>
 			</control>
 
@@ -714,12 +715,12 @@
 				<width>32</width>
 				<height>32</height>
 				<texture>forum-browser-video-loading.gif</texture>
-				<visible>Control.isVisible(105)</visible>
+				<visible>StringCompare(Window.Property(progress),progress)</visible>
 			</control>
 		</control>
 		
 		<control type="group">
-			<animation effect="slide" end="0,-90" time="500" condition="Control.IsVisible(105)">Conditional</animation>
+			<animation effect="slide" end="0,-90" time="500" condition="StringCompare(Window.Property(progress),progress)">Conditional</animation>
 			<posx>515</posx>
 			<posy>735</posy>
 			<control type="image">

@@ -1652,7 +1652,6 @@ class GeneralPostParser(AdvancedParser):
 			if not self.posts[-1].get('data'):
 				self.getLastData(self.posts[-1])
 			if len(self.posts) == 1 and self.posts[0].get('data'):
-				print 'TEST2'
 				self.posts[0]['data'] = self.sequence
 			ct = 0
 			for p in self.posts:

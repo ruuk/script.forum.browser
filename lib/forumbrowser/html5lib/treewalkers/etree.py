@@ -2,14 +2,14 @@ import gettext
 _ = gettext.gettext
 
 try:
-    from types import ModuleType
+    from types import ModuleType  # @UnusedImport
 except:
-    from new import module as ModuleType
-import copy
+    from new import module as ModuleType  # @Reimport
+import copy  # @UnusedImport
 import re
 
 import _base
-from html5lib.constants import voidElements
+from lib.forumbrowser.html5lib.constants import voidElements  # @UnusedImport
 
 tag_regexp = re.compile("{([^}]*)}(.*)")
 

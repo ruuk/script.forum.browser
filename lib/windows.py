@@ -1,7 +1,7 @@
 import threading, xbmc, xbmcgui, time, re, signals, asyncconnections, dialogs
 from xbmcconstants import *  # @UnusedWildImport
 from lib.forumbrowser import forumbrowser
-from util import LOG, ERROR, T, StoppableThread
+from util import LOG, ERROR, T, StoppableThread, getSetting
 
 SIGNALHUB = None
 
@@ -101,8 +101,16 @@ class ThreadWindow:
 		
 	def setStopControl(self,control):
 		self._stopControl = control
-		control.setVisible(False)
+		self.hideProgress()
 		
+	def showProgress(self):
+		self.setProperty('progress','progress')
+		if self._stopControl: self._stopControl.setVisible(True)
+	
+	def hideProgress(self):
+		self.setProperty('progress','')
+		if self._stopControl: self._stopControl.setVisible(False)
+	
 	def setProgressCommands(self,start=None,progress=None,end=None):
 		self._startCommand = start
 		self._progressCommand = progress
@@ -127,7 +135,7 @@ class ThreadWindow:
 			if self._currentThread and self._currentThread.isAlive():
 				self._currentThread.stop()
 				if self._endCommand: self._endCommand()
-				if self._stopControl: self._stopControl.setVisible(False)
+				self.hideProgress()
 			if self._isMain and len(threading.enumerate()) > 1:
 				d = xbmcgui.DialogProgress()
 				d.create(T(32220),T(32221))
@@ -176,7 +184,7 @@ class ThreadWindow:
 		
 	def endInMain(self,function,*args,**kwargs):
 		if self._endCommand: self._endCommand()
-		if self._stopControl: self._stopControl.setVisible(False)
+		self.hideProgress()
 		self.runInMain(function,*args,**kwargs)
 		
 	def getThread(self,function,finishedCallback=None,progressCallback=None,errorCallback=None,name='FBUNKNOWN'):
@@ -187,19 +195,69 @@ class ThreadWindow:
 		t.setErrorCallback(self.endInMain,errorCallback)
 		t.setProgressCallback(self.runInMain,progressCallback)
 		self._currentThread = t
-		if self._stopControl: self._stopControl.setVisible(True)
+		self.showProgress()
 		if self._startCommand: self._startCommand()
 		return t
 		
 	def stopThread(self):
 		asyncconnections.StopConnection()
-		if self._stopControl: self._stopControl.setVisible(False)
+		self.hideProgress()
 		if self._currentThread:
 			self._currentThread.stop()
 			self._currentThread = None
 			if self._endCommand: self._endCommand()
 		
-class BaseWindowFunctions(ThreadWindow):
+class ManagedWindow():
+	managed = getSetting('disable_window_stacking',False)
+	
+	def __init__(self):
+		self._data = None
+		self._XML = ''
+		self._KWArgs = None
+		self._nextWindow = None
+		self._nextXML = ''
+		self._nextKWArgs = None
+		self._nextData = None
+		self._function = None
+		self._funcArgs = None
+		self._funcKWArgs = None
+		self._hop = False
+		
+	def nextWindow(self, data, window, xml, **kwargs):
+		if not self.managed:
+			dialogs.openWindow(window,xml,**kwargs)
+			return False
+		self._data = data
+		self._nextWindow = window
+		self._nextXML = xml
+		self._nextKWArgs = kwargs
+		self.close()
+		return True
+	
+	def hop(self, data, xml, **kwargs):
+		if not self.managed:
+			self.close()
+			dialogs.openWindow(self.__class__,xml,data=data,**kwargs)
+			return False
+		self._nextData = data
+		self._nextWindow = self.__class__
+		self._nextXML = xml
+		self._nextKWArgs = kwargs
+		self._hop = True
+		self.close()
+		return True
+	
+	def function(self,data, xml, function,*args,**kwargs):
+		if not self.managed: return function(*args,**kwargs)
+		self._nextData = data
+		self._nextWindow = self.__class__
+		self._nextXML = xml
+		self._function = function
+		self._funcArgs = args
+		self._funcKWArgs = kwargs
+		self.close()
+		
+class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 	def __init__( self, *args, **kwargs ):
 		self._progMessageSave = ''
 		self.closed = False
@@ -207,6 +265,7 @@ class BaseWindowFunctions(ThreadWindow):
 		self._externalWindow = None
 		self._progressWidth = 1
 		ThreadWindow.__init__(self)
+		ManagedWindow.__init__(self)
 		
 	def externalWindow(self):
 		if not self._externalWindow: self._externalWindow = self._getExternalWindow()
@@ -376,3 +435,57 @@ class PageWindow(BaseWindow):
 		self.getControl(105).setLabel(pageData.getPageDisplay())
 		
 	def gotoPage(self,page): pass
+	
+######################################################################################
+#
+# WindowManager
+#
+######################################################################################
+class WindowManager():
+	def __init__(self):
+		self.stack = []
+		
+	def start(self,window,xml,**kwargs):
+		wd = self.nextWindow(WindowData().fromData(window,xml,kwargs))
+		while wd:
+			wd = self.nextWindow(wd)
+		
+	def nextWindow(self,wd):
+		w = dialogs.openWindow(wd.nextWindow,wd.nextXML,return_window=True,data=wd.nextData,**wd.nextKWArgs)
+		w._XML = wd.nextXML
+		w._KWArgs = wd.nextKWArgs
+		wd = self.windowDone(w)
+		del w
+		return wd
+	
+	def windowDone(self,w):
+		if w._function:
+			w._function(*w._funcArgs,**w._funcKWArgs)
+			return WindowData(w)
+		elif not w._nextWindow:
+			if self.stack:
+				wd = self.stack.pop()
+				return WindowData().fromData(wd.window, wd.XML, wd.KWArgs, wd.data)
+		else:
+			wd = WindowData(w)
+			if w._hop: return wd
+			self.stack.append(wd)
+			return wd
+
+class WindowData():
+	def __init__(self,window=None):
+		self.data = window and window._data or None
+		self.window = window and window.__class__ or None
+		self.XML =  window and window._XML or None
+		self.KWArgs =  window and window._KWArgs or {}
+		self.nextWindow =  window and window._nextWindow or None
+		self.nextXML =  window and window._nextXML or None
+		self.nextKWArgs =  window and window._nextKWArgs or {}
+		self.nextData = window and window._nextData or None
+	
+	def fromData(self,window,xml,kwargs,data=None):
+		self.nextWindow = window
+		self.nextXML = xml
+		self.nextKWArgs = kwargs or {}
+		self.nextData = data
+		return self
