@@ -37,17 +37,5 @@ homepage
 platform
 @item:show_ok=Always Show OK Button In Message Dialogs
 When enabled, message dialogs will always show an OK button. In either case you may exit the dialogs in the normal fashion.
-@item:use_skin_mods=Use Skin Modifications
-[B]Recommended.[/B]
-When enabled allows Forum Browser to modify the current skin. This allows the use of a custom font for a more consistent display on skins other than Confluence, and also allows the use of a modified keyboard for easier post editing.
-When forum browser next starts, it will ask to install the modifications.
-
-The custom keyboard and font will only show in Forum Browser.
 @item:save_logos=Cache Logo Images Locally
 When enabled, Forum Browser will save the logo file to disk, and use this copy in the future.
-@item:skin=Skin
-Select between the Dark or Light skin. Default is currently the light skin.
-@item:show_media_indicators=Show Post Media Indicators
-When enabled, image and video icons will show in the posts lists view indicating in which posts those media have been detected.
-@item:smi_count_link_images=Count Link Images As Images
-When enabled, image links will also be detected when showing post media indicators

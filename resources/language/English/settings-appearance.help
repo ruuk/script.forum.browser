@@ -1,0 +1,36 @@
+Settings Help (Appearance)
+@item:skin=Skin
+Select between the Dark, Light or Video skins. Default is currently the Light skin.
+
+On the Video skin, when video is playing, the video occupies most of the screen, and the interface wraps around it.
+@item:hide_image_urls=Hide Image URLs In Posts Display
+Only show the image pseudo-graphic and image number when displaying posts
+@item:show_media_indicators=Show Post Media Indicators
+When enabled, image and video icons will show in the posts lists view indicating in which posts those media have been detected.
+@item:smi_count_link_images=Count Link Images As Images
+When enabled, image links will also be detected when showing post media indicators
+@item:use_skin_mods=Use Skin Modifications
+[B]Recommended.[/B]
+When enabled, a special font file will be installed which includes smiley characters and special formatting characters for things such as quote display.
+It also allows Forum Browser to display consistently on all skins.
+
+Installing the special font will:
+    * Check for a user directory install of the XBMC skin files, and if not found create a copy
+    * Create a backup of the original 'Font.xml' file
+    * Copy the Forum Browser font to the skins 'font' directory
+    * Insert lines into the original 'Font.xml' file for the new font
+    
+This will [I]not[/I] affect XBMC or any other addon. It will simply give Forum Browser access to another font.
+@item:use_keyboard_mod=Use Keyboard Mod
+Enables the custom keyboard which allows long lines to be entered.
+
+Installing the keyboard will:
+    * Check for a user directory install of the XBMC skin files, and if not found create a copy
+    * Create a backup of the current 'DialogKeyboard.xml' file
+    * Allow you to choose either a generic or skin matching (if available) replacement keyboard
+    * Copy a directory of images to the skins 'media' folder
+    * Replace the original 'DialogKeyboard.xml' file
+    
+[B]THE NEW KEYBOARD WILL REPLACE THE OLD KEYBOARD FOR ALL USES IN XBMC[/B]
+
+After the modifications have been installed, XBMC will need to be restarted before they are visible.

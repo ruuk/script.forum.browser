@@ -205,7 +205,7 @@
 					<control type="label">
 						<posx>58</posx>
 						<posy>8</posy>
-						<width>262</width>
+						<width>332</width>
 						<height>40</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
@@ -248,7 +248,7 @@
 					<control type="label">
 						<posx>58</posx>
 						<posy>8</posy>
-						<width>262</width>
+						<width>332</width>
 						<height>40</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>

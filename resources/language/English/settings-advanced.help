@@ -5,6 +5,9 @@ Select between AES & Triple DES, AES and DES encryption. The default is AES & Tr
 Optional.
 Allows you to select a file whose contents will be used as the encryption key. Normally the key is automatically generated as a combination of your system username, your XBMC user name and the forum user name.
 The only restrictions for the file is that it must be readable by XBMC and it contents must not change.
+@item:disable_window_stacking=Disable Window Stacking
+Enabling this causes Forum Browser windows to be closed before opening new windows.
+This should make Forum browser use less memory, but probably causes a slight delay when changing windows and is less smooth visually.
 @item:debug=Enable Debug Logging
 Enables more detailed logging. You should only enable this if the developer asks you to when reporting a bug.
 @item:do_mybb_edit_bug_fix=Enable MyBB Edit Post Bug Re-Subscribe Fix
@@ -12,5 +15,8 @@ A bug in (as of this writing) the current version of the MyBB plugin for tapatal
 @item:disable_act_splash=Disable Activity Splash
 Early Frodo versions caused crashes when the activity splash displayed.
 Though this behavior was fixed, this setting disables the splash.
+@item:disable_async_connections=Disable Asynchronous Connections
+When this option is enabled, connections are blocking, which means that attempts to cancel them must wait until the socket operation is finished.
+The code that enables asynchronous connections may not work on all versions of python, so you may check this setting if you are having errors with connections.
 @item:exp_stuff=Experimental Stuff
 Enable any experimental features (if available). Experimental features may be broken and are not supported in any way. 

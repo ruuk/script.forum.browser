@@ -1838,6 +1838,10 @@ msgctxt "#32538"
 msgid "Hide Image URLs In Posts Display"
 msgstr ""
 
+msgctxt "#32539"
+msgid "Appearance"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

@@ -45,7 +45,9 @@ Added option to the posts view context menu 'View Posts As A Page' which shows a
 Colorized the text of links and images
 Links where the text is the same as the URL now only show the URL once
 When skin mods are installed, links now show a hand icon instead of the word 'LINK' and images now have a more graphical style appearance
-Added an 'Hide Image URLs In Posts Display' to settings:General
+Added 'Appearance' section to settings and moved some setting from 'Genereal' to there
+Added 'Hide Image URLs In Posts Display' to settings:Appearance
+Updated the settings help
 
 *** 2.1.0 *** 04-24-2013 ***
 
