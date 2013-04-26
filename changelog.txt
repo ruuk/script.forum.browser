@@ -6,6 +6,7 @@ TODO:
  Short Term:
   Show read/unread status on video skin where it doesn't
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
+  Fix it so that the progress does not pop up twice when starting FB
   
  Long Term:
   Check on optional import behavior

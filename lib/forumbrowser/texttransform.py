@@ -127,8 +127,11 @@ class MessageConverter:
 			self.bullet = u'\u2022'
 		else:
 			self.imageConvert = self.imageConvertNoMod
-			self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [COLOR FF00AAAA][I]{1}[/I][/COLOR] '
-			self.linkReplace = u'[COLOR cyan]\{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
+			if util.getSetting('hide_image_urls',True):
+				self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR] '
+			else:
+				self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [COLOR FF00AAAA][I]{1}[/I][/COLOR] '
+			self.linkReplace = u'[COLOR cyan]{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
 			self.link2Replace = u'[COLOR cyan]({0} [B]\g<url>[/B])[/COLOR]'.format(T(32182))
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
@@ -364,7 +367,7 @@ class MessageConverter:
 	def linkConvert(self,m):
 		if m.group(1) == m.group(2):
 			return self.link2Replace.replace('\g<url>',m.group(2))
-		return self.linkReplace.format(m.group(1),m.group(2))
+		return self.linkReplace.format(m.group(2),m.group(1))
 	
 	def imageConvertMod(self,m):
 		self.imageCount += 1
