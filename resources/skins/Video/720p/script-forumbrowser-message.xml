@@ -508,7 +508,7 @@
 						<posy>130</posy>
 						<width>140</width>
 						<height>14</height>
-						<font>ForumBrowser-font10</font>
+						<font>ForumBrowser-font12</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<selectedcolor>white</selectedcolor>
@@ -535,7 +535,7 @@
 						<posy>130</posy>
 						<width>140</width>
 						<height>14</height>
-						<font>ForumBrowser-font10</font>
+						<font>ForumBrowser-font12</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
 						<selectedcolor>white</selectedcolor>

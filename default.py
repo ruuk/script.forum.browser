@@ -1092,7 +1092,11 @@ class MessageWindow(windows.BaseWindow):
 				#TODO: Limit
 				url = urlParentDirFilter.sub('/',url)
 			url = url.replace('/../','/')
-			item = xbmcgui.ListItem(self.imageReplace % i,iconImage=url)
+			if getSetting('use_skin_mods',True):
+				disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(unichr(10101 + i))
+			else:
+				disp = self.imageReplace % i
+			item = xbmcgui.ListItem(disp,iconImage=url)
 			item.setProperty('url',url)
 			self.getControl(150).addItem(item)
 			

@@ -7,6 +7,8 @@ TODO:
   Show read/unread status on video skin where it doesn't
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   Fix it so that the progress does not pop up twice when starting FB
+  Add image info to slideout on Video skin for full message view
+  Finish no window stacking mode
   
  Long Term:
   Check on optional import behavior
@@ -33,7 +35,7 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-Current Version : 2.1.0
+Current Version : 2.1.1
 
 *** 2.1.1 ***
 
