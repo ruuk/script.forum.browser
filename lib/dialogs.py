@@ -378,7 +378,7 @@ class ActivitySplash():
 	def __enter__(self):
 		return self
 	
-	def __exit__(self):
+	def __exit__(self,etype, evalue, traceback):
 		self.close()
 		
 	def update(self,pct,message):

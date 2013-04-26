@@ -104,12 +104,20 @@ class MessageConverter:
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+T(32180)+'[/B][CR]'+T(32181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.aQuoteReplace = unicode.encode('[CR]_________________________[CR][B]'+T(32180)+'[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
 		self.quoteImageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]A[/COLOR][COLOR FF0000FF]G[/COLOR][COLOR FFFF00FF]E[/COLOR]: \g<url>'
-		self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]: [I]%s[/I] '
-		self.linkReplace = unicode.encode('\g<text> (%s [B]\g<url>[/B])' % T(32182),'utf8')
-		self.link2Replace = unicode.encode('(%s [B]\g<url>[/B])' % T(32182),'utf8')
 		self.hrReplace = ('[B]_____________________________________________________________________________________[/B]').encode('utf8')
+		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [I]{1}[/I] '
+		#self.imageReplace = u'[COLOR FFFF0000]([/COLOR][COLOR FF00FF00]([/COLOR]{0}[COLOR FF0000FF])[/COLOR][COLOR FFFFFF00])[/COLOR]{1}'
 		
 		if util.getSetting('use_skin_mods',True):
+			self.imageConvert = self.imageConvertMod
+			self.imageReplace = u'[CR][COLOR FF808080]\u250c\u2500\u2500\u2500\u2510[/COLOR][CR]'
+			if util.getSetting('hide_image_urls',True):
+				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR][COLOR FFFF0000]([/COLOR][COLOR FF00FF00]{0}[/COLOR][COLOR FF4444FF])[/COLOR][COLOR FFDDDD00]\u2022[/COLOR][CR]'
+			else:
+				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR][COLOR FFFF0000]([/COLOR][COLOR FF00FF00]{0}[/COLOR][COLOR FF4444FF])[/COLOR][COLOR FFDDDD00]\u2022[/COLOR][COLOR FF00AAAA]{1}[/COLOR][CR]'
+			self.imageReplace += u'[COLOR FF808080]\u2514\u2500\u2500\u2500\u2518[/COLOR][CR]'
+			self.linkReplace = u'[COLOR FF00AAAA]{0} (\u261B [B]{1}[/B])[/COLOR]'
+			self.link2Replace = u'[COLOR FF00AAAA](\u261B [B]\g<url>[/B])[/COLOR]'
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
 			self.quoteVert = u'\u2502'
@@ -118,6 +126,10 @@ class MessageConverter:
 			self.codeEndReplace = u'\u2514'+u'\u2500'*300
 			self.bullet = u'\u2022'
 		else:
+			self.imageConvert = self.imageConvertNoMod
+			self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [COLOR FF00AAAA][I]{1}[/I][/COLOR] '
+			self.linkReplace = u'[COLOR cyan]\{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
+			self.link2Replace = u'[COLOR cyan]({0} [B]\g<url>[/B])[/COLOR]'.format(T(32182))
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
 			self.quoteVert = u'|'
@@ -170,7 +182,7 @@ class MessageConverter:
 		
 		self.imageCount = 0
 		html = self.imageFilter.sub(self.imageConvert,html)
-		html = self.linkFilter.sub(self.linkReplace,html)
+		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
@@ -348,11 +360,22 @@ class MessageConverter:
 		html = html.replace('</div>','\n')
 		html = re.sub('<[^<>]+?>','',html)
 		return convertHTMLCodes(html).strip()
-		
-	def imageConvert(self,m):
+	
+	def linkConvert(self,m):
+		if m.group(1) == m.group(2):
+			return self.link2Replace.replace('\g<url>',m.group(2))
+		return self.linkReplace.format(m.group(1),m.group(2))
+	
+	def imageConvertMod(self,m):
 		self.imageCount += 1
-		return self.imageReplace % (self.imageCount,m.group('url'))
+		return self.imageReplace.format(unichr(10101 + self.imageCount),m.group('url'))
+	
+	def imageConvertNoMod(self,m):
+		self.imageCount += 1
+		return self.imageReplace.format(self.imageCount,m.group('url'))
 
+	imageConvert = imageConvertNoMod
+	
 	def processSmilies(self,text):
 		if not isinstance(text,unicode): text = unicode(text,'utf8')
 		if self.smileyFilter: return text
@@ -482,7 +505,7 @@ class BBMessageConverter(MessageConverter):
 		
 		self.imageCount = 0
 		html = self.imageFilter.sub(self.imageConvert,html)
-		html = self.linkFilter.sub(self.linkReplace,html)
+		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
 		html = html.replace('[hr]',self.hrReplace)
 		html = self.removeNested(html,'\[/?B\]','[B]')
@@ -493,7 +516,7 @@ class BBMessageConverter(MessageConverter):
 		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
 		html = self.processSmilies(html)
 		return convertHTMLCodes(html)
-			
+		
 	def formatQuotes(self,html):
 		if not isinstance(html,unicode):
 			try:
@@ -608,10 +631,6 @@ class BBMessageConverter(MessageConverter):
 			if self.nCounter < 0: self.nCounter = 0
 			if self.nCounter == 0: return tag
 		return ''
-	
-	def imageConvert(self,m):
-		self.imageCount += 1
-		return self.imageReplace % (self.imageCount,m.group('url'))
 		
 	def parseCodes(self,text):
 		text = re.sub('\[QUOTE=(?P<user>\w+)(?:;\d+)*\](?P<quote>.+?)\[/QUOTE\](?is)',self.quoteConvert,text)

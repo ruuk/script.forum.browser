@@ -4,6 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Show read/unread status on video skin where it doesn't
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   
  Long Term:
@@ -39,6 +40,11 @@ ParserBrowser: Added context menu option to Posts view: 'View Thread In WebViewe
 Can now change themes without restarting forum browser
 Fixed a bug preventing the display of the context menu on the online users display
 Fixed a bug with avatars on the online users display in the Video skin
+Added option to the posts view context menu 'View Posts As A Page' which shows a full view of all the posts on the page together
+Colorized the text of links and images
+Links where the text is the same as the URL now only show the URL once
+When skin mods are installed, links now show a hand icon instead of the word 'LINK' and images now have a more graphical style appearance
+Added an 'Hide Image URLs In Posts Display' to settings:General
 
 *** 2.1.0 *** 04-24-2013 ***
 

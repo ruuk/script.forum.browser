@@ -1830,6 +1830,14 @@ msgctxt "#32536"
 msgid "Disable Window Stacking (Requires Restart)"
 msgstr ""
 
+msgctxt "#32537"
+msgid "View Posts As A Page"
+msgstr ""
+
+msgctxt "#32538"
+msgid "Hide Image URLs In Posts Display"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

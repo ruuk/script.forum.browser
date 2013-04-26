@@ -1747,6 +1747,8 @@ class RepliesWindow(windows.PageWindow):
 			else:
 				if FB.canGetRepliesURL():
 					d.addItem('webviewer',T(32535))
+				if self.posts: d.addItem('pageview',T(32537))
+				
 			if item:
 				post = self.posts.get(item.getProperty('post'))
 				if FB.canPost() and not self.search:
@@ -1786,6 +1788,8 @@ class RepliesWindow(windows.PageWindow):
 			url = FB.getRepliesURL(self.tid,self.fid,self.pageData.getPageNumber())
 			webviewer.getWebResult(url,dialog=True,browser=hasattr(FB,'browser') and FB.browser)
 			return
+		elif result == 'pageview':
+			self.pageView()
 		elif result == 'quote':
 			self.stopThread()
 			self.openPostDialog(post)
@@ -1837,7 +1841,26 @@ class RepliesWindow(windows.PageWindow):
 			else:
 				dialogs.showHelp('posts')
 		if self.empty: self.fillRepliesList()
-			
+	
+	def pageView(self):
+		with dialogs.ActivitySplash() as splash:
+			out = ''
+			if util.getSetting('use_skin_mods',True):
+				divider = u'\u2580'*200
+				underHeader = u'\u2594'*200
+			else:
+				divider = '_'*200
+				underHeader = '-'*200
+			keys = self.posts.keys()
+			keys.sort()
+			for k in keys:
+				p = self.posts[k]
+				postNumber = str(p.postNumber)
+				splash.update(0,'Adding Post #{0}'.format(postNumber))
+				out += '[COLOR FF808080]#' + postNumber + ' - ' + re.sub('<.*?>','',p.userName) + '[/COLOR][CR]'+ underHeader + '[CR]'
+				out += p.messageAsDisplay(raw=True) + '[CR]' + divider + '[CR]'
+		dialogs.showText('Posts', out)
+		
 	def deletePost(self):
 		item = self.getControl(120).getSelectedItem()
 		pid = item.getProperty('post')
@@ -3343,7 +3366,9 @@ def doSettings(window=None):
 	DEBUG = getSetting('debug',False)
 	signals.DEBUG = DEBUG
 	tapatalk.DEBUG = DEBUG
-	if FB: FB.MC.resetRegex()
+	if FB:
+		FB.MC.resetRegex()
+		FB.MC.setReplaces()
 	if mods.checkForSkinMods():
 		setSetting('refresh_skin',True)
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
