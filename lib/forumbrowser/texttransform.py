@@ -184,9 +184,9 @@ class MessageConverter:
 		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
 		
 		self.imageCount = 0
-		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
+		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.ulFilter.sub(self.processBulletedList,html)
 		html = self.olFilter.sub(self.processOrderedList,html)
 		html = self.colorFilter.sub(self.convertColor,html)
@@ -366,12 +366,17 @@ class MessageConverter:
 	
 	def linkConvert(self,m):
 		if m.group(1) == m.group(2):
-			return self.link2Replace.replace('\g<url>',m.group(2))
+			return self.link2Replace.replace('\g<url>',m.group(1))
+		elif self.imageFilter.search(m.group(2)):
+			return m.group(2) + self.link2Replace.replace('\g<url>',m.group(1))
 		return self.linkReplace.format(m.group(2),m.group(1))
 	
 	def imageConvertMod(self,m):
 		self.imageCount += 1
-		return self.imageReplace.format(unichr(10101 + self.imageCount),m.group('url'))
+		disp = self.imageCount
+		if self.imageCount <= 30:
+			disp = unichr(10101 + self.imageCount)
+		return self.imageReplace.format(disp,m.group('url'))
 	
 	def imageConvertNoMod(self,m):
 		self.imageCount += 1
@@ -507,9 +512,9 @@ class BBMessageConverter(MessageConverter):
 		html = html.replace('[/color]','[/COLOR]')
 		
 		self.imageCount = 0
-		html = self.imageFilter.sub(self.imageConvert,html)
 		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
+		html = self.imageFilter.sub(self.imageConvert,html)
 		html = html.replace('[hr]',self.hrReplace)
 		html = self.removeNested(html,'\[/?B\]','[B]')
 		html = self.removeNested(html,'\[/?I\]','[I]')

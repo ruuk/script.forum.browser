@@ -35,7 +35,17 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+KNOWN ISSUES:
+  Corrupted color display on longer posts. XBMC bug as of Frodo 12.1
+  
 Current Version : 2.1.1
+
+*** 2.1.2 ***
+
+Added an detail display on the image slide out on the full message view of the Video skin
+Made the links slide out on the full message view taller on the Video skin
+Fixed the numbers for post images for counts over 20 when the skin mods are enabled
+Modified font to include more circled numbers for the post image representations
 
 *** 2.1.1 ***
 
@@ -43,6 +53,7 @@ ParserBrowser: Added context menu option to Posts view: 'View Thread In WebViewe
 Can now change themes without restarting forum browser
 Fixed a bug preventing the display of the context menu on the online users display
 Fixed a bug with avatars on the online users display in the Video skin
+Added 'Disable Window Stacking' to settings advanced
 Added option to the posts view context menu 'View Posts As A Page' which shows a full view of all the posts on the page together
 Colorized the text of links and images
 Links where the text is the same as the URL now only show the URL once

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import urllib2, re, os, sys, time, urlparse, binascii, math
+import urllib2, re, os, sys, time, urlparse, binascii, math, textwrap
 import xbmc, xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 from lib import util, signals, asyncconnections
@@ -1008,16 +1008,10 @@ class MessageWindow(windows.BaseWindow):
 		self.started = True
 		self.setLoggedIn()
 		self.setWindowProperties()
-#		if getSetting('use_forum_colors') == 'true':
-#			if (FB.theme.get('mode') == 'dark' or getSetting('color_mode') == '1') and getSetting('color_mode') != '2':
-#				text = '[COLOR FFFFFFFF]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-#			else:
-#				text = '[COLOR FF000000]%s[/COLOR][CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
-#		else:
-#			text = '%s[CR] [CR]' % (self.post.translated or self.post.messageAsDisplay())
 		s = dialogs.showActivitySplash()
 		try:
 			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
+			#open('/home/ruuk/test.txt','w').write(repr(text))
 		finally:
 			s.close()
 			
@@ -1093,11 +1087,15 @@ class MessageWindow(windows.BaseWindow):
 				url = urlParentDirFilter.sub('/',url)
 			url = url.replace('/../','/')
 			if getSetting('use_skin_mods',True):
-				disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(unichr(10101 + i))
+				if i <= 30:
+					disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(unichr(10101 + i))
+				else:
+					disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(i)
 			else:
 				disp = self.imageReplace % i
 			item = xbmcgui.ListItem(disp,iconImage=url)
 			item.setProperty('url',url)
+			item.setProperty('wrapped_url',textwrap.fill(url, 60, break_long_words=True))
 			self.getControl(150).addItem(item)
 			
 		#targetdir = os.path.join(util.__addon__.getAddonInfo('profile'),'messageimages')
