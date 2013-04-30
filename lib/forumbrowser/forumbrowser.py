@@ -829,7 +829,7 @@ class ForumBrowser:
 					#(':arrow:','',''), #TODO: Arrow in face
 					(':(',u'\u2639',u':\r('),
 					(':)',u'\u263a',u':\r)'),
-					(':s',u'\u2463',u':\rs'),
+					(':s',u'\u2473',u':\rs'),
 					('\r',u'',u'')
 					]
 

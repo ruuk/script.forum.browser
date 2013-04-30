@@ -2552,6 +2552,7 @@ class ForumsWindow(windows.BaseWindow):
 				self.resetForum()
 				self.fillForumList()
 		self.openElements()
+		dialogs.doKeyboard('TEST',mod=True,smilies=FB.getSmilies())
 		
 	def setLogoFromFile(self):
 		logopath = getCurrentLogo()
@@ -4175,6 +4176,8 @@ if __name__ == '__main__':
 		doSettings()
 	elif sys.argv[-1].startswith('settingshelp_'):
 		dialogs.showHelp('settings-' + sys.argv[-1].split('_')[-1])
+	elif sys.argv[-1] == 'smilies':
+		dialogs.smiliesDialog()
 	else:
 		try:
 			setSetting('FBIsRunning',True)

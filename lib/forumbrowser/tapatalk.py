@@ -2,7 +2,7 @@ from lib.util import LOG, ERROR, getSetting
 from lib import util
 from lib import asyncconnections
 asyncconnections.LOG = LOG
-import xmlrpclib, httplib, sys, re, time, os
+import xmlrpclib, httplib, sys, re, time, os, urlparse
 import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
@@ -527,6 +527,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.transport = None
 		self.server = None
 		self.forumConfig = {}
+		self._siteSmilies = None
 		self.needsLogin = True
 		self.alwaysLogin = always_login
 		self.lang = util.T
@@ -584,6 +585,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			raise
 		except:
 			ERROR('Failed to get forum config')
+		
+	def getSmilies(self):
+		if self._siteSmilies is not None: return self._siteSmilies
+		if not self.getConfigInfo('get_smilies', False): return None
+		smilies = self.server.get_smilies()
+		if not 'list' in smilies: return None
+		url = self._url.split('mobiquo',1)[0]
+		final = []
+		for cat, slist in smilies['list'].items():
+			for s in slist:
+				final.append({'cat':cat,'url':urlparse.urljoin(url, s.get('url','')),'code':str(s.get('code','')),'title':str(s.get('title',''))})
+		self._siteSmilies = final
+		return self._siteSmilies
 			
 	def getConfigInfo(self,key,default=None):
 		val = self.forumConfig.get(key)

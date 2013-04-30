@@ -11,8 +11,12 @@ def clearDirFiles(filepath):
 		f = os.path.join(filepath,f)
 		if os.path.isfile(f): os.remove(f)
 				
-def doKeyboard(prompt,default='',hidden=False,mod=False):
+def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=None):
 	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
+	if smilies:
+		saveSmilies(smilies)
+	xbmcgui.Window(10000).setProperty('ForumBrowser_siteSmilies',bool(smilies) and '1' or '')
+		
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
 	keyboard.doModal()
@@ -459,7 +463,7 @@ class DialogSelect(xbmcgui.WindowXMLDialog):
 			pos = self.getControl(111).getSelectedPosition()
 			if pos < 0: return
 			self.choice = pos
-			self.close()	
+			self.close()
 		
 class ChoiceMenu():
 	def __init__(self,caption,with_splash=False):
@@ -519,7 +523,6 @@ def dialogSelect(heading,ilist,autoclose=0):
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
 	c = ChoiceMenu(heading)
 	i=0
-	print ilist
 	for disp in ilist:
 		c.addItem(i,disp)
 		i+=1
@@ -527,6 +530,94 @@ def dialogSelect(heading,ilist,autoclose=0):
 	#result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
 	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 	return result
+	
+class SmiliesDialog(BaseDialog):
+	def __init__( self, *args, **kwargs ):
+		self.result = None
+		self.items = kwargs.get('items')
+		self.caption = kwargs.get('caption')
+		self.started = False
+		BaseDialog.__init__( self )
+	
+	def onInit(self):
+		if self.started: return
+		self.started = True
+		self.setProperty('caption',self.caption)
+		self.showItems()
+		
+	def showItems(self):
+		clist = self.getControl(111)
+		clist.reset()
+		items = []
+		for i in self.items:
+			items.append(xbmcgui.ListItem(label=i['disp'],label2=i['disp2'],thumbnailImage=i['icon']))
+		clist.addItems(items)
+		
+	def onAction(self,action):
+		if action == 92 or action == 10:
+			self.doClose()
+	
+	def doClose(self):
+		self.close()
+			
+	def onClick(self,controlID):
+		if controlID == 111:
+			self.finish()
+			
+	def finish(self):
+		item = self.getControl(111).getSelectedItem()
+		if not item: return
+		self.result = self.getControl(111).getSelectedPosition()
+		self.doClose()
+		
+def smiliesDialog(heading='Smilies',smilies=None):
+	if not smilies: smilies = loadSmilies() 
+	if not smilies: return
+	menu = SmiliesChoiceMenu(heading)
+	for s in smilies:
+		menu.addItem(s['code'],s['title'],s['url'])
+	code = menu.getResult()
+	if not code: return
+	cmap = {')':48,'!':49,'@':50,'#':51,'$':52,'%':53,'^':54,'&':55,'*':56,'(':57,'[':65,']':66,'{':67,'}':68,'-':69,'_':70,'=':71,'+':72,';':73,':':74,"'":75,'"':76,',':77,'.':78,'<':79,'>':80,'/':81,'?':82,'\\':83,'|':84,'`':85,'~':86}
+	clicks = [78,8]
+	for c in list(code):
+		val = ord(c)
+		if val > 64 and val < 91:
+			clicks += (302,val)
+		elif val > 96 and val < 123:
+			clicks.append(val-32)
+		elif c in cmap:
+			clicks += (304,cmap[c])
+	for c in clicks:
+		cmd = 'SendClick(virtualkeyboard,%s)' % c
+		print cmd
+		xbmc.executebuiltin(cmd)
+	
+def loadSmilies():
+	sfile = os.path.join(CACHE_PATH,'smilies')
+	if not os.path.exists(sfile): return None
+	with open(sfile,'r') as f: data = f.read()
+	smilies = []
+	for line in data.split('\n'):
+		smiley = line.split('\r',2)
+		if len(smiley) != 3: continue
+		smilies.append({'code':smiley[0],'title':smiley[1],'url':smiley[2]})
+	return smilies
+
+def saveSmilies(smilies):
+	out = []
+	for s in smilies:
+		out.append(s['code'] + '\r' + s['title'] + '\r' + s['url'])
+	with open(os.path.join(CACHE_PATH,'smilies'),'w') as f:
+		f.write('\n'.join(out))
+
+class SmiliesChoiceMenu(ChoiceMenu):
+	def getResult(self,windowFile='script-forumbrowser-dialog-smilies.xml'):
+		w = openWindow(SmiliesDialog,windowFile ,return_window=True,menu=self,items=self.items,caption=self.caption)
+		result = w.result
+		del w
+		if result == None: return None
+		return self.items[result]['id']
 	
 class OptionsChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None,close_on_context=True):
