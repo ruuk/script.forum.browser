@@ -1842,6 +1842,10 @@ msgctxt "#32539"
 msgid "Appearance"
 msgstr ""
 
+msgctxt "#32540"
+msgid "Smilies"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

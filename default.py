@@ -1,9 +1,21 @@
 # -*- coding: utf-8 -*-
+import os, sys, xbmc
 
-import urllib2, re, os, sys, time, urlparse, binascii, math, textwrap
-import xbmc, xbmcgui #@UnresolvedImport
+if __name__ == '__main__':
+	if sys.argv[-1].startswith('settingshelp_') or sys.argv[-1] == 'smilies':
+		from lib import dialogs, util
+		CACHE_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'cache'))
+		dialogs.CACHE_PATH = CACHE_PATH
+		if sys.argv[-1].startswith('settingshelp_'):
+			dialogs.showHelp('settings-' + sys.argv[-1].split('_')[-1])
+		elif sys.argv[-1] == 'smilies':
+			dialogs.smiliesDialog()
+		sys.exit()
+		
+import urllib2, re, time, urlparse, binascii, math, textwrap
+import xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
-from lib import util, signals, asyncconnections
+from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
 from lib.xbmcconstants import * # @UnusedWildImport
 
@@ -68,7 +80,7 @@ from lib.forumbrowser import texttransform
 from lib.crypto import passmanager
 from lib.forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
-from lib import dialogs, windows, mods
+from lib import dialogs, windows, mods  # @Reimport
 
 signals.DEBUG = DEBUG
 
@@ -794,10 +806,8 @@ class PostDialog(windows.BaseWindow):
 	def getOutput(self): pass
 	
 	def setTitle(self):
-		keyboard = xbmc.Keyboard(self.title,T(32125))
-		keyboard.doModal()
-		if not keyboard.isConfirmed(): return
-		title = keyboard.getText()
+		title = dialogs.doKeyboard(T(32125), self.title)
+		if not title: return
 		self.showTitle(title)
 		self.title = title
 	
@@ -939,7 +949,7 @@ class LinePostDialog(PostDialog):
 					.replace('[/COLOR]','[/color]')
 			
 	def addLineSingle(self,line=None,before=False,update=True):
-		if line == None: line = dialogs.doKeyboard(T(32123),'',mod=True)
+		if line == None: line = dialogs.doKeyboard(T(32123),'',mod=True,smilies=FB.getSmilies())
 		if line == None: return False
 		if before:
 			clist = self.getControl(120)
@@ -976,7 +986,7 @@ class LinePostDialog(PostDialog):
 	def editLine(self):
 		item = self.getControl(120).getSelectedItem()
 		if not item: return
-		line = dialogs.doKeyboard(T(32124),item.getLabel(),mod=True)
+		line = dialogs.doKeyboard(T(32124),item.getLabel(),mod=True,smilies=FB.getSmilies())
 		if line == None: return False
 		item.setProperty('text',line)
 		item.setLabel(self.displayLine(line))
@@ -2552,7 +2562,6 @@ class ForumsWindow(windows.BaseWindow):
 				self.resetForum()
 				self.fillForumList()
 		self.openElements()
-		dialogs.doKeyboard('TEST',mod=True,smilies=FB.getSmilies())
 		
 	def setLogoFromFile(self):
 		logopath = getCurrentLogo()
@@ -4174,10 +4183,6 @@ def startForumBrowser(forumID=None):
 if __name__ == '__main__':
 	if sys.argv[-1] == 'settings':
 		doSettings()
-	elif sys.argv[-1].startswith('settingshelp_'):
-		dialogs.showHelp('settings-' + sys.argv[-1].split('_')[-1])
-	elif sys.argv[-1] == 'smilies':
-		dialogs.smiliesDialog()
 	else:
 		try:
 			setSetting('FBIsRunning',True)

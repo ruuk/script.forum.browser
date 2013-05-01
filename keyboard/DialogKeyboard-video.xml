@@ -4,17 +4,29 @@
 	<coordinates>
 		<system>2</system>
 		<posx>20</posx>
-		<posy>555</posy>
-		<origin x="20" y="555">StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</origin>
+		<posy>360</posy>
+		<origin x="20" y="555">Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</origin>
 	</coordinates>
 	<controls>
 		<control type="group">
 			<visible>!Window.IsVisible(numericinput)</visible>
 			
 			<control type="group" id="200">
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 				<defaultcontrol>299</defaultcontrol>
 				<posx>0</posx>
-				<posy>-265</posy>
+				<posy>-275</posy>
+				<onup>307</onup>
+				<ondown>300</ondown>
+				<control type="image">
+					<posx>-10</posx>
+					<posy>-10</posy>
+					<width>140</width>
+					<height>270</height>
+					<aspectratio>stretch</aspectratio>
+					<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
+					<colordiffuse>44000000</colordiffuse>
+				</control>
 				<control type="image">
 					<posx>0</posx>
 					<posy>0</posy>
@@ -49,7 +61,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -73,7 +86,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -97,7 +111,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,73)</onclick>
@@ -121,7 +136,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -145,7 +161,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -169,7 +186,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -192,7 +210,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,304)</onclick>
 					<onclick>SendClick(,74)</onclick>
@@ -216,7 +235,8 @@
 					<font>ForumBrowser-font13</font>
 					<textcolor>yellow</textcolor>
 					<focusedcolor>black</focusedcolor>
-					<onclick>SendClick(,78)</onclick>
+					<onclick>SendClick(,304)</onclick>
+					<onclick>SendClick(,90)</onclick>
 					<onclick>SendClick(,8)</onclick>
 					<onclick>SendClick(,56)</onclick>
 					<onclick>SendClick(,304)</onclick>
@@ -246,6 +266,15 @@
 			</control>
 			
 			<control type="image">
+				<posx>-10</posx>
+				<posy>-10</posy>
+				<width>1260</width>
+				<height>166</height>
+				<aspectratio>stretch</aspectratio>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
+				<colordiffuse>44000000</colordiffuse>
+			</control>
+			<control type="image">
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>1240</width>
@@ -256,16 +285,16 @@
 			</control>
 			
 			<control type="group">
-				<animation effect="slide" end="0,40" time="500" condition="!Control.HasFocus(300)">Conditional</animation>
+				<animation effect="slide" end="0,40" time="500" condition="!Control.HasFocus(300) + Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)">Conditional</animation>
 				<posx>10</posx>
 				<posy>-20</posy>
 				<control type="image">
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>451</width>
-					<height>50</height>
+					<height>34</height>
 					<aspectratio>stretch</aspectratio>
-					<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-black.png</texture>
+					<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-header.png</texture>
 				</control>
 				<control type="label" id="311">
 					<description>header label</description>
@@ -276,7 +305,7 @@
 					<font>ForumBrowser-font12_title</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FF4488AA</textcolor>
 				</control>
 			</control>
 			
@@ -295,23 +324,6 @@
 				<height>126</height>
 				<aspectratio>stretch</aspectratio>
 				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-black.png</texture>
-			</control>
-			<control type="button">
-				<description>Close Window button</description>
-				<posx>1212</posx>
-				<posy>-40</posy>
-				<width>28</width>
-				<height>28</height>
-				<label>-</label>
-				<font>-</font>
-				<onclick>PreviousMenu</onclick>
-				<texturefocus>forum-browser-keyboard/forum-browser-close-button-focus.png</texturefocus>
-				<texturenofocus>forum-browser-keyboard/forum-browser-close-button.png</texturenofocus>
-				<onleft>3</onleft>
-				<onright>3</onright>
-				<onup>3</onup>
-				<ondown>3</ondown>
-				<visible>system.getbool(input.enablemouse)</visible>
 			</control>
 			<control type="label" id="310">
 				<description>Edit Text</description>
@@ -1168,7 +1180,7 @@
 					<onleft>306</onleft>
 					<onright>32</onright>
 					<onup>304</onup>
-					<ondown>298</ondown>
+					<ondown>300</ondown>
 					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="32">
@@ -1197,11 +1209,12 @@
 					<height>26</height>
 					<label>&lt;</label>
 					<align>center</align>
-					<aligny>center</aligny>
+					<aligny>top</aligny>
+					<textoffsety>-3</textoffsety>
 					<texturenofocus></texturenofocus>
 					<texturefocus border="6">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
-					<font>ForumBrowser-font30</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font20</font>
+					<textcolor>FF4488AA</textcolor><focusedcolor>black</focusedcolor>
 					<onleft>32</onleft>
 					<onright>306</onright>
 					<onup>8</onup>
@@ -1215,11 +1228,12 @@
 					<height>26</height>
 					<label>&gt;</label>
 					<align>center</align>
-					<aligny>center</aligny>
+					<aligny>top</aligny>
+					<textoffsety>-3</textoffsety>
 					<texturenofocus></texturenofocus>
 					<texturefocus border="6">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
-					<font>ForumBrowser-font30</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font20</font>
+					<textcolor>FF4488AA</textcolor><focusedcolor>black</focusedcolor>
 					<onleft>305</onleft>
 					<onright>307</onright>
 					<onup>8</onup>

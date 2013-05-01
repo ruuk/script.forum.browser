@@ -15,6 +15,15 @@ def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=None):
 	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
 	if smilies:
 		saveSmilies(smilies)
+		xbmcgui.Window(10000).setProperty('FB_smiley_0',u'\u263a')
+		xbmcgui.Window(10000).setProperty('FB_smiley_1',u'\u2639')
+		xbmcgui.Window(10000).setProperty('FB_smiley_2',u'\u2464')
+		xbmcgui.Window(10000).setProperty('FB_smiley_3',u'\u2463')
+		xbmcgui.Window(10000).setProperty('FB_smiley_4',u'\u2465')
+		xbmcgui.Window(10000).setProperty('FB_smiley_5',u'\u2469')
+		xbmcgui.Window(10000).setProperty('FB_smiley_6',u'\u246e')
+		xbmcgui.Window(10000).setProperty('FB_smiley_7',u'\u2462')
+
 	xbmcgui.Window(10000).setProperty('ForumBrowser_siteSmilies',bool(smilies) and '1' or '')
 		
 	keyboard = xbmc.Keyboard(default,prompt)
@@ -544,6 +553,7 @@ class SmiliesDialog(BaseDialog):
 		self.started = True
 		self.setProperty('caption',self.caption)
 		self.showItems()
+		self.setFocusId(111)
 		
 	def showItems(self):
 		clist = self.getControl(111)
@@ -570,7 +580,7 @@ class SmiliesDialog(BaseDialog):
 		self.result = self.getControl(111).getSelectedPosition()
 		self.doClose()
 		
-def smiliesDialog(heading='Smilies',smilies=None):
+def smiliesDialog(heading=util.T(32540),smilies=None):
 	if not smilies: smilies = loadSmilies() 
 	if not smilies: return
 	menu = SmiliesChoiceMenu(heading)
@@ -579,7 +589,7 @@ def smiliesDialog(heading='Smilies',smilies=None):
 	code = menu.getResult()
 	if not code: return
 	cmap = {')':48,'!':49,'@':50,'#':51,'$':52,'%':53,'^':54,'&':55,'*':56,'(':57,'[':65,']':66,'{':67,'}':68,'-':69,'_':70,'=':71,'+':72,';':73,':':74,"'":75,'"':76,',':77,'.':78,'<':79,'>':80,'/':81,'?':82,'\\':83,'|':84,'`':85,'~':86}
-	clicks = [78,8]
+	clicks = [304,90,8]
 	for c in list(code):
 		val = ord(c)
 		if val > 64 and val < 91:
@@ -590,7 +600,7 @@ def smiliesDialog(heading='Smilies',smilies=None):
 			clicks += (304,cmap[c])
 	for c in clicks:
 		cmd = 'SendClick(virtualkeyboard,%s)' % c
-		print cmd
+		#print cmd
 		xbmc.executebuiltin(cmd)
 	
 def loadSmilies():
