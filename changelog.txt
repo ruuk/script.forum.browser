@@ -9,6 +9,7 @@ TODO:
   Fix it so that the progress does not pop up twice when starting FB
   Add image info to slideout on Video skin for full message view
   Finish no window stacking mode
+  Implement get_participated_forum, get_board_stat
   
  Long Term:
   Check on optional import behavior
@@ -38,7 +39,7 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1
   
-Current Version : 2.1.1
+Current Version : 2.1.2
 
 *** 2.1.2 ***
 
@@ -46,6 +47,10 @@ Added an detail display on the image slide out on the full message view of the V
 Made the links slide out on the full message view taller on the Video skin
 Fixed the numbers for post images for counts over 20 when the skin mods are enabled
 Modified font to include more circled numbers for the post image representations
+Added 'Video' keyboard with smilies (Fits under video when playing)
+Tapatalk: Added ability to use forum specific smilies when available
+Added settings option 'Change Keyboard' which allows you to change which keyboard is installed without manually uninstalling and reinstalling
+Enabling or changing skin mods no longer requires a Forum Browser restart
 
 *** 2.1.1 ***
 

@@ -106,7 +106,7 @@ class ForumBrowserService:
 		if method == 'normal' and ntype == 'single':
 			mtime=self.notifyXbmcDuration
 			image=util.__addon__.getAddonInfo('icon')
-			xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
+			util.showNotice(header,message,mtime,image)
 		elif method != 'normal' and ntype == 'all':
 			if getSetting('FBIsRunning',False):
 				signals.sendSignal('NEW_POSTS')

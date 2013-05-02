@@ -1,7 +1,7 @@
 import threading, xbmc, xbmcgui, time, re, signals, asyncconnections, dialogs
 from xbmcconstants import *  # @UnusedWildImport
 from lib.forumbrowser import forumbrowser
-from util import LOG, ERROR, T, StoppableThread, getSetting
+import util
 
 SIGNALHUB = None
 
@@ -15,7 +15,7 @@ class ThreadError:
 	def __nonzero__(self):
 		return False
 	
-class StoppableCallbackThread(StoppableThread):
+class StoppableCallbackThread(util.StoppableThread):
 	def __init__(self,target=None, name='FBUNKOWN'):
 		self._target = target
 		self._stop = threading.Event()
@@ -26,7 +26,7 @@ class StoppableCallbackThread(StoppableThread):
 		self._errorHelper = None
 		self._errorCallback = None
 		self._threadName = name
-		StoppableThread.__init__(self,name=name)
+		util.StoppableThread.__init__(self,name=name)
 		
 	def setArgs(self,*args,**kwargs):
 		self.args = args
@@ -36,10 +36,10 @@ class StoppableCallbackThread(StoppableThread):
 		try:
 			self._target(*self.args,**self.kwargs)
 		except forumbrowser.Error,e:
-			LOG('ERROR IN THREAD: ' + e.message)
+			util.LOG('ERROR IN THREAD: ' + e.message)
 			self.errorCallback(ThreadError('%s: %s' % (self._threadName,e.message)))
 		except:
-			err = ERROR('ERROR IN THREAD: ' + self._threadName)
+			err = util.ERROR('ERROR IN THREAD: ' + self._threadName)
 			self.errorCallback(ThreadError('%s: %s' % (self._threadName,err)))
 		
 	def setFinishedCallback(self,helper,callback):
@@ -138,7 +138,7 @@ class ThreadWindow:
 				self.hideProgress()
 			if self._isMain and len(threading.enumerate()) > 1:
 				d = xbmcgui.DialogProgress()
-				d.create(T(32220),T(32221))
+				d.create(util.T(32220),util.T(32221))
 				d.update(0)
 				self.stopThreads()
 				if d.iscanceled():
@@ -153,12 +153,12 @@ class ThreadWindow:
 		
 	def stopThreads(self):
 		for t in threading.enumerate():
-			if isinstance(t,StoppableThread): t.stop()
+			if isinstance(t,util.StoppableThread): t.stop()
 		time.sleep(1)
 		while len(threading.enumerate()) > 1:
 			for t in threading.enumerate():
 				#if t != threading.currentThread(): t.join()
-				if isinstance(t,StoppableThread) and t.isAlive(): t.raiseExc(Exception)
+				if isinstance(t,util.StoppableThread) and t.isAlive(): t.raiseExc(Exception)
 			time.sleep(1)
 	
 	def _resetFunction(self):
@@ -208,7 +208,7 @@ class ThreadWindow:
 			if self._endCommand: self._endCommand()
 		
 class ManagedWindow():
-	managed = getSetting('disable_window_stacking',False)
+	managed = util.getSetting('disable_window_stacking',False)
 	
 	def __init__(self):
 		self._data = None
@@ -234,9 +234,13 @@ class ManagedWindow():
 		self.close()
 		return True
 	
-	def hop(self, data, xml, **kwargs):
+	def hop(self,data, xml, **kwargs):
+		return self._doHop(data,xml,False,**kwargs)
+		
+	def _doHop(self, data, xml, _refresh_xbmc_skin, **kwargs):
 		if not self.managed:
 			self.close()
+			if _refresh_xbmc_skin: util.refreshXBMCSkin()
 			dialogs.openWindow(self.__class__,xml,data=data,**kwargs)
 			return False
 		self._nextData = data
@@ -245,8 +249,9 @@ class ManagedWindow():
 		self._nextKWArgs = kwargs
 		self._hop = True
 		self.close()
+		if _refresh_xbmc_skin: util.refreshXBMCSkin()
 		return True
-	
+		
 	def function(self,data, xml, function,*args,**kwargs):
 		if not self.managed: return function(*args,**kwargs)
 		self._nextData = data
@@ -378,8 +383,8 @@ class PageWindow(BaseWindow):
 		self.pageData = None
 		self._totalItems = kwargs.get('total_items',0)
 		self.firstRun = True
-		self._firstPage = T(32110)
-		self._lastPage = T(32111)
+		self._firstPage = util.T(32110)
+		self._lastPage = util.T(32111)
 		self._newestPage = None
 		BaseWindow.__init__( self, *args, **kwargs )
 		
@@ -408,8 +413,8 @@ class PageWindow(BaseWindow):
 	def pageMenu(self):
 		options = [self._firstPage,self._lastPage]
 		if self._newestPage: options.append(self._newestPage)
-		options.append(T(32115))
-		idx = dialogs.dialogSelect(T(32114),options)
+		options.append(util.T(32115))
+		idx = dialogs.dialogSelect(util.T(32114),options)
 		if idx < 0: return
 		if options[idx] == self._firstPage: self.gotoPage(self.pageData.getPageNumber(1))
 		elif options[idx] == self._lastPage: self.gotoPage(self.pageData.getPageNumber(-1))
@@ -419,7 +424,7 @@ class PageWindow(BaseWindow):
 		else: self.askPageNumber()
 		
 	def askPageNumber(self):
-		page = xbmcgui.Dialog().numeric(0,T(32116))
+		page = xbmcgui.Dialog().numeric(0,util.T(32116))
 		try: int(page)
 		except: return
 		self.gotoPage(self.pageData.getPageNumber(page))

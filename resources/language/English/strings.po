@@ -1846,6 +1846,10 @@ msgctxt "#32540"
 msgid "Smilies"
 msgstr ""
 
+msgctxt "#32541"
+msgid "Change Keyboard"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

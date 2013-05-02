@@ -195,6 +195,24 @@ class StoppableThread(threading.Thread):
 		"""
 		_async_raise( self._get_my_tid(), exctype )
 		
+def setRefreshXBMCSkin():
+	setSetting('refresh_skin',True)
+	
+def xbmcSkinAwaitingRefresh():
+	return getSetting('refresh_skin',False)
+
+def refreshXBMCSkin():
+	if not getSetting('refresh_skin',True): return False
+	setSetting('refresh_skin',False)
+	showNotice('Forum Browser','Refreshing XBMC Skin',500)
+	xbmc.sleep(500)
+	LOG('! REFRESHING SKIN !')
+	xbmc.executebuiltin('ReloadSkin()')
+	return True
+	
+def showNotice(header,message,mtime='',image=__addon__.getAddonInfo('icon')):
+	xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
+	
 class XBMCControlConditionalVisiblity:
 	def __init__(self):
 		self.cache = {}

@@ -24,6 +24,7 @@
     <setting id="smi_count_link_images" type="bool" label="32045" subsetting="true" default="false" enable="eq(-1,true)"/>
     <setting id="use_skin_mods" type="bool" label="32234" default="true" />
     <setting id="use_keyboard_mod" type="bool" label="32237" subsetting="true" default="false"  enable="eq(-1,true)"/>
+    <setting label="32541"  subsetting="true" type="action" action="RunScript(script.forum.browser,change_keyboard)" id="current_keyboard_mod" enable="eq(-1,true) + eq(-2,true)"/>
      <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_appearance)"/>
   </category>
   <category label="32018">

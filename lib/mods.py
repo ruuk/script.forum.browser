@@ -73,7 +73,7 @@ def checkKBModRemove(skinPath):
 			dialogs.showMessage(T(32476),T(32476),' ',T(32477))
 			return True
 				
-def checkForSkinMods():
+def checkForSkinMods(just_check_font=False):
 	skinPath = xbmc.translatePath('special://skin')
 	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
 	skinName = os.path.basename(skinPath)
@@ -97,6 +97,7 @@ def checkForSkinMods():
 				if 'Forum Browser' in contents:
 					LOG('Fonts mod detected')
 					install = False
+	if just_check_font: return install
 	if not install and not getSetting('use_keyboard_mod',False):
 		LOG('Keyboard mod disabled')
 		return checkKBModRemove(localSkinPath)
@@ -121,25 +122,19 @@ def checkForSkinMods():
 def installSkinMods(update=False):
 	if not getSetting('use_skin_mods',False): return
 		
+	paths = getPaths()
 	#restart = False
-	fbPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
-	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
-	skinPath = xbmc.translatePath('special://skin')
-	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
-	currentSkin = os.path.basename(skinPath)
-	localSkinPath = os.path.join(localAddonsPath,currentSkin)
-	#LOG(localSkinPath)
-	#LOG(skinPath)
-	version = getSkinVersion(skinPath)
-	version2 = getSkinVersion(localSkinPath)
 	
-	if not os.path.exists(localSkinPath) or StrictVersion(version2) < StrictVersion(version):
-		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(currentSkin),T(32488),T(32489))
+	version = getSkinVersion(paths.skinPath)
+	version2 = getSkinVersion(paths.localSkinPath)
+	
+	if not os.path.exists(paths.localSkinPath) or StrictVersion(version2) < StrictVersion(version):
+		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(paths.currentSkin),T(32488),T(32489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
 		dialog.create(T(32490),T(32491))
 		try:
-			copyTree(skinPath,localSkinPath,dialog)
+			copyTree(paths.skinPath,paths.localSkinPath,dialog)
 		except:
 			err = ERROR('Failed to copy skin to user directory')
 			dialogs.showMessage(T(32050),err,T(32492),error=True)
@@ -148,71 +143,87 @@ def installSkinMods(update=False):
 			dialog.close()
 		#restart = True
 		dialogs.showMessage(T(32304),T(32493),T(32494),success=True)
-		
-	skinPath = localSkinPath
-	sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.txt')
-	sourceFontPath = os.path.join(fbPath,'keyboard','ForumBrowser-DejaVuSans.ttf')
-	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
-	backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
-	fontPath = os.path.join(skinPath,'720p','Font.xml')
-	fontBackupPath = os.path.join(skinPath,'720p','Font.xml.FBbackup')
-	if not os.path.exists(dialogPath):
-		dialogPath = dialogPath.replace('720p','1080i')
-		backupPath = backupPath.replace('720p','1080i')
-		fontPath = fontPath.replace('720p','1080i')
-		fontBackupPath = fontBackupPath.replace('720p','1080i')
-		sourceFontXMLPath = sourceFontXMLPath.replace('720p','1080i')
 	
-	LOG('Local Addons Path: %s' % localAddonsPath)
-	LOG('Current skin: %s' % currentSkin)
-	LOG('Skin path: %s' % skinPath)
-	LOG('Keyboard target path: %s' % dialogPath)
+	LOG('Local Addons Path: %s' % paths.localAddonsPath)
+	LOG('Current skin: %s' % paths.currentSkin)
+	LOG('Skin path: %s' % paths.localSkinPath)
+	LOG('Keyboard target path: %s' % paths.dialogPath)
 	
-	copyFont(sourceFontPath,skinPath)
-	fontcontents = open(fontPath,'r').read()
-	if not os.path.exists(fontBackupPath) or not 'Forum Browser' in fontcontents:
-		LOG('Creating backup of original Font.xml file: ' + fontBackupPath)
-		open(fontBackupPath,'w').write(fontcontents)
+	copyFont(paths.sourceFontPath,paths.localSkinPath)
+	fontcontents = open(paths.fontPath,'r').read()
+	if not os.path.exists(paths.fontBackupPath) or not 'Forum Browser' in fontcontents:
+		LOG('Creating backup of original Font.xml file: ' + paths.fontBackupPath)
+		open(paths.fontBackupPath,'w').write(fontcontents)
 		
 	if not 'Forum Browser' in fontcontents or update:
-		LOG('Modifying contents of Font.xml with: ' + sourceFontXMLPath)
-		original = open(fontPath,'r').read()
-		modded = original.replace('<font>',open(sourceFontXMLPath,'r').read() + '<font>',1)
-		open(fontPath,'w').write(modded)
+		LOG('Modifying contents of Font.xml with: ' + paths.sourceFontXMLPath)
+		original = open(paths.fontPath,'r').read()
+		modded = original.replace('<font>',open(paths.sourceFontXMLPath,'r').read() + '<font>',1)
+		open(paths.fontPath,'w').write(modded)
 	dialogs.showMessage(T(32052),'',T(32495))
 	
 	if update and not getSetting('use_keyboard_mod',False): return True
+	return installKeyboardMod(update,paths)
 	
+def installKeyboardMod(update=True,paths=None):
+	if not paths: paths = getPaths()
 	yes = xbmcgui.Dialog().yesno(T(32496),T(32497),T(32498))
 	setSetting('use_keyboard_mod',yes and 'true' or 'false')
 	
 	if yes:
-		keyboardFile = chooseKeyboardFile(fbPath,currentSkin)
+		keyboardFile = chooseKeyboardFile(paths.fbPath,paths.currentSkin)
 		if not keyboardFile: return True
-		sourcePath = os.path.join(fbPath,'keyboard',keyboardFile)
+		sourcePath = os.path.join(paths.fbPath,'keyboard',keyboardFile)
 		LOG('Keyboard source path: %s' % sourcePath)
-		copyKeyboardModImages(skinPath)
-		keyboardcontents = open(dialogPath,'r').read()
-		if not os.path.exists(backupPath) or not 'Forum Browser' in keyboardcontents:
-			LOG('Creating backup of original DialogKeyboard.xml file: ' + backupPath)
-			open(backupPath,'w').write(open(dialogPath,'r').read())
+		copyKeyboardModImages(paths.localSkinPath)
+		keyboardcontents = open(paths.dialogPath,'r').read()
+		if not os.path.exists(paths.backupPath) or not 'Forum Browser' in keyboardcontents:
+			LOG('Creating backup of original DialogKeyboard.xml file: ' + paths.backupPath)
+			open(paths.backupPath,'w').write(open(paths.dialogPath,'r').read())
 		
 		if not 'Forum Browser' in keyboardcontents or update:
 			LOG('Replacing DialogKeyboard.xml with: ' + sourcePath)
-			os.remove(dialogPath)
-			open(dialogPath,'w').write(open(sourcePath,'r').read())
+			os.remove(paths.dialogPath)
+			open(paths.dialogPath,'w').write(open(sourcePath,'r').read())
+		#if getSetting('FBIsRunning',True) and FBrunning:
+		#	dialogs.showMessage(T(32052),'',T(32499) + '[CR][CR]' + T(32477))
+		#else:
 		dialogs.showMessage(T(32052),'',T(32499))
 	else:
 		dialogs.showMessage(T(32483),T(32521),' ',T(32522))
 	return True
 
+def getPaths():
+	class paths:
+		fbPath = xbmc.translatePath(__addon__.getAddonInfo('path'))
+		localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
+		skinPath = xbmc.translatePath('special://skin')
+		if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
+		currentSkin = os.path.basename(skinPath)
+		localSkinPath = os.path.join(localAddonsPath,currentSkin)
+		sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.txt')
+		sourceFontPath = os.path.join(fbPath,'keyboard','ForumBrowser-DejaVuSans.ttf')
+		dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
+		backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
+		fontPath = os.path.join(skinPath,'720p','Font.xml')
+		fontBackupPath = os.path.join(skinPath,'720p','Font.xml.FBbackup')
+		if not os.path.exists(dialogPath):
+			dialogPath = dialogPath.replace('720p','1080i')
+			backupPath = backupPath.replace('720p','1080i')
+			fontPath = fontPath.replace('720p','1080i')
+			fontBackupPath = fontBackupPath.replace('720p','1080i')
+			sourceFontXMLPath = sourceFontXMLPath.replace('720p','1080i')
+	return paths
+	
 def chooseKeyboardFile(fbPath,currentSkin):
 	files = os.listdir(os.path.join(fbPath,'keyboard'))
 	skins = []
 	for f in files:
 		if f.startswith('DialogKeyboard-'):
 			skinName = f.split('-',1)[-1].rsplit('.',1)[0].lower()
-			if skinName in currentSkin.lower() or skinName == 'generic': skins.append(skinName.title())
+			if skinName in currentSkin.lower() or skinName == 'generic' or skinName == 'video': skins.append(skinName.title())
 	idx = xbmcgui.Dialog().select(T(32523),skins)
 	if idx < 0: return None
-	return 'DialogKeyboard-%s.xml' % skins[idx].lower()
+	skin = skins[idx]
+	setSetting('current_keyboard_mod',skin)
+	return 'DialogKeyboard-%s.xml' % skin.lower()

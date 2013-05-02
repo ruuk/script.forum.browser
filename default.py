@@ -11,6 +11,14 @@ if __name__ == '__main__':
 		elif sys.argv[-1] == 'smilies':
 			dialogs.smiliesDialog()
 		sys.exit()
+	elif sys.argv[-1] == 'change_keyboard':
+		from lib import mods,util  # @Reimport
+		if mods.checkForSkinMods(just_check_font=True):
+			mods.installSkinMods()
+		else:
+			mods.installKeyboardMod()
+		util.setRefreshXBMCSkin()
+		sys.exit()
 		
 import urllib2, re, time, urlparse, binascii, math, textwrap
 import xbmcgui #@UnresolvedImport
@@ -2879,9 +2887,10 @@ class ForumsWindow(windows.BaseWindow):
 		global THEME
 		skin = util.getSavedTheme(current=THEME)
 		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
-		if skin != THEME:
+		refresh = util.xbmcSkinAwaitingRefresh()
+		if skin != THEME or refresh:
 			THEME = util.getSavedTheme(current=skin,get_current=True)
-			self.hop(self.data,"script-forumbrowser-forums.xml")
+			self._doHop(self.data,"script-forumbrowser-forums.xml",refresh)
 			#dialogs.showMessage(T(32374),T(32375))
 
 ######################################################################################
@@ -3330,10 +3339,11 @@ def updateOldVersion():
 	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
 	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
 		convertForumSettings_1_1_4()
-	if StrictVersion(lastVersion) < StrictVersion('1.3.5') and not lastVersion == '0.0.0':
+	if StrictVersion(lastVersion) < StrictVersion('2.1.2') and not lastVersion == '0.0.0':
 		if getSetting('use_skin_mods',False):
 			dialogs.showMessage(T(32393),T(32394))
 			mods.installSkinMods(update=True)
+			util.setRefreshXBMCSkin()
 	if lastVersion == '0.0.0': doFirstRun()
 	return True
 
@@ -3381,9 +3391,11 @@ def doSettings(window=None):
 	if FB:
 		FB.MC.resetRegex()
 		FB.MC.setReplaces()
-	if mods.checkForSkinMods():
-		setSetting('refresh_skin',True)
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
+	if mods.checkForSkinMods():
+		util.setRefreshXBMCSkin()
+		return True
+	return False
 
 def forumsManager(window=None,size='full',forumID=None):
 	if size == 'small':
@@ -4155,10 +4167,9 @@ def startForumBrowser(forumID=None):
 	updateOldVersion()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 	try:
-		if mods.checkForSkinMods() or getSetting('refresh_skin',False):
+		if mods.checkForSkinMods() or util.xbmcSkinAwaitingRefresh():
 			LOG('Skin Mods Changed: Reloading Skin')
-			xbmc.executebuiltin('ReloadSkin()')
-			setSetting('refresh_skin',False)
+			util.refreshXBMCSkin()
 	except:
 		ERROR('Error Installing Skin Mods')
 
