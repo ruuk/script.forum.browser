@@ -674,7 +674,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		LOG('FAILED TO LOGIN')
 		return False
 		
-	def checkLogin(self,callback=None):
+	def checkLogin(self,callback=None,callback_percent=5):
 		#raise Exception('TEST')
 		loginURL = ''
 		url = self.checkForLoginLink()
@@ -690,7 +690,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		if not self.browser or self.needsLogin or not self.isLoggedIn():
 			self.needsLogin = False
-			if not callback(5,T(32100)): return False
+			if not callback(callback_percent,T(32100)): return False
 			if not self.login(loginURL):
 				self._loggedIn = False
 			else:

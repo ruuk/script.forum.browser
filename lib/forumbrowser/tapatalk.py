@@ -585,6 +585,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			raise
 		except:
 			ERROR('Failed to get forum config')
+	
+	def getStats(self):
+		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
+		stats = self.server.get_board_stat()
+		if isinstance(stats,dict) and 'total_threads'in stats: return stats
+		return None
 		
 	def getSmilies(self):
 		if self._siteSmilies is not None: return self._siteSmilies

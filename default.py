@@ -536,6 +536,10 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		elif controlID == 208: updateThemeODB(forumID)
 		elif controlID == 210:
 			dialogs.showMessage(str(self.getControl(210).getLabel()),dialogs.loadHelp('options.help').get('help',''))
+		elif controlID == 211:
+			self.moveFavoriteUp(forumID)
+		elif controlID == 212:
+			self.moveFavoriteDown(forumID)
 			
 	def onAction(self,action):
 		windows.BaseWindowDialog.onAction(self,action)
@@ -558,7 +562,30 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				if focusID  == 209: helpname = 'parserbrowser'
 				dialogs.showMessage(str(self.getControl(focusID).getLabel()),dialogs.loadHelp('options.help').get(helpname,''))
 
+	def moveFavoriteUp(self,forumID):
+		favs = getFavorites()
+		if not forumID in favs: return
+		idx = favs.index(forumID)
+		if idx == 0: return
+		favs.remove(forumID)
+		idx-=1
+		favs.insert(idx, forumID)
+		saveFavorites(favs)
+		self.refresh(forumID)
+		self.setFocusId(260)
 		
+	def moveFavoriteDown(self,forumID):
+		favs = getFavorites()
+		if not forumID in favs: return
+		idx = favs.index(forumID)
+		if idx >= len(favs): return
+		favs.remove(forumID)
+		idx+=1
+		favs.insert(idx, forumID)
+		saveFavorites(favs)
+		self.refresh(forumID)
+		self.setFocusId(260)
+	
 	def startDisplayTimeout(self):
 		if self.forumsWindow: return
 		if getSetting('notify_dialog_close_only_video',True) and not self.isVideoPlaying(): return 
@@ -619,13 +646,18 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			whole = favs + rest
 			final = []
 			for f in whole:
-				if f and not f in final and not f.startswith('.'):
+				if not f in final and not f.startswith('.'):
 					final.append(f)
 		unreadData = self.loadLastData() or {}
 		uitems = []
 		items = []
+		fitems =[]
 		colors = {}
+		last = None
 		for f in final:
+			if not f:
+				if last: last.setProperty('separator','separator')
+				continue
 			flag = False
 			path = getForumPath(f,just_path=True)
 			unread = unreadData.get(f) or {}
@@ -646,7 +678,6 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			else:
 				path = self.makeColorFile(color, self.colorsDir)
 				colors[color] = path
-			if f in favs: item.setProperty('favorite','favorite')
 			item.setProperty('bgfile',path)
 			item.setProperty('forumID',f)
 			item.setProperty('type',f[:2])
@@ -666,11 +697,15 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			usubs = usubs and '%s/%s' % (usubs,tsubs) or ''
 			item.setProperty('unread_subs',usubs)
 			item.setProperty('unread_PMs',upms)
-			if flag:
+			if f in favs:
+				item.setProperty('favorite','favorite')
+				fitems.append(item)	
+			elif flag:
 				uitems.append(item)
 			else:
 				items.append(item)
-		self.items = uitems + items
+			last = item
+		self.items = fitems + uitems + items
 		idx = 0
 		for item in self.items:
 			if item.getProperty('forumID') == self.initialForumID: self.initialIndex = idx
@@ -714,7 +749,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			ERROR('Failed To Read Data File')
 
 def getNotifyList():
-		flist = listForumSettings()
+		flist = os.listdir(FORUMS_PATH)
 		nlist = []
 		for f in flist:
 			data = loadForumSettings(f)
@@ -2392,21 +2427,32 @@ class ForumsWindow(windows.BaseWindow):
 			self.setFocusId(202)
 			raise
 		
-	def startGetForumBrowser(self,forum=None,url=None):
+	def startGetForumBrowser(self,forum=None,url=None,all_at_once=True):
 		self.getControl(201).setEnabled(False)
 		self.getControl(203).setEnabled(False)
 		self.getControl(204).setEnabled(False)
-		t = self.getThread(getForumBrowser,finishedCallback=self.endGetForumBrowser,errorCallback=self.errorCallback,name='GETFORUMBROWSER')
-		t.setArgs(forum=forum,url=url,donecallback=t.finishedCallback)
-		t.start()
+		if all_at_once:
+			t = self.getThread(self.openForum,finishedCallback=self.doFillForumList,errorCallback=self.errorCallback,name='OPENFORUM')
+			t.setArgs(forum=forum,url=url,callback=t.progressCallback,donecallback=t.finishedCallback)
+			t.start()
+		else:
+			t = self.getThread(getForumBrowser,finishedCallback=self.endGetForumBrowser,errorCallback=self.errorCallback,name='GETFORUMBROWSER')
+			t.setArgs(forum=forum,url=url,donecallback=t.finishedCallback)
+			t.start()
 		
-	def endGetForumBrowser(self,fb,forumElements):
+	def openForum(self,forum=None,url=None,callback=None,donecallback=None):
+		fb, forumElements = getForumBrowser(forum,url)
+		self.endGetForumBrowser(fb, forumElements, skip_fillForumList=True)
+		self.fillForumList(first=True, skip_getForums=True)
+		FB.getForums(callback=callback,donecallback=donecallback)
+		
+	def endGetForumBrowser(self,fb,forumElements,skip_fillForumList=False):
 		global FB
 		FB = fb
 		#self.setTheme()
 		self.getControl(112).setVisible(False)
 		self.resetForum(no_theme=True)
-		self.fillForumList(True)
+		if not skip_fillForumList: self.fillForumList(True)
 		setSetting('last_forum',FB.getForumID())
 		self.forumElements = forumElements
 		
@@ -2488,7 +2534,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.failedToGetForum()
 		windows.ThreadWindow.stopThread(self)
 		
-	def fillForumList(self,first=False,data=None):
+	def fillForumList(self,first=False,data=None,skip_getForums=False):
 		if not FB: return
 		self.setLabels()
 		if data:
@@ -2511,6 +2557,7 @@ class ForumsWindow(windows.BaseWindow):
 				FB.getForums(callback=self.setProgress,donecallback=self.doFillForumList)
 				self.openSubscriptionsWindow()
 				return
+		if skip_getForums: return
 		t = self.getThread(FB.getForums,finishedCallback=self.doFillForumList,errorCallback=self.errorCallback,name='FORUMS')
 		t.setArgs(callback=t.progressCallback,donecallback=t.finishedCallback)
 		t.start()
@@ -3558,6 +3605,9 @@ def getFavorites():
 		favs = []
 	return favs
 	
+def saveFavorites(favs):
+	setSetting('favorites','*:*'.join(favs))
+	
 def selectForumCategory(with_all=False):
 	d = dialogs.ChoiceMenu(T(32420))
 	if with_all:
@@ -4125,10 +4175,6 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			from lib.forumbrowser import forumrunner
 			if log_function: forumrunner.LOG = log_function
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=getSetting('always_login',False))
-		#else:
-		#	err = 'getForumBrowser(): Boxee'
-		#	from forumbrowser import parserbrowser
-		#	FB = parserbrowser.ParserForumBrowser(forum,always_login=getSetting('always_login') == 'true')
 	except forumbrowser.ForumMovedException,e:
 		showError(T(32050),T(32470),'\n' + e.message,error=True)
 		return False
@@ -4157,7 +4203,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		return False
 	
 	if donecallback: donecallback(FB,forumElements)
-	return FB
+	return FB, forumElements
 
 def startForumBrowser(forumID=None):
 	global PLAYER, SIGNALHUB, STARTFORUM, WM

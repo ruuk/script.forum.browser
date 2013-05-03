@@ -195,8 +195,8 @@ class ThreadWindow:
 		t.setErrorCallback(self.endInMain,errorCallback)
 		t.setProgressCallback(self.runInMain,progressCallback)
 		self._currentThread = t
-		self.showProgress()
 		if self._startCommand: self._startCommand()
+		self.showProgress()
 		return t
 		
 	def stopThread(self):
@@ -297,6 +297,7 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 	def startProgress(self):
 		self._progMessageSave = self.getControl(104).getLabel()
 		self._progressWidth = self.getControl(300).getWidth()
+		self.getControl(310).setWidth(1)
 		#self.getControl(310).setVisible(True)
 	
 	def setProgress(self,pct,message=''):

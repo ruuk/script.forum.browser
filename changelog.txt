@@ -51,6 +51,9 @@ Added 'Video' keyboard with smilies (Fits under video when playing)
 Tapatalk: Added ability to use forum specific smilies when available
 Added settings option 'Change Keyboard' which allows you to change which keyboard is installed without manually uninstalling and reinstalling
 Enabling or changing skin mods no longer requires a Forum Browser restart
+Fixed a bug where service was checking removed forums
+Progress no longer pops up twice when opening a forum (most noticable on the Video skin)
+Added the ability to re-arrange favorite forums
 
 *** 2.1.1 ***
 

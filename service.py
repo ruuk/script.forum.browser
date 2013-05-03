@@ -127,7 +127,8 @@ class ForumBrowserService:
 		return self.getUsername() != '' and self.getPassword() != ''
 		
 	def setForumBrowser(self,forum):
-		self.FB = getForumBrowser(forum,silent=True,no_default=True,log_function=LOG)
+		result = getForumBrowser(forum,silent=True,no_default=True,log_function=LOG)
+		self.FB = result and result[0] or None
 		return self.FB
 		
 	def checkLast(self,forum,ID,count=1):
@@ -166,8 +167,12 @@ class ForumBrowserService:
 		for forum in getNotifyList():
 			fdata = {}
 			flag = False
-			if not self.setForumBrowser(forum): continue
-			if not self.hasLogin(): continue
+			if not self.setForumBrowser(forum):
+				LOG('Failed to get browser for forum: %s' % forum)
+				continue
+			if not self.hasLogin():
+				LOG('No login for forum: %s' % forum)
+				continue
 			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,rules=loadForumSettings(forum,get_rules=True))
 			try:
 				pmcounts = self.FB.getPMCounts()

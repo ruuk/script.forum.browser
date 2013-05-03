@@ -204,7 +204,7 @@ def xbmcSkinAwaitingRefresh():
 def refreshXBMCSkin():
 	if not getSetting('refresh_skin',True): return False
 	setSetting('refresh_skin',False)
-	showNotice('Forum Browser','Refreshing XBMC Skin',500)
+	showNotice('Forum Browser',T(32542),500)
 	xbmc.sleep(500)
 	LOG('! REFRESHING SKIN !')
 	xbmc.executebuiltin('ReloadSkin()')

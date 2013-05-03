@@ -1063,6 +1063,8 @@ class ForumBrowser:
 		
 	def makeURL(self,url): return url
 	
+	def getStats(self): return None
+		
 	def getSmilies(self): return None
 	
 	def getPMCounts(self,pct=0): return None

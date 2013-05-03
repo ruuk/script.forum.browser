@@ -140,7 +140,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		self.forumType = self.forumParser.forumType
 		self.MC.resetRegex()
 		self.doLoadForumData()
-		self.checkLogin(callback)
+		self.checkLogin(callback,callback_percent=95)
 		if not forums and self.isLoggedIn():
 			try:
 				html = self.readURL(url,callback=callback,force_browser=True)
