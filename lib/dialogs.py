@@ -368,7 +368,6 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 		return not self.canceled
 		
 	def onAction(self,action):
-		print 'TEST'
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2: action = ACTION_PREVIOUS_MENU
 		if action == ACTION_PREVIOUS_MENU:
 			self.cancel()

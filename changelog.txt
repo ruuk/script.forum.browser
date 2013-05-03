@@ -10,6 +10,7 @@ TODO:
   Add image info to slideout on Video skin for full message view
   Finish no window stacking mode
   Implement get_participated_forum, get_board_stat
+  Smilies on other keyboards
   
  Long Term:
   Check on optional import behavior
@@ -23,7 +24,6 @@ TODO:
   Logo url from field in forum config data?
   Add missing smilies other forum types
   Add missing quote formats for other forum systems
-  Smiley dialog
   Tapatalk: Use charset from get_config
   Find forum mobiquo.php path from tapatalk.js path in html page
   Latest Threads

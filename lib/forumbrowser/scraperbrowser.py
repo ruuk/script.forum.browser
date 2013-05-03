@@ -604,7 +604,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						ct+=1
 						try:
 							for c in self.browser.form.controls:
-								print c
+								#print c
 								if not userset and usercontrol in str(c.name):
 									LOG('Found possible username control: %s' % c.name)
 									userset = True
@@ -988,7 +988,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			base_url = re.sub(self.filters['main_url_cleaner'],'',base_url)
 			if not base_url.endswith('/'): base_url += '/'
 		base_url += prefix
-		print base_url
+		#print base_url
 		return base_url + sub
 		
 	def getURL(self,name):
