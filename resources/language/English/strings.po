@@ -1659,7 +1659,7 @@ msgid "Files copied."
 msgstr ""
 
 msgctxt "#32494"
-msgid "Forum Browser needs to be restarted for the mod to take effect."
+msgid "XBMC needs to be restarted for the mod to take effect."
 msgstr ""
 
 msgctxt "#32495"

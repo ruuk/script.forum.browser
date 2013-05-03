@@ -86,7 +86,7 @@ def checkForSkinMods(just_check_font=False):
 	if __addon__.getSetting('use_skin_mods') != 'true':
 		LOG('Skin mods disabled')
 		return checkKBModRemove(localSkinPath)
-	font = os.path.join(localSkinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
+	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	install = True
 	if os.path.exists(font):
 		if StrictVersion(version2) >= StrictVersion(version):
@@ -102,8 +102,8 @@ def checkForSkinMods(just_check_font=False):
 		LOG('Keyboard mod disabled')
 		return checkKBModRemove(localSkinPath)
 	
-	dialogPath = os.path.join(localSkinPath,'720p','DialogKeyboard.xml')
-	if not os.path.exists(dialogPath): dialogPath = os.path.join(localSkinPath,'1080i','DialogKeyboard.xml')
+	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
+	if not os.path.exists(dialogPath): dialogPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml')
 	if os.path.exists(dialogPath):
 		keyboardcontents = open(dialogPath,'r').read()
 		if 'Forum Browser' in keyboardcontents:
@@ -203,10 +203,10 @@ def getPaths():
 		localSkinPath = os.path.join(localAddonsPath,currentSkin)
 		sourceFontXMLPath = os.path.join(fbPath,'keyboard','Font-720p.txt')
 		sourceFontPath = os.path.join(fbPath,'keyboard','ForumBrowser-DejaVuSans.ttf')
-		dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
-		backupPath = os.path.join(skinPath,'720p','DialogKeyboard.xml.FBbackup')
-		fontPath = os.path.join(skinPath,'720p','Font.xml')
-		fontBackupPath = os.path.join(skinPath,'720p','Font.xml.FBbackup')
+		dialogPath = os.path.join(localSkinPath,'720p','DialogKeyboard.xml')
+		backupPath = os.path.join(localSkinPath,'720p','DialogKeyboard.xml.FBbackup')
+		fontPath = os.path.join(localSkinPath,'720p','Font.xml')
+		fontBackupPath = os.path.join(localSkinPath,'720p','Font.xml.FBbackup')
 		if not os.path.exists(dialogPath):
 			dialogPath = dialogPath.replace('720p','1080i')
 			backupPath = backupPath.replace('720p','1080i')
