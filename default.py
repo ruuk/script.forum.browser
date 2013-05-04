@@ -382,26 +382,13 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		if not cid: return
 		#self.setFocusId(100)
 		self.setFocusId(cid)
-		
-	def handleXBMCDialogProgress(self,dialog,pct,msg):
-		if pct > -1: dialog.update(pct,msg)
-		if dialog.iscanceled(): asyncconnections.StopConnection()
-		return not dialog.iscanceled()
 	
 	def getWebImage(self,url):
-		d = xbmcgui.DialogProgress()
-		d.create(T(32285))
-		try:
-			info = forumbrowser.HTMLPageInfo(url,progress_callback=(self.handleXBMCDialogProgress,d))
-			if d.iscanceled():
-				d.close()
-				return ''
+		with dialogs.xbmcDialogProgress(T(32285)) as d:
+			info = forumbrowser.HTMLPageInfo(url,progress_callback=d.update)
+			if d.iscanceled(): return ''
 			domain = url.split('://',1)[-1].split('/',1)[0]
 			logo = chooseLogo(domain,info.images(),keep_colors=True,splash=d)
-		except util.StopRequestedException:
-			return ''
-		finally:
-			d.close()
 		return logo
 	
 	def makeColorFile(self,color):
@@ -3618,13 +3605,9 @@ def selectForumCategory(with_all=False):
 	return d.getResult()
 
 def addForum(current=False):
-	dialog = xbmcgui.DialogProgress()
-	dialog.create(T(32423))
-	dialog.update(0,T(32424))
-	info = None
 	user = None
 	password=None
-	try:
+	with dialogs.xbmcDialogProgress(T(32423),T(32424)) as dialog:
 		if current:
 			if not FB: return
 			ftype = FB.prefix[:2]
@@ -3643,7 +3626,7 @@ def addForum(current=False):
 			forum = dialogs.doKeyboard(T(32426))
 			if forum == None: return
 			forum = forum.lower()
-			dialog.update(10,'%s: Tapatalk' % T(32427))
+			if not dialog.update(10,'%s: Tapatalk' % T(32427)): return
 			url = tapatalk.testForum(forum)
 			ftype = ''
 			label = ''
@@ -3652,7 +3635,7 @@ def addForum(current=False):
 				label = 'Tapatalk'
 				pageURL = url.split('/mobiquo/',1)[0]
 			else:
-				dialog.update(13,'%s: Forumrunner' % T(32427))
+				if not dialog.update(13,'%s: Forumrunner' % T(32427)): return
 				from lib.forumbrowser import forumrunner #@Reimport
 				url = forumrunner.testForum(forum)
 				if url:
@@ -3661,13 +3644,13 @@ def addForum(current=False):
 					pageURL = url.split('/forumrunner/',1)[0]
 					
 			if not url:
-				dialog.update(16,'%s: Parser Browser' % T(32427))
+				if not dialog.update(16,'%s: Parser Browser' % T(32427)): return
 				yes = dialogs.dialogYesNo(T(32428),T(32429),'',T(32430))
 				if yes:
 					user = dialogs.doKeyboard(T(32201))
 					if user: password = dialogs.doKeyboard(T(32202),hidden=True)
 				from lib.forumbrowser import genericparserbrowser
-				url,info,parser = genericparserbrowser.testForum(forum,user,password)
+				url,parser = genericparserbrowser.testForum(forum,user,password,progress_callback=dialog.update)
 				if url:
 					ftype = 'GB'
 					label = 'Parser Browser (%s)' % parser.getForumTypeName()
@@ -3691,15 +3674,18 @@ def addForum(current=False):
 					dialogs.showInfo('parserbrowser-normal')
 			forum = url.split('http://',1)[-1].split('/',1)[0]
 			
-		dialog.update(20,T(32434))
-		if not info: info = forumbrowser.HTMLPageInfo(pageURL)
+		if not dialog.update(20,T(32434)): return
+		dialog.setRange(20,30)
+		info = forumbrowser.HTMLPageInfo(pageURL,progress_callback=dialog.update)
+		dialog.setRange()
 		tmp_desc = info.description(info.title(''))
 		tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
 		images = info.images()
-		dialog.update(30,T(32435))
+		if not dialog.update(30,T(32435)): return
 		desc = dialogs.doKeyboard(T(32435),default=tmp_desc,mod=True)
+		if desc is None: return
 		if not desc: desc = tmp_desc
-		dialog.update(40,T(32436))
+		if not dialog.update(40,T(32436)): return
 		logo = chooseLogo(forum,images)
 		LOG('Adding Forum: %s at URL: %s' % (forum,url))
 		name = forum
@@ -3712,8 +3698,6 @@ def addForum(current=False):
 		dialog.update(60,T(32437))
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 		return forumID
-	finally:
-		dialog.close()
 	
 def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do these all the same. What... was I crazy?
 	if ftype == 'TT':

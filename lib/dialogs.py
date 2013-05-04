@@ -1,5 +1,5 @@
 import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
-import util
+import util, asyncconnections
 from xbmcconstants import *  # @UnusedWildImport
 
 DEBUG = None
@@ -11,10 +11,10 @@ def clearDirFiles(filepath):
 		f = os.path.join(filepath,f)
 		if os.path.isfile(f): os.remove(f)
 				
-def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=None):
+def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=False):
 	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
-	if smilies:
-		saveSmilies(smilies)
+	if smilies is not False:
+		if smilies: saveSmilies(smilies)
 		xbmcgui.Window(10000).setProperty('FB_smiley_0',u'\u263a')
 		xbmcgui.Window(10000).setProperty('FB_smiley_1',u'\u2639')
 		xbmcgui.Window(10000).setProperty('FB_smiley_2',u'\u2464')
@@ -23,8 +23,10 @@ def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=None):
 		xbmcgui.Window(10000).setProperty('FB_smiley_5',u'\u2469')
 		xbmcgui.Window(10000).setProperty('FB_smiley_6',u'\u246e')
 		xbmcgui.Window(10000).setProperty('FB_smiley_7',u'\u2462')
-
-	xbmcgui.Window(10000).setProperty('ForumBrowser_siteSmilies',bool(smilies) and '1' or '')
+	else:
+		xbmcgui.Window(10000).setProperty('FB_smiley_0','')
+		
+	xbmcgui.Window(10000).setProperty('ForumBrowser_siteSmilies',smilies and '1' or '')
 		
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
@@ -327,8 +329,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		
 	def onClick( self, controlID ):
 		if controlID == 120:
-			pass
-			#self.finish()
+			self.finish()
 		
 	def doMenu(self):
 		if self.menu.contextCallback:
@@ -650,6 +651,53 @@ class ImageChoiceMenu(ChoiceMenu):
 		if result == None: return None
 		return self.items[result]['id']
 
+class xbmcDialogProgress:
+	def __init__(self,heading,line1='',line2='',line3=''):
+		self.heading = heading
+		self.line1 = line1
+		self.line2 = line2
+		self.line3 = line3
+		self.lastPercent = 0
+		self.setRange()
+		self.dialog = xbmcgui.DialogProgress()
+	
+	def __enter__(self):
+		self.create(self.heading,self.line1,self.line2,self.line3)
+		self.update(0,self.line1,self.line2,self.line3)
+		return self
+	
+	def __exit__(self,etype, evalue, traceback):
+		self.close()
+		if etype == util.StopRequestedException: return True
+	
+	def setRange(self,start=0,end=100):
+		self.start = start
+		self.end = end
+		self.range = end - start
+		
+	def recalculatePercent(self,pct):
+		#print '%s - %s %s %s' % (pct,self.start,self.range,self.start + int((pct/100.0) * self.range))
+		return self.start + int((pct/100.0) * self.range)
+
+	def create(self,heading,line1='',line2='',line3=''):
+		self.dialog.create(heading,line1,line2,line3)
+		
+	def update(self,pct,line1='',line2='',line3=''):
+		if self.dialog.iscanceled():
+			asyncconnections.StopConnection()
+			return False
+		pct = self.recalculatePercent(pct)
+		if pct < self.lastPercent: pct = self.lastPercent
+		self.lastPercent = pct
+		self.dialog.update(pct,line1,line2,line3)
+		return True
+	
+	def iscanceled(self):
+		return self.dialog.iscanceled()
+	
+	def close(self):
+		self.dialog.close()
+		
 def getHexColor(hexc=None):
 	hexc = doKeyboard(util.T(32475),default=hexc)
 	if not hexc: return None

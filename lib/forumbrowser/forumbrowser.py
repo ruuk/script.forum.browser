@@ -3,6 +3,25 @@ import sys, os, re, urllib, urllib2, texttransform, binascii, time
 from lib import asyncconnections
 from lib.util import LOG, ERROR
 
+def getForumTestUrls(base,subpath=''):
+	urls = []
+	import urlparse
+	if not base.startswith('http://') and not base.startswith('https://'):
+		base = 'http://' + base.lstrip('/')
+	
+	parsed = urlparse.urlparse(base)
+	if parsed.path.strip('/'): urls.append(parsed.geturl())
+	urls.append(urlparse.urljoin(parsed.geturl(), subpath))
+	urls.append(urlparse.urljoin(parsed.geturl(), '/' + subpath))
+		
+	final = []
+	
+	for u in urls:
+		if not u in final: final.append(u)
+		if not 'www' in u:
+			u = u.split('://')[0] + '://www.' + u.split('://')[-1] #I suppose I should allow for a user:pass@ but...
+			if not u in final: final.append(u)
+	return final
 
 def durationToShortText(unixtime):
 	days = int(unixtime/86400)
@@ -125,6 +144,7 @@ class HTMLPageInfo:
 		self.lastProgTime = 0
 		self.progWait = 1
 		self.lastProgMessage = ''
+		self.finished = False
 		
 		self.base = url
 		if not self.base.endswith('/'): self.base += '/'
@@ -142,8 +162,10 @@ class HTMLPageInfo:
 			self.html2 = html
 		else:
 			self._getHTML()
+		self.finished = True
 		
 	def updateProgress(self,pct,msg=''):
+		if self.finished: return False
 		if not self.progressCallback: return True
 		msg = msg or self.lastProgMessage
 		self.lastProgMessage = msg
@@ -156,8 +178,7 @@ class HTMLPageInfo:
 		else:
 			self.currentProgress = pct
 			
-		callback, arg = self.progressCallback
-		return callback(arg,self.currentProgress,msg)
+		return self.progressCallback(self.currentProgress,msg)
 		
 	def updateProgressMax(self,maxp):
 		self.currMaxProgress = maxp

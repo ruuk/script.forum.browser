@@ -12,7 +12,7 @@
 			<visible>!Window.IsVisible(numericinput)</visible>
 			
 			<control type="group" id="200">
-				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1) + !StringCompare(Window(10000).Property(FB_smiley_0),)</visible>
 				<defaultcontrol>299</defaultcontrol>
 				<posx>0</posx>
 				<posy>-275</posy>

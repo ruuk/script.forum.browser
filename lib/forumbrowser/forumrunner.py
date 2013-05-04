@@ -6,25 +6,15 @@ from lib.util import LOG, ERROR
 DEBUG = sys.modules["__main__"].DEBUG
 
 def testForum(forum):
-	url3 = None
-	url2 = None
-	if forum.startswith('http://'):
-		url = forum
-		if not forum.endswith('/'): forum += '/'
-		if not forum.endswith('.php/'): url2 = forum + 'forumrunner/request.php'
-	else:
-		if forum.startswith('/'): forum = forum[1:]
-		if forum.endswith('/'): forum = forum[:-1]
-		url = 'http://%s/forumrunner/request.php' % forum
-		url2 = None
-		if '/' in forum: url3 = 'http://%s/forumrunner/request.php' % forum.split('/',1)[0]
+	urls = forumbrowser.getForumTestUrls(forum, 'forumrunner/request.php')
 	
-	for u in (url,url2,url3):
+	for u in urls:
 		if not u: continue
 		try:
 			client = ForumrunnerClient(u)
 			result = client.version()
-			if result.get('version'): return u
+			if result.get('version'):
+				return u
 		except:
 			continue
 	return None

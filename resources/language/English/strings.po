@@ -1379,7 +1379,7 @@ msgid "Add Forum"
 msgstr ""
 
 msgctxt "#32424"
-msgid "Enter Name And Address"
+msgid "Enter Forum Web Address"
 msgstr ""
 
 msgctxt "#32425"

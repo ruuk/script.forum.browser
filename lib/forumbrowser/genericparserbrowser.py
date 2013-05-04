@@ -7,20 +7,17 @@ from lib.util import getSetting, LOG, ERROR, T
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 loadForumSettings = sys.modules["__main__"].loadForumSettings
 
-def testForum(url,user=None,password=None):
+def testForum(url,user=None,password=None,progress_callback=None):
 	if not url.startswith('http'):
-		if url.startswith('/'): url = url[1:]
+		url = url.lstrip('/')
 		url = 'http://' + url
 	if not url.endswith('/'): url += '/'
-	#p = GeneralForumParser()
 	pb = GenericParserForumBrowser(url,url=url)
 	pb.user = user
 	pb.password = password
-	info = forumbrowser.HTMLPageInfo(url)
-	#p.getForums(info.html)
 	pb.getForums()
-	if pb.forumParser.isValid: return url,info,pb.forumParser
-	return None,None,None
+	if pb.forumParser.isValid: return url,pb.forumParser
+	return None,None
 
 class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	browserType = 'GenericParserForumBrowser'

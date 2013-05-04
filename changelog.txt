@@ -11,6 +11,7 @@ TODO:
   Finish no window stacking mode
   Implement get_participated_forum, get_board_stat
   Smilies on other keyboards
+  Post/thread/forum bookmarks
   
  Long Term:
   Check on optional import behavior
@@ -47,13 +48,16 @@ Added an detail display on the image slide out on the full message view of the V
 Made the links slide out on the full message view taller on the Video skin
 Fixed the numbers for post images for counts over 20 when the skin mods are enabled
 Modified font to include more circled numbers for the post image representations
-Added 'Video' keyboard with smilies (Fits under video when playing)
+Added 'Video' keyboard (fits under video when playing) with smilies
 Tapatalk: Added ability to use forum specific smilies when available
 Added settings option 'Change Keyboard' which allows you to change which keyboard is installed without manually uninstalling and reinstalling
 Enabling or changing skin mods no longer requires a Forum Browser restart
 Fixed a bug where service was checking removed forums
 Progress no longer pops up twice when opening a forum (most noticable on the Video skin)
 Added the ability to re-arrange favorite forums
+Fixed a bug causing skin mods not to update when a pre-installed skin is updated to a new version
+Fixed a bug preventing forum logos from being selected in logo dialog
+Improved forum detection when user 'Add Forum' for Tapatalk and Forumrunner
 
 *** 2.1.1 ***
 

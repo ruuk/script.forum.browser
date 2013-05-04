@@ -204,9 +204,13 @@ def xbmcSkinAwaitingRefresh():
 def refreshXBMCSkin():
 	if not getSetting('refresh_skin',True): return False
 	setSetting('refresh_skin',False)
-	showNotice('Forum Browser',T(32542),500)
-	xbmc.sleep(500)
-	LOG('! REFRESHING SKIN !')
+	#showNotice('Forum Browser',T(32542),500)
+	from lib import dialogs
+	with dialogs.xbmcDialogProgress('Forum Browser',T(32542)) as d:
+		for p in range(10,110,10):
+			xbmc.sleep(50)
+			d.update(p)
+	LOG('! REFRESHING XBMC SKIN !')
 	xbmc.executebuiltin('ReloadSkin()')
 	return True
 	

@@ -19,20 +19,9 @@ def checkVersion(version1, version2):
 	return cmp(normalize(version1), normalize(version2))
 
 def testForum(forum):
-	url2 = None
-	url3 = None
-	if forum.startswith('http://'):
-		url = forum
-		if not forum.endswith('/') and not forum.endswith('.php'): forum += '/'
-		if not forum.endswith('.php/'): url2 = forum + 'mobiquo/mobiquo.php'
-	else:
-		if forum.startswith('/'): forum = forum[1:]
-		if forum.endswith('/'): forum = forum[:-1]
-		url = 'http://%s/mobiquo/mobiquo.php' % forum
-		url2 = None
-		if '/' in forum: url3 = 'http://%s/mobiquo/mobiquo.php' % forum.split('/',1)[0]
+	urls = forumbrowser.getForumTestUrls(forum, 'mobiquo/mobiquo.php')
 	
-	for u in (url,url2,url3):
+	for u in urls:
 		if not u: continue
 		try:
 			server = xmlrpclib.ServerProxy(u,transport=CookieTransport())
