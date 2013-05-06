@@ -40,11 +40,16 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1
   
-Current Version : 2.1.2
+Current Version : 2.1.3
+
+*** 2.1.3 ***
+
+Added smilies to Confluence keyboard skin
+Added missing smilies dialog (for site smilies) for the light/dark skins 
 
 *** 2.1.2 ***
 
-Added an detail display on the image slide out on the full message view of the Video skin
+Added a detail display on the image slide out on the full message view of the Video skin
 Made the links slide out on the full message view taller on the Video skin
 Fixed the numbers for post images for counts over 20 when the skin mods are enabled
 Modified font to include more circled numbers for the post image representations

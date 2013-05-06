@@ -1,0 +1,114 @@
+<window>
+	<defaultcontrol always="true">119</defaultcontrol>
+	<zorder>1</zorder>
+	<type>dialog</type>
+	<coordinates>
+		<system>1</system>
+		<posx>20</posx>
+		<posy>20</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<posx>-20</posx>
+			<posy>-20</posy>
+			<width>350</width>
+			<height>355</height>
+			<texture border="20">forum-browser-white-box.png</texture>
+			<colordiffuse>AA000000</colordiffuse>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>310</width>
+			<height>315</height>
+			<texture border="20">forum-browser-white-boxr.png</texture>
+			<colordiffuse>FF444444</colordiffuse>
+		</control>
+		
+		<control type="image">
+			<posx>10</posx>
+			<posy>10</posy>
+			<width>290</width>
+			<height>80</height>
+			<texture border="20">forum-browser-white-boxr.png</texture>
+			<colordiffuse>FFAAAAAA</colordiffuse>
+		</control>
+		<control type="label">
+			<posx>20</posx>
+			<posy>16</posy>
+			<width>270</width>
+			<height>30</height>
+			<font>ForumBrowser-font13</font>
+			<aligny>center</aligny>
+			<textcolor>black</textcolor>
+			<align>center</align>
+			<label>[B]$INFO[Window.Property(caption)][/B]</label>
+		</control>
+		
+		<control type="image">
+			<posx>10</posx>
+			<posy>47</posy>
+			<width>290</width>
+			<height>258</height>
+			<texture border="20">forum-browser-white-boxr.png</texture>
+		</control>
+		
+		<control type="group" id="119">
+			<control type='list' id="111">
+				<posx>20</posx>
+				<posy>50</posy>
+				<width>270</width>
+				<height>252</height>
+				<scrolltime>200</scrolltime>
+				<itemlayout height="38">
+					<control type="image">
+						<posx>20</posx>
+						<posy>11</posy>
+						<width>32</width>
+						<height>32</height>
+						<texture>$INFO[Listitem.Thumb]</texture>
+					</control>
+					<control type="label">
+						<posx>60</posx>
+						<posy>12</posy>
+						<width>200</width>
+						<height>30</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>black</textcolor>
+						<align>left</align>
+						<info>ListItem.Label</info>
+					</control>
+				</itemlayout>
+				<focusedlayout height="38">
+					<control type="image">
+						<posx>0</posx>
+						<posy>8</posy>
+						<width>270</width>
+						<height>38</height>
+						<texture border="20">forum-browser-white-boxr.png</texture>
+						<colordiffuse>FF555555</colordiffuse>
+					</control>
+					<control type="label">
+						<posx>60</posx>
+						<posy>12</posy>
+						<width>200</width>
+						<height>30</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>white</textcolor>
+						<align>left</align>
+						<info>ListItem.Label</info>
+					</control>
+					<control type="image">
+						<posx>20</posx>
+						<posy>11</posy>
+						<width>32</width>
+						<height>32</height>
+						<texture>$INFO[Listitem.Thumb]</texture>
+					</control>
+				</focusedlayout>
+			</control>
+		</control>
+	</controls>
+</window>
