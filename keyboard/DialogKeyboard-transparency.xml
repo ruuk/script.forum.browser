@@ -101,17 +101,291 @@
 				<width>690</width>
 				<height>318</height>
 				<texture border="50">keyboard.png</texture>
+				<visible>!Control.IsVisible(200)</visible>
+			</control>
+			<control type="image">
+				<posx>185</posx>
+				<posy>70</posy>
+				<width>800</width>
+				<height>318</height>
+				<texture border="50">keyboard.png</texture>
+				<visible>Control.IsVisible(200)</visible>
 			</control>
 			<control type="group">
 				<posx>130</posx>
 				<posy>105</posy>
+				
+				<control type="group" id="200">
+					<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1) + !StringCompare(Window(10000).Property(FB_smiley_0),)</visible>
+					<defaultcontrol>299</defaultcontrol>
+					<posx>70</posx>
+					<posy>-20</posy>
+					<onright>300</onright>
+					<control type="button" id="299">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>20</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_0)]</label>
+						<onright>298</onright>
+						<onleft>8</onleft>
+						<ondown>297</ondown>
+						<onup>291</onup>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					<control type="button" id="298">
+						<description>frown</description>
+						<posx>70</posx>
+						<posy>20</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_1)]</label>
+						<onright>49</onright>
+						<onleft>299</onleft>
+						<onup>290</onup>
+						<ondown>296</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,57)</onclick>
+					</control>
+					
+					<control type="button" id="297">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>70</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_2)]</label>
+						<onright>296</onright>
+						<onleft>300</onleft>
+						<onup>299</onup>
+						<ondown>295</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,73)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					<control type="button" id="296">
+						<description>frown</description>
+						<posx>70</posx>
+						<posy>70</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_3)]</label>
+						<onright>81</onright>
+						<onleft>297</onleft>
+						<onup>298</onup>
+						<ondown>294</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,302)</onclick>
+						<onclick>SendClick(,68)</onclick>
+					</control>
+					
+					<control type="button" id="295">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>120</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_4)]</label>
+						<onright>294</onright>
+						<onleft>303</onleft>
+						<onup>297</onup>
+						<ondown>293</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,302)</onclick>
+						<onclick>SendClick(,80)</onclick>
+					</control>
+					<control type="button" id="294">
+						<description>frown</description>
+						<posx>70</posx>
+						<posy>120</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_5)]</label>
+						<onright>65</onright>
+						<onleft>295</onleft>
+						<onup>296</onup>
+						<ondown>292</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,79)</onclick>
+					</control>
+					
+					<control type="button" id="293">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>170</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_6)]</label>
+						<onright>292</onright>
+						<onleft>302</onleft>
+						<onup>295</onup>
+						<ondown>291</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,81)</onclick>
+					</control>
+					<control type="button" id="292">
+						<description>frown</description>
+						<posx>70</posx>
+						<posy>170</posy>
+						<width>50</width>
+						<height>50</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_7)]</label>
+						<onright>90</onright>
+						<onleft>293</onleft>
+						<onup>294</onup>
+						<ondown>290</ondown>
+						<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+						<texturefocus border="10">key-focus.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font30</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>yellow</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,56)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,69)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					
+					<control type="group">
+						<visible>StringCompare(Window(10000).Property(ForumBrowser_siteSmilies),1) + StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+						<control type="button" id="290">
+							<description>More</description>
+							<posx>20</posx>
+							<posy>220</posy>
+							<width>100</width>
+							<height>48</height>
+							<label>MORE</label>
+							<onright>307</onright>
+							<onleft>304</onleft>
+							<onup>292</onup>
+							<ondown>298</ondown>
+							<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+							<texturefocus border="10">key-focus.png</texturefocus>
+							<align>center</align>
+							<aligny>center</aligny>
+							<font>font-20</font>
+							<textcolor>yellow</textcolor>
+							<focusedcolor>yellow</focusedcolor>
+							<onclick>RunScript(script.forum.browser,smilies)</onclick>
+						</control>
+						<control type="button" id="291">
+							<visible>!Control.HasFocus(290)</visible>
+							<description>More</description>
+							<posx>20</posx>
+							<posy>220</posy>
+							<width>100</width>
+							<height>48</height>
+							<label>MORE</label>
+							<onright>307</onright>
+							<onleft>304</onleft>
+							<onup>293</onup>
+							<ondown>299</ondown>
+							<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
+							<texturefocus border="10">key-focus.png</texturefocus>
+							<align>center</align>
+							<aligny>center</aligny>
+							<font>font-20</font>
+							<textcolor>yellow</textcolor>
+							<focusedcolor>yellow</focusedcolor>
+							<onclick>RunScript(script.forum.browser,smilies)</onclick>
+						</control>
+					</control>
+				</control>
+				
 				<control type="button" id="49">
 					<description>'1' button</description>
 					<posx>200</posx>
 					<posy>0</posy>
 					<width>48</width>
 					<height>48</height>
-					<onleft>8</onleft>
+					<onleft>298</onleft>
 					<onright>50</onright>
 					<onup>307</onup>
 					<ondown>81</ondown>
@@ -241,7 +515,7 @@
 					<height>48</height>
 					<onleft>56</onleft>
 					<onright>48</onright>
-					<onup>298</onup>
+					<onup>288</onup>
 					<ondown>79</ondown>
 					<texturenofocus border="10">key-digit-nofocus.png</texturenofocus>
 					<texturefocus border="10">key-focus.png</texturefocus>
@@ -273,7 +547,7 @@
 					<height>48</height>
 					<label>20181</label>
 					<onleft>48</onleft>
-					<onright>49</onright>
+					<onright>299</onright>
 					<onup>304</onup>
 					<ondown>300</ondown>
 					<texturenofocus border="10">key-special-nofocus.png</texturenofocus>
@@ -288,7 +562,7 @@
 					<posy>50</posy>
 					<width>48</width>
 					<height>48</height>
-					<onleft>300</onleft>
+					<onleft>296</onleft>
 					<onright>87</onright>
 					<onup>49</onup>
 					<ondown>65</ondown>
@@ -450,7 +724,7 @@
 					<height>48</height>
 					<label>20177</label>
 					<onleft>80</onleft>
-					<onright>81</onright>
+					<onright>297</onright>
 					<onup>8</onup>
 					<ondown>303</ondown>
 					<texturenofocus border="10">key-special-nofocus.png</texturenofocus>
@@ -465,7 +739,7 @@
 					<posy>100</posy>
 					<width>48</width>
 					<height>48</height>
-					<onleft>303</onleft>
+					<onleft>294</onleft>
 					<onright>83</onright>
 					<onup>81</onup>
 					<ondown>90</ondown>
@@ -611,7 +885,7 @@
 					<height>48</height>
 					<label>20179</label>
 					<onleft>76</onleft>
-					<onright>65</onright>
+					<onright>295</onright>
 					<onup>300</onup>
 					<ondown>302</ondown>
 					<texturenofocus border="24">key-special-nofocus-off.png</texturenofocus>
@@ -628,7 +902,7 @@
 					<posy>150</posy>
 					<width>48</width>
 					<height>48</height>
-					<onleft>302</onleft>
+					<onleft>292</onleft>
 					<onright>88</onright>
 					<onup>65</onup>
 					<ondown>307</ondown>
@@ -761,7 +1035,7 @@
 					<onleft>305</onleft>
 					<onright>302</onright>
 					<onup>76</onup>
-					<ondown>298</ondown>
+					<ondown>288</ondown>
 					<texturenofocus border="10">key-special-nofocus.png</texturenofocus>
 					<texturefocus border="10">key-focus.png</texturefocus>
 					<align>center</align>
@@ -776,7 +1050,7 @@
 					<height>48</height>
 					<label>20178</label>
 					<onleft>306</onleft>
-					<onright>90</onright>
+					<onright>293</onright>
 					<onup>303</onup>
 					<ondown>304</ondown>
 					<texturenofocus border="24">key-special-nofocus-off.png</texturenofocus>
@@ -794,7 +1068,7 @@
 					<width>148</width>
 					<height>48</height>
 					<label>1006</label>
-					<onleft>304</onleft>
+					<onleft>291</onleft>
 					<onright>32</onright>
 					<onup>90</onup>
 					<ondown>49</ondown>
@@ -812,7 +1086,7 @@
 					<height>48</height>
 					<label>20182</label>
 					<onleft>307</onleft>
-					<onright>298</onright>
+					<onright>288</onright>
 					<onup>67</onup>
 					<ondown>51</ondown>
 					<texturenofocus border="10">key-special-nofocus.png</texturenofocus>
@@ -829,24 +1103,24 @@
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 					<posx>0</posx>
 					<posy>0</posy>
-					<control type="button" id="298">
+					<control type="button" id="288">
 						<description>Contract</description>
 						<posx>0</posx>
 						<posy>0</posy>
 						<width>48</width>
 						<height>48</height>
 						<onleft>32</onleft>
-						<onright>299</onright>
-						<onup>299</onup>
-						<ondown>299</ondown>
+						<onright>289</onright>
+						<onup>289</onup>
+						<ondown>289</ondown>
 						<texturenofocus border="10">key-special-nofocus.png</texturenofocus>
 						<texturefocus border="10">key-focus.png</texturefocus>
 						<align>center</align>
 						<aligny>center</aligny>
 						<font>font-20</font>
-						<focusedcolor>black</focusedcolor>
+						<focusedcolor>yellow</focusedcolor>
 						<onclick>SetProperty(ForumBrowser_modKeyboard,0,10000)</onclick>
-						<onclick>Control.SetFocus(299)</onclick>
+						<onclick>Control.SetFocus(289)</onclick>
 						<label>][</label>
 					</control>
 				</control>
@@ -854,13 +1128,13 @@
 					<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 					<posx>0</posx>
 					<posy>0</posy>
-					<control type="button" id="299">
+					<control type="button" id="289">
 						<description>Expand</description>
 						<posx>0</posx>
 						<posy>0</posy>
 						<width>48</width>
 						<height>48</height>
-						<onleft>298</onleft>
+						<onleft>288</onleft>
 						<onright>304</onright>
 						<onup>306</onup>
 						<ondown>57</ondown>
@@ -869,9 +1143,9 @@
 						<align>center</align>
 						<aligny>center</aligny>
 						<font>font-20</font>
-						<focusedcolor>black</focusedcolor>
+						<focusedcolor>yellow</focusedcolor>
 						<onclick>SetProperty(ForumBrowser_modKeyboard,1,10000)</onclick>
-						<onclick>Control.SetFocus(298)</onclick>
+						<onclick>Control.SetFocus(288)</onclick>
 						<label>[-]</label>
 					</control>
 				</control>
@@ -884,8 +1158,8 @@
 					<width>148</width>
 					<height>48</height>
 					<label>20180</label>
-					<onleft>299</onleft>
-					<onright>307</onright>
+					<onleft>289</onleft>
+					<onright>291</onright>
 					<onup>302</onup>
 					<ondown>8</ondown>
 					<texturenofocus border="24">key-special-nofocus-off.png</texturenofocus>

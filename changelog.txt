@@ -44,7 +44,8 @@ Current Version : 2.1.3
 
 *** 2.1.4 ***
 
-Added smileys to Generic keyboard and changed it's appearance
+Added smilies to Generic keyboard skin and changed it's appearance
+Added smilies to Transparency! keyboard skin
 
 *** 2.1.3 ***
 
