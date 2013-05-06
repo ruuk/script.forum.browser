@@ -11,21 +11,39 @@
 		<control type="group">
 			<visible>!Window.IsVisible(numericinput)</visible>
 			<control type="image">
-				<posx>0</posx>
-				<posy>-5</posy>
-				<width>780</width>
-				<height>410</height>
-				<texture border="40">forum-browser-keyboard/forum-browser-white-box.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
+				<posx>-20</posx>
+				<posy>-20</posy>
+				<width>800</width>
+				<height>425</height>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
+				<colordiffuse>44000000</colordiffuse>
 				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
-				<posx>0</posx>
-				<posy>-5</posy>
+				<posx>-20</posx>
+				<posy>-20</posy>
+				<width>800</width>
+				<height>625</height>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
+				<colordiffuse>44000000</colordiffuse>
+				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>-10</posx>
+				<posy>-10</posy>
 				<width>780</width>
-				<height>610</height>
-				<texture border="40">forum-browser-keyboard/forum-browser-white-box.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
+				<height>405</height>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+				<colordiffuse>FF4488AA</colordiffuse>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>-10</posx>
+				<posy>-10</posy>
+				<width>780</width>
+				<height>605</height>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+				<colordiffuse>FF4488AA</colordiffuse>
 				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
@@ -33,7 +51,7 @@
 				<posy>0</posy>
 				<width>760</width>
 				<height>385</height>
-				<texture border="40">forum-browser-keyboard/forum-browser-black-boxr.png</texture>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-black.png</texture>
 				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
@@ -41,15 +59,22 @@
 				<posy>0</posy>
 				<width>760</width>
 				<height>585</height>
-				<texture border="40">forum-browser-keyboard/forum-browser-black-boxr.png</texture>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-black.png</texture>
 				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>760</width>
+				<height>40</height>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-header.png</texture>
 			</control>
 			<control type="label" id="311">
 				<description>header label</description>
 				<posx>25</posx>
-				<posy>10</posy>
+				<posy>0</posy>
 				<width>720</width>
-				<height>30</height>
+				<height>40</height>
 				<font>font13_title</font>
 				<align>center</align>
 				<aligny>center</aligny>
@@ -58,7 +83,7 @@
 			<control type="button">
 				<description>Close Window button</description>
 				<posx>723</posx>
-				<posy>10</posy>
+				<posy>6</posy>
 				<width>28</width>
 				<height>28</height>
 				<label>-</label>
@@ -73,38 +98,47 @@
 				<visible>system.getbool(input.enablemouse)</visible>
 			</control>
 			<control type="image">
-				<posx>40</posx>
-				<posy>49</posy>
+				<posx>50</posx>
+				<posy>53</posy>
 				<width>680</width>
-				<height>60</height>
+				<height>53</height>
 				<aspectratio>stretch</aspectratio>
-				<texture border="20">forum-browser-keyboard/forum-browser-white-boxr.png</texture>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
 				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="image">
-				<posx>40</posx>
-				<posy>49</posy>
+				<posx>50</posx>
+				<posy>53</posy>
 				<width>680</width>
-				<height>260</height>
+				<height>253</height>
 				<aspectratio>stretch</aspectratio>
-				<texture border="20">forum-browser-keyboard/forum-browser-white-boxr.png</texture>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
 				<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 			</control>
 			<control type="label" id="310">
 				<description>Edit Text</description>
-				<posx>55</posx>
-				<posy>55</posy>
-				<width>650</width>
+				<posx>60</posx>
+				<posy>50</posy>
+				<width>660</width>
 				<height>220</height>
-				<font>font13</font>
+				<font>ForumBrowser-font13</font>
 				<align>left</align>
 				<aligny>top</aligny>
 				<wrapmultiline>true</wrapmultiline>
 				<textcolor>black</textcolor>
 			</control>
-			
+			<control type="image">
+				<posx>50</posx>
+				<posy>106</posy>
+				<width>680</width>
+				<height>200</height>
+				<aspectratio>stretch</aspectratio>
+				<texture border="10">forum-browser-keyboard/forum-browser-keyboard-white.png</texture>
+				<colordiffuse>FF000000</colordiffuse>
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+			</control>
 			<control type="group">
-				<posx>11</posx>
+				<posx>14</posx>
 				<posy>68</posy>
 				<control type="group">
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
@@ -116,8 +150,8 @@
 						<width>24</width>
 						<height>24</height>
 						<aspectratio>stretch</aspectratio>
-						<texture  border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texture>
-						<visible>!Control.HasFocus(298)</visible>
+						<texture  border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+						<visible>!Control.HasFocus(288)</visible>
 					</control>
 					<control type="image">
 						<posx>0</posx>
@@ -125,27 +159,27 @@
 						<width>24</width>
 						<height>24</height>
 						<aspectratio>stretch</aspectratio>
-						<texture  border="3">forum-browser-keyboard/forum-browser-KeyboardKey.png</texture>
-						<visible>Control.HasFocus(298)</visible>
+						<texture  border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texture>
+						<visible>Control.HasFocus(288)</visible>
 					</control>
-					<control type="button" id="298">
+					<control type="button" id="288">
 						<description>Contract</description>
 						<posx>4</posx>
 						<posy>4</posy>
 						<width>16</width>
 						<height>16</height>
-						<onleft>298</onleft>
-						<onright>298</onright>
+						<onleft>288</onleft>
+						<onright>288</onright>
 						<onup>307</onup>
-						<ondown>299</ondown>
+						<ondown>289</ondown>
 						<texturenofocus>forum-browser-keyboard/forum-browser-scroll-down.png</texturenofocus>
 						<texturefocus>forum-browser-keyboard/forum-browser-scroll-down-focus.png</texturefocus>
 						<align>center</align>
 						<aligny>center</aligny>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<focusedcolor>black</focusedcolor>
 						<onclick>SetProperty(ForumBrowser_modKeyboard,0,10000)</onclick>
-						<onclick>Control.SetFocus(299)</onclick>
+						<onclick>Control.SetFocus(289)</onclick>
 					</control>
 				</control>
 				<control type="group">
@@ -158,8 +192,8 @@
 						<width>24</width>
 						<height>24</height>
 						<aspectratio>stretch</aspectratio>
-						<texture border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texture>
-						<visible>!Control.HasFocus(299)</visible>
+						<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+						<visible>!Control.HasFocus(289)</visible>
 					</control>
 					<control type="image">
 						<posx>0</posx>
@@ -167,27 +201,27 @@
 						<width>24</width>
 						<height>24</height>
 						<aspectratio>stretch</aspectratio>
-						<texture  border="3">forum-browser-keyboard/forum-browser-KeyboardKey.png</texture>
-						<visible>Control.HasFocus(299)</visible>
+						<texture  border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texture>
+						<visible>Control.HasFocus(289)</visible>
 					</control>
-					<control type="button" id="299">
+					<control type="button" id="289">
 						<description>Expand</description>
 						<posx>4</posx>
 						<posy>4</posy>
 						<width>16</width>
 						<height>16</height>
-						<onleft>299</onleft>
-						<onright>299</onright>
-						<onup>298</onup>
+						<onleft>289</onleft>
+						<onright>289</onright>
+						<onup>288</onup>
 						<ondown>300</ondown>
 						<texturenofocus>forum-browser-keyboard/forum-browser-scroll-up.png</texturenofocus>
 						<texturefocus>forum-browser-keyboard/forum-browser-scroll-up-focus.png</texturefocus>
 						<align>center</align>
 						<aligny>center</aligny>
-						<font>font13</font>
+						<font>ForumBrowser-font13</font>
 						<focusedcolor>black</focusedcolor>
 						<onclick>SetProperty(ForumBrowser_modKeyboard,1,10000)</onclick>
-						<onclick>Control.SetFocus(298)</onclick>
+						<onclick>Control.SetFocus(288)</onclick>
 					</control>
 				</control>
 			</control>
@@ -196,6 +230,276 @@
 				<posx>30</posx>
 				<posy>120</posy>
 				<animation effect="slide" end="0,200" time="0" delay="0" condition="StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)">Conditional</animation>
+				
+				<control type="group" id="200">
+					<visible>StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1) + !StringCompare(Window(10000).Property(FB_smiley_0),)</visible>
+					<defaultcontrol>299</defaultcontrol>
+					<posx>-180</posx>
+					<posy>0</posy>
+					<onright>300</onright>
+					<control type="image">
+						<posx>-10</posx>
+						<posy>-10</posy>
+						<width>140</width>
+						<height>270</height>
+						<aspectratio>stretch</aspectratio>
+						<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-white.png</texture>
+						<colordiffuse>44000000</colordiffuse>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>120</width>
+						<height>250</height>
+						<aspectratio>stretch</aspectratio>
+						<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+						<colordiffuse>FF4488AA</colordiffuse>
+					</control>
+					<control type="image">
+						<posx>10</posx>
+						<posy>10</posy>
+						<width>100</width>
+						<height>230</height>
+						<aspectratio>stretch</aspectratio>
+						<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+					</control>
+					
+					<control type="button" id="299">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>20</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_0)]</label>
+						<onright>298</onright>
+						<onleft>57</onleft>
+						<ondown>297</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					<control type="button" id="298">
+						<description>frown</description>
+						<posx>60</posx>
+						<posy>20</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_1)]</label>
+						<onright>300</onright>
+						<onleft>299</onleft>
+						<ondown>296</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,57)</onclick>
+					</control>
+					<control type="button" id="297">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>60</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_2)]</label>
+						<onright>296</onright>
+						<onleft>74</onleft>
+						<onup>299</onup>
+						<ondown>295</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,73)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					<control type="button" id="296">
+						<description>frown</description>
+						<posx>60</posx>
+						<posy>60</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_3)]</label>
+						<onright>302</onright>
+						<onleft>297</onleft>
+						<onup>298</onup>
+						<ondown>294</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,302)</onclick>
+						<onclick>SendClick(,68)</onclick>
+					</control>
+					<control type="button" id="295">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>100</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_4)]</label>
+						<onright>294</onright>
+						<onleft>84</onleft>
+						<onup>297</onup>
+						<ondown>293</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,302)</onclick>
+						<onclick>SendClick(,80)</onclick>
+					</control>
+					<control type="button" id="294">
+						<description>frown</description>
+						<posx>60</posx>
+						<posy>100</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_5)]</label>
+						<onright>303</onright>
+						<onleft>295</onleft>
+						<onup>296</onup>
+						<ondown>292</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,79)</onclick>
+					</control>
+					<control type="button" id="293">
+						<description>smile</description>
+						<posx>20</posx>
+						<posy>140</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_6)]</label>
+						<onright>292</onright>
+						<onleft>8</onleft>
+						<onup>295</onup>
+						<ondown>291</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,74)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,81)</onclick>
+					</control>
+					<control type="button" id="292">
+						<description>frown</description>
+						<posx>60</posx>
+						<posy>140</posy>
+						<width>40</width>
+						<height>40</height>
+						<label>$INFO[Window(10000).Property(FB_smiley_7)]</label>
+						<onright>304</onright>
+						<onleft>293</onleft>
+						<onup>294</onup>
+						<ondown>291</ondown>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>yellow</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,90)</onclick>
+						<onclick>SendClick(,8)</onclick>
+						<onclick>SendClick(,56)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,69)</onclick>
+						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,48)</onclick>
+					</control>
+					<control type="button" id="291">
+						<description>More</description>
+						<visible>StringCompare(Window(10000).Property(ForumBrowser_siteSmilies),1) + StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
+						<posx>20</posx>
+						<posy>190</posy>
+						<width>80</width>
+						<height>40</height>
+						<label>MORE</label>
+						<onright>307</onright>
+						<onleft>306</onleft>
+						<onup>293</onup>
+						<texturenofocus></texturenofocus>
+						<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+						<align>center</align>
+						<aligny>center</aligny>
+						<font>ForumBrowser-font13</font>
+						<textcolor>white</textcolor>
+						<focusedcolor>black</focusedcolor>
+						<onclick>RunScript(script.forum.browser,smilies)</onclick>
+					</control>
+				</control>
+				
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>700</width>
+					<height>250</height>
+					<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
+				</control>
+				
 				<control type="button" id="300">
 					<description>DONE button</description>
 					<posx>0</posx>
@@ -203,16 +507,16 @@
 					<width>200</width>
 					<height>50</height>
 					<label>20177</label>
-					<onleft>57</onleft>
+					<onleft>298</onleft>
 					<onright>48</onright>
-					<onup>299</onup>
+					<onup>289</onup>
 					<ondown>302</ondown>
-					<texturenofocus border="25,25,5,5">forum-browser-keyboard/forum-browser-KeyboardCornerTopNF.png</texturenofocus>
-					<texturefocus border="25,25,5,5">forum-browser-keyboard/forum-browser-KeyboardCornerTop.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="48">
 					<description>'0' button</description>
@@ -224,12 +528,12 @@
 					<onright>49</onright>
 					<onup>32</onup>
 					<ondown>65</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="49">
 					<description>'1' button</description>
@@ -241,12 +545,12 @@
 					<onright>50</onright>
 					<onup>32</onup>
 					<ondown>66</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="50">
 					<description>'2' button</description>
@@ -258,12 +562,12 @@
 					<onright>51</onright>
 					<onup>32</onup>
 					<ondown>67</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="51">
 					<description>'3' button</description>
@@ -275,12 +579,12 @@
 					<onright>52</onright>
 					<onup>32</onup>
 					<ondown>68</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="52">
 					<description>'4' button</description>
@@ -292,12 +596,12 @@
 					<onright>53</onright>
 					<onup>32</onup>
 					<ondown>69</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="53">
 					<description>'5' button</description>
@@ -309,12 +613,12 @@
 					<onright>54</onright>
 					<onup>32</onup>
 					<ondown>70</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="54">
 					<description>'6' button</description>
@@ -326,12 +630,12 @@
 					<onright>55</onright>
 					<onup>305</onup>
 					<ondown>71</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="55">
 					<description>'7' button</description>
@@ -343,12 +647,12 @@
 					<onright>56</onright>
 					<onup>305</onup>
 					<ondown>72</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="56">
 					<description>'8' button</description>
@@ -360,12 +664,12 @@
 					<onright>57</onright>
 					<onup>306</onup>
 					<ondown>73</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="57">
 					<description>'9' button</description>
@@ -374,15 +678,15 @@
 					<width>50</width>
 					<height>50</height>
 					<onleft>56</onleft>
-					<onright>300</onright>
+					<onright>299</onright>
 					<onup>306</onup>
 					<ondown>74</ondown>
-					<texturenofocus flipx="true" border="5,25,25,5">forum-browser-keyboard/forum-browser-KeyboardCornerTopNF.png</texturenofocus>
-					<texturefocus flipx="true" border="5,25,25,5">forum-browser-keyboard/forum-browser-KeyboardCornerTop.png</texturefocus>
+					<texturenofocus flipx="true" border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus flipx="true" border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="radiobutton" id="302">
 					<description>SHIFT button</description>
@@ -391,19 +695,19 @@
 					<width>200</width>
 					<height>50</height>
 					<label>20178</label>
-					<onleft>74</onleft>
+					<onleft>296</onleft>
 					<onright>65</onright>
 					<onup>300</onup>
 					<ondown>303</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<radioposy>5</radioposy>
 					<radiowidth>20</radiowidth>
 					<radioheight>20</radioheight>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="65">
 					<description>'A' button</description>
@@ -415,12 +719,12 @@
 					<onright>66</onright>
 					<onup>48</onup>
 					<ondown>75</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="66">
 					<description>'B' button</description>
@@ -432,12 +736,12 @@
 					<onright>67</onright>
 					<onup>49</onup>
 					<ondown>76</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="67">
 					<description>'C' button</description>
@@ -449,12 +753,12 @@
 					<onright>68</onright>
 					<onup>50</onup>
 					<ondown>77</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="68">
 					<description>'D' button</description>
@@ -466,12 +770,12 @@
 					<onright>69</onright>
 					<onup>51</onup>
 					<ondown>78</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="69">
 					<description>'E' button</description>
@@ -483,12 +787,12 @@
 					<onright>70</onright>
 					<onup>52</onup>
 					<ondown>79</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="70">
 					<description>'F' button</description>
@@ -500,12 +804,12 @@
 					<onright>71</onright>
 					<onup>53</onup>
 					<ondown>80</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="71">
 					<description>'G' button</description>
@@ -517,12 +821,12 @@
 					<onright>72</onright>
 					<onup>54</onup>
 					<ondown>81</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="72">
 					<description>'H' button</description>
@@ -534,12 +838,12 @@
 					<onright>73</onright>
 					<onup>55</onup>
 					<ondown>82</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="73">
 					<description>'I' button</description>
@@ -551,12 +855,12 @@
 					<onright>74</onright>
 					<onup>56</onup>
 					<ondown>83</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="74">
 					<description>'J' button</description>
@@ -565,15 +869,15 @@
 					<width>50</width>
 					<height>50</height>
 					<onleft>73</onleft>
-					<onright>302</onright>
+					<onright>297</onright>
 					<onup>57</onup>
 					<ondown>84</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="radiobutton" id="303">
 					<description>CAPS LOCK button</description>
@@ -582,19 +886,19 @@
 					<width>200</width>
 					<height>50</height>
 					<label>20179</label>
-					<onleft>84</onleft>
+					<onleft>294</onleft>
 					<onright>75</onright>
 					<onup>302</onup>
 					<ondown>304</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<radioposy>5</radioposy>
 					<radiowidth>20</radiowidth>
 					<radioheight>20</radioheight>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="75">
 					<description>'K' button</description>
@@ -606,12 +910,12 @@
 					<onright>76</onright>
 					<onup>65</onup>
 					<ondown>85</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="76">
 					<description>'L' button</description>
@@ -623,12 +927,12 @@
 					<onright>77</onright>
 					<onup>66</onup>
 					<ondown>86</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="77">
 					<description>'M' button</description>
@@ -640,12 +944,12 @@
 					<onright>78</onright>
 					<onup>67</onup>
 					<ondown>87</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="78">
 					<description>'N' button</description>
@@ -657,12 +961,12 @@
 					<onright>79</onright>
 					<onup>68</onup>
 					<ondown>88</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="79">
 					<description>'O' button</description>
@@ -674,12 +978,12 @@
 					<onright>80</onright>
 					<onup>69</onup>
 					<ondown>89</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="80">
 					<description>'P' button</description>
@@ -691,12 +995,12 @@
 					<onright>81</onright>
 					<onup>70</onup>
 					<ondown>90</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="81">
 					<description>'Q' button</description>
@@ -708,12 +1012,12 @@
 					<onright>82</onright>
 					<onup>71</onup>
 					<ondown>8</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="82">
 					<description>'R' button</description>
@@ -725,12 +1029,12 @@
 					<onright>83</onright>
 					<onup>72</onup>
 					<ondown>8</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="83">
 					<description>'S' button</description>
@@ -742,12 +1046,12 @@
 					<onright>84</onright>
 					<onup>73</onup>
 					<ondown>8</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="84">
 					<description>'T' button</description>
@@ -756,15 +1060,15 @@
 					<width>50</width>
 					<height>50</height>
 					<onleft>83</onleft>
-					<onright>303</onright>
+					<onright>295</onright>
 					<onup>74</onup>
 					<ondown>8</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="radiobutton" id="304">
 					<description>Symbols button</description>
@@ -773,19 +1077,19 @@
 					<width>200</width>
 					<height>50</height>
 					<label>20180</label>
-					<onleft>8</onleft>
+					<onleft>292</onleft>
 					<onright>85</onright>
 					<onup>303</onup>
 					<ondown>307</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<radioposy>5</radioposy>
 					<radiowidth>20</radiowidth>
 					<radioheight>20</radioheight>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="85">
 					<description>'U' button</description>
@@ -797,12 +1101,12 @@
 					<onright>86</onright>
 					<onup>75</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="86">
 					<description>'V' button</description>
@@ -814,12 +1118,12 @@
 					<onright>87</onright>
 					<onup>76</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="87">
 					<description>'W' button</description>
@@ -831,12 +1135,12 @@
 					<onright>88</onright>
 					<onup>77</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="88">
 					<description>'X' button</description>
@@ -848,12 +1152,12 @@
 					<onright>89</onright>
 					<onup>78</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="89">
 					<description>'Y' button</description>
@@ -865,12 +1169,12 @@
 					<onright>90</onright>
 					<onup>79</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="90">
 					<description>'Z' button</description>
@@ -882,12 +1186,12 @@
 					<onright>8</onright>
 					<onup>80</onup>
 					<ondown>32</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="8">
 					<description>BACKSPACE button</description>
@@ -897,15 +1201,15 @@
 					<height>50</height>
 					<label>20181</label>
 					<onleft>90</onleft>
-					<onright>304</onright>
+					<onright>293</onright>
 					<onup>81</onup>
 					<ondown>305</ondown>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="307">
 					<description>IP Input button</description>
@@ -913,17 +1217,17 @@
 					<posy>200</posy>
 					<width>200</width>
 					<height>50</height>
-					<texturenofocus border="25,5,25,5">forum-browser-keyboard/forum-browser-KeyboardCornerBottomNF.png</texturenofocus>
-					<texturefocus border="25,5,25,5">forum-browser-keyboard/forum-browser-KeyboardCornerBottom.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<label>1006</label>
-					<font>font13</font>
+					<font>ForumBrowser-font13</font>
 					<align>center</align>
 					<aligny>center</aligny>
-					<onleft>306</onleft>
+					<onleft>291</onleft>
 					<onright>32</onright>
 					<onup>304</onup>
-					<ondown>298</ondown>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<ondown>288</ondown>
+					<focusedcolor>black</focusedcolor>
 				</control>
 				<control type="button" id="32">
 					<description>SPACE button</description>
@@ -932,12 +1236,12 @@
 					<width>300</width>
 					<height>50</height>
 					<label>20182</label>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
 					<align>center</align>
 					<aligny>center</aligny>
-					<font>font13</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<font>ForumBrowser-font13</font>
+					<focusedcolor>black</focusedcolor>
 					<onleft>307</onleft>
 					<onright>305</onright>
 					<onup>85</onup>
@@ -952,10 +1256,10 @@
 					<label>&lt;</label>
 					<align>center</align>
 					<aligny>center</aligny>
-					<texturenofocus border="3">forum-browser-keyboard/forum-browser-KeyboardKeyNF.png</texturenofocus>
-					<texturefocus border="5">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
-					<font>font30</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<texturenofocus border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<font>ForumBrowser-font30</font>
+					<focusedcolor>black</focusedcolor>
 					<onleft>32</onleft>
 					<onright>306</onright>
 					<onup>8</onup>
@@ -970,12 +1274,12 @@
 					<label>&gt;</label>
 					<align>center</align>
 					<aligny>center</aligny>
-					<texturenofocus flipx="true" border="5,5,25,25">forum-browser-keyboard/forum-browser-KeyboardCornerBottomNF.png</texturenofocus>
-					<texturefocus flipx="true" border="5,5,25,25">forum-browser-keyboard/forum-browser-KeyboardCornerBottom.png</texturefocus>
-					<font>font30</font>
-					<textcolor>white</textcolor><focusedcolor>black</focusedcolor>
+					<texturenofocus  border="10">forum-browser-keyboard/forum-browser-keyboard-boxr-light.png</texturenofocus>
+					<texturefocus  border="10">forum-browser-keyboard/forum-browser-KeyboardKey.png</texturefocus>
+					<font>ForumBrowser-font30</font>
+					<focusedcolor>black</focusedcolor>
 					<onleft>305</onleft>
-					<onright>307</onright>
+					<onright>291</onright>
 					<onup>8</onup>
 					<ondown>56</ondown>
 				</control>

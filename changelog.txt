@@ -42,6 +42,10 @@ KNOWN ISSUES:
   
 Current Version : 2.1.3
 
+*** 2.1.4 ***
+
+Added smileys to Generic keyboard and changed it's appearance
+
 *** 2.1.3 ***
 
 Added smilies to Confluence keyboard skin
