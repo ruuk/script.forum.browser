@@ -57,44 +57,59 @@
 			<width>32</width>
 			<height>32</height>
 		</control>
-		
-		<control type="image">
-			<description>Forums List Background</description>
-			<posx>10</posx>
-			<posy>10</posy>
-			<width>290</width>
-			<height>540</height>
-			<texture border="10">forum-browser-video-box.png</texture>
+		<control type="group">
 			<visible>Control.IsVisible(115)</visible>
+			<control type="image">
+				<description>Forums List Background</description>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>290</width>
+				<height>540</height>
+				<texture border="10">forum-browser-video-box.png</texture>
+			</control>
+			<control type="image">
+				<description>Menu Indicator Background</description>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>290</width>
+				<height>30</height>
+				<texture border="10">forum-browser-video-box-header.png</texture>
+			</control>
 		</control>
 		
-		<control type="image">
-			<description>Forums List Background</description>
+		<control type="group">
+			<visible>!Control.IsVisible(115)</visible>
 			<posx>10</posx>
 			<posy>10</posy>
 			<width>1260</width>
-			<height>540</height>
-			<texture border="10">forum-browser-video-box.png</texture>
-			<visible>!Control.IsVisible(115)</visible>
-		</control>
-		
-		<control type="image">
-			<description>Menu Indicator Background</description>
-			<posx>10</posx>
-			<posy>10</posy>
-			<width>290</width>
-			<height>30</height>
-			<texture border="10">forum-browser-video-box-header.png</texture>
-			<visible>Control.IsVisible(115)</visible>
-		</control>
-		<control type="image">
-			<description>Menu Indicator Background</description>
-			<posx>10</posx>
-			<posy>10</posy>
-			<width>1260</width>
-			<height>30</height>
-			<texture border="10">forum-browser-video-box-header.png</texture>
-			<visible>!Control.IsVisible(115)</visible>
+			<control type="image">
+				<description>Forums List Background</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>1260</width>
+				<height>540</height>
+				<texture border="10">forum-browser-video-box.png</texture>
+			</control>
+			<control type="image">
+				<description>Menu Indicator Background</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>1260</width>
+				<height>30</height>
+				<texture border="10">forum-browser-video-box-header.png</texture>
+			</control>
+			<control type="label">
+				<description>Stats</description>
+				<posx>10r</posx>
+				<posy>0</posy>
+				<width>900</width>
+				<height>30</height>
+				<font>ForumBrowser-font10</font>
+				<textcolor>FF4488AA</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
+				<label>$INFO[Window.Property(stats_total_threads),[B]Threads:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]Posts:[/B] ]$INFO[Window.Property(stats_total_members),  [B]Members:[/B] ]$INFO[Window.Property(stats_total_online),  [B]Online:[/B] ]</label>
+			</control>
 		</control>
 		
 		<control type="group">

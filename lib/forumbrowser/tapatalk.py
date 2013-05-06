@@ -578,7 +578,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def getStats(self):
 		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
 		stats = self.server.get_board_stat()
-		if isinstance(stats,dict) and 'total_threads'in stats: return stats
+		if isinstance(stats,dict) and 'total_threads'in stats:
+			if not self.canGetOnlineUsers():
+				del stats['total_online']
+				del stats['guest_online']
+			return stats
 		return None
 		
 	def getSmilies(self):
@@ -764,9 +768,16 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			except:
 				ERROR('Failed to get PM Counts')
 				pm_counts = None
+			try:
+				if not callback(80,self.lang(32545)): break
+				stats = self.getStats()
+			except:
+				ERROR('Failed to get Forum stats')
+				stats = None
+				
 			callback(100,self.lang(32052))
 			
-			return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
+			return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts,'stats':stats}),donecallback)
 			
 		return self.finish(FBData(extra={'logo':logo},error='CANCEL'),donecallback)
 	

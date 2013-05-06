@@ -2565,6 +2565,7 @@ class ForumsWindow(windows.BaseWindow):
 			#xbmcgui.lock()
 			self.getControl(120).reset()
 			self.setPMCounts(data.getExtra('pm_counts'))
+			self.setStats(data.getExtra('stats'))
 			
 			for f in data.data:
 				self.empty = False
@@ -2641,6 +2642,14 @@ class ForumsWindow(windows.BaseWindow):
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
 		self.getControl(203).setLabel(T(32909) + disp)
 		self.setLoggedIn()
+		
+	def setStats(self,stats=None):
+		if not stats: stats = {}
+		self.setProperty('stats_total_threads',str(stats.get('total_threads','')))
+		self.setProperty('stats_total_posts',str(stats.get('total_posts','')))
+		self.setProperty('stats_total_members',str(stats.get('total_members','')))
+		self.setProperty('stats_total_online',str(stats.get('total_online','')))
+		self.setProperty('stats_guest_online',str(stats.get('guest_online','')))
 		
 	def openPMWindow(self,forumElements=None):
 		if self.nextWindow(self.data,RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements):
