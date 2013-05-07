@@ -1866,6 +1866,14 @@ msgctxt "#32545"
 msgid "Getting Forum Stats"
 msgstr ""
 
+msgctxt "#32546"
+msgid "Members"
+msgstr ""
+
+msgctxt "#32547"
+msgid "Online"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

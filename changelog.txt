@@ -4,13 +4,12 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
-  Show read/unread status on video skin where it doesn't
+  Remember position when returning to windows when stacking is disabled
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   Fix it so that the progress does not pop up twice when starting FB
   Add image info to slideout on Video skin for full message view
   Finish no window stacking mode
-  Implement get_participated_forum, get_board_stat
-  Smilies on other keyboards
+  Implement get_participated_forum
   Post/thread/forum bookmarks
   
  Long Term:
@@ -46,7 +45,8 @@ Current Version : 2.1.3
 
 Added smilies to Generic keyboard skin and changed it's appearance
 Added smilies to Transparency! keyboard skin
-Video skin now shows forum stats - currently works only with Tapatalk 
+Video skin now shows forum stats - currently works only with Tapatalk
+Video skin now has unread markers for forums and unread threads are highlighted
 
 *** 2.1.3 ***
 
