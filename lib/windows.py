@@ -223,10 +223,13 @@ class ManagedWindow():
 		self._funcKWArgs = None
 		self._hop = False
 		
+	def selectedIndex(self): return None
+	
 	def nextWindow(self, data, window, xml, **kwargs):
 		if not self.managed:
 			dialogs.openWindow(window,xml,**kwargs)
 			return False
+		data.select = self.selectedIndex()
 		self._data = data
 		self._nextWindow = window
 		self._nextXML = xml

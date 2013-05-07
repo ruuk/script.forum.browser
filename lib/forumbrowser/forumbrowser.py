@@ -50,6 +50,7 @@ class FBData():
 		self.pageData = pagedata
 		self.extra = extra or {}
 		self.error = error
+		self.select = None
 	
 	def __getitem__(self,key):
 		return self.extra.get(key)

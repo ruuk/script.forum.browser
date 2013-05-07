@@ -1236,7 +1236,9 @@ class GeneralForumParser(AdvancedParser):
 						'pb':[ (re.compile('<h[^>]+?>manage subscriptions<[^>]+?>(?i)'),re.compile('')) ],
 					}
 		
-		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')') }
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
+								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/categories/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
+							}
 		#http://www.torrentday.com/forums.php?action=viewforum&subforumid=1&forumid=26
 		self.linkRE = None
 	
@@ -1350,7 +1352,8 @@ class GeneralThreadParser(AdvancedParser):
 						}
 		
 		self.genericLinkREs = {	'u0':re.compile('(?:href=|^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\'| |>)'),
-								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)')
+								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)'),
+								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/discussion/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
 							 }
 		
 		self.splits = { 'ip':[(re.compile('section=markasread'),re.compile(''))]
@@ -1481,6 +1484,7 @@ class GeneralPostParser(AdvancedParser):
 		#ez    Ezboard/Yuku:
 		
 		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)'),
+								'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?)(?:$|"|\')'), # /forums/discussion/1785/reminds-me-of-clerks/p1
 								'u9': re.compile('(?:^|>)#(?P<pid>\d+)')
 							
 								}
@@ -1632,11 +1636,13 @@ class GeneralPostParser(AdvancedParser):
 		if self.isGeneric:
 			lastP = None
 			for p in self.posts:
-				if lastP:
+				if lastP and 'bottom' in lastP:
 					lastP['data'] = self.sequence[self.sequence.index(lastP['bottom']):self.sequence.index(p['bottom'])]
 					data = self.setDatas(lastP)
 					lastP['message'] = data and self.excessiveNL.sub('\n\n',self.wsRE.sub('',''.join(data)).strip())
 					if 'data' in lastP: del lastP['data']
+				elif lastP:
+					print "FORUMBROWSER: GENERIC POST PARSER: No lastP['bottom']"
 				lastP = p
 				
 			seq = self.sequence[self.sequence.index(lastP['bottom']):]
@@ -1842,13 +1848,14 @@ class GeneralPostParser(AdvancedParser):
 			if d.tag == 'img':
 				src = self.revertCodes(d.getAttr('src'))
 				reprd = repr(d)
-				if 'avatar' in reprd.lower():
+				reprd_lower = reprd.lower()
+				if 'avatar' in reprd_lower or 'profilephoto' in reprd_lower:
 					p['avatar'] = src or ''
 				elif 'offline' in reprd or 'useroff' in reprd:
 					p['online'] = False
 				elif 'online' in src or 'useron' in src: #useron is from SMF
 					p['online'] = True
-				elif self.lastUnset and self.lastUnset.endswith('gender') and ('male' in src.lower() or 'female' in src.lower()):
+				elif self.lastUnset and self.lastUnset.endswith('gender') and 'male' in src.lower():
 					p['extras']['gender'] = 'female' in src.lower() and 'Female' or 'Male'
 					self.lastUnset = None 
 				elif d.getAttr('width') and not p.get('avatar'): #user added images won't have size attributes set, at least that's the theory

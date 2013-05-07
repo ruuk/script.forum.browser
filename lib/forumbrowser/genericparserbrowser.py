@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, urlparse
 import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
@@ -167,8 +167,9 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 					url = f.get('url')
 					if not url: break
 					if not url.startswith('http'):
-						if url.startswith('/'): url = url[1:]
-						url = self._url + url
+						url = urlparse.urljoin(self._url,url)
+						#if url.startswith('/'): url = url[1:]
+						#url = self._url + url
 					break
 			pagesURL = url
 			if page and not str(page).isdigit(): url = self._url + page
@@ -236,8 +237,9 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				url = f.get('url')
 				if not url: break
 				if not url.startswith('http'):
-					if url.startswith('/'): url = url[1:]
-					url = self._url + url
+					url = urlparse.urljoin(self._url,url)
+					#if url.startswith('/'): url = url[1:]
+					#url = self._url + url
 				break
 		return url
 	

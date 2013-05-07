@@ -2604,6 +2604,7 @@ class ForumsWindow(windows.BaseWindow):
 				setLogins()
 				self.resetForum()
 				self.fillForumList()
+		if data.select is not None: self.getControl(120).selectItem(data.select)
 		self.openElements()
 		
 	def setLogoFromFile(self):
@@ -2835,6 +2836,11 @@ class ForumsWindow(windows.BaseWindow):
 		FB.theme = fdata.theme
 		self.setTheme()
 		
+	def selectedIndex(self):
+		idx = self.getControl(120).getSelectedPosition()
+		if idx < 0: return None
+		return idx
+	
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
 		d = dialogs.ChoiceMenu('Options',with_splash=True)
