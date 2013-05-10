@@ -1347,7 +1347,7 @@ class GeneralThreadParser(AdvancedParser):
 							'mb2':re.compile('(?:^|")showthread\.php\?[^"\']*?tid=(?P<id>\d+)'),
 							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
 							#'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
-							'ip':re.compile('/topic/(?P<id>\d+)-[^"\'/]*?/(?:"|\'|$)'),
+							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?/(?:"|\'|$)'),
 							'sm':re.compile('index\.php\?[^"\']*?topic=(?P<id>\d+\.0+)')
 						}
 		
@@ -1356,7 +1356,7 @@ class GeneralThreadParser(AdvancedParser):
 								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/discussion/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
 							 }
 		
-		self.splits = { 'ip':[(re.compile('section=markasread'),re.compile(''))]
+		self.splits = { 'ip':[(re.compile('ipsLayout_content'),re.compile(''))]
 					}
 		
 		self.linkRE = None

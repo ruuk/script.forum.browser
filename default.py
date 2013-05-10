@@ -1374,7 +1374,7 @@ def showUserExtras(post,ignore=None,just_return=False):
 	color = 'FF550000'
 	if just_return: color = 'FFBBBBBB'
 	for k,v in post.getExtras(ignore=ignore).items():
-		out += '[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v),FB))
+		out += u'[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v),FB))
 	if just_return: return out
 	dialogs.showMessage(T(32329),out,scroll=True)
 
@@ -2433,7 +2433,11 @@ class ForumsWindow(windows.BaseWindow):
 			t.start()
 		
 	def openForum(self,forum=None,url=None,callback=None,donecallback=None):
-		fb, forumElements = getForumBrowser(forum,url)
+		result = getForumBrowser(forum,url)
+		if not result:
+			if donecallback: donecallback(None)
+			return None
+		fb, forumElements = result
 		self.endGetForumBrowser(fb, forumElements, skip_fillForumList=True)
 		self.fillForumList(first=True, skip_getForums=True)
 		FB.getForums(callback=callback,donecallback=donecallback)
@@ -2557,12 +2561,13 @@ class ForumsWindow(windows.BaseWindow):
 	def doFillForumList(self,data):
 		self.endProgress()
 		self.lastFB = FB
-		self.setLogo(data.getExtra('logo'))
 		if not data:
+			if data == None: return
 			self.setFocusId(202)
 			if data.error == 'CANCEL': return
 			dialogs.showMessage(T(32050),T(32171),T(32053),'[CR]'+data.error,success=False)
 			return
+		self.setLogo(data.getExtra('logo'))
 		self.data = data
 		self.empty = True
 		

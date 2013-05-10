@@ -527,6 +527,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.reloadForumData(self.forum)
 		self.loginError = ''
 		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?) \w+:'
+		self.userInfoCache = {}
 		self.initialize()
 	
 	def isLoggedIn(self):
@@ -1064,27 +1065,19 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			#callback(-1,'NO POSTS')
 			return self.finish(FBData(error='NO POSTS'),donecallback)
 		if not callback(60,self.lang(32103)): return None
-		infos = {}
 		ct = page + 1
 		pct_ct = 1
 		tot = len(posts)
 		for p in posts:
 			fp = self.getForumPost(p)
 			fp.postNumber = ct
-			try:
-				if not fp.userName in infos:
-					infos[fp.userName] = self.server.get_user_info(xmlrpclib.Binary(fp.userName))
-				fp.setUserInfo(infos[fp.userName])
-			except:
-				infos[fp.userName] = {}
-				LOG('Failed to get user info for: %s' % fp.userName)
-				if DEBUG: ERROR('ERROR:')
+			fp.setUserInfo(self.getUserData(fp.userName))
 			sreplies.append(fp)
 			if not self.updateProgress(callback, 60, 35, pct_ct, tot, self.lang(32103)): break
 			ct+=1
 			pct_ct +=1
 		return sreplies
-					
+				
 	def hasPM(self):
 		return not self.forumConfig.get('disable_pm','0') == '1'
 	
@@ -1376,3 +1369,21 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			text = result.get('result_text')
 			LOG('Failed to user info: ' + str(text))
 			return None
+
+	def getUserData(self,username):
+		if username in self.userInfoCache:
+			self.userInfoCache[username][0] = time.time()
+			return self.userInfoCache[username][1]
+		try:
+			self.userInfoCache[username] = [time.time(),self.server.get_user_info(xmlrpclib.Binary(username))]
+		except:
+			self.userInfoCache[username] = [time.time(),{}]
+			LOG('Failed to get user info for: %s' % username)
+			if DEBUG: ERROR('ERROR:')
+		if len(self.userInfoCache) > 110: #clear 10 out of the cache, putting it back to 100
+			#LOG('LIMITING USER INFO CACHE')
+			keys = self.userInfoCache.keys()
+			keys.sort(key=lambda k: self.userInfoCache[k][0])
+			for i in range(0,11): del self.userInfoCache[keys[i]]
+		return self.userInfoCache[username][1]
+	
