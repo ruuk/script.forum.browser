@@ -38,6 +38,11 @@ KNOWN ISSUES:
   
 Current Version : 2.1.5
 
+*** 2.1.6 ***
+
+Improved smilies appearance
+Changed keyboard mods output on one smiley from :/ to :-/
+
 *** 2.1.5 ***
 
 Forgot to include the new font file in the last update, so here it is :)

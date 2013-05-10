@@ -67,14 +67,14 @@ class MessageConverter:
 		new = SmiliesList()
 		if util.getSetting('use_skin_mods',True):
 			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
-				f = '(\s)'+ re.escape(f)
+				f = '((?:^|\s))'+ re.escape(f)
 				if '[/COLOR]' in r:
 					new.append((f,r))
 				else:
 					new.append((f,'[COLOR FFBBBB00]'+r+'[/COLOR]'))
 		else:
 			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
-				f = '(\s)'+ re.escape(f)
+				f = '((?:^|\s))'+ re.escape(f)
 				if '[/COLOR]' in x:
 					new.append((f,x))
 				else:

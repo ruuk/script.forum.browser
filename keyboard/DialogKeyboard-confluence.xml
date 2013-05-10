@@ -411,6 +411,8 @@
 						<onclick>SendClick(,304)</onclick>
 						<onclick>SendClick(,74)</onclick>
 						<onclick>SendClick(,304)</onclick>
+						<onclick>SendClick(,69)</onclick>
+						<onclick>SendClick(,304)</onclick>
 						<onclick>SendClick(,81)</onclick>
 					</control>
 					<control type="button" id="292">
