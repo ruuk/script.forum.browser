@@ -36,7 +36,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1
   
-Current Version : 2.1.4
+Current Version : 2.1.5
+
+*** 2.1.5 ***
+
+Forgot to include the new font file in the last update, so here it is :)
 
 *** 2.1.4 ***
 
