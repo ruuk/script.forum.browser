@@ -1,16 +1,31 @@
-import sys, re, textwrap, htmlentitydefs
+import re, textwrap, htmlentitydefs
 from lib import util
+from lib import chardet
 
-DEBUG = sys.modules["__main__"].DEBUG
-FB = sys.modules["__main__"].FB
+DEBUG = util.DEBUG
 
 T = util.T
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
-def convertHTMLCodes(html):
+def convertHTMLCodes(html,FB=None,encoding=None):
 	if not isinstance(html,unicode):
-		html = unicode(html,'utf8','replace')
+		if not encoding:
+			if FB:
+				encoding = FB.getEncoding()
+			else:
+				encoding = 'utf-8'
+		try:
+			html = unicode(html,encoding)
+		except:
+			encoding = chardet.detect(html)
+			if util.DEBUG: util.LOG(encoding)
+			try:
+				html = unicode(html,encoding['encoding'])
+				if FB: FB.updateEncoding(encoding['encoding'],encoding['confidence'])
+			except:
+				html = unicode(html,encoding,'replace')
+			
 	try:
 		html = re.sub('&#(\d{1,5});',cUConvert,html)
 		html = re.sub('&(\w+?);',cTConvert,html)
@@ -27,9 +42,7 @@ class MessageConverter:
 	brFilter = re.compile('<br[ /]{0,2}>')
 	
 	def __init__(self,fb):
-		global FB
-		FB = fb
-		self.fb = fb
+		self.FB = fb
 		self._currentFilter = None
 		self.resetOrdered(False)
 		self.textwrap = textwrap.TextWrapper(80)
@@ -69,36 +82,36 @@ class MessageConverter:
 		self.FB.smilies = new
 		
 	def resetRegex(self):
-		if not FB: return
+		if not self.FB: return
 		
 		self.prepareSmileyList()
 
 		self.lineFilter = re.compile('[\n\r\t]')
-		f = FB.filters.get('quote')
+		f = self.FB.filters.get('quote')
 		self.quoteFilter = f and re.compile(f) or None
-		f = FB.filters.get('code')
+		f = self.FB.filters.get('code')
 		self.codeFilter = f and re.compile(f) or None
-		f = FB.filters.get('php')
+		f = self.FB.filters.get('php')
 		self.phpFilter = f and re.compile(f) or None
-		f = FB.filters.get('html')
+		f = self.FB.filters.get('html')
 		self.htmlFilter = f and re.compile(f) or None
-		f = FB.smilies.get('regex')
+		f = self.FB.smilies.get('regex')
 		self.smileyFilter = f and re.compile(f) or None
-		f = FB.filters.get('image')
+		f = self.FB.filters.get('image')
 		self.imageFilter = f and re.compile(f) or self.imageFilter
-		f = FB.filters.get('link')
+		f = self.FB.filters.get('link')
 		self.linkFilter = f and re.compile(f) or self.linkFilter
-		f = FB.filters.get('link2')
+		f = self.FB.filters.get('link2')
 		self.linkFilter2 = f and re.compile(f) or None
-		f = FB.getQuoteFormat()
+		f = self.FB.getQuoteFormat()
 		self.quoteFilter2 = f and re.compile(f) or None
 		
-		self.quoteStartFilter = re.compile(FB.getQuoteStartFormat())
-		self.altQuoteStartFilter = re.compile(FB.altQuoteStartFilter)
+		self.quoteStartFilter = re.compile(self.FB.getQuoteStartFormat())
+		self.altQuoteStartFilter = re.compile(self.FB.altQuoteStartFilter)
 		self.quoteEndFilter = re.compile('\[\/quote\](?i)')
 		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
 		
-		self.smileyReplace = '[COLOR '+FB.smilies.get('color','FF888888')+']%s[/COLOR]'
+		self.smileyReplace = '[COLOR '+self.FB.smilies.get('color','FF888888')+']%s[/COLOR]'
 		
 	def setReplaces(self):
 		self.quoteReplace = unicode.encode('[CR]_________________________[CR][B]'+T(32180)+'[/B][CR]'+T(32181)+' [B]%s[/B][CR][I]%s[/I][CR]_________________________[CR][CR]','utf8')
@@ -110,11 +123,13 @@ class MessageConverter:
 		
 		if util.getSetting('use_skin_mods',True):
 			self.imageConvert = self.imageConvertMod
+			self.imageConvertQuote = self.imageConvertModQuote
 			self.imageReplace = u'[CR][COLOR FF808080]\u250c\u2500\u2500\u2500\u2510[/COLOR][CR]'
 			if util.getSetting('hide_image_urls',True):
-				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR][COLOR FFFF0000]([/COLOR][COLOR FF00FF00]{0}[/COLOR][COLOR FF4444FF])[/COLOR][COLOR FFDDDD00]\u2022[/COLOR][CR]'
+				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR]{0}[COLOR FF808080]\u2502[/COLOR][CR]'
 			else:
-				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR][COLOR FFFF0000]([/COLOR][COLOR FF00FF00]{0}[/COLOR][COLOR FF4444FF])[/COLOR][COLOR FFDDDD00]\u2022[/COLOR][COLOR FF00AAAA]{1}[/COLOR][CR]'
+				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR]{0}[COLOR FF808080]\u2502[/COLOR][COLOR FF00AAAA]{1}[/COLOR][CR]'
+			self.imageReplaceQuote = u'\u2022\u2024{0}\u2022 '
 			self.imageReplace += u'[COLOR FF808080]\u2514\u2500\u2500\u2500\u2518[/COLOR][CR]'
 			self.linkReplace = u'[COLOR FF00AAAA]{0} (\u261B [B]{1}[/B])[/COLOR]'
 			self.link2Replace = u'[COLOR FF00AAAA](\u261B [B]\g<url>[/B])[/COLOR]'
@@ -127,8 +142,10 @@ class MessageConverter:
 			self.bullet = u'\u2022'
 		else:
 			self.imageConvert = self.imageConvertNoMod
+			self.imageConvertQuote = self.imageConvertNoModQuote
+			self.imageReplaceQuote = 'IMG#{0} '
 			if util.getSetting('hide_image_urls',True):
-				self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR] '
+				self.imageReplace = self.imageReplaceQuote
 			else:
 				self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [COLOR FF00AAAA][I]{1}[/I][/COLOR] '
 			self.linkReplace = u'[COLOR cyan]{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
@@ -184,6 +201,7 @@ class MessageConverter:
 		if self.smileyFilter: html = self.smileyFilter.sub(self.smileyConvert,html)
 		
 		self.imageCount = 0
+		self.imageNumber = 0
 		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
 		html = self.imageFilter.sub(self.imageConvert,html)
@@ -207,7 +225,7 @@ class MessageConverter:
 		html = self.removeNested(html,'\[/?I\]','[I]')
 		html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
 		html = self.processSmilies(html)
-		return convertHTMLCodes(html)
+		return convertHTMLCodes(html,self.FB)
 
 	def formatQuotesOld(self,html):
 		ct = 0
@@ -362,7 +380,7 @@ class MessageConverter:
 		html = html.replace('</table>','\n\n')
 		html = html.replace('</div>','\n')
 		html = re.sub('<[^<>]+?>','',html)
-		return convertHTMLCodes(html).strip()
+		return convertHTMLCodes(html,self.FB).strip()
 	
 	def linkConvert(self,m):
 		if m.group(1) == m.group(2):
@@ -371,19 +389,67 @@ class MessageConverter:
 			return m.group(2) + self.link2Replace.replace('\g<url>',m.group(1))
 		return self.linkReplace.format(m.group(2),m.group(1))
 	
-	def imageConvertMod(self,m):
-		self.imageCount += 1
-		disp = self.imageCount
-		if self.imageCount <= 30:
-			disp = unichr(10101 + self.imageCount)
-		return self.imageReplace.format(disp,m.group('url'))
+	def imageConvertModQuote(self,m):
+		count = self.getImageCount(m)
+		disp = self.getMonoCharacterNumber(count)
+		return self.imageReplaceQuote.format(disp,m.group('url'))
 	
+	def imageConvertNoModQuote(self,m):
+		count = self.getImageCount(m)
+		return self.imageReplaceQuote.format(count,m.group('url'))
+	
+	def imageConvertMod(self,m):
+		count = self.getImageCount(m)
+		disp = self.makeCamera(count)
+		return self.imageReplace.format(disp,m.group('url'))
+		
+	def getImageCount(self,m):
+		try:
+			count = int(m.group('count'))
+		except:
+			self.imageCount += 1
+			count = self.imageCount
+		return count
+	
+	def getCharacterNumber(self,count):	
+		if count <= 30:
+			return u'[COLOR FF00FF00]{0}[/COLOR]'.format(unichr(10101 + count))
+		elif count <=60:
+			return u'[COLOR FFFF0000]{0}[/COLOR]'.format(unichr(10071 + count))
+		elif count <=90:
+			return u'[COLOR FF4444FF]{0}[/COLOR]'.format(unichr(10041 + count))
+		else:
+			return u'[COLOR FF4444FF]{0}[/COLOR]'.format(unichr(10060))
+		
+	def getMonoCharacterNumber(self,count):	
+		if count <= 30:
+			return unichr(10101 + count)
+		elif count <=60:
+			return unichr(10071 + count)
+		elif count <=90:
+			return unichr(10041 + count)
+		else:
+			return unichr(10060)
+			
+	def makeCamera(self,count):
+		return u'[COLOR FFFFFFFF]\u205e[/COLOR][COLOR FF000033]\u205d[/COLOR][COLOR FF111111]\u2024[/COLOR][COLOR FFFFCCCC]\u2025[/COLOR]{0}'.format(self.getCharacterNumber(count))
+		
 	def imageConvertNoMod(self,m):
-		self.imageCount += 1
-		return self.imageReplace.format(self.imageCount,m.group('url'))
+		count = self.getImageCount(m)
+		return self.imageReplace.format(count,m.group('url'))
 
 	imageConvert = imageConvertNoMod
+	imageConvertQuote = imageConvertNoModQuote
 	
+	def imageNumberer(self,m):
+		self.imageNumber+=1
+		return m.group(0).lower().replace('img', '%simg' % self.imageNumber)
+		
+	def numberImages(self,html,image_count=0):
+		self.imageNumber = image_count
+		html = self.imageNumbererFilter.sub(self.imageNumberer,html)
+		return html
+		
 	def processSmilies(self,text):
 		if not isinstance(text,unicode): text = unicode(text,'utf8')
 		if self.smileyFilter: return text
@@ -391,10 +457,10 @@ class MessageConverter:
 		return text
 	
 	def smileyRawConvert(self,m):
-		return FB.smilies.get(m.group('smiley'),'')
+		return self.FB.smilies.get(m.group('smiley'),'')
 		
 	def smileyConvert(self,m):
-		return self.smileyReplace % FB.smilies.get(m.group('smiley'),'')
+		return self.smileyReplace % self.FB.smilies.get(m.group('smiley'),'')
 		
 	def quoteConvert(self,m):
 		gd = m.groupdict()
@@ -459,6 +525,8 @@ class BBMessageConverter(MessageConverter):
 		self.listItemFilter1 = re.compile('\[\*\](.*?)($|\[CR\])')
 		self.listItemFilter2 = re.compile('\[\*\]')
 		self.underlineFilter = re.compile('\[/?u\](?i)')
+		self.underlineBlockFilter = re.compile('\[u\](.*?)\[/u\](?is)')
+		self.imageNumbererFilter = re.compile('\[img\](?i)')
 		self.setReplaces()
 		self.resetRegex()
 		
@@ -489,11 +557,15 @@ class BBMessageConverter(MessageConverter):
 		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
 		self.fakeHrFilter = re.compile('[_]{10,}')
 		
-	def messageToDisplay(self,html):
+	def messageToDisplay(self,html,image_count=0):
 		#import codecs
 		#codecs.open('test.txt','w','utf8').write(html)
 		html = html.replace('[CR]','\n')
 		html = self.kissingTagFilter.sub(r'\1\n\2',html)
+
+		html = self.numberImages(html, image_count)
+		self.imageCount = self.imageNumber
+		
 		html = self.fakeHrFilter.sub(r'\n\g<0>\n',html)
 		html = html.replace('[hr]','\n[hr]\n')
 		html = self.formatQuotes(html)
@@ -511,19 +583,49 @@ class BBMessageConverter(MessageConverter):
 		if self.colorStart: html = self.colorStart.sub(r'[COLOR FF\1]',html)
 		html = html.replace('[/color]','[/COLOR]')
 		
-		self.imageCount = 0
 		html = self.linkFilter.sub(self.linkConvert,html)
 		if self.linkFilter2: html = self.linkFilter2.sub(self.link2Replace,html)
 		html = self.imageFilter.sub(self.imageConvert,html)
 		html = html.replace('[hr]',self.hrReplace)
 		html = self.removeNested(html,'\[/?B\]','[B]')
 		html = self.removeNested(html,'\[/?I\]','[I]')
-		html = self.underlineFilter.sub('_',html)
+		#html = self.underlineFilter.sub('_',html)
+		html = self.underlineBlockFilter.sub(self.underlineConvert,html)
 		html = self.bulletedFilter.sub(self.processBulletedList,html)
 		html = self.numberedFilter.sub(self.processOrderedList,html)
 		#html = html.replace('[CR]','\n').strip().replace('\n','[CR]') #TODO Make this unnecessary
 		html = self.processSmilies(html)
-		return convertHTMLCodes(html)
+		return convertHTMLCodes(html,self.FB)
+		
+	def underlineConvert(self,m):
+		head = ''
+		tail = ''
+		parts = re.split('(\[[^\]\[]+\])',m.group(1).lstrip())
+		i = True
+		for x in range(len(parts)-1,-1,-1):
+			if i:
+				prstrip = parts[x].rstrip(' ')
+				if prstrip:
+					tail += ' ' * (len(parts[x]) - len(prstrip))
+					parts[x] = prstrip
+					break
+				else:
+					tail += parts[x]
+					parts[x] = ''
+			i = not i
+		out = ''
+		i = True
+		textFound = False
+		for x in parts:
+			if i and x:
+				if x.strip() or textFound: #this removes leading spaces even if after a tag
+					if not textFound: x = x.lstrip()
+					out += re.sub('.',u'\u2042\g<0>',x)
+					textFound = True
+			else:
+				out += x
+			i = not i
+		return head + out + tail
 		
 	def formatQuotes(self,html):
 		if not isinstance(html,unicode):
@@ -591,6 +693,7 @@ class BBMessageConverter(MessageConverter):
 				if justStarted:
 					out += vert + '[CR]'
 				line = self.linkFilter.sub(r'\g<text> [B](Link)[/B]',line)
+				line = self.imageFilter.sub(self.imageConvertQuote,line)
 				line = re.sub('\[code\](?i)','__________\nCODE:\n',line)
 				line = re.sub('\[/code\](?i)','\n__________',line)
 				line = re.sub('\[php\](?i)','__________\nPHP:\n',line)

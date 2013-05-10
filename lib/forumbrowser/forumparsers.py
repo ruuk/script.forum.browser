@@ -1484,7 +1484,8 @@ class GeneralPostParser(AdvancedParser):
 		#ez    Ezboard/Yuku:
 		
 		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)'),
-								'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?)(?:$|"|\')'), # /forums/discussion/1785/reminds-me-of-clerks/p1
+								#'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?)(?:$|"|\')'), # /forums/discussion/1785/reminds-me-of-clerks/p1
+								'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?(?:p1|_\d+))(?:$|"|\')'),
 								'u9': re.compile('(?:^|>)#(?P<pid>\d+)')
 							
 								}
@@ -1518,7 +1519,7 @@ class GeneralPostParser(AdvancedParser):
 							('extra.location',re.compile('^(?:location|from) ?:?( .+)?(?i)')),
 							('extra.reputation',re.compile('^reputation:( \d+)?(?i)')),
 							('extra.gender',re.compile('^gender:( .*?)?(?i)')),
-							('status',re.compile('(^.{1,40}$)')),
+							('status',re.compile('(^.{1,40}(?<!:)$)')),
 							('postcount',re.compile('\w+: ([\d,]+)$(?i)')),
 							('title',re.compile('^re: (?i)')),
 							('extra.uploaded',re.compile('^uploaded: ?(.+)$(?i)')),
@@ -2172,8 +2173,12 @@ class GeneralPostParser(AdvancedParser):
 					if title and not postnumber: post['title'] = title
 					if self.forumType == 'pb': post['status'] = ' '
 					self.lastStack = self.stack[:]
-					self.ids[ID] = post
-					self.posts.append(post)
+					if ID in self.ids:
+						post.update(self.ids[ID])
+						self.ids[ID] = post
+					else:
+						self.ids[ID] = post
+						self.posts.append(post)
 					if self.lastPost and 'bottom' in self.lastPost:
 						bottomTag = self.lastPost['bottom']
 						#print bottomTag.depth

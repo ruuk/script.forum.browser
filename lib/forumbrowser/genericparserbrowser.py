@@ -48,14 +48,15 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 								'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
 								'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
 								'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
-								'image':'\[img\](?P<url>[^\[]+)\[/img\](?is)',
-								'link':'\[url="?(?P<url>[^\]]+?)"?\](?P<text>.*?)\[/url\](?is)',
+								'image':'\[(?P<count>\d+)?img\](?P<url>[^\[]+?)\[/img\](?is)',
+								'link':'\[(?:url|video|ame)="?(?P<url>[^\"\]]+?)"?\](?P<text>.*?)\[/(?:url|video|ame)\](?is)',
+								#'link':'\[url              ="?(?P<url>[^  \]]+?)"?\](?P<text>.*?)\[/url\](?is)',
 								'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
-								'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
-								'thread_link':'showthread.php\?[^<>"]*?tid=(?P<threadid>\d+)',
-								'color_start':'\[color=?#?(?P<color>\w+)\]'
-								})
-				
+								#'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<threadid>\d+)[^<>"]*?pid=(?P<postid>\d+)',
+								'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
+								'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
+								'color_start':'\[color=?["\']?#?(?P<color>\w+)["\']?\](?i)'})
+						
 		forum = self.getForumID()
 		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)
 		if not os.path.exists(fname):

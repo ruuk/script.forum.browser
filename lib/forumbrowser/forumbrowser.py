@@ -648,6 +648,9 @@ class ForumPost:
 		self.attrs_index = dir(self)
 		self.attrs_lower = [x.lower() for x in self.attrs_index]
 			
+	def numberImages(self):
+		self.message = self.MC.numberImages(self.message)
+		
 	def setVals(self,pdict): pass
 	
 	def canLike(self): return False
@@ -782,7 +785,7 @@ class ForumBrowser:
 	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
 							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
 							'vb':'(?i)\[quote(?:\=(?P<user>[^;\]]+)(?:;\d+)*)?\]',
-							'ip':'(?i)\[quote(?: name\=\'(?P<user>[^\']+)\')?\]',
+							'ip':'(?i)\[quote(?: name\=\'(?P<user>[^\']+)\')?[^\]]*\]',
 							'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?is)'
 						}
 	
@@ -918,6 +921,9 @@ class ForumBrowser:
 		self.browser = None
 		self.rules = None
 		self.messageConvertorClass=message_converter
+		self._encodingConfidence = 0
+		self._encoding = 'utf-8'
+		self.initFilters()
 		
 	def initialize(self):
 		self.MC = self.messageConvertorClass(self)
@@ -926,6 +932,14 @@ class ForumBrowser:
 		if callback: callback(data)
 		return data
 	
+	def getEncoding(self): return self._encoding
+	
+	def updateEncoding(self,encoding,confidence,log_change=True):
+		if confidence > self._encodingConfidence:
+			if log_change and encoding != self._encoding: LOG('Forum Encoding Changed: %s -> %s' % (self._encoding,encoding))
+			self._encoding = encoding
+			self._encodingConfidence = confidence
+			
 	def domain(self):
 		domain = self._url.split('://',1)[-1]
 		return domain.split('/')[0]
@@ -986,17 +1000,19 @@ class ForumBrowser:
 		self.forms = {}
 		self.formats = {}
 		
+	def initFilters(self):
+		self.filters.update({	'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
+								'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
+								'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
+								'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
+								'image':'\[(?P<count>\d+)?img\](?P<url>[^\[]+?)\[/img\](?is)',
+								'link':'\[(?:url|video|ame)="?(?P<url>[^\"\]]+?)"?\](?P<text>.+?)\[/(?:url|video|ame)\](?is)',
+								'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
+								'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
+								'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
+								'color_start':'\[color=?["\']?#?(?P<color>\w+)["\']?\](?i)'})
+				
 	def loadForumData(self,fname):
-		self.filters.update({'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
-						'code':'\[CODE\](?P<code>.+?)\[/CODE\](?is)',
-						'php':'\[PHP\](?P<php>.+?)\[/PHP\](?is)',
-						'html':'\[HTML\](?P<html>.+?)\[/HTML\](?is)',
-						'image':'\[img\](?P<url>[^\[]+?)\[/img\](?is)',
-						'link':'\[(?:url|video|ame)="?(?P<url>[^\"\]]+?)"?\](?P<text>.+?)\[/(?:url|video|ame)\](?is)',
-						'link2':'\[url\](?P<text>(?P<url>.+?))\[/url\](?is)',
-						'post_link':'(?:showpost.php|showthread.php)\?[^<>"]*?tid=(?P<tid>\d+)[^<>"]*?pid=(?P<pid>\d+)',
-						'thread_link':'showthread.php\?[^<>"]*?tid=(?P<tid>\d+)',
-						'color_start':'\[color=?["\']?#?(?P<color>\w+)["\']?\](?i)'})
 		return self.parseForumData(fname)
 		
 	def parseForumData(self,fname):

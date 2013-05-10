@@ -5,6 +5,7 @@ T = __addon__.getLocalizedString
 
 SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
 CURRENT_THEME = None
+DEBUG = None
 
 class AbortRequestedException(Exception): pass
 class StopRequestedException(Exception): pass

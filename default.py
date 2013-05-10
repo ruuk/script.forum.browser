@@ -90,6 +90,8 @@ from lib.forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, windows, mods  # @Reimport
 
+util.DEBUG = DEBUG
+
 signals.DEBUG = DEBUG
 
 dialogs.CACHE_PATH = CACHE_PATH
@@ -1116,21 +1118,20 @@ class MessageWindow(windows.BaseWindow):
 			if s: s.close()
 
 	def getImages(self):
-		i=0
 		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 		urls = self.post.imageURLs()
 		if urls: self.hasImages = True
-		for url in urls:
-			i+=1
+		for i,url in urls:
+			try:
+				i = int(i)
+			except:
+				i = 0
 			while urlParentDirFilter.search(url):
 				#TODO: Limit
 				url = urlParentDirFilter.sub('/',url)
 			url = url.replace('/../','/')
 			if getSetting('use_skin_mods',True):
-				if i <= 30:
-					disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(unichr(10101 + i))
-				else:
-					disp = u'[COLOR FF00FF00]{0}[/COLOR]'.format(i)
+				disp = FB.MC.makeCamera(i)
 			else:
 				disp = self.imageReplace % i
 			item = xbmcgui.ListItem(disp,iconImage=url)
@@ -1205,7 +1206,8 @@ class MessageWindow(windows.BaseWindow):
 				raise
 		
 	def showImage(self,url):
-		image_files = self.post.imageURLs()
+		counts, image_files = zip(*self.post.imageURLs())  # @UnusedVariable
+		image_files = list(image_files)
 		for l in self.post.links():
 			if l.isImage() and not l.textIsImage(): image_files.append(l.url)
 		if url in image_files:
@@ -1372,7 +1374,7 @@ def showUserExtras(post,ignore=None,just_return=False):
 	color = 'FF550000'
 	if just_return: color = 'FFBBBBBB'
 	for k,v in post.getExtras(ignore=ignore).items():
-		out += '[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v)))
+		out += '[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v),FB))
 	if just_return: return out
 	dialogs.showMessage(T(32329),out,scroll=True)
 
@@ -1562,7 +1564,7 @@ class RepliesWindow(windows.PageWindow):
 		self.setMessageProperty(post,item,True)
 		item.setProperty('post',str(post.postId))
 		item.setProperty('avatar',self.fixAvatar(url))
-		#item.setProperty('status',texttransform.convertHTMLCodes(post.status))
+		#item.setProperty('status',texttransform.convertHTMLCodes(post.status,FB))
 		item.setProperty('date',post.getDate(self.timeOffset))
 		item.setProperty('online',post.online and 'online' or '')
 		item.setProperty('postnumber',post.postNumber and unicode(post.postNumber) or '')
@@ -1578,8 +1580,11 @@ class RepliesWindow(windows.PageWindow):
 		extras = post.getExtras()
 		for a in alt:
 			val = extras.get(a)
-			if val != None and unicode(val):
-				edisp = val and '%s: %s' % (self.info_display.get(a,a).title(),texttransform.convertHTMLCodes(unicode(val))) or ''
+			if val != None:
+				if not hasattr(val,'len'): val = str(val)
+				val = texttransform.convertHTMLCodes(val,FB)
+				if not val: continue
+				edisp = '%s: %s' % (self.info_display.get(a,a).title(),val)
 				del extras[a]
 				altused.append(a)
 				if item.getProperty('alternate1'):
@@ -2123,7 +2128,7 @@ class ThreadsWindow(windows.PageWindow):
 			tid = tdict.get('threadid','')
 			starter = tdict.get('starter',T(32348))
 			title = tdict.get('title','')
-			title = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',title))
+			title = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',title),FB)
 			last = tdict.get('lastposter','')
 			fid = tdict.get('forumid','')
 			sticky = tdict.get('sticky') and 'sticky' or ''
@@ -2142,7 +2147,7 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty("fid",unicode(fid))
 			item.setProperty("lastposter",last)
 			preview = tdict.get('short_content','')
-			if preview: preview = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(preview))
+			if preview: preview = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(preview,FB))
 			
 			if last:
 				last = self.desc_base % last
@@ -2172,10 +2177,10 @@ class ThreadsWindow(windows.PageWindow):
 			title = fdict.get('title',T(32050))
 			desc = fdict.get('description') or T(32172)
 			text = self.textBase
-			title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
+			title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?',FB)
 			item = xbmcgui.ListItem(label=self.textBase % T(32164),label2=text % title)
 			item.setInfo('video',{"Genre":'is_forum'})
-			item.setProperty("last",self.forum_desc_base % texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
+			item.setProperty("last",self.forum_desc_base % texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB))
 			item.setProperty("title",title)
 			item.setProperty("topic",title)
 			item.setProperty("id",fid)
@@ -2578,10 +2583,10 @@ class ForumsWindow(windows.BaseWindow):
 				desc = fdict.get('description') or T(32172)
 				sub = fdict.get('subforum')
 				if sub: desc = T(32173)
-				title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?')
+				title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?',FB)
 				item = xbmcgui.ListItem(label=title)
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
-				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc))))
+				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB))
 				item.setProperty("topic",title)
 				item.setProperty("id",unicode(fid))
 				item.setProperty("link",fdict.get('link',''))
@@ -3435,6 +3440,7 @@ def doSettings(window=None):
 		del w
 	global DEBUG
 	DEBUG = getSetting('debug',False)
+	util.DEBUG = DEBUG
 	signals.DEBUG = DEBUG
 	tapatalk.DEBUG = DEBUG
 	if FB:
@@ -3694,7 +3700,7 @@ def addForum(current=False):
 		info = forumbrowser.HTMLPageInfo(pageURL,progress_callback=dialog.update)
 		dialog.setRange()
 		tmp_desc = info.description(info.title(''))
-		tmp_desc = texttransform.convertHTMLCodes(tmp_desc).strip()
+		tmp_desc = texttransform.convertHTMLCodes(tmp_desc,FB).strip()
 		images = info.images()
 		if not dialog.update(30,T(32435)): return
 		desc = dialogs.doKeyboard(T(32435),default=tmp_desc,mod=True)

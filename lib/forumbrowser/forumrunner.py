@@ -99,6 +99,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.userId = pdict.get('userid',pdict.get('post_userid',''))
 		self.title = pdict.get('title','')
 		self.message = pdict.get('edittext',self.filterMessage(pdict.get('text',pdict.get('message',pdict.get('thread_preview','')))))
+		self.numberImages()
 		self.date = pdict.get('post_timestamp',pdict.get('pm_timestamp',''))
 		self.images = pdict.get('images',[])
 		self.thumbs = pdict.get('image_thumbs',[])
@@ -133,6 +134,7 @@ class ForumPost(forumbrowser.ForumPost):
 	def getMessage(self,skip=False,raw=False):
 		if raw and self.isShort:
 			self.FB.updatePost(self)
+			self.numberImages()
 		if self.hideSignature: return self.message
 		return self.message + self.signature
 	

@@ -45,6 +45,11 @@ Added smilies to Transparency! keyboard skin
 Video skin now shows forum stats - currently works only with Tapatalk
 Video skin now has unread markers for forums and unread threads are highlighted
 Returning to a window when stacking is disabled now returns to previously selected item
+Improved image representation in posts
+Fix for images in quotes and image numbering in quotes
+Real underline tag [u][/u] support
+Tapatalk: Encoding from API now used when available
+Added encoding detection when encoding not provided
 
 *** 2.1.3 ***
 

@@ -241,6 +241,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.boxid = pdict.get('boxid','')
 			self._can_like = False
 			self._is_liked = False
+		self.numberImages()
 		
 	def update(self,data):
 		self.setVals(data)
@@ -346,10 +347,12 @@ class ForumPost(forumbrowser.ForumPost):
 				self.FB.updatePost(self)
 			self.isShort = False
 			self.isRaw = True
+			self.numberImages()
 		elif raw and self.userName == self.FB.user and not self.isRaw:
 			m = self.FB.server.get_raw_post(self.getID())
 			self.message = str(m.get('post_content',self.message))
 			self.isRaw = True
+			self.numberImages()
 		sig = ''
 		if self.signature and not self.hideSignature: sig = '\n__________\n[COLOR FF808080]' + self.signature + '[/COLOR]'
 		return makeUnicode(self.message) + makeUnicode(sig)
@@ -411,7 +414,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return '[COLOR %s]' % color
 		
 	def filterMessage(self,message):
-		message = message.replace('<b>','[b]').replace('</b>','[/b]').replace('<i>','[i]').replace('</i>','[/i]').replace('<u>','_').replace('</u>','_')
+		message = message.replace('<b>','[b]').replace('</b>','[/b]').replace('<i>','[i]').replace('</i>','[/i]').replace('<u>','[u]').replace('</u>','[/u]')
 		message = re.sub('<font color="([^"]+)">',self.colorReplace,message).replace('</font>','[/COLOR]') #r'[COLOR FF\1]',message)
 		return convertHTMLCodes(message.replace('<br />\n','\n'))
 	
@@ -574,6 +577,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			raise
 		except:
 			ERROR('Failed to get forum config')
+		encoding = self.getConfigInfo('charset')
+		if encoding:
+			LOG('Forum Encoding: ' + encoding)
+			self.updateEncoding(encoding,1,log_change=False)
 	
 	def getStats(self):
 		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
