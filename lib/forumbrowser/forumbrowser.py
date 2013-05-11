@@ -766,7 +766,7 @@ class ForumUser:
 		self.avatar = ''
 		self.status = ''
 		self.extras = {}
-			
+		
 ######################################################################################
 # Forum Browser API
 ######################################################################################
@@ -804,13 +804,14 @@ class ForumBrowser:
 					(':-/',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u246e[/COLOR]',u':-/'),
 					(';)',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2464[/COLOR]',u';\r)'),
 					(':D',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF990000]\u2476[/COLOR][COLOR FF111111]\u2463[/COLOR]',u':\rD'),
-					(':P',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2465[/COLOR]',u':\rP'),
-					(':p',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2465[/COLOR]',u':\rP'),
-					(':o',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2469[/COLOR]',u':\ro'),
+					(':P',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF990000]\u2477[/COLOR][COLOR FF111111]\u2465[/COLOR]',u':\rP'),
+					(':p',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF990000]\u2477[/COLOR][COLOR FF111111]\u2465[/COLOR]',u':\rP'),
+					(':oops:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFF7D7D]\u247a[/COLOR][COLOR FF111111]\u246d[/COLOR]',u':")'),
+					(':oo:',u'>oo<',u'>oo<'),
+					(':o',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2469[/COLOR]',u':\ro'),
 					(':~',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u246a[/COLOR]',u':~'),
 					(':grin:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF990000]\u2476[/COLOR][COLOR FF111111]\u2463[/COLOR]',u':\rD'),
-					(':blush:',u'[COLOR FFFF9999]\u2475[/COLOR][COLOR FF111111]\u246d[/COLOR]',u':")'),
-					(':oops:',u'[COLOR FFFF9999]\u2475[/COLOR][COLOR FF111111]\u246d[/COLOR]',u':")'),
+					(':blush:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFF7D7D]\u247a[/COLOR][COLOR FF111111]\u263a[/COLOR]',u':")'),
 					(':laugh:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2476[/COLOR][COLOR FF111111]\u2470[/COLOR]',u':\r))'),
 					(':angry:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2466[/COLOR]',u'>:\r{'),
 					(':rofl:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2476[/COLOR][COLOR FF111111]\u2467[/COLOR]',u'*ROFL*'),
@@ -819,8 +820,8 @@ class ForumBrowser:
 					(':sleepy:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2468[/COLOR]',u'*SLEEPY*'),
 					(':cool:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2462[/COLOR]',u'B)'),
 					('8-)',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2462[/COLOR]',u'8-)'),
-					(':rolleyes:',u'*ROLLEYES*',u'*ROLLEYES*'),
-					(':roll:',u'*ROLLEYES*',u'*ROLLEYES*'),
+					(':rolleyes:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2479[/COLOR]',u'*ROLLEYES*'),
+					(':roll:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2479[/COLOR]',u'*ROLLEYES*'),
 					(':nod:',u'*NOD*',u'*NOD*'),
 					(':sniffle:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u246a[/COLOR]',u':\rs'),
 					(':confused:',u'%)',u'%)'),
@@ -829,19 +830,18 @@ class ForumBrowser:
 					(':yawn:',u'*YAWN*',u'*YAWN*'),
 					(':struggle:',u'*STRUGGLE*',u'*STRUGGLE*'),
 					(':shame:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u246c[/COLOR]',u'*SHAME*'),
-					(':eek:',u'[COLOR FF00AA00]\u2475[/COLOR][COLOR FF111111]\u2472[/COLOR]',u'[COLOR FF00AA00]8o[/COLOR]'),
-					(':mrgreen:',u'[COLOR FF00AA00]\u2475[/COLOR][COLOR FF111111]\u2472[/COLOR]',u'[COLOR FF00AA00]:D[/COLOR]'),
+					(':eek:',u'[COLOR FF00AA00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2472[/COLOR]',u'[COLOR FF00AA00]8o[/COLOR]'),
+					(':mrgreen:',u'[COLOR FF00AA00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2472[/COLOR]',u'[COLOR FF00AA00]:D[/COLOR]'),
 					(':rotfl:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2476[/COLOR][COLOR FF111111]\u2467[/COLOR]',u'*ROFL*'),
-					(':bulgy-eyes:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u246f[/COLOR]',u'Oo'),
+					(':bulgy-eyes:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u246f[/COLOR]',u'Oo'),
 					(':at-wits-end:',u'[COLOR FFAA0000]\u2475[/COLOR][COLOR FF111111]\u2466[/COLOR]',u'[COLOR FFAA0000]>:{[/COLOR]'),
-					(':oo:',u'>oo<',u'>oo<'),
 					(':stare:',u'*STARE*',u'*STARE*'),
 					(':sad:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2639[/COLOR]',u':\r('),
 					(':cry:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2639[/COLOR]',u':\r('),
 					(':no:',u'*NO*',u'*NO*'),
 					('???',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF404040]\u2473[/COLOR]',u'???'),
-					(':shocked:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2469[/COLOR]',u'*SHOCKED*'),
-					(':shock:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FF111111]\u2469[/COLOR]',u'*SHOCKED*'),
+					(':shocked:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2469[/COLOR]',u'*SHOCKED*'),
+					(':shock:',u'[COLOR FFCCCC00]\u2475[/COLOR][COLOR FFFFFFFF]\u2478[/COLOR][COLOR FF111111]\u2469[/COLOR]',u'*SHOCKED*'),
 					(':love:',u'[COLOR FFAAAA66]\u2475[/COLOR][COLOR FF880000]\u2471[/COLOR]',u'[COLOR FFAA0000]<3[/COLOR]'),
 					('<3',u'[COLOR FFAA0000]\u2665[/COLOR]',u'[COLOR FFAA0000]<3[/COLOR]'),
 					(':shy:',u'*SHY*',u'*SHY*'),
@@ -1168,5 +1168,7 @@ class ForumBrowser:
 		#print 'ct: %s tot: %s pct: %s' % (ct,tot,pct)
 		return callback(pct,text)
 	
-	
+def getSmiley(key):
+	for s in ForumBrowser.smiliesDefs:
+		if s[0] == key: return s[1:]
 		

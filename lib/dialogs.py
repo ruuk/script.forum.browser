@@ -1,6 +1,7 @@
 import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
 import util, asyncconnections
 from xbmcconstants import *  # @UnusedWildImport
+from lib.forumbrowser import forumbrowser
 
 DEBUG = None
 CACHE_PATH = None
@@ -15,14 +16,14 @@ def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=False):
 	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
 	if smilies is not False:
 		if smilies: saveSmilies(smilies)
-		xbmcgui.Window(10000).setProperty('FB_smiley_0',u'\u263a')
-		xbmcgui.Window(10000).setProperty('FB_smiley_1',u'\u2639')
-		xbmcgui.Window(10000).setProperty('FB_smiley_2',u'\u2464')
-		xbmcgui.Window(10000).setProperty('FB_smiley_3',u'\u2463')
-		xbmcgui.Window(10000).setProperty('FB_smiley_4',u'\u2465')
-		xbmcgui.Window(10000).setProperty('FB_smiley_5',u'\u2469')
-		xbmcgui.Window(10000).setProperty('FB_smiley_6',u'\u246e')
-		xbmcgui.Window(10000).setProperty('FB_smiley_7',u'\u2462')
+		xbmcgui.Window(10000).setProperty('FB_smiley_0',forumbrowser.getSmiley(':)')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_1',forumbrowser.getSmiley(':(')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_2',forumbrowser.getSmiley(';)')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_3',forumbrowser.getSmiley(':D')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_4',forumbrowser.getSmiley(':P')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_5',forumbrowser.getSmiley(':o')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_6',forumbrowser.getSmiley(':-/')[0])
+		xbmcgui.Window(10000).setProperty('FB_smiley_7',forumbrowser.getSmiley('8-)')[0])
 	else:
 		xbmcgui.Window(10000).setProperty('FB_smiley_0','')
 		

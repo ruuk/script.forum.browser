@@ -1,4 +1,4 @@
-import HTMLParser, re, htmlentitydefs, time
+import HTMLParser, re, htmlentitydefs, time, urlparse
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
@@ -1219,7 +1219,8 @@ class GeneralForumParser(AdvancedParser):
 							'mb2': 'MyBB',
 							'pb': 'PhpBB',
 							'ip': 'Invision Power Board',
-							'sm': 'SMF (Simple Machines Forum)'
+							'sm': 'SMF (Simple Machines Forum)',
+							'gs': 'Geek & Sundry'
 						}
 		
 		self.linkREs = {	'vb': re.compile('(?:^|")(?:forumdisplay.php|forums)(?:\?|/)(?:[^"\']*?f=)?(?P<id>\d+)'),
@@ -1229,15 +1230,15 @@ class GeneralForumParser(AdvancedParser):
 							'pb': re.compile('(?:^|")(?:\W+)?viewforum.php?[^"\']*?f=?(?P<id>\d+)'),
 							#'ip': re.compile('/forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
 							'ip': re.compile('(?:(?<!/)/(?!/)(?P<prefix>.+/))?forum/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
-							'sm': re.compile('index\.php\?[^"\']*?board=(?P<id>\d+\.0+)')
+							'sm': re.compile('index\.php\?[^"\']*?board=(?P<id>\d+\.0+)'),
+							'gs':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/categories/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
 						}
 		
 		self.splits = {	'vb':[ (re.compile('<!--[^>]*?SUBSCRIBED FORUMS[^>]*?-->(?i)'),re.compile('<!--[^>]*?END SUBSCRIBED FORUMS[^>]*?-->(?i)')) ],
 						'pb':[ (re.compile('<h[^>]+?>manage subscriptions<[^>]+?>(?i)'),re.compile('')) ],
 					}
 		
-		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')'),
-								'u1':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/categories/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
+		self.genericLinkREs = {	'u0':re.compile('(?:^|"|\')(?P<url>[^"\']*?forum\w*\.php\?[^"\']*?(?<!b|m|f)(?:forumid|fid|f|id)=(?P<id>\d+)[^"\']*?)(?:$|"|\')')
 							}
 		#http://www.torrentday.com/forums.php?action=viewforum&subforumid=1&forumid=26
 		self.linkRE = None
@@ -1348,12 +1349,12 @@ class GeneralThreadParser(AdvancedParser):
 							'pb':re.compile('(?:^|")(?:\W+)?viewtopic.php?[^"\']*?f=(?P<fid>\d+)[^"\']*?t=(?P<id>\d+)'),
 							#'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?(?:"|\'|$)'),
 							'ip':re.compile('/topic/(?P<id>\d+)-[^"\']*?/(?:"|\'|$)'),
-							'sm':re.compile('index\.php\?[^"\']*?topic=(?P<id>\d+\.0+)')
+							'sm':re.compile('index\.php\?[^"\']*?topic=(?P<id>\d+\.0+)'),
+							'gs':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/discussion/(?P<id>\d+/[^"\'/]+)[^"\']*?)(?:$|"|\')')
 						}
 		
 		self.genericLinkREs = {	'u0':re.compile('(?:href=|^|"|\')(?P<url>[^"\']*?(?:thread|topic)\w*\.php\?[^"\']*?(?:t|id|threadid|tid)=(?P<id>\d+)[^"\']*?)(?:$|"|\'| |>)'),
-								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)'),
-								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?/forums/discussion/(?P<id>[^"\'/]+)[^"\']*?)(?:$|"|\')')
+								'u1':re.compile('(?:href=|^|"|\')(?P<url>[^"\'>]*?\?[^"\'>]*?(?:topicid|threadid|tid)=(?P<id>\d+)[^"\'>]*?)(?:$|"|\'| |>)')
 							 }
 		
 		self.splits = { 'ip':[(re.compile('ipsLayout_content'),re.compile(''))]
@@ -1477,15 +1478,15 @@ class GeneralPostParser(AdvancedParser):
 							'mb2': re.compile('(?:^|")showthread\.php\?[^"\']*?tid=\d+[^"\']*?pid=(?P<id>\d+)'),
 							'pb': re.compile('(?:^|")#p(?P<id>\d+)'),
 							'ip': re.compile('/topic/\d+-[^"\']*?/?(?:#entry|findpost__p__)(?P<id>\d+)(?:"|\'|$)'),
-							'sm': re.compile('index\.php\?[^"\']*?topic=\d+\.msg(?P<id>\d+)#msg\d+')
+							'sm': re.compile('index\.php\?[^"\']*?topic=\d+\.msg(?P<id>\d+)#msg\d+'),
+							'gs': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion/(?:comment|\d+)/[^"\']*?((?:/p(?=1)|Comment_)\d+))(?:$|"|\')')
+
 						}
 		#sm    SMF: Simple Machines Forum
 		#ub    UBB
 		#ez    Ezboard/Yuku:
 		
 		self.genericLinkREs = {	'u0': re.compile('\?[^"\']*?postid=(?P<pid>\d+)'),
-								#'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?)(?:$|"|\')'), # /forums/discussion/1785/reminds-me-of-clerks/p1
-								'u1': re.compile('(?:^|"|\')(?P<url>[^"\']*?discussion(?:/comment)?/(?P<pid>\d+)[^"\']*?(?:p1|_\d+))(?:$|"|\')'),
 								'u9': re.compile('(?:^|>)#(?P<pid>\d+)')
 							
 								}
@@ -1496,14 +1497,7 @@ class GeneralPostParser(AdvancedParser):
 #								'u2':re.compile('(?:^|"|\')(?P<url>[^"\']*?pm\.php\?\w=\d+[^"\']*?)(?:$|"|\')')
 #						}
 		
-		self.postREs = [	#(None,re.compile('^#?\d+$')),
-							('postnumber',re.compile('^#?(\d+)?$')),
-							('postnumber',re.compile('^#(\d+) ')),
-							(None,re.compile('^by$')),
-							#(None,re.compile('^#$')),
-							('joindate',re.compile('^(?:joined|registered|join date)(?! user):?( .+)?(?i)')),
-							('labeledstatus',re.compile('^(?:group|class):?( .+)?(?i)')),
-							('date',re.compile('\d+-\d+-\d+')),
+		self.dateREs = [	('date',re.compile('\d+-\d+-\d+')),
 							('date',re.compile('\d+(?:\w\w), \d{4}')),
 							('date',re.compile('\w+ \d{1,2}:\d{2}')),
 							('date',re.compile('\d{1,2}:\d{2} \wm(?i)')),
@@ -1512,6 +1506,17 @@ class GeneralPostParser(AdvancedParser):
 							('date',re.compile('\w+ \d{1,2}(?:\w{2})?, \d{4}')),
 							('date',re.compile('\w+day, \d{1,2}:\d{1,2}')),
 							('date',re.compile('^(?:today|yesterday),(?i)')),
+							('date',re.compile('^(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w{0,6}\s\d+(?i)'))
+					]
+		
+		self.postREs = [	#(None,re.compile('^#?\d+$')),
+							('postnumber',re.compile('^#?(\d+)?$')),
+							('postnumber',re.compile('^#(\d+) ')),
+							(None,re.compile('^by$')),
+							#(None,re.compile('^#$')),
+							('joindate',re.compile('^(?:joined|registered|join date)(?! user):?( .+)?(?i)')),
+							('labeledstatus',re.compile('^(?:group|class):?( .+)?(?i)'))
+						] + self.dateREs + [
 							(None,re.compile('^post:(?i)')),
 							('user',re.compile('^.*\w.*$')),
 							('postcount',re.compile('^posts:?( [\d,]+)?(?i)')),
@@ -1531,7 +1536,9 @@ class GeneralPostParser(AdvancedParser):
 		self.ignores = ('pm','profile','email','private message','report','quote','private message','add as contact','send email','edit post','delete post','report this post','reply with quote','visit homepage','edit','delete','members','multiquote','back to top')
 		
 		self.splits = { 'ip':[	(re.compile('<!-- ::: CONTENT ::: -->'),re.compile('<!-- Close topic -->')),
-								(re.compile("<div class='topic_controls'>"),re.compile(''))]
+								(re.compile("<div class='topic_controls'>"),re.compile(''))
+							],
+						'gs':[(re.compile('<!-- /start #Forums -->'),re.compile('<!-- /end #Forums -->'))]
 					}
 		
 		self.threadParser = None
@@ -1566,9 +1573,10 @@ class GeneralPostParser(AdvancedParser):
 		
 	def fixURL(self,url):
 		if url.startswith('http'): return url
-		url = url.split('/',1)[-1]
-		return self.base + url
-	
+		return urlparse.urljoin(self.base,url)
+# 		url = url.split('/',1)[-1]
+# 		return self.base + url
+
 	def addRules(self,rules=None):
 		self.extraRules = []
 		self.headFilters = []
@@ -1613,6 +1621,7 @@ class GeneralPostParser(AdvancedParser):
 		#elif self.reFluxBB.search(html): self.linkRE = self.reFluxBB
 		#elif self.reMyBB.search(html): self.linkRE = self.reMyBB
 		self.getRE(html)
+		if 'generic_posts' in self.filters: self.isGeneric = True
 		if not self.linkRE: self.mode = 'PID'
 		print 'Post Parsing Mode: ' + self.mode
 		print 'Post Forum Type: ' + self.forumType
@@ -2167,10 +2176,16 @@ class GeneralPostParser(AdvancedParser):
 						else:
 							usedTag = tag
 						postnumber = ''
-					if title.lower() in ('quote','pm','profile'): title = ''
-							
+					if title.lower() in ('quote','pm','profile'): title = ''					
 					post = {'postid':ID,'postnumber':postnumber.replace('#',''),'usedtag':usedTag,'tag':tag}
-					if title and not postnumber: post['title'] = title
+					if title and not postnumber:
+						for r in self.dateREs:
+							if r[1].search(title):
+								post['date'] = title
+								break
+						else:
+							post['title'] = title
+							
 					if self.forumType == 'pb': post['status'] = ' '
 					self.lastStack = self.stack[:]
 					if ID in self.ids:

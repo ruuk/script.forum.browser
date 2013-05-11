@@ -1,0 +1,10 @@
+#FluxBB
+
+url:threads=categories/!FORUMID!!PAGE!
+url:replies=discussion/!THREADID!!PAGE!
+
+url:page_arg=/p!PAGE!
+
+format:no_9999=True
+
+filter:generic_posts=True

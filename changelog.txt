@@ -42,6 +42,7 @@ Current Version : 2.1.5
 
 Improved smilies appearance
 Changed keyboard mods output on one smiley from :/ to :-/
+Fixed detection of smilies at the start of a new line
 
 *** 2.1.5 ***
 
