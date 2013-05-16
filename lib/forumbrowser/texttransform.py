@@ -18,11 +18,11 @@ def convertHTMLCodes(html,FB=None,encoding=None):
 		try:
 			html = unicode(html,encoding)
 		except:
-			encoding = chardet.detect(html)
-			if util.DEBUG: util.LOG(encoding)
+			detected_encoding = chardet.detect(html)
+			if util.DEBUG: util.LOG(detected_encoding)
 			try:
-				html = unicode(html,encoding['encoding'])
-				if FB: FB.updateEncoding(encoding['encoding'],encoding['confidence'])
+				html = unicode(html,detected_encoding['encoding'])
+				if FB: FB.updateEncoding(detected_encoding['encoding'],detected_encoding['confidence'])
 			except:
 				html = unicode(html,encoding,'replace')
 			
@@ -131,7 +131,10 @@ class MessageConverter:
 				self.imageReplace += u'[COLOR FF808080]\u2502[/COLOR]{0}[COLOR FF808080]\u2502[/COLOR][COLOR FF00AAAA]{1}[/COLOR][CR]'
 			self.imageReplaceQuote = u'\u2022\u2024{0}\u2022 '
 			self.imageReplace += u'[COLOR FF808080]\u2514\u2500\u2500\u2500\u2518[/COLOR][CR]'
-			self.linkReplace = u'[COLOR FF00AAAA]{0} (\u261B [B]{1}[/B])[/COLOR]'
+			if util.getSetting('hide_link_urls',True):
+				self.linkReplace = u'[COLOR FF00AAAA]\u261B{0}[/COLOR]'
+			else:
+				self.linkReplace = u'[COLOR FF00AAAA]{0} (\u261B [B]{1}[/B])[/COLOR]'
 			self.link2Replace = u'[COLOR FF00AAAA](\u261B [B]\g<url>[/B])[/COLOR]'
 			self.quoteStartReplace = u'\u250c'+u'\u2500'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'\u2514'+u'\u2500'*300+u'[CR]'
@@ -148,7 +151,10 @@ class MessageConverter:
 				self.imageReplace = self.imageReplaceQuote
 			else:
 				self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [COLOR FF00AAAA][I]{1}[/I][/COLOR] '
-			self.linkReplace = u'[COLOR cyan]{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
+			if util.getSetting('hide_link_urls',True):
+				self.linkReplace = u'[COLOR cyan]{1} {0}[/COLOR]'.format('{0}',T(32182))
+			else:
+				self.linkReplace = u'[COLOR cyan]{0} ({2} [B]{1}[/B])[/COLOR]'.format('{0}','{1}',T(32182))
 			self.link2Replace = u'[COLOR cyan]({0} [B]\g<url>[/B])[/COLOR]'.format(T(32182))
 			self.quoteStartReplace = u','+u'-'*300+u'[CR][B]'+T(32180)+u' %s[/B]'
 			self.quoteEndReplace = u'`'+u'-'*300+u'[CR]'
@@ -385,8 +391,7 @@ class MessageConverter:
 	def linkConvert(self,m):
 		if m.group(1) == m.group(2):
 			return self.link2Replace.replace('\g<url>',m.group(1))
-		elif self.imageFilter.search(m.group(2)):
-			return m.group(2) + self.link2Replace.replace('\g<url>',m.group(1))
+		
 		return self.linkReplace.format(m.group(2),m.group(1))
 	
 	def imageConvertModQuote(self,m):

@@ -347,7 +347,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 			self.headerColor = colorFile
 			self.updateHeaderColor()
 		elif data['type'] == 'function':
-			data['value'][0](*data['value'][1:])
+			if data['value'][0](*data['value'][1:]): self.settingsChanged = True
 		
 	def validate(self,val,vtype):
 		if vtype == 'text.integer':
@@ -424,6 +424,7 @@ def editForumSettings(forumID):
 	if forumID.startswith('GB.'):
 		w.addSep()
 		w.addItem('login_url',T(32293),rules.get('login_url',''),'text.url.' + fdata.forumURL())
+		w.addItem('ignore_forum_images',T(32016),sett.get('ignore_forum_images',True),'boolean')
 		w.addItem('rules',T(32294),(manageParserRules,forumID,rules),'function')
 	oldLogo = fdata.urls.get('logo','')
 	w.doModal()
@@ -435,6 +436,7 @@ def editForumSettings(forumID):
 							notify=w.data['notify']['value'],
 							extras=w.data['extras']['value'],
 							time_offset_hours=w.data['time_offset_hours']['value'],
+							ignore_forum_images=w.data['ignore_forum_images']['value'],
 							rules=rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
@@ -1374,7 +1376,9 @@ def showUserExtras(post,ignore=None,just_return=False):
 	color = 'FF550000'
 	if just_return: color = 'FFBBBBBB'
 	for k,v in post.getExtras(ignore=ignore).items():
-		out += u'[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n'.format(k.title(),color,texttransform.convertHTMLCodes(str(v),FB))
+		if not hasattr(v,'decode'): v = str(v)
+		val = texttransform.convertHTMLCodes(v,FB)
+		out += FB.unicode('[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n').format(k.title(),color,val)
 	if just_return: return out
 	dialogs.showMessage(T(32329),out,scroll=True)
 
@@ -1581,7 +1585,7 @@ class RepliesWindow(windows.PageWindow):
 		for a in alt:
 			val = extras.get(a)
 			if val != None:
-				if not hasattr(val,'len'): val = str(val)
+				if not hasattr(val,'decode'): val = str(val)
 				val = texttransform.convertHTMLCodes(val,FB)
 				if not val: continue
 				edisp = '%s: %s' % (self.info_display.get(a,a).title(),val)
@@ -2132,7 +2136,7 @@ class ThreadsWindow(windows.PageWindow):
 			last = tdict.get('lastposter','')
 			fid = tdict.get('forumid','')
 			sticky = tdict.get('sticky') and 'sticky' or ''
-			reply_count = unicode(tdict.get('reply_number','0') or '0')
+			reply_count = unicode(tdict.get('reply_number','') or '')
 			if starter == self.me: starterbase = self.highBase
 			else: starterbase = self.textBase
 			#title = (tdict.get('new_post') and self.newBase or self.textBase) % title
@@ -2529,6 +2533,7 @@ class ForumsWindow(windows.BaseWindow):
 	def stopThread(self):
 		self.failedToGetForum()
 		windows.ThreadWindow.stopThread(self)
+		if FB: self.getControl(104).setLabel('[B]%s[/B]' % FB.getDisplayName())
 		
 	def fillForumList(self,first=False,data=None,skip_getForums=False):
 		if not FB: return
@@ -2591,6 +2596,7 @@ class ForumsWindow(windows.BaseWindow):
 				title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?',FB)
 				item = xbmcgui.ListItem(label=title)
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
+				item.setProperty("ignore",fdict.get('ignore') and 'ignore' or '')
 				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB))
 				item.setProperty("topic",title)
 				item.setProperty("id",unicode(fid))
@@ -2681,6 +2687,7 @@ class ForumsWindow(windows.BaseWindow):
 			item = self.getControl(120).getSelectedItem()
 			
 		if item:
+			if item.getProperty('ignore'): return False
 			link = item.getProperty('link')
 			if link:
 				return self.openLink(link)
@@ -3207,7 +3214,8 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 	
 	ret['username'] = ret.get('username','')
 	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
-	ret['notify'] = ret.get('notify') == 'True'
+	ret['notify'] = util._processSetting(ret.get('notify'),False)
+	ret['ignore_forum_images'] = util._processSetting(ret.get('ignore_forum_images'),True)
 		
 	if get_both:
 		return ret,rules
@@ -3478,12 +3486,16 @@ def forumsManager(window=None,size='full',forumID=None):
 def manageParserRules(forumID=None,rules=None):
 	if not forumID:
 		if FB: forumID = FB.getForumID()
+	horLine = '-'
+	if FB: horLine = FB.MC.hrReplace
 	if not forumID: return
-	returnRules = False
+	changed = False
+	returnIfChanged = False
 	if rules != None:
-		returnRules = True
+		returnIfChanged = True
 	else:
 		rules = loadForumSettings(forumID,get_rules=True)
+	rhelp = dialogs.loadHelp('postrules.help')
 	choice = True
 	while choice:
 		menu = dialogs.OptionsChoiceMenu(T(32395))
@@ -3492,32 +3504,47 @@ def manageParserRules(forumID=None,rules=None):
 		for k in keys:
 			v = rules[k]
 			if k.startswith('extra.'):
-				if v: menu.addItem(k,'[%s] ' % T(32396) + k.split('.')[-1],display2=v)
+				if v: menu.addItem(k,'[%s] ' % T(32396) + k.split('.')[-1],display2=v + '[CR]%s[CR]%s' % (horLine,rhelp['extra']))
 			elif k == 'login_url':
 				if v: menu.addItem(k,T(32398),display2=texttransform.textwrap.fill(v,30))
 			else:
 				if v:
 					for i in v.split(';&;'):
-						if i: menu.addItem(k + '.' + i,'[%s %s] ' % (k.upper(),T(32397)) + i)
+						if i:
+							if k == 'split':
+								disp = i.replace(';&&;',' [COLOR FFFF9999]|[/COLOR] ')
+								s,e = i.split(';&&;',1)
+								disp2 = '[COLOR FF808080]S:[/COLOR] %s[CR][COLOR FF808080]E:[/COLOR] %s' % (s,e) + '[CR]%s[CR]%s' % (horLine,rhelp[k])
+							else:
+								disp = i
+								disp2 = disp + '[CR]%s[CR]%s' % (horLine,rhelp[k])
+							menu.addItem(k + '.' + i,'[%s %s] ' % (k.upper(),T(32397)) + disp,'',disp2)
+		menu.addSep()
 		menu.addItem('add','[COLOR FFFFFF00]+ %s[/COLOR]' % T(32399))
 		menu.addItem('share','[COLOR FF00FFFF]%s->[/COLOR]' % T(32400),display2='Share rules to the Forum Browser online database')
-		menu.addItem('save',returnRules and '[COLOR FF00FF00]%s[/COLOR]' % T(32052) or '[COLOR FF00FF00]<- %s[/COLOR]' % T(32401))
+		menu.addItem('save',returnIfChanged and '[COLOR FF00FF00]%s[/COLOR]' % T(32052) or '[COLOR FF00FF00]<- %s[/COLOR]' % T(32401))
 		choice = menu.getResult()
-		if not choice: return
+		
+		if not choice:
+			if returnIfChanged: return changed
+			return
+		
 		if choice == 'save':
 			for k in rules.keys():
 				if not rules[k]: rules[k] = None
-			if returnRules: return rules
+			if returnIfChanged: return changed
 			saveForumSettings(forumID,rules=rules)
 			continue
 		elif choice == 'share':
 			shareForumRules(forumID,rules)
 			continue
 		elif choice == 'add':
-			menu = dialogs.ChoiceMenu(T(32402))
-			menu.addItem('extra',T(32317))
-			menu.addItem('head',T(32403))
-			menu.addItem('tail',T(32404))
+			menu = dialogs.OptionsChoiceMenu(T(32402))
+			menu.addItem('extra',T(32317),'',rhelp['extra'])
+			menu.addItem('head',T(32403),'',rhelp['head'])
+			menu.addItem('tail',T(32404),'',rhelp['tail'])
+			menu.addItem('class',T(32549),'',rhelp['class'])
+			menu.addItem('split',T(32550),'',rhelp['split'])
 			rtype = menu.getResult()
 			if not rtype: continue
 			if rtype == 'extra':
@@ -3528,13 +3555,25 @@ def manageParserRules(forumID=None,rules=None):
 				val = dialogs.doKeyboard(T(32406),default)
 				if not val: continue
 				rules['extra.' + name] = val
+				changed = True
 			else:
-				val = dialogs.doKeyboard(T(32407))
-				if not val: continue
+				if rtype == 'split':
+					val1 = dialogs.doKeyboard(T(32551))
+					if val1 == None: continue
+					val1 = val1 or ''
+					val2 = dialogs.doKeyboard(T(32552))
+					val2 = val2 or ''
+					if not val1 and not val2: continue
+					val = val1 + ';&&;' + val2
+				else:
+					val = dialogs.doKeyboard(T(32407))
+					if not val: continue
+					
 				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
 				if not val in vallist:
 					vallist.append(val)
 					rules[rtype] = ';&;'.join(vallist)
+					changed = True
 			continue
 		menu = dialogs.ChoiceMenu(T(32408))
 		if not choice == 'login_url': menu.addItem('edit',T(32232))
@@ -3544,12 +3583,14 @@ def manageParserRules(forumID=None,rules=None):
 		if choice2 == 'remove':
 			if choice.startswith('extra.') or choice == 'login_url':
 				rules[choice] = None
+				changed = True
 			else:
 				rtype, val = choice.split('.')
 				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
 				if val in vallist:
 					vallist.pop(vallist.index(val))
 					rules[rtype] = ';&;'.join(vallist)
+					changed = True
 		else:
 			if choice.startswith('extra.') or choice == 'login_url':
 				val = rules[choice]
@@ -3559,15 +3600,27 @@ def manageParserRules(forumID=None,rules=None):
 				edit = dialogs.doKeyboard(T(32232),val)
 				if edit == None: continue
 				rules[choice] = edit
+				changed = True
 			else:
 				rtype, val = choice.split('.')
-				edit = dialogs.doKeyboard(T(32232),val)
+				if rtype == 'split':
+					val1,val2 = val.split(';&&;',1)
+					val1 = dialogs.doKeyboard(T(32551),val1)
+					if val1 == None: continue
+					val1 = val1 or ''
+					val2 = dialogs.doKeyboard(T(32552),val2)
+					if val2 == None: continue
+					val2 = val2 or ''
+					edit = val1 + ';&&;' + val2
+				else:
+					edit = dialogs.doKeyboard(T(32232),val)
 				if edit == None: continue
 				vallist = rules.get(rtype) and rules[rtype].split(';&;') or []
 				if val in vallist:
 					vallist.pop(vallist.index(val))
 					vallist.append(edit)
 					rules[rtype] = ';&;'.join(vallist)
+					changed = True
 
 def shareForumRules(forumID,rules):
 	odb = forumbrowser.FBOnlineDatabase()

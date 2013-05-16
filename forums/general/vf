@@ -1,0 +1,21 @@
+#Geek&Sundry
+
+url:threads=categories/!FORUMID!!PAGE!
+url:replies=discussion/!THREADID!!PAGE!
+
+filter:main_url_cleaner=/categories(?:/|$)
+
+url:page_arg=/p!PAGE!
+
+filter:page=" class="Highlight">(?P<page>\d+).*?(?P<total>\d+)</a><[^>]+class="Next"
+filter:next=(?:/p(?P<page>\d+))?" class="Next"
+filter:prev=(?:/p(?P<page>\d+))?" class="Previous"
+
+format:no_9999=True
+filter:ignore_top_forums=True
+
+filter:generic_posts=True
+
+form:login_action=signin
+form:login_user=Form/Email
+form:login_pass=Form/Password

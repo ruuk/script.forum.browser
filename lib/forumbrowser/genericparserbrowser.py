@@ -2,7 +2,7 @@ import sys, os, urlparse
 import forumbrowser, scraperbrowser, texttransform
 from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostParser
 from forumbrowser import FBData
-from lib.util import getSetting, LOG, ERROR, T
+from lib import util
 
 FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 loadForumSettings = sys.modules["__main__"].loadForumSettings
@@ -42,6 +42,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		
 		#self.urls['base'] = url
 		self.initialize()
+		self.postParser.bullet = self.MC.bullet
 		
 	def loadForumFile(self):
 		self.filters.update({	'quote':'\[QUOTE\](?P<quote>.*)\[/QUOTE\](?is)',
@@ -123,27 +124,27 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not html:
 			try:
 				url = url or self._url
-				LOG('Forums List URL: ' + url)
+				util.LOG('Forums List URL: ' + url)
 				html = self.readURL(url,callback=callback,force_browser=True)
 			except:
-				em = ERROR('ERROR GETTING FORUMS')
+				em = util.ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em or 'ERROR'),donecallback)
 		
-		if not html or not callback(80,T(32103)):
+		if not html or not callback(80,util.T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		
-		forums = self.forumParser.getForums(html,callback,80,20)
-		LOG('Detected Forum Type: ' + self.forumParser.forumType)
-		self.forumType = self.forumParser.forumType
+		self.forumType = self.forumParser.getForumsPre(html)
+		util.LOG('Detected Forum Type: ' + self.forumType)
 		self.MC.resetRegex()
 		self.doLoadForumData()
+		self.forumParser.setFilters(self.filters)
+		forums = self.forumParser.getForums(html,callback,80,20)
 		self.checkLogin(callback,callback_percent=95)
 		if not forums and self.isLoggedIn():
 			try:
 				html = self.readURL(url,callback=callback,force_browser=True)
 			except:
-				em = ERROR('ERROR GETTING FORUMS')
+				em = util.ERROR('ERROR GETTING FORUMS')
 				callback(-1,'%s' % em)
 				return self.finish(FBData(error=em or 'ERROR'),donecallback)
 			forums = self.forumParser.getForums(html)
@@ -155,7 +156,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		logo = self.urls.get('logo') or 'http://%s/favicon.ico' % self.domain()
 		#pm_counts = self.getPMCounts(html)
 		pm_counts = None
-		callback(100,T(32052))
+		callback(100,util.T(32052))
 		
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
 	
@@ -175,12 +176,12 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			pagesURL = url
 			if page and not str(page).isdigit(): url = self._url + page
 		if not url: url = self.getPageUrl(page,'threads',fid=forumid,prefix=self.forumParser.getPrefix())
-		LOG('Forum URL: %s' % url)
+		util.LOG('Forum URL: %s' % url)
 		html = self.readURL(url,callback=callback,force_browser=True)
-		if not html or not callback(80,T(32103)):
+		if not html or not callback(80,util.T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		threads = self.threadParser.getThreads(html,pagesURL)
-		LOG('Detected Threads Type: ' + self.threadParser.forumType)
+		util.LOG('Detected Threads Type: ' + self.threadParser.forumType)
 		#forums = self.forumParser.getList(html,in_threads=True)
 		try:
 			newfid = self.forumParser.linkRE.search(self.lastURL.rsplit('/',1)[-1]).groupdict().get('id')
@@ -190,7 +191,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		#if forums: extra = {'forums':forums}
 		if subs:
 			for t in threads: t['subscribed'] = True
-		callback(100,T(32052))
+		callback(100,util.T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads',page_urls=self.threadParser.pages,page_data=page_data)
 		if self.threadParser.getForumType() == 'u0': pd.useURLs = True
 		return self.finish(FBData(threads,pd,extra=extra),donecallback)
@@ -248,20 +249,22 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = None
 		pagesURL = url
-		self.postParser.addRules(loadForumSettings(self.getForumID(),get_rules=True))
-		self.postParser.ignoreForumImages = getSetting('ignore_forum_images',True)
+		fset, rules = loadForumSettings(self.getForumID(),get_both=True)
+		self.postParser.addRules(rules)
+		self.postParser.ignoreForumImages = fset.get('ignore_forum_images')
 		self.postParser.setDomain(self._url)
+		self.postParser.tid = threadid
 		if self.threadParser.isGeneric:
 			url = self._getGenericRepliesURL(threadid, url)
 			pagesURL = url
 			if page and not str(page).replace('-','').isdigit(): url = self._url + page
 		if not url: url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid,prefix=self.forumParser.getPrefix())
-		LOG('Thread URL: ' + url)
+		util.LOG('Thread URL: ' + url)
 		html = self.readURL(url,callback=callback,force_browser=True)
-		if not html or not callback(80,T(32103)):
+		if not html or not callback(80,util.T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
 		replies = self.postParser.getPosts(html,pagesURL,callback=callback,filters=self.filters,page_url=url,progress_base=80,progress_range=20)
-		LOG('Detected Posts Type: ' + self.postParser.forumType)
+		util.LOG('Detected Posts Type: ' + self.postParser.forumType)
 		#topic = re.search(self.filters.get('thread_topic','%#@+%#@'),html)
 		#if not threadid:
 		#	threadid = re.search(self.filters.get('thread_id','%#@+%#@'),html)
@@ -276,7 +279,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				#print post.message.encode('ascii','replace')
 				sreplies.append(post)
 			except:
-				ERROR('ERROR CREATING POST - Using blank post')
+				util.ERROR('ERROR CREATING POST - Using blank post')
 				post = self.getForumPost()
 				sreplies.append(post)
 		pd = self.getPageInfo(html,page,page_type='replies',page_urls=self.postParser.pages)
@@ -288,7 +291,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		except:
 			extra = None
 			
-		callback(100,T(32052))
+		callback(100,util.T(32052))
 		
 		return self.finish(FBData(sreplies,pd,extra=extra),donecallback)
 	
@@ -307,7 +310,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				return 'Reason Unknown'
 			#TODO: check for success = perhaps look for exec_refresh()
 		except:
-			return ERROR('Failed to subscribe to thread: ' + tid)
+			return util.ERROR('Failed to subscribe to thread: ' + tid)
 		
 	def unSubscribeThread(self, tid):
 		url = self.urls.get('unsubscribe_thread').replace('!THREADID!',tid)
@@ -316,7 +319,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			#TODO: check for success = perhaps look for exec_refresh()
 			return True
 		except:
-			return ERROR('Failed to unsubscribe from thread: ' + tid)
+			return util.ERROR('Failed to unsubscribe from thread: ' + tid)
 		
 	def subscribeForum(self, fid):
 		url = self.urls.get('subscribe_forum').replace('!FORUMID!',fid)
@@ -328,7 +331,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 				return 'Reason Unknown'
 			#TODO: check for success = perhaps look for exec_refresh()
 		except:
-			return ERROR('Failed to subscribe to forum: ' + fid)
+			return util.ERROR('Failed to subscribe to forum: ' + fid)
 		
 	def unSubscribeForum(self, fid):
 		url = self.urls.get('unsubscribe_forum').replace('!FORUMID!',fid)
@@ -337,7 +340,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			#TODO: check for success = perhaps look for exec_refresh()
 			return True
 		except:
-			return ERROR('Failed to unsubscribe from forum: ' + fid)
+			return util.ERROR('Failed to unsubscribe from forum: ' + fid)
 		
 	def canSubscribeThread(self, tid): return bool(self.urls.get('subscribe_thread') and self.isLoggedIn())
 	
@@ -368,5 +371,6 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def canOpenLatest(self): return False
 	
+	def ignoreTopForums(self): return self.formats.get('ignore_top_forums') == "True"
 
 	

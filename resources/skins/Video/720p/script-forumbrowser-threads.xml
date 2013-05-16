@@ -537,7 +537,7 @@
 			</control>
 			<control type="label">
 				<description>Last Poster</description>
-			<posx>300</posx>
+				<posx>300</posx>
 				<posy>38</posy>
 				<width>300</width>
 				<height>25</height>
@@ -548,6 +548,19 @@
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32162] [COLOR FF00FF00]$INFO[Container(120).ListItem.Property(lastposter)][/COLOR]</label>
 				<visible>!StringCompare(Container(120).ListItem.Property(lastposter),) + !StringCompare(Container(120).ListItem.Studio,)</visible>
+			</control>
+			<control type="label">
+				<description>Last Poster</description>
+				<posx>600</posx>
+				<posy>38</posy>
+				<width>300</width>
+				<height>25</height>
+				<font>ForumBrowser-font12</font>
+				<textcolor>FF4488AA</textcolor>
+				<aligny>top</aligny>
+				<align>left</align>
+				<wrapmultiline>true</wrapmultiline>
+				<label>$INFO[Container(120).ListItem.Property(reply_count),$ADDON[script.forum.browser 32912]: ]</label>
 			</control>
 			<control type="label">
 				<description>Forum Description</description>

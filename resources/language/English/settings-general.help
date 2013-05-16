@@ -19,8 +19,6 @@ This only works if login user and password are set for the current forum.
 Sort the posts with the oldest on top.
 @item:hide_sig=Hide Signatures In Posts
 When enabled, will hide post signatures if possible
-@item:ignore_forum_images=Parser Browser: Ignore Forum Images In Posts
-Try to detect forum software images in posts (such as small icons and such) and remove them from the display.
 @item:post_user_info=Post User Attributes To Display
 A comma separated list of attributes to display in the posts list below the user name and activity information.
 Up to three items will be displayed following the order of the specified list and depending on availability of the data.

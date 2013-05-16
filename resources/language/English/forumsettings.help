@@ -43,10 +43,9 @@ Some forums use a non-standard login page.
 This will open WebViewer and allow you to browse to the login page. When you exit WebViewer, you will be asked if you want to use the url you were viewing when you exited.
 
 If the login page has already been set, you will first be asked if you want to clear the login page or change it.
+@item:ignore_forum_images
+Try to detect forum software images in posts (such as small icons and such) and remove them from the display.
 @item:rules
 Open the rules manager to set custom post parser rules for a Parser Browser forum.
- 
-You can add head and tail filters, which will remove lines that have only the entered phrase (as when the quote button text is showing up at the end of all posts).
 
-You can add 'extras' which are Python regular expressions that match a user info label such as 'Reputation:' and are searched on an html tag by tag basis. For example ^reputation:( \d+)?(?i) is the built in expression to match reputation. The 'extra' name will be the label shown in the post.
- 
+This allows you to set forum specific filters that correct parser errors.

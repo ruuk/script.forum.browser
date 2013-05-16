@@ -1,6 +1,6 @@
 #Forum browser common
 import sys, os, re, urllib, urllib2, texttransform, binascii, time
-from lib import asyncconnections
+from lib import asyncconnections, chardet
 from lib.util import LOG, ERROR
 
 def getForumTestUrls(base,subpath=''):
@@ -934,6 +934,23 @@ class ForumBrowser:
 	
 	def getEncoding(self): return self._encoding
 	
+	def unicode(self,string,encoding=None):
+		if not encoding:
+			encoding = self._encoding
+		else:
+			encoding = 'utf-8'
+			
+		try:
+			return unicode(string,encoding)
+		except:
+			detected_encoding = chardet.detect(string)
+			try:
+				string = unicode(string,detected_encoding['encoding'])
+				self.updateEncoding(detected_encoding['encoding'],detected_encoding['confidence'])
+				return string
+			except:
+				return unicode(string,encoding,'replace')
+	
 	def updateEncoding(self,encoding,confidence,log_change=True):
 		if confidence > self._encodingConfidence:
 			if log_change and encoding != self._encoding: LOG('Forum Encoding Changed: %s -> %s' % (self._encoding,encoding))
@@ -1100,6 +1117,8 @@ class ForumBrowser:
 		self.rules = rules
 		
 	def makeURL(self,url): return url
+	
+	def ignoreTopForums(self): return False
 	
 	def getStats(self): return None
 		

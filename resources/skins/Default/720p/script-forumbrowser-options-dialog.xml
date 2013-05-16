@@ -137,7 +137,7 @@
 				<height>580</height>
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
-				<align>center</align>
+				<align>left</align>
 				<info>Container(120).ListItem.Label2</info>
 			</control>
 		</control>

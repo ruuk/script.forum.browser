@@ -164,7 +164,7 @@ class PageData:
 			ndict = next_match.groupdict()
 			page = ndict.get('page')
 			start = ndict.get('start','0')
-			if page:
+			if 'page' in ndict:
 				self.next = True
 				self.urlMode = 'PAGE'
 				if not page_set and page.isdigit(): self.page = str(int(page) - 1)
@@ -565,11 +565,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		LOG('LOGGING IN')
 		self.checkBrowser()
 		try:
-			response = self.browserOpen(url or self.getLoginURL())
+			lurl = url or self.getLoginURL()
+			response = self.browserOpen(lurl)
 		except self.mechanize.HTTPError, e:
 			if e.code == 302:
 				response = e
 			elif e.code == 404:
+				LOG('LOGIN URL: ' + lurl)
 				raise Exception('Login Page Not Found: 404')
 			else:
 				LOG('CODE: %s' % e.code)

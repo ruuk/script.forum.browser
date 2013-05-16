@@ -1,0 +1,25 @@
+#Post Parser Rules Help
+@item:extra
+A Python regular expression that matches a user info label such as 'Reputation:' that is searched individually against each html tag's text.
+
+For example ^reputation:( \d+)?(?i) is the built in expression to match reputation. The 'extra' name will be the label shown in the post.
+
+You can alternatively use 'class:CLASSNAME' which will instead display the data within the tag that has a matching class.
+@item:head
+Removes lines at the beginning of a post that have only the entered phrase (such as when the PM button text is showing up at the start of all posts).
+@item:tail
+Removes lines at the end of a post that have only the entered phrase (such as when the quote button text is showing up at the end of all posts).
+@item:class
+Ignores all data within the HTML tag that has a matching class attribute for each post.
+
+For example:
+<div class="Identity brown"><span>Coats</span><span> Serenity</span></div>
+
+Using 'Identity' or 'brown' will cause everything within the div tag will be ignored.
+@item:split
+Python regular expressions that match html before the posts start and after the posts end.
+They need to be unique, but present on all post pages.
+
+Some forums have something easy such as '<!-- /start #POSTS -->'
+
+This will speed up post processing and remove extra data when the parser failed to detect post boundries.

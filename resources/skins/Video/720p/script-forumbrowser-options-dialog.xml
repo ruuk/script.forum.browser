@@ -192,7 +192,8 @@
 						<posy>48</posy>
 						<width>396</width>
 						<height>1</height>
-						<texture>forum-browser-video-box.png</texture>
+						<texture>forum-browser-video-white.png</texture>
+						<colordiffuse>FFAAAAAA</colordiffuse>
 						<visible>StringCompare(ListItem.Property(SEPARATOR),SEPARATOR)</visible>
 					</control>
 					<control type="image">
@@ -235,7 +236,8 @@
 						<posy>48</posy>
 						<width>396</width>
 						<height>1</height>
-						<texture>forum-browser-video-box.png</texture>
+						<texture>forum-browser-video-white.png</texture>
+						<colordiffuse>FFAAAAAA</colordiffuse>
 						<visible>StringCompare(ListItem.Property(SEPARATOR),SEPARATOR)</visible>
 					</control>
 					<control type="image">
@@ -278,7 +280,7 @@
 				<height>580</height>
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
-				<align>center</align>
+				<align>left</align>
 				<info>Container(120).ListItem.Label2</info>
 			</control>
 		</control>

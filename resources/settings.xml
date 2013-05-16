@@ -10,7 +10,6 @@
     <setting id="reverse_sort" type="bool" label="32002" default="false" />
     <setting id="reverse_sort_search" type="bool" label="32525" default="false" />
     <setting id="hide_signatures" type="bool" label="32013" default="false" />
-    <setting id="ignore_forum_images" type="bool" label="32016" default="true" />
     <setting label="32518" type="text" id="post_user_info" default="status,postcount,reputation,joindate,location"/>
     <setting id="message_dialog_always_show_ok" type="bool" label="32014" default="false" />
     <setting id="enable_ssl" type="bool" label="32235" default="false" visible="false"/>
@@ -20,6 +19,7 @@
   <category label="32539">
   	<setting id="skin" type="enum" label="32005" lvalues="32012|32011|32022" default="0" />
     <setting id="hide_image_urls" type="bool" label="32538" default="true" />
+    <setting id="hide_link_urls" type="bool" label="32548" default="true" />
     <setting id="show_media_indicators" type="bool" label="32044" default="true" />
     <setting id="smi_count_link_images" type="bool" label="32045" subsetting="true" default="false" enable="eq(-1,true)"/>
     <setting id="use_skin_mods" type="bool" label="32234" default="true" />

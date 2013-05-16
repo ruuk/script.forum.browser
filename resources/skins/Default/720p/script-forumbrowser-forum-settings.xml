@@ -110,7 +110,7 @@
 			<control type="list" id="320">
 				<posx>10</posx>
 				<posy>10</posy>
-				<width>380</width>
+				<width>400</width>
 				<height>430</height>
 				<onleft>101</onleft>
 				<onright>100</onright>
@@ -134,9 +134,9 @@
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
 						<control type="label">
-							<posx>350</posx>
+							<posx>370</posx>
 							<posy>0</posy>
-							<width>160</width>
+							<width>180</width>
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
@@ -150,7 +150,7 @@
 						<control type="label">
 							<posx>10</posx>
 							<posy>0</posy>
-							<width>170</width>
+							<width>334</width>
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
@@ -159,7 +159,7 @@
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
 						<control type="image">
-							<posx>334</posx>
+							<posx>354</posx>
 							<posy>11</posy>
 							<width>16</width>
 							<height>16</height>
@@ -168,7 +168,7 @@
 							<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 						</control>
 						<control type="image">
-							<posx>334</posx>
+							<posx>354</posx>
 							<posy>11</posy>
 							<width>16</width>
 							<height>16</height>
@@ -193,7 +193,7 @@
 						<control type="image">
 							<posx>190</posx>
 							<posy>1</posy>
-							<width>150</width>
+							<width>170</width>
 							<height>36</height>
 							<aspectratio>stretch</aspectratio>
 							<texture>$INFO[ListItem.Property(header_color)]</texture>
@@ -201,7 +201,7 @@
 						<control type="image">
 							<posx>190</posx>
 							<posy>1</posy>
-							<width>150</width>
+							<width>170</width>
 							<height>36</height>
 							<aspectratio align="right">keep</aspectratio>
 							<texture>$INFO[ListItem.Property(value)]</texture>
@@ -223,7 +223,7 @@
 						<control type="image">
 							<posx>190</posx>
 							<posy>1</posy>
-							<width>150</width>
+							<width>170</width>
 							<height>36</height>
 							<aspectratio>stretch</aspectratio>
 							<texture>$INFO[ListItem.Label2]</texture>
@@ -261,7 +261,7 @@
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
-							<width>360</width>
+							<width>380</width>
 							<height>38</height>
 							<texture border="20">forum-browser-grey-boxr.png</texture>
 						</control>
@@ -279,9 +279,9 @@
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
 							<control type="label">
-								<posx>350</posx>
+								<posx>370</posx>
 								<posy>0</posy>
-								<width>160</width>
+								<width>180</width>
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
@@ -295,7 +295,7 @@
 							<control type="label">
 								<posx>10</posx>
 								<posy>0</posy>
-								<width>170</width>
+								<width>334</width>
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
@@ -304,7 +304,7 @@
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
 							<control type="image">
-								<posx>334</posx>
+								<posx>354</posx>
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
@@ -313,7 +313,7 @@
 								<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 							</control>
 							<control type="image">
-								<posx>334</posx>
+								<posx>354</posx>
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
@@ -338,7 +338,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>170</width>
 								<height>36</height>
 								<aspectratio>stretch</aspectratio>
 								<texture>$INFO[ListItem.Property(header_color)]</texture>
@@ -346,7 +346,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>170</width>
 								<height>36</height>
 								<aspectratio align="right">keep</aspectratio>
 								<texture>$INFO[ListItem.Property(value)]</texture>
@@ -368,7 +368,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>170</width>
 								<height>36</height>
 								<aspectratio>stretch</aspectratio>
 								<texture>$INFO[ListItem.Label2]</texture>
@@ -395,7 +395,7 @@
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
-							<width>360</width>
+							<width>380</width>
 							<height>38</height>
 							<texture border="20">forum-browser-white-boxr.png</texture>
 						</control>
@@ -413,9 +413,9 @@
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
 							<control type="label">
-								<posx>350</posx>
+								<posx>370</posx>
 								<posy>0</posy>
-								<width>160</width>
+								<width>180</width>
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
@@ -429,7 +429,7 @@
 							<control type="label">
 								<posx>10</posx>
 								<posy>0</posy>
-								<width>170</width>
+								<width>334</width>
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
@@ -438,7 +438,7 @@
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
 							<control type="image">
-								<posx>334</posx>
+								<posx>354</posx>
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
@@ -447,7 +447,7 @@
 								<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 							</control>
 							<control type="image">
-								<posx>334</posx>
+								<posx>354</posx>
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
@@ -472,7 +472,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>170</width>
 								<height>36</height>
 								<aspectratio align="right">keep</aspectratio>
 								<texture>$INFO[ListItem.Property(value)]</texture>
@@ -494,7 +494,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>170</width>
 								<height>36</height>
 								<aspectratio>stretch</aspectratio>
 								<texture>$INFO[ListItem.Label2]</texture>
@@ -518,7 +518,7 @@
 					<control type="image">
 						<posx>0</posx>
 						<posy>0</posy>
-						<width>360</width>
+						<width>380</width>
 						<height>38</height>
 						<texture border="20">forum-browser-black-outline.png</texture>
 					</control>

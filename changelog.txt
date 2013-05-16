@@ -4,6 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  ParserBrowser: More parsing of profile links and allow user to view in webviewer
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   Finish no window stacking mode
   Implement get_participated_forum
@@ -34,15 +35,26 @@ TODO:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
 KNOWN ISSUES:
-  Corrupted color display on longer posts. XBMC bug as of Frodo 12.1
+  Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.5
+Current Version : 2.1.6
 
 *** 2.1.6 ***
 
 Improved smilies appearance
 Changed keyboard mods output on one smiley from :/ to :-/
 Fixed detection of smilies at the start of a new line
+Added post count to threads window on Video skin
+ParserBrowser: Added new forum type: Vanilla (Used for the Geek & Sundry forums among others)
+Fixed a bug where opening a thread caused the forum title to be hidden on the forums window
+Added a setting in the 'Appearance' section: 'Hide Link URLs In Posts Display'. If the URL is in the text of the link, this will still be displayed
+Various ParserBrowser fixes
+Editing forum post parsing rules from forum settings now triggers cancel confirmation
+Added Split Filters (start and end splitting) and Class Filters (ignore tags with specified class) to post parsing rules
+Added the ability to prepend Extra rules with 'class:' to match extra info in an html tag that has the specified class attribute
+Added help for each post parser rule type when adding a new rule
+ParserBrowser: Added the ability for FB to mark top forums as headings, so clicking them will do nothing)
+ParserBrowser: Moved setting 'Ignore Forum Images In Posts' from general:settings to forum specific settings
 
 *** 2.1.5 ***
 
