@@ -37,7 +37,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.6
+Current Version : 2.1.7
+
+*** 2.1.7 ***
+
+Forgot to add mod update on version check for font changes, now addded :)
 
 *** 2.1.6 ***
 
