@@ -20,8 +20,8 @@ def LOG(txt): pass
 
 FB = None
 import default
-from default import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
-from default import getForumBrowser, listForumSettings, loadForumSettings, forumsManager, getNotifyList #@UnusedImport
+from lib.util import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
+from default import getForumBrowser, listForumSettings, forumsManager, getNotifyList #@UnusedImport
 from webviewer import video #@UnresolvedImport
 
 default.LOG = LOG
@@ -114,12 +114,12 @@ class ForumBrowserService:
 			forumsManager(size=method)
 		
 	def getUsername(self):
-		data = loadForumSettings(self.FB.getForumID())
+		data = util.loadForumSettings(self.FB.getForumID())
 		if data and data['username']: return data['username']
 		return ''
 		
 	def getPassword(self):
-		data = loadForumSettings(self.FB.getForumID())
+		data = util.loadForumSettings(self.FB.getForumID())
 		if data and data['password']: return data['password']
 		return ''
 		
@@ -173,7 +173,7 @@ class ForumBrowserService:
 			if not self.hasLogin():
 				LOG('No login for forum: %s' % forum)
 				continue
-			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,rules=loadForumSettings(forum,get_rules=True))
+			self.FB.setLogin(self.getUsername(), self.getPassword(), always=True,rules=util.loadForumSettings(forum,get_rules=True))
 			try:
 				pmcounts = self.FB.getPMCounts()
 				xbmc.sleep(300)

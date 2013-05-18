@@ -49,7 +49,7 @@ def getSetting(key,default=None):
 def _processSetting(setting,default):
 	if not setting: return default
 	if isinstance(default,bool):
-		return setting == 'true'
+		return setting.lower() == 'true'
 	elif isinstance(default,int):
 		return int(float(setting or 0))
 	elif isinstance(default,list):

@@ -430,14 +430,17 @@ def editForumSettings(forumID):
 	w.doModal()
 	if w.OK:
 		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
+		ifi = None
+		if forumID.startswith('GB.'):
+			ifi = w.data['ignore_forum_images']['value']
 		util.saveForumSettings(	forumID,
-							username=w.data['username']['value'],
-							password=w.data['password']['value'],
-							notify=w.data['notify']['value'],
-							extras=w.data['extras']['value'],
-							time_offset_hours=w.data['time_offset_hours']['value'],
-							ignore_forum_images=w.data['ignore_forum_images']['value'],
-							rules=rules)
+								username=w.data['username']['value'],
+								password=w.data['password']['value'],
+								notify=w.data['notify']['value'],
+								extras=w.data['extras']['value'],
+								time_offset_hours=w.data['time_offset_hours']['value'],
+								ignore_forum_images=ifi,
+								rules=rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
 		fdata.theme['header_color'] = w.data['header_color']['value']
@@ -1438,6 +1441,7 @@ class RepliesWindow(windows.PageWindow):
 		self.ignoreSelect = False
 		self.firstRun = True
 		self.started = False
+		self.stayAtTop = False
 		self.currentPMBox = {}
 		self.timeOffset = 0
 		timeOffset = util.getForumSetting(FB.getForumID(),'time_offset_hours','').replace(':','')
@@ -1500,19 +1504,24 @@ class RepliesWindow(windows.PageWindow):
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		
 	def showThread(self,nopage=False):
+		self.stayAtTop = False
 		if nopage:
 			page = ''
 		else:
 			page = '1'
 			if self.forumElements and self.forumElements.get('post') == 'last':
-				page = '-1'
+				page = FB.getPageData(is_replies=True).getPageNumber('-1')
 			elif self.forumElements and self.forumElements.get('post') == 'first':
-				page = '1'
+				self.stayAtTop = True
+				page = FB.getPageData(is_replies=True).getPageNumber('1')
+			elif self.forumElements and self.forumElements.get('args') and self.forumElements['args'].get('page'):
+				self.stayAtTop = True
+				page = self.forumElements['args'].get('page')
 			elif self.forumElements and self.forumElements.get('post'):
 				self.pid = self.forumElements.get('post')
 			elif getSetting('open_thread_to_newest') == 'true':
-				if not self.search: page = '-1'
-		self.fillRepliesList(FB.getPageData(is_replies=True).getPageNumber(page))
+				if not self.search: page = FB.getPageData(is_replies=True).getPageNumber('-1')
+		self.fillRepliesList(page)
 		
 	def isPM(self):
 		return self.tid == 'private_messages'
@@ -1522,6 +1531,7 @@ class RepliesWindow(windows.PageWindow):
 		self.endProgress()
 	
 	def fillRepliesList(self,page='',pid=None):
+		print page
 		#page = int(page)
 		#if page < 0: raise Exception()
 		self.getControl(106).setVisible(True)
@@ -1626,6 +1636,9 @@ class RepliesWindow(windows.PageWindow):
 		return getSetting('reverse_sort',False)
 	
 	def shouldDropToBottom(self):
+		if self.stayAtTop:
+			self.stayAtTop = False
+			return False
 		if self.isPM(): return False
 		if self.search: return getSetting('reverse_sort_search',False)
 		return not getSetting('reverse_sort',False)
