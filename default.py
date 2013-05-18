@@ -408,7 +408,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		
 def editForumSettings(forumID):
 	w = dialogs.openWindow(ForumSettingsDialog,'script-forumbrowser-forum-settings.xml',return_window=True,modal=False,theme='Default')
-	sett,rules = loadForumSettings(forumID,get_both=True) or {'username':'','password':'','notify':False}
+	sett,rules = util.loadForumSettings(forumID,get_both=True) or {'username':'','password':'','notify':False}
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 	w.setHeader(forumID[3:])
 	w.setHelp(dialogs.loadHelp('forumsettings.help') or {})
@@ -430,7 +430,7 @@ def editForumSettings(forumID):
 	w.doModal()
 	if w.OK:
 		rules['login_url'] = w.data.get('login_url') and w.data['login_url']['value'] or None
-		saveForumSettings(	forumID,
+		util.saveForumSettings(	forumID,
 							username=w.data['username']['value'],
 							password=w.data['password']['value'],
 							notify=w.data['notify']['value'],
@@ -444,7 +444,7 @@ def editForumSettings(forumID):
 		fdata.writeData()
 	del w
 	if oldLogo != fdata.urls['logo']:
-		getCachedLogo(fdata.urls['logo'],forumID,clear=True)
+		util.getCachedLogo(fdata.urls['logo'],forumID,clear=True)
 	
 ######################################################################################
 #
@@ -506,12 +506,12 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			editForumSettings(forumID)
 			item = self.getControl(220).getSelectedItem()
 			if not item: return
-			ndata = loadForumSettings(forumID) or {}
+			ndata = util.loadForumSettings(forumID) or {}
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			
 			fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 			logo = fdata.urls.get('logo','')
-			exists, logopath = getCachedLogo(logo,forumID)
+			exists, logopath = util.getCachedLogo(logo,forumID)
 			if exists: logo = logopath
 			item.setIconImage(logo)
 			
@@ -650,15 +650,15 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				if last: last.setProperty('separator','separator')
 				continue
 			flag = False
-			path = getForumPath(f,just_path=True)
+			path = util.getForumPath(f,just_path=True)
 			unread = unreadData.get(f) or {}
 			if not path: continue
 			if not os.path.isfile(os.path.join(path,f)): continue
 			fdata = forumbrowser.ForumData(f,path)
-			ndata = loadForumSettings(f) or {}
+			ndata = util.loadForumSettings(f) or {}
 			name = fdata.name
 			logo = fdata.urls.get('logo','')
-			exists, logopath = getCachedLogo(logo,f)
+			exists, logopath = util.getCachedLogo(logo,f)
 			if exists: logo = logopath
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			item = xbmcgui.ListItem(name,iconImage=logo)
@@ -743,7 +743,7 @@ def getNotifyList():
 		flist = os.listdir(FORUMS_PATH)
 		nlist = []
 		for f in flist:
-			data = loadForumSettings(f)
+			data = util.loadForumSettings(f)
 			if data:
 				if data['notify']: nlist.append(f)
 		return nlist
@@ -1036,6 +1036,7 @@ class MessageWindow(windows.BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		self.post = kwargs.get('post')
 		self.searchRE = kwargs.get('search_re')
+		self.threadTopic = kwargs.get('thread_topic','')
 		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]%s[/COLOR]'
 		self.imageReplace = 'IMG #%s'
 		self.action = None
@@ -1044,6 +1045,7 @@ class MessageWindow(windows.BaseWindow):
 		self.hasImages = False
 		self.hasLinks = False
 		self.videoHandler = video.WebVideo()
+		if self.post: FB.updateAppURL(post=self.post.postId)
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		
 	def onInit(self):
@@ -1215,7 +1217,7 @@ class MessageWindow(windows.BaseWindow):
 		if url in image_files:
 			image_files.pop(image_files.index(url))
 			image_files.insert(0,url)
-		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,util.__addon__.getAddonInfo('path'),THEME,images=image_files,parent=self)
+		w = ImagesDialog("script-forumbrowser-imageviewer.xml" ,util.__addon__.getAddonInfo('path'),THEME,images=image_files)
 		w.doModal()
 		del w
 			
@@ -1233,6 +1235,9 @@ class MessageWindow(windows.BaseWindow):
 				self.setFocusId(127)
 				return
 		windows.BaseWindow.onAction(self,action)
+		
+	def onClose(self):
+		if self.post: FB.updateAppURL(post=self.post.postId,close=True)
 		
 	def doLinkMenu(self):
 		link = self.getSelectedLink()
@@ -1283,6 +1288,7 @@ class MessageWindow(windows.BaseWindow):
 		if FB.canDelete(self.post.cleanUserName(),self.post.messageType()): d.addItem('delete',T(32141))
 		if FB.canEditPost(self.post.cleanUserName()): d.addItem('edit',T(32232))
 		if self.post.extras: d.addItem('extras',T(32317))
+		d.addItem('bookmark',T(32553))
 		d.addItem('help',T(32244))
 		result = d.getResult()
 		if result == 'quote': self.openPostDialog(quote=True)
@@ -1300,6 +1306,8 @@ class MessageWindow(windows.BaseWindow):
 				self.doClose()
 		elif result == 'extras':
 			showUserExtras(self.post)
+		elif result =='bookmark':
+			dialogs.addBookmark(FB,name=self.post.title or ('#%s in %s' % (self.post.postNumber or self.post.postId,self.threadTopic)))
 		elif result == 'help':
 			dialogs.showHelp('message')
 			
@@ -1417,8 +1425,10 @@ class RepliesWindow(windows.PageWindow):
 		self.fid = kwargs.get('fid','')
 		self.pid = kwargs.get('pid','')
 		self.uid = kwargs.get('uid','')
+		
+		FB.updateAppURL(thread=self.tid)
+		
 		self.search_uname = kwargs.get('search_name','')
-		self.parent = kwargs.get('parent')
 		#self._firstPage = T(32113)
 		self._newestPage = T(32112)
 		self.me = FB.user
@@ -1430,7 +1440,7 @@ class RepliesWindow(windows.PageWindow):
 		self.started = False
 		self.currentPMBox = {}
 		self.timeOffset = 0
-		timeOffset = getForumSetting(FB.getForumID(),'time_offset_hours','').replace(':','')
+		timeOffset = util.getForumSetting(FB.getForumID(),'time_offset_hours','').replace(':','')
 		if timeOffset:
 			negative = timeOffset.startswith('-') and -1 or 1
 			timeOffset = timeOffset.strip('-')
@@ -1494,7 +1504,13 @@ class RepliesWindow(windows.PageWindow):
 			page = ''
 		else:
 			page = '1'
-			if getSetting('open_thread_to_newest') == 'true':
+			if self.forumElements and self.forumElements.get('post') == 'last':
+				page = '-1'
+			elif self.forumElements and self.forumElements.get('post') == 'first':
+				page = '1'
+			elif self.forumElements and self.forumElements.get('post'):
+				self.pid = self.forumElements.get('post')
+			elif getSetting('open_thread_to_newest') == 'true':
 				if not self.search: page = '-1'
 		self.fillRepliesList(FB.getPageData(is_replies=True).getPageNumber(page))
 		
@@ -1691,7 +1707,7 @@ class RepliesWindow(windows.PageWindow):
 		self.forumElements = None
 			
 	def getUserInfoAttributes(self):
-		data = loadForumSettings(FB.getForumID())
+		data = util.loadForumSettings(FB.getForumID())
 		try:
 			if 'extras' in data and data['extras']: return data['extras'].split(',')
 			return getSetting('post_user_info','status,postcount,reputation,joindate,location').split(',')
@@ -1717,7 +1733,7 @@ class RepliesWindow(windows.PageWindow):
 			return self.openPostThread(post)
 		post.tid = self.tid
 		post.fid = self.fid
-		w = dialogs.openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,search_re=self.searchRE,parent=self)
+		w = dialogs.openWindow(MessageWindow,"script-forumbrowser-message.xml" ,return_window=True,post=post,search_re=self.searchRE,thread_topic=self.topic)
 		self.setMessageProperty(post,item)
 		self.setFocusId(120)
 		if w.action:
@@ -1725,6 +1741,7 @@ class RepliesWindow(windows.PageWindow):
 				self.topic = ''
 				self.pid = w.action.pid
 				self.tid = w.action.tid
+				FB.updateAppURL(thread=self.tid)
 				self.search = ''
 				self.searchRE = None
 				self.firstRun = True
@@ -1767,6 +1784,9 @@ class RepliesWindow(windows.PageWindow):
 						return
 		windows.PageWindow.onAction(self,action)
 	
+	def onClose(self):
+		FB.updateAppURL(thread=self.tid,close=True)
+		
 	def newSearch(self):
 		terms = dialogs.doKeyboard(T(32330),self.search or '')
 		if not terms: return
@@ -1825,6 +1845,7 @@ class RepliesWindow(windows.PageWindow):
 				d.addItem('unlike',T(32334))
 			if self.searchRE and not getSetting('search_open_thread',False):
 				d.addItem('open_thread',T(32335))
+			d.addItem('bookmark',T(32553))
 			d.addItem('refresh',T(32054))
 			d.addItem('help',T(32244))
 		finally:
@@ -1839,6 +1860,8 @@ class RepliesWindow(windows.PageWindow):
 			url = FB.getRepliesURL(self.tid,self.fid,self.pageData.getPageNumber())
 			webviewer.getWebResult(url,dialog=True,browser=hasattr(FB,'browser') and FB.browser)
 			return
+		elif result == 'bookmark':
+			dialogs.addBookmark(FB,page=self.pageData.getPageNumber(),name=self.topic,page_disp=self.pageData.page)
 		elif result == 'pageview':
 			self.pageView()
 		elif result == 'quote':
@@ -1922,7 +1945,7 @@ class RepliesWindow(windows.PageWindow):
 		
 	def openPostThread(self,post):
 		if not post: return
-		dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=post.fid,tid=post.tid,pid=post.postId,topic=post.topic,search_re=self.searchRE,parent=self)
+		dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=post.fid,tid=post.tid,pid=post.postId,topic=post.topic,search_re=self.searchRE)
 	
 	def openPostDialog(self,post=None,force_pm=False,no_quote=False):
 		tid = self.tid
@@ -2018,9 +2041,8 @@ class ThreadsWindow(windows.PageWindow):
 	def __init__( self, *args, **kwargs ):
 		self.fid = kwargs.get('fid','')
 		self.topic = kwargs.get('topic','')
-		self.parent = kwargs.get('parent')
 		self.forumItem = kwargs.get('item')
-		self.me = self.parent.getUsername() or '?'
+		self.me = FB.user or '?'
 		self.search = kwargs.get('search_terms')
 		self.search_uname = kwargs.get('search_name','')
 		self.forumElements = kwargs.get('forumElements','')
@@ -2033,6 +2055,7 @@ class ThreadsWindow(windows.PageWindow):
 		self.highBase = '%s'
 		self.forum_desc_base = '[I]%s [/I]'
 		self.started = False
+		FB.updateAppURL(forum=self.fid)
 		windows.PageWindow.__init__( self, *args, **kwargs )
 		self.setPageData(FB)
 		
@@ -2218,13 +2241,13 @@ class ThreadsWindow(windows.PageWindow):
 		fid = item.getProperty('fid') or self.fid
 		topic = item.getProperty('title')
 		if item.getProperty('is_forum') == 'True':
-			dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self.parent,item=item)
+			dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,item=item)
 			#self.fid = fid
 			#self.topic = topic
 			#self.setTheme()
 			#self.fillThreadList()
 		else:
-			dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,parent=self,forumElements=forumElements)
+			dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,forumElements=forumElements)
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2249,6 +2272,9 @@ class ThreadsWindow(windows.PageWindow):
 					return
 		windows.PageWindow.onAction(self,action)
 		
+	def onClose(self):
+		FB.updateAppURL(forum=self.fid,close=True)
+	
 	def doMenu(self):
 		item = self.getControl(120).getSelectedItem()
 		d = dialogs.ChoiceMenu('Options',with_splash=True)
@@ -2274,6 +2300,7 @@ class ThreadsWindow(windows.PageWindow):
 						d.addItem('createthread',T(32252))
 				if FB.canSearchAdvanced('TID'):
 					d.addItem('search','%s [B][I]%s[/I][/B]' % (T(32371),item.getProperty('title')[:30]))
+			d.addItem('bookmark',T(32553))
 			d.addItem('help',T(32244))
 		finally:
 			d.cancel()
@@ -2297,11 +2324,13 @@ class ThreadsWindow(windows.PageWindow):
 			if unSubscribeForum(self.fid): self.forumItem.setProperty('subscribed','')
 		elif result == 'search':
 			if not item.getProperty("is_forum") == 'True':
-				searchPosts(self,item.getProperty('id'))
+				searchPosts(item.getProperty('id'))
 			else:
-				searchThreads(self.parent,item.getProperty('id'))
+				searchThreads(item.getProperty('id'))
 		elif result == 'createthread':
 			self.createThread()
+		elif result == 'bookmark':
+			dialogs.addBookmark(FB, name=self.topic)
 		elif result == 'help':
 			if self.fid == 'subscriptions':
 				dialogs.showHelp('subscriptions')
@@ -2364,7 +2393,6 @@ class ForumsWindow(windows.BaseWindow):
 	def __init__( self, *args, **kwargs ):
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		#FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true')
-		self.parent = self
 		self.empty = True
 		self.setAsMain()
 		self.started = False
@@ -2379,17 +2407,17 @@ class ForumsWindow(windows.BaseWindow):
 		self.openForumsManager(external=True)
 		
 	def getUsername(self):
-		data = loadForumSettings(FB.getForumID())
+		data = util.loadForumSettings(FB.getForumID())
 		if data and data['username']: return data['username']
 		return ''
 		
 	def getPassword(self):
-		data = loadForumSettings(FB.getForumID())
+		data = util.loadForumSettings(FB.getForumID())
 		if data and data['password']: return data['password']
 		return ''
 		
 	def getNotify(self):
-		data = loadForumSettings(FB.getForumID())
+		data = util.loadForumSettings(FB.getForumID())
 		if data: return data['notify']
 		return False
 	
@@ -2459,6 +2487,12 @@ class ForumsWindow(windows.BaseWindow):
 	def openElements(self):
 		if not self.forumElements: return
 		forumElements = self.forumElements
+		if not FB or forumElements.get('forumID') != FB.getForumID():
+			global STARTFORUM
+			STARTFORUM = util.createForumBrowserURL(forumElements)
+			self.startGetForumBrowser(all_at_once=True)
+			return
+		
 		if forumElements.get('section'):
 			if forumElements.get('section') == 'SUBSCRIPTIONS':
 				self.openSubscriptionsWindow(forumElements)
@@ -2633,7 +2667,7 @@ class ForumsWindow(windows.BaseWindow):
 	def setLogo(self,logo):
 		if not logo: return
 		if getSetting('save_logos',False):
-			exists, logopath = getCachedLogo(logo,FB.getForumID())
+			exists, logopath = util.getCachedLogo(logo,FB.getForumID())
 			if exists:
 				logo = logopath
 			else:
@@ -2669,9 +2703,9 @@ class ForumsWindow(windows.BaseWindow):
 		self.setProperty('stats_guest_online',str(stats.get('guest_online','')))
 		
 	def openPMWindow(self,forumElements=None):
-		if self.nextWindow(self.data,RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements):
+		if self.nextWindow(self.data,RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),forumElements=forumElements):
 			return
-		#dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),parent=self,forumElements=forumElements)
+		#dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,tid='private_messages',topic=T(32176),forumElements=forumElements)
 		self.setPMCounts(FB.getPMCounts())
 	
 	def openThreadsWindow(self,forumElements=None):
@@ -2693,7 +2727,7 @@ class ForumsWindow(windows.BaseWindow):
 				return self.openLink(link)
 			if not fid: fid = item.getProperty('id')
 			topic = item.getProperty('topic')
-		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,item=item,forumElements=forumElements):
+		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,item=item,forumElements=forumElements):
 			return True
 		self.setPMCounts(FB.getPMCounts())
 		return True
@@ -2705,7 +2739,7 @@ class ForumsWindow(windows.BaseWindow):
 	def openSubscriptionsWindow(self,forumElements=None):
 		fid = 'subscriptions'
 		topic = T(32175)
-		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,parent=self,forumElements=forumElements):
+		if self.nextWindow(self.data, ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,forumElements=forumElements):
 			return
 		self.setPMCounts(FB.getPMCounts())
 	
@@ -2738,7 +2772,7 @@ class ForumsWindow(windows.BaseWindow):
 			return
 		elif result == 'search':
 			menu.close()
-			searchUser(self,item.get('id'))
+			searchUser(item.get('id'))
 		elif result == 'info':
 			self.showUserInfo(item.get('id'),item.get('disp'))
 
@@ -2801,11 +2835,11 @@ class ForumsWindow(windows.BaseWindow):
 		elif controlID == 202:
 			return self.openForumsManager()
 		elif controlID == 205:
-			searchPosts(self)
+			searchPosts()
 		elif controlID == 206:
 			searchThreads(self)
 		elif controlID == 207:
-			searchUser(self)
+			searchUser()
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
@@ -2874,6 +2908,7 @@ class ForumsWindow(windows.BaseWindow):
 				if FB.canGetOnlineUsers():
 					d.addItem('online',T(32369))
 				d.addItem('foruminfo',T(32370))
+			d.addItem('bookmarks',T(32554))
 			d.addItem('refresh',T(32054))
 			d.addItem('help',T(32244))
 		finally:
@@ -2886,7 +2921,12 @@ class ForumsWindow(windows.BaseWindow):
 		elif result == 'search':
 			searchThreads(self,item.getProperty('id'))
 		elif result == 'foruminfo':
-			self.showForumInfo()			
+			self.showForumInfo()
+		elif result == 'bookmarks':
+			url = dialogs.bookmarks()
+			if not url: return
+			self.forumElements = util.parseForumBrowserURL(url)
+			self.openElements()
 		elif result == 'refresh':
 			if FB:
 				self.fillForumList()
@@ -2910,7 +2950,7 @@ class ForumsWindow(windows.BaseWindow):
 		
 	def resetForum(self,hidelogo=True,no_theme=False):
 		if not FB: return
-		FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true',rules=loadForumSettings(FB.getForumID(),get_rules=True))
+		FB.setLogin(self.getUsername(),self.getPassword(),always=getSetting('always_login') == 'true',rules=util.loadForumSettings(FB.getForumID(),get_rules=True))
 		self.setButtons()
 		setSetting('last_forum',FB.getForumID())
 		if no_theme: return
@@ -3107,25 +3147,25 @@ def getSearchDefault(setting,default='',with_global=True,heading=T(32376),new=T(
 		elif idx > 0: default = slist[idx]
 	return default
 		
-def searchPosts(parent,tid=None):
+def searchPosts(tid=None):
 	default = getSearchDefault('last_post_search')
 	if default == None: return
 	terms = dialogs.doKeyboard(T(32330),default)
 	if not terms: return
 	appendSettingList('last_post_search',terms,10)
 	appendSettingList('last_search',terms,10)
-	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic=T(32378),tid=tid,parent=parent)
+	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic=T(32378),tid=tid)
 	
-def searchThreads(parent,fid=None):
+def searchThreads(fid=None):
 	default = getSearchDefault('last_thread_search')
 	if default == None: return
 	terms = dialogs.doKeyboard(T(32330),default)
 	if not terms: return
 	appendSettingList('last_thread_search',terms,10)
 	appendSettingList('last_search',terms,10)
-	dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,topic=T(32379),fid=fid,parent=parent)
+	dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,topic=T(32379),fid=fid)
 
-def searchUser(parent,uid=None):
+def searchUser(uid=None):
 	uname = None
 	if not uid:
 		default = getSearchDefault('last_search_user',with_global=False,heading=T(32380),new=T(32381))
@@ -3154,150 +3194,41 @@ def searchUser(parent,uid=None):
 		topic = T(32384)
 	elif default == '@!RECENTTHREADS!@':
 		terms = default
-		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,search_name=uname,topic=T(32383),parent=parent)
+		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms=terms,search_name=uname,topic=T(32383))
 		return 
 	else:
 		terms = dialogs.doKeyboard(T(32330),default)
 		if not terms: return
 		appendSettingList('last_user_search',terms,10)
 		appendSettingList('last_search',terms,10)
-	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic=topic,uid=uid,search_name=uname,parent=parent)
-
-def getCachedLogo(logo,forumID,clear=False):
-	root, ext = os.path.splitext(logo) #@UnusedVariable
-	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
-	if not ext:
-		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.png')
-		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.gif')
-	if os.path.exists(logopath):
-		if clear: os.remove(logopath)
-		return True, logopath
-	return False, logopath
-
-def getForumSetting(forumID,key,default=None):
-	data = loadForumSettings(forumID)
-	return util._processSetting(data.get(key),default)
-
-def loadForumSettings(forumID,get_rules=False,get_both=False):
-	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)
-	if not os.path.exists(fsPath):
-		if get_both:
-			return {},{}
-		else:
-			return {}
-	fsFile = open(fsPath,'r')
-	lines = fsFile.read()
-	fsFile.close()
-	try:
-		ret = {}
-		rules = {}
-		mode = 'settings'
-		for l in lines.splitlines():
-			if l.startswith('[rules]'):
-				if not get_rules and not get_both: break
-				mode = 'rules'
-			else:
-				k,v = l.split('=',1)
-				if mode == 'rules':
-					rules[k] = v.strip()
-				else:
-					ret[k] = v.strip()
-	except:
-		ERROR('Failed to get settings for forum: %s' % forumID)
-		if get_both:
-			return {},{}
-		else:
-			return {}
-		
-	if get_rules:
-		return rules
-	
-	ret['username'] = ret.get('username','')
-	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
-	ret['notify'] = util._processSetting(ret.get('notify'),False)
-	ret['ignore_forum_images'] = util._processSetting(ret.get('ignore_forum_images'),True)
-		
-	if get_both:
-		return ret,rules
-	else:
-		return ret
-
-def saveForumSettings(forumID,**kwargs):
-	username=kwargs.pop('username',None)
-	password=kwargs.pop('password',None)
-	notify=kwargs.pop('notify',None)
-	rules=kwargs.pop('rules',None)
-	
-	data, rules_data = loadForumSettings(forumID,get_both=True) or ({},{})
-	#data.update(kwargs)
-	if rules: rules_data.update(rules)
-	if data: data.update(kwargs)
-	
-	if notify == None: data['notify'] = data.get('notify')  or False
-	else: data['notify'] = notify
-	
-	if username == None: data['username'] = data.get('username') or ''
-	else: data['username'] = username
-	
-	if password == None: data['password'] = data.get('password') or ''
-	else: data['password'] = password
-	
-	try:
-		password = passmanager.encryptPassword(data['username'] or '?', data['password'])
-		data['password'] = password
-		out = []
-		for k,v in data.items():
-			out.append('%s=%s' % (k,v))
-		if rules_data:
-			out.append('[rules]')
-			for k,v in rules_data.items():
-				if v != None: out.append('%s=%s' % (k,v))
-		fsFile = open(os.path.join(FORUMS_SETTINGS_PATH,forumID),'w')
-		#fsFile.write('username=%s\npassword=%s\nnotify=%s' % (data['username'],password,data['notify']))
-		fsFile.write('\n'.join(out))
-		fsFile.close()
-		return True
-	except:
-		ERROR('Failed to save forum settings for: %s' % forumID)
-		return False
+	dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,search_terms=terms,topic=topic,uid=uid,search_name=uname)
 
 def addParserRule(forumID,key,value):
 	if key.startswith('extra.'):
-		saveForumSettings(rules={key:value})
+		util.saveForumSettings(rules={key:value})
 	else:
-		rules = loadForumSettings(get_rules=True)
+		rules = util.loadForumSettings(get_rules=True)
 		if key == 'head':
 			vallist = rules.get('head') and rules['head'].split(';&;') or []
 		elif key == 'tail':
 			vallist = rules.get('tail') and rules['tail'].split(';&;') or []
 		if not value in vallist: vallist.append(value)
-		saveForumSettings(rules={key:';&;'.join(vallist)})
+		util.saveForumSettings(rules={key:';&;'.join(vallist)})
 
 def removeParserRule(forumID,key,value=None):
 	if key.startswith('extra.'):
-		saveForumSettings(rules={key:None})
+		util.saveForumSettings(rules={key:None})
 	else:
-		rules = loadForumSettings(get_rules=True)
+		rules = util.loadForumSettings(get_rules=True)
 		if key == 'head':
 			vallist = rules.get('head') and rules['head'].split(';&;') or []
 		elif key == 'tail':
 			vallist = rules.get('tail') and rules['tail'].split(';&;') or []
 		if value in vallist: vallist.pop(vallist.index(value))
-		saveForumSettings(rules={key:';&;'.join(vallist)})
+		util.saveForumSettings(rules={key:';&;'.join(vallist)})
 		
 def listForumSettings():
 	return os.listdir(FORUMS_SETTINGS_PATH)
-
-def getForumPath(forumID,just_path=False):
-	path = os.path.join(FORUMS_PATH,forumID)
-	if os.path.exists(path):
-		if just_path: return FORUMS_PATH
-		return path
-	path = os.path.join(FORUMS_STATIC_PATH,forumID)
-	if os.path.exists(path):
-		if just_path: return FORUMS_STATIC_PATH
-		return path
-	return None
 	
 def fidSortFunction(fid):
 	if fid[:3] in ['TT.','FR.','GB.']: return fid[3:]
@@ -3327,14 +3258,14 @@ def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide
 			if not f:
 				menu.addSep()
 				continue
-			path = getForumPath(f,just_path=True)
+			path = util.getForumPath(f,just_path=True)
 			if not path: continue
 			if not os.path.isfile(os.path.join(path,f)): continue
 			fdata = forumbrowser.ForumData(f,path)
 			name = fdata.name
 			desc = fdata.description
 			logo = fdata.urls.get('logo','')
-			exists, logopath = getCachedLogo(logo,f)
+			exists, logopath = util.getCachedLogo(logo,f)
 			if exists: logo = logopath
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			desc = '[B]%s[/B]: [COLOR FFFF9999]%s[/COLOR]' % ( T(32290) , (desc or 'None') )
@@ -3360,7 +3291,7 @@ def setLogins(force_ask=False,forumID=None):
 		if FB: forumID = FB.getForumID()
 	if not forumID or force_ask: forumID = askForum(forumID=forumID)
 	if not forumID: return
-	data = loadForumSettings(forumID)
+	data = util.loadForumSettings(forumID)
 	user = ''
 	if data: user = data.get('username','')
 	user = dialogs.doKeyboard(T(32201),user)
@@ -3372,7 +3303,7 @@ def setLogins(force_ask=False,forumID=None):
 	if not user and not password:
 		dialogs.showMessage(T(32387),T(32388))
 	else:
-		saveForumSettings(forumID,username=user,password=password)
+		util.saveForumSettings(forumID,username=user,password=password)
 		dialogs.showMessage(T(32389),T(32390))
 		
 def setLoginPage(forumID=None):
@@ -3386,7 +3317,7 @@ def setLoginPage(forumID=None):
 	LOG('Open Forum Main Page - URL: ' + url)
 	url = browseWebURL(url)
 	if url == None: return
-	saveForumSettings(forumID,rules={'login_url':url})
+	util.saveForumSettings(forumID,rules={'login_url':url})
 	
 def browseWebURL(url):
 	(url,html) = webviewer.getWebResult(url,dialog=True) #@UnusedVariable
@@ -3429,7 +3360,7 @@ def convertForumSettings_1_1_4():
 		password = passmanager.getPassword(key, username)
 		if username or password:
 			LOG('CONVERTING FORUM SETTINGS: %s' % f)
-			saveForumSettings(f,username=username,password=password)
+			util.saveForumSettings(f,username=username,password=password)
 			setSetting('login_user_' + f.replace('.','_'),'')
 			setSetting('login_pass_' + f.replace('.','_'),'')
 
@@ -3439,9 +3370,9 @@ def toggleNotify(forumID=None):
 	notify = True
 	if not forumID and FB: forumID = FB.getForumID()
 	if not forumID: return None
-	data = loadForumSettings(forumID)
+	data = util.loadForumSettings(forumID)
 	if data: notify = not data['notify']
-	saveForumSettings(forumID,notify=notify)
+	util.saveForumSettings(forumID,notify=notify)
 	return notify
 		
 def doSettings(window=None):
@@ -3494,7 +3425,7 @@ def manageParserRules(forumID=None,rules=None):
 	if rules != None:
 		returnIfChanged = True
 	else:
-		rules = loadForumSettings(forumID,get_rules=True)
+		rules = util.loadForumSettings(forumID,get_rules=True)
 	rhelp = dialogs.loadHelp('postrules.help')
 	choice = True
 	while choice:
@@ -3533,7 +3464,7 @@ def manageParserRules(forumID=None,rules=None):
 			for k in rules.keys():
 				if not rules[k]: rules[k] = None
 			if returnIfChanged: return changed
-			saveForumSettings(forumID,rules=rules)
+			util.saveForumSettings(forumID,rules=rules)
 			continue
 		elif choice == 'share':
 			shareForumRules(forumID,rules)
@@ -3773,7 +3704,7 @@ def addForum(current=False):
 		if name.startswith('forums.'): name = name[7:]
 		forumID = ftype + '.' + name
 		saveForum(ftype,forumID,name,desc,url,logo)
-		if user and password: saveForumSettings(forumID,username=user,password=password)
+		if user and password: util.saveForumSettings(forumID,username=user,password=password)
 		dialog.update(60,T(32437))
 		if not (not current and ftype == 'GB'): addForumToOnlineDatabase(name,url,desc,logo,ftype,dialog=dialog)
 		return forumID
@@ -3844,8 +3775,8 @@ def doAddForumFromOnline(f,odb):
 	forumID = f['type']+'.'+f['name']
 	saveForum(f['type'],forumID,f['name'],f.get('desc',''),f['url'],f.get('logo',''),f.get('header_color',''))
 	rules = isinstance(f,dict) and odb.getForumRules(f['type']+'.'+f['name']) or {}
-	old_rules = loadForumSettings(forumID,get_rules=True)
-	if rules and not old_rules: saveForumSettings(forumID,rules=rules)
+	old_rules = util.loadForumSettings(forumID,get_rules=True)
+	if rules and not old_rules: util.saveForumSettings(forumID,rules=rules)
 	dialogs.showMessage(T(32416),'{0}: {1}'.format(T(32442),f['name']))
 	return forumID
 	
@@ -4220,7 +4151,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	#	url = getSetting('exp_general_forums_last_url')
 	#	if not url: forum = 'TT.xbmc.org'
 		
-	if not getForumPath(forum):
+	if not util.getForumPath(forum):
 		if no_default: return False
 		forum = 'TT.xbmc.org'
 	err = ''

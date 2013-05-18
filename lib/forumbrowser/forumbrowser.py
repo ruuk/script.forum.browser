@@ -1,7 +1,7 @@
 #Forum browser common
 import sys, os, re, urllib, urllib2, texttransform, binascii, time
 from lib import asyncconnections, chardet
-from lib.util import LOG, ERROR
+from lib import util
 
 def getForumTestUrls(base,subpath=''):
 	urls = []
@@ -84,7 +84,7 @@ class FBOnlineDatabase():
 			result = urllib2.urlopen(self.url,enc).read()
 			return result
 		except:
-			err = ERROR('FBTTOnlineDatabase.postData()')
+			err = util.ERROR('FBTTOnlineDatabase.postData()')
 			return 'ERROR: ' + err
 			
 	def addForum(self,name,url,logo='',desc='',ftype='TT',cat='0',rating_function='0',rating_accuracy='0',header_color='FFFFFF'):
@@ -120,7 +120,7 @@ class FBOnlineDatabase():
 					add['cat'] = int(add.get('cat',0))
 					final.append(add)
 		except:
-			ERROR(str(flist))
+			util.ERROR(str(flist))
 		return final
 	
 	def getForumRules(self,forumID):
@@ -133,7 +133,7 @@ class FBOnlineDatabase():
 					k,v = r.split('=')
 					final[k] = v
 		except:
-			ERROR(str(rlist))
+			util.ERROR(str(rlist))
 		return final
 
 class HTMLPageInfo:
@@ -194,7 +194,7 @@ class HTMLPageInfo:
 			self.html = self.getHTML(self.url)
 		except:
 			self.isValid = False
-			ERROR('HTMLPageInfo 1: FAILED',hide_tb=True)
+			util.ERROR('HTMLPageInfo 1: FAILED',hide_tb=True)
 			
 		if self.url == self.base2: return
 		self.updateProgressMax(100)
@@ -205,7 +205,7 @@ class HTMLPageInfo:
 			self.html2 = self.getHTML(self.base2)
 			self.isValid = True
 		except:
-			ERROR('HTMLPageInfo 2: FAILED',hide_tb=True)
+			util.ERROR('HTMLPageInfo 2: FAILED',hide_tb=True)
 		
 	def getHTML(self,url):
 		opener = urllib2.build_opener(asyncconnections.createHandlerWithCallback(self.updateProgress))
@@ -277,7 +277,7 @@ class HTMLPageInfo:
 				for url in re.findall("background(?:-image)?:[^\(]*?url\(['\"]?(?P<url>[^\"']+?)['\"]?\)",style):
 					urls.append(self.fullURL(url, sbase))
 			except:
-				LOG('Failed to get stylesheet')
+				util.LOG('Failed to get stylesheet')
 		
 		#print urls
 		return urls
@@ -490,7 +490,7 @@ def valToString(val):
 		try:
 			return val.encode('utf-8')
 		except:
-			LOG('valToString() encode error')
+			util.LOG('valToString() encode error')
 			return val
 	return str(val).encode('utf-8')
 
@@ -900,6 +900,7 @@ class ForumBrowser:
 		self._url = ''
 		self.user = ''
 		self.password = ''
+		self.appURL = 'forumbrowser://%s' % forum
 		self.transport = None
 		self.server = None
 		self.forumConfig = {}
@@ -953,7 +954,7 @@ class ForumBrowser:
 	
 	def updateEncoding(self,encoding,confidence,log_change=True):
 		if confidence > self._encodingConfidence:
-			if log_change and encoding != self._encoding: LOG('Forum Encoding Changed: %s -> %s' % (self._encoding,encoding))
+			if log_change and encoding != self._encoding: util.LOG('Forum Encoding Changed: %s -> %s' % (self._encoding,encoding))
 			self._encoding = encoding
 			self._encodingConfidence = confidence
 			
@@ -977,7 +978,7 @@ class ForumBrowser:
 		else:
 			url = self.makeURL(self.getURL('login'))
 			
-		LOG('LOGIN URL: %s' % url)
+		util.LOG('LOGIN URL: %s' % url)
 			
 		return url
 		
@@ -1093,6 +1094,35 @@ class ForumBrowser:
 			dlist.append(srt[k])
 		return dlist
 	
+	def updateAppURL(self,forum=None,thread=None,post=None,close=False):
+		elements = util.parseForumBrowserURL(self.appURL)
+		if forum:
+			if close:
+				if forum == 'subscriptions': elements['section'] = None
+				elements['forum'] = elements['thread'] = elements['post'] = None
+			else:
+				if forum == 'subscriptions':
+					elements['section'] = 'SUBSCRIPTIONS'
+				else:
+					elements['forum'] = forum
+		elif thread:
+			if close:
+				if thread == 'private_messages':
+					elements['section'] = elements['forum'] = None
+				elements['thread'] = elements['post'] = None
+			else:
+				if thread == 'private_messages':
+					elements['section'] = 'PM'
+				else:
+					elements['thread'] = thread
+		elif post:
+			if close:
+				elements['post'] = None
+			else:
+				elements['post'] = post
+		self.appURL = util.createForumBrowserURL(elements)
+		#util.LOG('APP URL: %s' % self.appURL)
+		
 	def getForumType(self): return ''
 
 	def getQuoteFormat(self):

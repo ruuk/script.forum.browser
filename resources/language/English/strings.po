@@ -1894,6 +1894,14 @@ msgctxt "#32552"
 msgid "Enter End RegEx"
 msgstr ""
 
+msgctxt "#32553"
+msgid "Add Bookmark"
+msgstr ""
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

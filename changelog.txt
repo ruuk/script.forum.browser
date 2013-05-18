@@ -39,9 +39,14 @@ KNOWN ISSUES:
   
 Current Version : 2.1.7
 
+*** 2.1.8 ***
+
+Added Bookmarks dialog
+Added 'Add Bookmarks' to context menu for threads, posts, and message views
+
 *** 2.1.7 ***
 
-Forgot to add mod update on version check for font changes, now addded :)
+Forgot to add mod update on version check for font changes, now added :)
 
 *** 2.1.6 ***
 

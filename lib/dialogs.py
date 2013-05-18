@@ -377,7 +377,6 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 	def cancel(self):
 		self.canceled = True
 		if self.cancelStopsConnections:
-			from lib import asyncconnections
 			asyncconnections.StopConnection()
 	
 	def onClick(self,controlID):
@@ -804,3 +803,67 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 		if action == 92 or action == 10:
 			self.closed = True
 			self.close()
+
+###################################################################	
+## Bookmarks
+###################################################################			
+def bookmarks():
+	bookmarks = util.loadBookmarks()
+	menu = ChoiceMenu(util.T(32554))
+	for b in bookmarks:
+		elements = util.parseForumBrowserURL(b[0])
+		f = elements.get('forumID')
+		path = util.getForumPath(f,just_path=True)
+		fdata = forumbrowser.ForumData(f,path)
+		#name = fdata.name
+		logo = fdata.urls.get('logo','')
+		exists, logopath = util.getCachedLogo(logo,f)
+		if exists: logo = logopath
+		menu.addItem(b[0], b[1], logo)
+	result = menu.getResult()
+	if not result: return
+	return result
+
+def addBookmark(FB,page=None,name='',page_disp=''):
+	if not FB: return
+	elements = util.parseForumBrowserURL(FB.appURL)
+	if elements.get('forum'): elements['section'] = None
+	url = None
+	if elements.get('post'):
+		url = util.createForumBrowserURL(elements)
+		if elements.get('section') == 'PM':
+			name = 'PM' + ': ' + name
+		else:
+			name = 'Post' + ': ' + name
+	elif elements.get('thread'):
+		menu = ChoiceMenu('Add Bookmark')
+		if page: menu.addItem('thread','Bookmark Thread (This Page)')
+		menu.addItem('threadlast','Bookmark Thread (Last Page)')
+		menu.addItem('threadfirst','Bookmark Thread (First Page)')
+		result = menu.getResult()
+		if not result: return
+		if result == 'thread':
+			url = util.createForumBrowserURL(elements,args={'page':page})
+			name = 'Thread (' + 'Page' + ' %s' % page_disp + '): ' + name
+		elif result == 'threadlast':
+			elements['post'] = 'last'
+			url = util.createForumBrowserURL(elements)
+			name = 'Thread (' + 'Last' + '): ' + name
+		elif result == 'threadfirst':
+			elements['post'] = 'first'
+			url = util.createForumBrowserURL(elements)
+			name = 'Thread (' + 'First' + '): ' + name
+	elif elements.get('forum'):
+		url = util.createForumBrowserURL(elements)
+		name = 'Forum' + ': ' + name
+	elif elements.get('section'):
+		url = util.createForumBrowserURL(elements)
+		if elements['section'] == 'SUBSCRIPTIONS':
+			name = '%s: %s' % (FB.getDisplayName(),'Subscriptions')
+		else:
+			name = '%s: %s' % (FB.getDisplayName(),'PMs')
+	if not url: return
+	name = doKeyboard('Enter Bookmark Name',name)
+	if not name: return
+	util.addBookmark(url, name)
+	
