@@ -3350,7 +3350,7 @@ def updateOldVersion():
 	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
 	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
 		convertForumSettings_1_1_4()
-	if StrictVersion(lastVersion) < StrictVersion('2.1.7') and not lastVersion == '0.0.0':
+	if StrictVersion(lastVersion) < StrictVersion('2.1.8') and not lastVersion == '0.0.0':
 		if getSetting('use_skin_mods',False):
 			dialogs.showMessage(T(32393),T(32394))
 			mods.installSkinMods(update=True)

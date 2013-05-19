@@ -216,7 +216,7 @@ class TextDialog(BaseDialog):
 		if action == 92 or action == 10:
 			self.close()
 			
-class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
+class ImageChoiceDialog(BaseDialog):
 	def __init__( self, *args, **kwargs ):
 		self.result = None
 		self.items = kwargs.get('items')
@@ -232,7 +232,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 		self.gifReplace = chr(255)*6
 		self.colorsDir = os.path.join(CACHE_PATH,'colors')
 		self.colorGif = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
-		xbmcgui.WindowXMLDialog.__init__( self )
+		BaseDialog.__init__( self )
 	
 	def onInit(self):
 		if self.started: return
@@ -276,6 +276,7 @@ class ImageChoiceDialog(xbmcgui.WindowXMLDialog):
 				item.setProperty(k,v)
 			clist.addItem(item)
 		self.getControl(300).setLabel('[B]%s[/B]' % self.caption)
+		self.setProperty('caption',self.caption)
 		self.setFocus(clist)
 		if self.select:
 			idx=0
@@ -809,18 +810,18 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 ###################################################################			
 def bookmarks():
 	bookmarks = util.loadBookmarks()
-	menu = ChoiceMenu(util.T(32554))
+	menu = ImageChoiceMenu(util.T(32554))
 	for b in bookmarks:
 		elements = util.parseForumBrowserURL(b[0])
 		f = elements.get('forumID')
 		path = util.getForumPath(f,just_path=True)
 		fdata = forumbrowser.ForumData(f,path)
-		#name = fdata.name
+		bgcolor = 'FF' + fdata.theme.get('header_color','FFFFFF')
 		logo = fdata.urls.get('logo','')
 		exists, logopath = util.getCachedLogo(logo,f)
 		if exists: logo = logopath
-		menu.addItem(b[0], b[1], logo)
-	result = menu.getResult()
+		menu.addItem(b[0], b[1], logo,bgcolor=bgcolor)
+	result = menu.getResult('script-forumbrowser-forum-select.xml')
 	if not result: return
 	return result
 

@@ -37,12 +37,14 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.7
+Current Version : 2.1.8
 
 *** 2.1.8 ***
 
 Added Bookmarks dialog
-Added 'Add Bookmarks' to context menu for threads, posts, and message views
+Added 'Add Bookmarks' to context menu for threads, posts, and message views (May be moved to a button later)
+Fix (hopefully) for font not being updated when updating mod
+Added forums select skin for Video skin. Used when adding from online database and for bookmarks 
 
 *** 2.1.7 ***
 

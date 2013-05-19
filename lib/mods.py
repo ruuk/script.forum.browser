@@ -17,7 +17,7 @@ def copyKeyboardModImages(skinPath):
 
 def copyFont(sourceFontPath,skinPath):
 	dst = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
-	if os.path.exists(dst): return
+	if os.path.exists(dst): xbmcvfs.delete(dst)
 	xbmcvfs.copy(sourceFontPath,dst)
 	
 def copyTree2(source,target):
