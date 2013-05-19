@@ -239,6 +239,14 @@ class ImageChoiceDialog(BaseDialog):
 		self.started = True
 		self.showItems()
 		
+	def removeItem(self,item):
+		if item in self.items:
+			idx = self.items.index(item)
+			self.items.pop(idx)
+			self.showItems()
+			return idx
+		return None
+			
 	def showItems(self):
 		clist = self.getControl(120)
 		clist.reset()
@@ -811,6 +819,8 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 def bookmarks():
 	bookmarks = util.loadBookmarks()
 	menu = ImageChoiceMenu(util.T(32554))
+	menu.setContextCallback(bookmarksRemoveCallback)
+	menu.closeContext = False
 	for b in bookmarks:
 		elements = util.parseForumBrowserURL(b[0])
 		f = elements.get('forumID')
@@ -824,6 +834,15 @@ def bookmarks():
 	result = menu.getResult('script-forumbrowser-forum-select.xml')
 	if not result: return
 	return result
+
+def bookmarksRemoveCallback(menu,item):
+	submenu = ChoiceMenu('Options')
+	submenu.addItem('remove', 'Remove')
+	result = submenu.getResult()
+	if not result: return
+	if result == 'remove':
+		idx = menu.removeItem(item)
+		util.removeBookmark(idx)
 
 def addBookmark(FB,page=None,name='',page_disp=''):
 	if not FB: return

@@ -1213,8 +1213,11 @@ class MessageWindow(windows.BaseWindow):
 				raise
 		
 	def showImage(self,url):
-		counts, image_files = zip(*self.post.imageURLs())  # @UnusedVariable
-		image_files = list(image_files)
+		image_files = []
+		imgURLs = self.post.imageURLs()
+		if imgURLs:
+			counts, image_files = zip(*imgURLs)  # @UnusedVariable
+			image_files = list(image_files)
 		for l in self.post.links():
 			if l.isImage() and not l.textIsImage(): image_files.append(l.url)
 		if url in image_files:
@@ -2953,7 +2956,7 @@ class ForumsWindow(windows.BaseWindow):
 	def showForumInfo(self):
 		out = ''
 		for k,v in FB.getForumInfo():
-			out += u'[B]%s[/B]: [COLOR FF550000]%s[/COLOR][CR]' % (k.replace('_',' ').title(),v)
+			out += u'[B]%s[/B]: [COLOR FFA00000]%s[/COLOR][CR]' % (k.replace('_',' ').title(),v)
 		dialogs.showMessage(T(32372),out,scroll=True)
 				
 	def preClose(self):

@@ -4,6 +4,7 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Make small dialog skin
   ParserBrowser: More parsing of profile links and allow user to view in webviewer
   Back on video also goes back a window - see what I can do (and see if other controls are affected)
   Finish no window stacking mode
@@ -37,7 +38,15 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.8
+Current Version : 2.1.9
+
+*** 2.1.9 ***
+
+Fixed colors for forum info to be viewable on dark skins
+Fixed a bug causing ParserBrowser forums to fail
+Fixed a bug preventing the viewing of images for links that are images
+Added handling for access errors (windows specific and generic permission) with the file locking used for signaling
+Added the ability to remove bookmarks
 
 *** 2.1.8 ***
 

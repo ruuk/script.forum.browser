@@ -23,6 +23,9 @@ import sys
 import time
 import errno
 
+if not getattr(__builtins__, "WindowsError", None):
+	class WindowsError(OSError): pass
+	
 class FileLock(object):
 	""" A file locking mechanism that has context-manager support so 
 		you can use it in a ``with`` statement. This should be relatively cross
@@ -78,8 +81,16 @@ class FileLock(object):
 					# Print some info about the current process as debug info for anyone who bothers to look.
 					f.write( self._lock_file_contents )
 				break;
+			except WindowsError as e:
+				if e.winerror != 32:
+					raise
+				if self.timeout is not None and (time.time() - start_time) >= self.timeout:
+					raise FileLock.FileLockException("Timeout occurred.")
+				if not blocking:
+					return False
+				time.sleep(self.delay)
 			except OSError as e:
-				if e.errno != errno.EEXIST:
+				if e.errno != errno.EEXIST and e.errno != errno.EACCES:
 					raise 
 				if self.timeout is not None and (time.time() - start_time) >= self.timeout:
 					raise FileLock.FileLockException("Timeout occurred.")

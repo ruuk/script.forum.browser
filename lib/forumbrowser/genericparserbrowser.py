@@ -4,9 +4,6 @@ from forumparsers import GeneralForumParser, GeneralThreadParser, GeneralPostPar
 from forumbrowser import FBData
 from lib import util
 
-FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
-loadForumSettings = sys.modules["__main__"].loadForumSettings
-
 def testForum(url,user=None,password=None,progress_callback=None):
 	if not url.startswith('http'):
 		url = url.lstrip('/')
@@ -96,7 +93,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 	
 	def loadForumData(self,forum):
 		self.needsLogin = True
-		fname = os.path.join(FORUMS_STATIC_PATH,forum)
+		fname = os.path.join(util.FORUMS_STATIC_PATH,forum)
 		if not os.path.exists(fname): fname = forum
 		if not os.path.exists(fname): return False
 		return forumbrowser.ForumBrowser.parseForumData(self, fname)
@@ -115,7 +112,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 			return scraperbrowser.ScraperForumBrowser.getQuoteStartFormat(self)
 	
 	def doLoadForumData(self):
-		path = os.path.join(FORUMS_STATIC_PATH,'general',self.forumParser.getForumType())
+		path = os.path.join(util.FORUMS_STATIC_PATH,'general',self.forumParser.getForumType())
 		self.loadForumData(path)
 			
 	def getForums(self,callback=None,donecallback=None,url='',html='',subs=False):
@@ -249,7 +246,7 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 		if not callback: callback = self.fakeCallback
 		url = None
 		pagesURL = url
-		fset, rules = loadForumSettings(self.getForumID(),get_both=True)
+		fset, rules = util.loadForumSettings(self.getForumID(),get_both=True)
 		self.postParser.addRules(rules)
 		self.postParser.ignoreForumImages = fset.get('ignore_forum_images')
 		self.postParser.setDomain(self._url)
