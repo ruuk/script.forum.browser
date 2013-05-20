@@ -518,20 +518,21 @@ class ChoiceMenu():
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True
 	
-	def getChoiceIndex(self):
+	def getChoiceIndex(self,xml_file):
+		xml_file = xml_file or 'script-forumbrowser-dialog-select.xml'
 		options = []
 		for i in self.items: options.append(i.get('disp'))
-		w = openWindow(DialogSelect,'script-forumbrowser-dialog-select.xml',return_window=True,caption=self.caption,select=options)
+		w = openWindow(DialogSelect,xml_file,return_window=True,caption=self.caption,select=options)
 		idx = w.choice
 		del w
 		return idx
 		#return xbmcgui.Dialog().select(self.caption,options)
 	
-	def getResult(self,close_on_context=True):
+	def getResult(self,close_on_context=True,xml_file=None):
 		self.closeContext = close_on_context
 		self.hideSplash()
 		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
-		idx = self.getChoiceIndex()
+		idx = self.getChoiceIndex(xml_file)
 		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 		if idx < 0: return None
 		if self.items[idx]['disabled']: return None
@@ -838,7 +839,7 @@ def bookmarks():
 def bookmarksRemoveCallback(menu,item):
 	submenu = ChoiceMenu('Options')
 	submenu.addItem('remove', 'Remove')
-	result = submenu.getResult()
+	result = submenu.getResult(xml_file='script-forumbrowser-dialog-select-small.xml')
 	if not result: return
 	if result == 'remove':
 		idx = menu.removeItem(item)

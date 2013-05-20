@@ -1387,8 +1387,8 @@ def deletePost(post,is_pm=False):
 
 def showUserExtras(post,ignore=None,just_return=False):
 	out = ''
-	color = 'FF550000'
-	if just_return: color = 'FFBBBBBB'
+	color = 'FFA00000'
+	if just_return: color = 'FFA00000'
 	for k,v in post.getExtras(ignore=ignore).items():
 		if not hasattr(v,'decode'): v = str(v)
 		val = texttransform.convertHTMLCodes(v,FB)
