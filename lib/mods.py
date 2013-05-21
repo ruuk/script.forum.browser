@@ -157,7 +157,10 @@ def installSkinMods(update=False):
 		
 	if not 'Forum Browser' in fontcontents or update:
 		LOG('Modifying contents of Font.xml with: ' + paths.sourceFontXMLPath)
-		original = open(paths.fontPath,'r').read()
+		if os.path.exists(paths.fontBackupPath): #because we're updating
+			original = open(paths.fontBackupPath,'r').read()
+		else:
+			original = open(paths.fontPath,'r').read()
 		modded = original.replace('<font>',open(paths.sourceFontXMLPath,'r').read() + '<font>',1)
 		open(paths.fontPath,'w').write(modded)
 	dialogs.showMessage(T(32052),'',T(32495))

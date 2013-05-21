@@ -39,7 +39,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.9
+Current Version : 2.1.10
+
+*** 2.1.10 ***
+
+Updates of Font.xml file now use backup file instead of modded Font.xml file
+Some changes to the internal signaling system to (hopefully) fix errors on windows systems
 
 *** 2.1.9 ***
 

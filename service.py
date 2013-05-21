@@ -1,8 +1,6 @@
 import os, sys, time, xbmc, xbmcaddon
-from lib import signals
-from lib.util import AbortRequestedException
+from lib import util, signals
 
-from lib import util
 util.LOG_PREFIX = 'FORUMBROWSER-SERVICE'
 
 DEBUG = False
@@ -178,19 +176,26 @@ class ForumBrowserService:
 				pmcounts = self.FB.getPMCounts()
 				xbmc.sleep(300)
 				subs = self.FB.getSubscriptions()
-			except AbortRequestedException:
+			except util.AbortRequestedException:
 				self.stop = True
 				return
 			except:
 				ERROR('Failed to get data for forum: %s' % forum)
 				fdata = self.lastData.get(forum)
 				continue
+			
+			log = self.FB.getDisplayName() + ': '
+			
+			if not pmcounts:
+				log += 'ERROR: No PM counts'
+				self.log(log)
+				continue
+			
 			fdata['PM'] = pmcounts.get('unread',0) or 0
 			pmtotal = pmcounts.get('total',0) or 0
 			if fdata['PM']:
 				if self.checkLast(forum, 'PM', fdata['PM']): flag = True
 			
-			log = self.FB.getDisplayName() + ': '
 			ct = 0
 			unread = 0
 			if not subs:

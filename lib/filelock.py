@@ -102,12 +102,15 @@ class FileLock(object):
 
 	def release(self):
 		""" Get rid of the lock by deleting the lockfile. 
-			When working in a `with` statement, this gets automatically 
+			When working in a `with` statement, this gets automatically
 			called at the end.
 		"""
 		self.is_locked = False
 		try:
 			os.unlink(self.lockfile)
+		except WindowsError as e:
+			if e.winerror == 32: return
+			raise	
 		except OSError, e:
 			if e.errno == 2: return
 			raise
