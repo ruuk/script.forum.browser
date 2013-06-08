@@ -2172,7 +2172,7 @@ class ThreadsWindow(windows.PageWindow):
 			starter = tdict.get('starter',T(32348))
 			title = tdict.get('title','')
 			title = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',title),FB)
-			last = tdict.get('lastposter','')
+			last = FB.unicode(tdict.get('lastposter',''))
 			fid = tdict.get('forumid','')
 			sticky = tdict.get('sticky') and 'sticky' or ''
 			reply_count = unicode(tdict.get('reply_number','') or '')
@@ -2190,11 +2190,11 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty("fid",unicode(fid))
 			item.setProperty("lastposter",last)
 			preview = tdict.get('short_content','')
-			if preview: preview = re.sub('<[^>]+?>','',texttransform.convertHTMLCodes(preview,FB))
+			if preview: preview = re.sub(u'<[^>]+?>',u'',texttransform.convertHTMLCodes(preview,FB))
 			
 			if last:
 				last = self.desc_base % last
-				if preview: last += '[CR]' + preview
+				if preview: last += u'[CR]' + preview
 			else:
 				last = preview
 			if self.searchRE: last = self.highlightTerms(FB,last)

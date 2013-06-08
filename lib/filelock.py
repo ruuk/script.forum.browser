@@ -82,6 +82,7 @@ class FileLock(object):
 					f.write( self._lock_file_contents )
 				break;
 			except WindowsError as e:
+				print 'Windows Error: %s' % e.winerror
 				if e.winerror != 32:
 					raise
 				if self.timeout is not None and (time.time() - start_time) >= self.timeout:
