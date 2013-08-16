@@ -1534,7 +1534,6 @@ class RepliesWindow(windows.PageWindow):
 		self.endProgress()
 	
 	def fillRepliesList(self,page='',pid=None):
-		print page
 		#page = int(page)
 		#if page < 0: raise Exception()
 		self.getControl(106).setVisible(True)

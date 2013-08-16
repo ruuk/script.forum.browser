@@ -942,7 +942,7 @@ class ForumBrowser:
 			encoding = 'utf-8'
 			
 		try:
-			return unicode(string,encoding)
+			return unicode.encode(string,encoding)
 		except:
 			detected_encoding = chardet.detect(string)
 			try:

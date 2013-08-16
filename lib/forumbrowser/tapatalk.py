@@ -699,7 +699,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if not update and self.pmBoxes: return self.pmBoxes
 		if not self.hasPM(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
-		result = self.server.get_box_info()
+		try:
+			result = self.server.get_box_info()
+		except xmlrpclib.Fault,e:
+			LOG("Failed to get_box_info() (XMLRPCLib Fault): {0}".format(e))
+			return None
 		if not result.get('result'):
 			LOG('Failed to get PM boxes: ' + str(result.get('result_text')))
 			return None
@@ -720,6 +724,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return self.pmBoxes
 	
 	def getPMCounts(self,callback_percent=5):
+		if self.getConfigInfo('conversation', False):
+			LOG("Skipping PM counts - forum uses conversation PMs")
+			return None
 		boxes = self.getPMBoxes(callback_percent=callback_percent)
 		if not boxes: return None
 		unread = 0
@@ -746,7 +753,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
-		if not self.guestOK(): self.checkLogin(callback, 5)
+		#if not self.guestOK(): 
+		self.checkLogin(callback, 5)
 		logo = None
 		while True:
 			if not callback(20,self.lang(32102)): break
@@ -1079,6 +1087,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return sreplies
 				
 	def hasPM(self):
+		if self.getConfigInfo('conversation', False): return False
 		return not self.forumConfig.get('disable_pm','0') == '1'
 	
 	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None):
