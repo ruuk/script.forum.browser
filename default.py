@@ -2706,7 +2706,10 @@ class ForumsWindow(windows.BaseWindow):
 		disp = ''
 		if not pm_counts: pm_counts = FB.getPMCounts()
 		if pm_counts: disp = ' (%s/%s)' % (pm_counts.get('unread','?'),pm_counts.get('total','?'))
-		self.getControl(203).setLabel(T(32909) + disp)
+		messages_text = T(32909)
+		if FB.hasConversation(): messages_text = T(32941)
+			
+		self.getControl(203).setLabel(messages_text + disp)
 		self.setLoggedIn()
 		
 	def setStats(self,stats=None):

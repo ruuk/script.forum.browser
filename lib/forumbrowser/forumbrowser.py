@@ -1185,6 +1185,7 @@ class ForumBrowser:
 	def isThreadSubscribed(self,tid,default=False): return default
 		
 	def hasPM(self): return False
+	def hasConversation(self): return False
 	
 	def hasSubscriptions(self): return False
 	

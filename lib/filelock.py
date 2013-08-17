@@ -22,6 +22,7 @@ import os
 import sys
 import time
 import errno
+import contextlib
 
 if not getattr(__builtins__, "WindowsError", None):
 	class WindowsError(OSError): pass
@@ -77,7 +78,7 @@ class FileLock(object):
 				# Attempt to create the lockfile.
 				# These flags cause os.open to raise an OSError if the file already exists.
 				fd = os.open( self.lockfile, os.O_CREAT | os.O_EXCL | os.O_RDWR )
-				with os.fdopen( fd, 'a' ) as f:
+				with contextlib.closing(os.fdopen( fd, 'a' )) as f: #Not sure if the closing() wrapper is necessary but couldn't find docs on it so this is safer
 					# Print some info about the current process as debug info for anyone who bothers to look.
 					f.write( self._lock_file_contents )
 				break;
@@ -102,16 +103,24 @@ class FileLock(object):
 		return True
 
 	def release(self):
-		""" Get rid of the lock by deleting the lockfile. 
+		""" Get rid of the lock by deleting the lockfile.
 			When working in a `with` statement, this gets automatically
 			called at the end.
 		"""
 		self.is_locked = False
 		try:
+			self.doRelease()
+		except:
+			time.sleep(1)
+			self.doRelease()
+			print "FORUMBROWSER: filelock.py: LOCK RELEASED ON 2ND ATTEMPT"
+		
+	def doRelease(self):
+		try:
 			os.unlink(self.lockfile)
 		except WindowsError as e:
 			if e.winerror == 32: return
-			raise	
+			raise
 		except OSError, e:
 			if e.errno == 2: return
 			raise

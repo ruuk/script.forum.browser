@@ -697,10 +697,13 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getPMBoxes(self,update=True,callback_percent=5):
 		if not update and self.pmBoxes: return self.pmBoxes
-		if not self.hasPM(): return None
+		if not self.hasPM() and not self.hasConversation(): return None
 		if not self.checkLogin(callback_percent=callback_percent): return None
 		try:
-			result = self.server.get_box_info()
+			if self.getConfigInfo('conversation', False):
+				result = self.server.get_conversations()
+			else:
+				result = self.server.get_box_info()
 		except xmlrpclib.Fault,e:
 			LOG("Failed to get_box_info() (XMLRPCLib Fault): {0}".format(e))
 			return None
@@ -709,13 +712,18 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			return None
 		self.pmBoxes = []
 		defaultSet = False
+		defType = "?"
+		if self.getConfigInfo('conversation', False): defType = 'conversation'
 		for b in result.get('list',[]):
-			box = {	'id':b.get('box_id',''),
-					'name':str(b.get('box_name','?')),
+			box = {	'id':b.get('box_id',b.get('conv_id','')),
+					'name':str(b.get('box_name',str(b.get('conv_subject','?')))),
 					'count':b.get('msg_count',0),
-					'unread':b.get('unread_count',0),
-					'type':b.get('box_type','') or str(b.get('box_name','?')).upper()
+					'conv_count':b.get('reply_count',0),
+					'unread':b.get('unread_count',b.get('unread_num',0) and 1 or 0),
+					'conv_unread':b.get('unread_count',0),
+					'type':b.get('box_type','') or str(b.get('box_name',defType)).upper()
 			}
+			if self.getConfigInfo('conversation', False): box['count'] = 1
 			if box.get('type') == 'INBOX' and not defaultSet:
 				box['default'] = True
 				defaultSet = True
@@ -724,16 +732,16 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return self.pmBoxes
 	
 	def getPMCounts(self,callback_percent=5):
-		if self.getConfigInfo('conversation', False):
-			LOG("Skipping PM counts - forum uses conversation PMs")
-			return None
+# 		if self.getConfigInfo('conversation', False):
+# 			LOG("Skipping PM counts - forum uses conversation PMs")
+# 			return None
 		boxes = self.getPMBoxes(callback_percent=callback_percent)
 		if not boxes: return None
 		unread = 0
 		total = 0
 		boxid = None
 		for l in boxes:
-			if l.get('type') == 'INBOX':
+			if l.get('type') in ('INBOX','CONVERSATION'):
 				if l.get('default'): boxid = l.get('id')
 				total += l.get('count',0)
 				unread += l.get('unread',0)
@@ -1089,6 +1097,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def hasPM(self):
 		if self.getConfigInfo('conversation', False): return False
 		return not self.forumConfig.get('disable_pm','0') == '1'
+	
+	def hasConversation(self):
+		return self.getConfigInfo('conversation', False)
 	
 	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None):
 		if not callback: callback = self.fakeCallback

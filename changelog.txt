@@ -4,6 +4,8 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 
 TODO:
  Short Term:
+  Right justified text for languages such as Hebrew
+  Handle attached images
   Strings for bookmarks
   Better bookmarks dialog for light/dark skin
   ParserBrowser: More parsing of profile links and allow user to view in webviewer
@@ -40,6 +42,10 @@ KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
 Current Version : 2.1.12
+
+*** 2.1.13 ***
+
+Show conversation counts for forums that use the conversation PM format
 
 *** 2.1.12 ***
 
