@@ -92,7 +92,6 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>center</aligny>
-				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32527][/B]</label>
 			</control>
 		</control>
@@ -518,7 +517,6 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<label>[B]$INFO[Container(120).ListItem.Property(title)][/B]</label>
 			</control>
 			<control type="label">
@@ -530,7 +528,6 @@
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32162] $INFO[Container(120).ListItem.Property(lastposter)]</label>
 				<visible>!StringCompare(Container(120).ListItem.Property(lastposter),)</visible>
@@ -544,7 +541,6 @@
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32162] [COLOR FF00FF00]$INFO[Container(120).ListItem.Property(lastposter)][/COLOR]</label>
 				<visible>!StringCompare(Container(120).ListItem.Property(lastposter),) + !StringCompare(Container(120).ListItem.Studio,)</visible>
@@ -558,7 +554,6 @@
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$INFO[Container(120).ListItem.Property(reply_count),$ADDON[script.forum.browser 32912]: ]</label>
 			</control>
@@ -585,7 +580,6 @@
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32526] $INFO[Container(120).ListItem.Property(starter)]</label>
 				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + !StringCompare(Container(120).ListItem.Director,me)</visible>
@@ -599,7 +593,6 @@
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32526] [COLOR FF00FF00]$INFO[Container(120).ListItem.Property(starter)][/COLOR]</label>
 				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + StringCompare(Container(120).ListItem.Director,me)</visible>
@@ -614,7 +607,6 @@
 				<font>ForumBrowser-font30</font>
 				<textcolor>white</textcolor>
 				<aligny>center</aligny>
-				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32911][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>

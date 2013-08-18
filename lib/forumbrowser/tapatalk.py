@@ -241,6 +241,7 @@ class ForumPost(forumbrowser.ForumPost):
 			self.boxid = pdict.get('boxid','')
 			self._can_like = False
 			self._is_liked = False
+		self.processAttachements(pdict)
 		self.numberImages()
 		
 	def update(self,data):
@@ -268,6 +269,12 @@ class ForumPost(forumbrowser.ForumPost):
 			users.append(str(l.get('username','')))
 		self.extras['like users'] = ', '.join(users)
 		self.extras['likes'] = len(users)
+		
+	def processAttachements(self,pdict):
+		if not 'attachments' in pdict: return
+		for a in pdict['attachments']:
+			if a.get('content_type') == 'image':
+				self.message += '[img]{0}[/img]'.format(a.get('url'))
 		
 	def getDate(self,offset=0):
 		if not self.unixtime: return self.date
@@ -719,7 +726,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 					'name':str(b.get('box_name',str(b.get('conv_subject','?')))),
 					'count':b.get('msg_count',0),
 					'conv_count':b.get('reply_count',0),
-					'unread':b.get('unread_count',b.get('unread_num',0) and 1 or 0),
+					'unread':b.get('unread_count',b.get('new_post',False) and 1 or 0),
 					'conv_unread':b.get('unread_count',0),
 					'type':b.get('box_type','') or str(b.get('box_name',defType)).upper()
 			}

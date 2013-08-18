@@ -137,7 +137,6 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>center</aligny>
-				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32527][/B]</label>
 			</control>
 		</control>
@@ -771,7 +770,6 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>white</textcolor>
 				<aligny>top</aligny>
-				<align>left</align>
 				<label>[B]$INFO[Container(120).ListItem.Label][/B]</label>
 			</control>
 			<control type="label">
@@ -797,7 +795,6 @@
 				<font>ForumBrowser-font30</font>
 				<textcolor>white</textcolor>
 				<aligny>center</aligny>
-				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
 			</control>

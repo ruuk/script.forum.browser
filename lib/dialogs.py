@@ -47,6 +47,8 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	elif not os.path.exists(src2):
 		theme = 'Default'
 		
+	rightAlign = util.getSetting('current_right_align',False)
+	
 	if not util.getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
 		#path = util.util.__addon__.getAddonInfo('profile')
@@ -54,7 +56,17 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
 		xmlFilename = 'script-forumbrowser-current.xml'
+		if rightAlign: xml = rightAlignXML(xml)
 		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
+	elif rightAlign:
+		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
+		#path = util.util.__addon__.getAddonInfo('profile')
+		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
+		#if not os.path.exists(skin): os.makedirs(skin)
+		xml = open(src,'r').read()
+		xmlFilename = 'script-forumbrowser-current.xml'
+		open(os.path.join(skin,xmlFilename),'w').write(rightAlignXML(xml))
+		
 	w = windowClass(xmlFilename,path,theme,*args,**kwargs)
 	if modal:
 		w.doModal()
@@ -64,6 +76,31 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	del w
 	return None
 
+def alignChanged():
+	if util.getSetting('current_right_align',False) != util.getSetting('last_right_align',False):
+		util.setSetting('last_right_align',util.getSetting('current_right_align',False))
+		return True
+	return False
+
+def rightAlignXML(xml):
+	if 'IGNORE_RIGHT_ALIGN' in xml: return xml
+	from BeautifulSoup import BeautifulStoneSoup
+	BeautifulStoneSoup.NESTABLE_TAGS['control']=[]
+	soup = BeautifulStoneSoup(xml)
+	for control in soup.findAll('control',attrs={'type':['label','textbox']}):
+		align = control.find('align')
+		if align and align.contents[0] == 'left':
+			try:
+				align.contents[0].replaceWith('right')
+				if control['type'] == 'label':
+					width = int(control.find('width').contents[0])
+					posx = int(control.find('posx').contents[0])
+					posx += width
+					control.find('posx').contents[0].replaceWith(str(posx))
+			except:
+				print 'ERROR'
+	return unicode(soup)
+			
 def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=False):
 	if text2: text += '[CR]' + text2
 	if text3: text += '[CR]' + text3

@@ -306,6 +306,7 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 	ret['username'] = ret.get('username','')
 	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
 	ret['notify'] = _processSetting(ret.get('notify'),False)
+	ret['right_align'] = _processSetting(ret.get('right_align'),False)
 	ret['ignore_forum_images'] = _processSetting(ret.get('ignore_forum_images'),True)
 		
 	if get_both:

@@ -5,7 +5,6 @@ Special thanks to John Hanselman for all his testing which helped make Forum Bro
 TODO:
  Short Term:
   Right justified text for languages such as Hebrew
-  Handle attached images
   Strings for bookmarks
   Better bookmarks dialog for light/dark skin
   ParserBrowser: More parsing of profile links and allow user to view in webviewer
@@ -41,16 +40,21 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.12
+Current Version : 2.1.13
 
 *** 2.1.13 ***
 
-Show conversation counts for forums that use the conversation PM format
+Show conversation counts for forums that use the conversation PM format (conversations not viewable yet and button is disabled)
+Fix a bug causing "Search Threads" to fail
+Display image attachments in posts
+Fix encoding errors when opening context menu on a selected forum/thread
+Initial implementation of text right alignment for forums in languages that read from right to left
+Added setting to forum settings dialog "Right Align Text"
 
 *** 2.1.12 ***
 
 Fix for encoding errors because of broken encoding handling
-Fix for forums failing that use conversation PMs (example: minixforums.com) 
+Fix for forums failing that use conversation PMs (example: minixforums.com)
 
 *** 2.1.11 ***
 

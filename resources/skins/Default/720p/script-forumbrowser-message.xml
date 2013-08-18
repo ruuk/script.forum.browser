@@ -137,6 +137,7 @@
 				<scroll>true</scroll>
 				<textcolor>FF000000</textcolor>
 				<visible>true</visible>
+				<align>left</align>
 			</control>
 
 			<control type="group" id="127">

@@ -255,7 +255,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		item.setProperty('value',str(value))
 		item.setProperty('id',sid)
 		if vtype == 'text.long':
-			item.setProperty('help',self.help.get(sid,'') + '[CR][COLOR FF999999]%s[/COLOR][CR][B]Current:[/B][CR][CR]%s' % (self.helpSep,valueDisplay))
+			item.setProperty('help', u'{0}[CR][COLOR FF999999]{1}[/COLOR][CR][B]Current:[/B][CR][CR]{2}'.format(self.help.get(sid,''),self.helpSep,texttransform.convertHTMLCodes(valueDisplay)))
 		else:
 			item.setProperty('help',self.help.get(sid,''))
 		self.items.append(item)
@@ -417,6 +417,7 @@ def editForumSettings(forumID):
 	w.addItem('notify',T(32018),sett.get('notify',''),'boolean')
 	w.addItem('extras',T(32288),sett.get('extras',''),'text')
 	w.addItem('time_offset_hours',T(32289),sett.get('time_offset_hours',''),'text.time')
+	w.addItem('right_align',T(32555),sett.get('right_align',''),'boolean')
 	w.addSep()
 	w.addItem('description',T(32290),fdata.description,'text.long')
 	w.addItem('logo',T(32291),fdata.urls.get('logo',''),'webimage.' + fdata.forumURL())
@@ -440,6 +441,7 @@ def editForumSettings(forumID):
 								extras=w.data['extras']['value'],
 								time_offset_hours=w.data['time_offset_hours']['value'],
 								ignore_forum_images=ifi,
+								right_align=w.data['right_align']['value'],
 								rules=rules)
 		fdata.description = w.data['description']['value']
 		fdata.urls['logo'] = w.data['logo']['value']
@@ -2314,7 +2316,7 @@ class ThreadsWindow(windows.PageWindow):
 					if FB.canCreateThread(item.getProperty('id')):
 						d.addItem('createthread',T(32252))
 				if FB.canSearchAdvanced('TID'):
-					d.addItem('search','%s [B][I]%s[/I][/B]' % (T(32371),item.getProperty('title')[:30]))
+					d.addItem('search','{0} [B][I]{1}[/I][/B]'.format(T(32371),item.getProperty('title')[:30]))
 			d.addItem('bookmark',T(32553))
 			d.addItem('help',T(32244))
 		finally:
@@ -2445,7 +2447,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.getControl(112).setVisible(False)
 		try:
 			if self.started: return
-			SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
+			windows.SIGNALHUB.registerReceiver('NEW_POSTS', self, self.newPostsCallback)
 			self.setProperty('ForumBrowserMAIN','MAIN')
 			self.setVersion()
 			self.setStopControl(self.getControl(105))
@@ -2625,6 +2627,9 @@ class ForumsWindow(windows.BaseWindow):
 		self.data = data
 		self.empty = True
 		
+		if dialogs.alignChanged():
+			self._doHop(self.data,"script-forumbrowser-forums.xml",False)
+			
 		try:
 			#xbmcgui.lock()
 			self.getControl(120).reset()
@@ -2855,7 +2860,7 @@ class ForumsWindow(windows.BaseWindow):
 		elif controlID == 205:
 			searchPosts()
 		elif controlID == 206:
-			searchThreads(self)
+			searchThreads(FB.getForumID())
 		elif controlID == 207:
 			searchUser()
 		elif controlID == 120:
@@ -2922,7 +2927,7 @@ class ForumsWindow(windows.BaseWindow):
 					else:
 						if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', T(32243))
 					if FB.canSearchAdvanced('FID'):
-						d.addItem('search','%s [B][I]%s[/I][/B]' % (T(32371),item.getProperty('topic')[:30]))
+						d.addItem('search','{0} [B][I]{1}[/I][/B]'.format(T(32371),item.getProperty('topic')[:30]))
 				if FB.canGetOnlineUsers():
 					d.addItem('online',T(32369))
 				d.addItem('foruminfo',T(32370))
@@ -4213,7 +4218,9 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		err = ERROR(err)
 		showError(T(32050),T(32171),err,error=True)
 		return False
-	
+	sett = util.loadForumSettings(FB.getForumID())
+	util.setSetting('last_right_align',util.getSetting('current_right_align', False))
+	util.setSetting('current_right_align', sett.get('right_align'))
 	if donecallback: donecallback(FB,forumElements)
 	return FB, forumElements
 

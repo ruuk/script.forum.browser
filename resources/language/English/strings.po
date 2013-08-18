@@ -1902,6 +1902,10 @@ msgctxt "#32554"
 msgid "Bookmarks"
 msgstr ""
 
+msgctxt "#32555"
+msgid "Right Align Text"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

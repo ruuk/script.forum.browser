@@ -813,7 +813,6 @@
 				<font>ForumBrowser-font13</font>
 				<textcolor>FF4488AA</textcolor>
 				<aligny>center</aligny>
-				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32527][/B]</label>
 			</control>
 		</control>

@@ -410,7 +410,7 @@
 					<control type="label">
 						<posx>20</posx>
 						<posy>0</posy>
-						<width>980</width>
+						<width>1183</width>
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
@@ -422,7 +422,7 @@
 					<control type="label">
 						<posx>20</posx>
 						<posy>0</posy>
-						<width>980</width>
+						<width>1183</width>
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
@@ -452,7 +452,7 @@
 					<control type="label">
 						<posx>20</posx>
 						<posy>0</posy>
-						<width>980</width>
+						<width>1183</width>
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
@@ -464,7 +464,7 @@
 					<control type="label">
 						<posx>20</posx>
 						<posy>0</posy>
-						<width>980</width>
+						<width>1183</width>
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>

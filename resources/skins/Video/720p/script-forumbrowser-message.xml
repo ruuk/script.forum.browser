@@ -64,6 +64,7 @@
 			<textcolor>white</textcolor>
 			<visible>true</visible>
 			<label>$INFO[Control.GetLabel(122)]</label>
+			<align>left</align>
 		</control>
 		
 		<control type="textbox" id="125">
@@ -79,6 +80,7 @@
 			<visible>true</visible>
 			<pagecontrol>126</pagecontrol>
 			<label>$INFO[Control.GetLabel(122)]</label>
+			<align>left</align>
 		</control>
 		
 		<control type="group">

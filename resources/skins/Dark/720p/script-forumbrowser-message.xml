@@ -138,6 +138,7 @@
 				<scroll>true</scroll>
 				<textcolor>white</textcolor>
 				<visible>true</visible>
+				<align>left</align>
 			</control>
 			<control type="group" id="127">
 				<defaultcontrol>123</defaultcontrol>

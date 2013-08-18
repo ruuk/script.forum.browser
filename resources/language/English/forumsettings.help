@@ -8,6 +8,8 @@ Passwords are stored encrypted.
 Encryption options are available in the addon settings under 'Advanced'.
 @item:notify
 This will toggle notifications on and off. This only matters when notifications are enabled in Forum Browser settings.
+@item:right_align
+When enabled, text will be right aligned. Useful for forums in languages that are read from right to left. 
 @item:extras
 A comma separated list of attributes to display in the posts list below the user name and activity information. This overrides the main Forum Browser setting. 
 Up to three items will be displayed following the order of the specified list and depending on availability of the data.
