@@ -4220,7 +4220,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		return False
 	sett = util.loadForumSettings(FB.getForumID())
 	util.setSetting('last_right_align',util.getSetting('current_right_align', False))
-	util.setSetting('current_right_align', sett.get('right_align'))
+	util.setSetting('current_right_align', sett.get('right_align') or '')
 	if donecallback: donecallback(FB,forumElements)
 	return FB, forumElements
 
