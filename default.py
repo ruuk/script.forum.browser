@@ -3741,6 +3741,15 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	
 def addForumFromOnline(stay_open_on_select=False):
+	d = dialogs.OptionsChoiceMenu('Choose Database')
+	logoPath = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','skins','Default','Media')
+	d.addItem('fb', 'Forum Browser Database', os.path.join(logoPath,'forum-browser-logo-128.png'),'Browse user contributed forums in the Forum Browser online database.')
+	d.addItem('tt', 'Tapatalk Database', os.path.join(logoPath,'forum-browser-tapatalk.png'),'Search the more than 60,000 tapatalk enabled forums in the Tapatalk database.')
+	d.addItem('fr', 'Forumrunner Database', os.path.join(logoPath,'forum-browser-forumrunner.png'),'Search the Forumrunner enabled forums in the Forumrunner database.')
+	source = d.getResult()
+	if not source: return None
+	if not source =='fb':
+		return addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=source == 'fr')
 	odb = forumbrowser.FBOnlineDatabase()
 	res = True
 	added = None
@@ -3785,7 +3794,58 @@ def addForumFromOnline(stay_open_on_select=False):
 				added = forumID
 				if not stay_open_on_select: return added
 	return added
-	
+
+def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
+	if forumrunner:
+		from lib.forumbrowser import forumrunner
+		db = forumrunner.ForumrunnerDatabaseInterface()
+	else:
+		db = tapatalk.TapatalkDatabaseInterface()
+	res = True
+	added = None
+	page = 1
+	perPage = 20
+	terms = dialogs.doKeyboard(T(32330))
+	if not terms: return
+	while res:
+		splash = dialogs.showActivitySplash(T(32438))
+		try:
+			flist = db.search(terms,page=page,per_page=perPage)
+		finally:
+			splash.close()
+		if not flist:
+			dialogs.showMessage(T(32439),T(32440))
+			continue
+		menu = dialogs.ImageChoiceMenu('Results')
+		if page > 1:
+			menu.addItem('prev_page', '[<- Previous Page]')
+		for f in flist:
+			interface = f.forumType
+			rf=ra=''
+			desc = f.description
+			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),'',T(32290),desc)
+			bgcolor = formatHexColorToARGB('FFFFFF')
+			menu.addItem(f, f.name, f.logo, desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
+		if len(flist) >= perPage:
+			menu.addItem('next_page', '[NEXT PAGE ->]')
+		f = True
+		while f:
+			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
+			if f == 'prev_page':
+				page -= 1
+				if page < 1: page = 1
+				break
+			elif f == 'next_page':
+				page += 1
+				break
+			elif f:
+				forumID = doAddForumFromTTorFR_DB(f)
+				added = forumID
+				if not stay_open_on_select: return added
+			else:
+				return None
+	return added
+
 def formatHexColorToARGB(hexcolor):
 	try:
 		binascii.unhexlify(hexcolor)
@@ -3803,6 +3863,18 @@ def doAddForumFromOnline(f,odb):
 	dialogs.showMessage(T(32416),'{0}: {1}'.format(T(32442),f['name']))
 	return forumID
 	
+def doAddForumFromTTorFR_DB(f):
+	if not f: return
+	forumID = f.forumID
+	print forumID
+	saveForum(f.forumType,forumID,f.name,f.description,f.url,f.logo,'FFFFFF')
+	odb = forumbrowser.FBOnlineDatabase()
+	rules = isinstance(f,dict) and odb.getForumRules(forumID) or {}
+	old_rules = util.loadForumSettings(forumID,get_rules=True)
+	if rules and not old_rules: util.saveForumSettings(forumID,rules=rules)
+	dialogs.showMessage(T(32416),'{0}: {1}'.format(T(32442),f.name))
+	return forumID
+
 def setRulesODB(forumID,rules):
 	odb = forumbrowser.FBOnlineDatabase()
 	out = []

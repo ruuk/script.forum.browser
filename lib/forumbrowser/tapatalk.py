@@ -187,7 +187,42 @@ class CookieTransport(xmlrpclib.Transport):
 		encoded = f.getvalue()
 		f.close()
 		return encoded
-				
+
+################################################################################
+# TapatalkDatabaseInterface
+################################################################################
+class TapatalkDatabaseInterface:
+	searchURL = 'https://directory.tapatalk.com/search.php?search={terms}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	class ForumEntry:
+		forumType = 'TT'
+		def __init__(self,jobj):
+			self.displayName = jobj.get('name','ERROR')
+			self.description = jobj.get('description','ERROR')
+			self.logo = jobj.get('logo','logo')
+			url = jobj.get('url','') + '/'
+			mobiquoDir = jobj.get('mobiquo_dir')
+			if mobiquoDir: url += mobiquoDir + '/'
+			self.url = url + 'mobiquo.php'
+			name = url.split('://',1)[-1].split('/',1)[0]
+			if name.startswith('www.'): name = name[4:]
+			if name.startswith('forum.'): name = name[6:]
+			if name.startswith('forums.'): name = name[7:]
+			self.name = name
+			self.forumID = 'TT.' + name
+	
+	def search(self,terms,page=1,per_page=20):
+		result = urllib2.urlopen(self.searchURL.format(terms=terms,page=page,per_page=per_page)).read()
+		import json
+		jobj = json.loads(result)
+		return self.processForums(jobj)
+		
+	def processForums(self,jobj):
+		entries = []
+		for f in jobj:
+			entries.append(self.ForumEntry(f))
+		return entries
+		
+
 ################################################################################
 # ForumPost
 ################################################################################

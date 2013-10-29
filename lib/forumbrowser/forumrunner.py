@@ -26,6 +26,41 @@ class FRCFail:
 		
 	def __nonzero__(self):
 		return False
+
+################################################################################
+# ForumrunnerDatabaseInterface
+################################################################################
+class ForumrunnerDatabaseInterface:
+	searchURL = 'http://www.forumrunner.com/forumrunner/request.php?cmd=search_forums&search={terms}&page={page}&perpage={per_page}&frv=1.3.18&frp=a'
+	class ForumEntry:
+		forumType = 'FR'
+		iconURL = 'http://www.forumrunner.com/icon.php?id={sid}'
+		def __init__(self,jobj):
+			#{"success":true,"data":{"forums":[{"id":"9071","category_id":"389","name":"XBMC Turkiye","desc":"xbmcTR XBMC icin Turkce Eklentiler..","forum_url":"http:\/\/www.xbmctr.com"}],"total_forums":"1"}}
+			self.searchID = jobj.get('id','')
+			self.displayName = jobj.get('name','ERROR')
+			self.description = jobj.get('desc','ERROR')
+			self.logo = self.iconURL.format(sid=self.searchID)
+			url = jobj.get('forum_url','')
+			self.url = url + '/forumrunner/request.php'
+			name = url.split('://',1)[-1].split('/',1)[0]
+			if name.startswith('www.'): name = name[4:]
+			if name.startswith('forum.'): name = name[6:]
+			if name.startswith('forums.'): name = name[7:]
+			self.name = name
+			self.forumID = 'FR.' + name			
+	
+	def search(self,terms,page=1,per_page=20):
+		result = urllib2.urlopen(self.searchURL.format(terms=terms,page=page,per_page=per_page)).read()
+		jobj = json.loads(result)
+		return self.processForums(jobj)
+		
+	def processForums(self,jobj):
+		if not 'data' in jobj: return []
+		entries = []
+		for f in jobj.get('data',{}).get('forums',[]):
+			entries.append(self.ForumEntry(f))
+		return entries
 	
 class ForumrunnerClient():
 	def __init__(self,url):

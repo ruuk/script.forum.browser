@@ -84,7 +84,7 @@ def alignChanged():
 
 def rightAlignXML(xml):
 	if 'IGNORE_RIGHT_ALIGN' in xml: return xml
-	from BeautifulSoup import BeautifulStoneSoup
+	from BeautifulSoup import BeautifulStoneSoup  # @UnresolvedImport
 	BeautifulStoneSoup.NESTABLE_TAGS['control']=[]
 	soup = BeautifulStoneSoup(xml)
 	for control in soup.findAll('control',attrs={'type':['label','textbox']}):
