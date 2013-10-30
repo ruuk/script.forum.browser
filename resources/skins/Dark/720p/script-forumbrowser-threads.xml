@@ -59,7 +59,7 @@
 				<width>200</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32911][/B]</label>
@@ -73,7 +73,7 @@
 				<width>630</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -320,7 +320,7 @@
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
-						<selectedcolor>black</selectedcolor>
+						<selectedcolor>FF000000</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,)</visible>
@@ -333,7 +333,7 @@
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>FF007700</textcolor>
-						<selectedcolor>black</selectedcolor>
+						<selectedcolor>FF000000</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,me)</visible>

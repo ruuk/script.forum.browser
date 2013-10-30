@@ -67,7 +67,7 @@
 				<width>230</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
@@ -81,7 +81,7 @@
 				<width>380</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32915][/B]</label>
@@ -162,7 +162,7 @@
 				<width>200</width>
 				<height>10</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
@@ -174,7 +174,7 @@
 				<width>200</width>
 				<height>10</height>
 				<font>ForumBrowser-font10</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 			</control>
@@ -239,9 +239,9 @@
 					<label>$ADDON[script.forum.browser 32905]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="201">
@@ -261,9 +261,9 @@
 					<label>$ADDON[script.forum.browser 32904]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
       
 				<control type="button" id="203">
@@ -283,9 +283,9 @@
 					<label>$ADDON[script.forum.browser 32909]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			      
 				<control type="button" id="200">
@@ -305,9 +305,9 @@
 					<label>$ADDON[script.forum.browser 32903]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
       		
@@ -340,7 +340,7 @@
 					<width>400</width>
 					<height>10</height>
 					<font>ForumBrowser-font10</font>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
 				</control>
@@ -362,7 +362,7 @@
 				<width>1192</width>
 				<height>45</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -405,7 +405,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 						<visible>StringCompare(ListItem.Genre,)</visible>
@@ -439,7 +439,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Genre,)</visible>
@@ -473,7 +473,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Genre,)</visible>
@@ -578,9 +578,9 @@
 						<label>$ADDON[script.forum.browser 32919]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					
 					<control type="button">
@@ -616,9 +616,9 @@
 						<label>$ADDON[script.forum.browser 32918]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					
 					<control type="button">
@@ -654,9 +654,9 @@
 						<label>$ADDON[script.forum.browser 32917]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 				</control>
 				<control type="button" id="204">
@@ -678,9 +678,9 @@
 					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="197">
 					<visible>!Control.IsVisible(204)</visible>
@@ -701,9 +701,9 @@
 					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 		</control>

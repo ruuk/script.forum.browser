@@ -47,7 +47,7 @@
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<align>left</align>
 				<label>$ADDON[script.forum.browser 32932]</label>
 			</control>
@@ -58,7 +58,7 @@
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<align>left</align>
 				<label>$ADDON[script.forum.browser 32933]</label>
 			</control>
@@ -137,7 +137,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 					</control>
@@ -160,7 +160,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(unread_subs)</info>
 						<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -184,7 +184,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(unread_pms)</info>
 						<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
@@ -384,7 +384,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
@@ -407,7 +407,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_subs)</info>
 							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -431,7 +431,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>

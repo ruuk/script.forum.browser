@@ -255,7 +255,7 @@
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
 						<textcolor>white</textcolor>
-						<shadowcolor>black</shadowcolor>
+						<shadowcolor>FF000000</shadowcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>

@@ -68,7 +68,7 @@
 				<width>200</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -147,7 +147,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-left-focus.png</texturefocus>
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]-[/B]</label>
@@ -167,7 +167,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-right-focus.png</texturefocus>
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]+[/B]</label>
@@ -229,7 +229,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-left-focus.png</texturefocus>
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]-[/B]</label>
@@ -249,7 +249,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-right-focus.png</texturefocus>
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]+[/B]</label>
@@ -311,7 +311,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-left-focus.png</texturefocus>
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]-[/B]</label>
@@ -331,7 +331,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-right-focus.png</texturefocus>
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]+[/B]</label>
@@ -382,7 +382,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-left-focus.png</texturefocus>
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]-[/B]</label>
@@ -402,7 +402,7 @@
 					<align>center</align>
 					<texturefocus>forum-browser-right-focus.png</texturefocus>
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<label>[B]+[/B]</label>
@@ -431,7 +431,7 @@
 					<align>center</align>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -643,7 +643,7 @@
 					<label>$ADDON[script.forum.browser 32942]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -674,7 +674,7 @@
 					<label>$ADDON[script.forum.browser 32913]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>

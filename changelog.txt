@@ -40,7 +40,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.15
+Current Version : 2.1.16
+
+*** 2.1.16 ***
+
+Fixed encoding detection for the Parser Browser, enabling proper display of languages which use, for example, Cyrillic script
+Change skin colors from white/black to FFFFFFFF/FF000000 for XBMC skins that define the constants differently (ie Aeon Nox white theme)
 
 *** 2.1.15 ***
 

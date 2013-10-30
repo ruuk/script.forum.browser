@@ -75,7 +75,7 @@
 				<width>230</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
@@ -89,7 +89,7 @@
 				<width>380</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32915][/B]</label>
@@ -169,7 +169,7 @@
 				<width>200</width>
 				<height>10</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
@@ -181,7 +181,7 @@
 				<width>200</width>
 				<height>10</height>
 				<font>ForumBrowser-font10</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 			</control>
@@ -349,7 +349,7 @@
 					<width>400</width>
 					<height>10</height>
 					<font>ForumBrowser-font10</font>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
 				</control>

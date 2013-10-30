@@ -95,7 +95,7 @@
 				<width>600</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -154,7 +154,7 @@
 					<label>$ADDON[script.forum.browser 32913]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 					<onclick>PreviousMenu</onclick>

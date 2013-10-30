@@ -50,7 +50,7 @@
 				<width>100</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32912][/B]</label>
@@ -94,7 +94,7 @@
 				<width>600</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -165,7 +165,7 @@
 						<align>center</align>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
 						<focusedcolor>white</focusedcolor>
 					</control>
@@ -242,7 +242,7 @@
 					<width>400</width>
 					<height>10</height>
 					<font>ForumBrowser-font10</font>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
 				</control>
@@ -425,7 +425,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
 					</control>
@@ -466,8 +466,8 @@
 						<width>1010</width>
 						<height>65</height>
 						<font>ForumBrowser-font10</font>
-						<textcolor>black</textcolor>
-						<selectedcolor>black</selectedcolor>
+						<textcolor>FF000000</textcolor>
+						<selectedcolor>FF000000</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
@@ -704,7 +704,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
 					</control>
@@ -745,7 +745,7 @@
 						<width>1010</width>
 						<height>165</height>
 						<font>ForumBrowser-font10</font>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>

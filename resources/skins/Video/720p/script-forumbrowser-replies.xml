@@ -743,7 +743,7 @@
 				<width>100</width>
 				<height>22</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
@@ -781,7 +781,7 @@
 				<width>100</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32912][/B]</label>

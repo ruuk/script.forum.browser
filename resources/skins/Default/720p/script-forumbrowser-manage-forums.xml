@@ -94,7 +94,7 @@
 					<label>$ADDON[script.forum.browser 32923]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -130,7 +130,7 @@
 					<label>$ADDON[script.forum.browser 32924]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -151,7 +151,7 @@
 					<label>$ADDON[script.forum.browser 32925]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -171,7 +171,7 @@
 					<label>$ADDON[script.forum.browser 32926]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -191,7 +191,7 @@
 					<label>$ADDON[script.forum.browser 32927]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -210,7 +210,7 @@
 					<label>$ADDON[script.forum.browser 32928]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -230,7 +230,7 @@
 					<label>$ADDON[script.forum.browser 32929]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -249,7 +249,7 @@
 					<label>$ADDON[script.forum.browser 32930]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -273,7 +273,7 @@
 						<label>$ADDON[script.forum.browser 32543]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
 						<focusedcolor>white</focusedcolor>
 					</control>
@@ -291,7 +291,7 @@
 						<label>$ADDON[script.forum.browser 32544]</label>
 						<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
 						<focusedcolor>white</focusedcolor>
 					</control>
@@ -311,7 +311,7 @@
 					<label>$ADDON[script.forum.browser 32931]</label>
 					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
-					<textcolor>black</textcolor>
+					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
 				</control>
@@ -342,7 +342,7 @@
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<align>left</align>
 				<label>$ADDON[script.forum.browser 32932]</label>
 			</control>
@@ -353,7 +353,7 @@
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>black</textcolor>
+				<textcolor>FF000000</textcolor>
 				<align>left</align>
 				<label>$ADDON[script.forum.browser 32933]</label>
 			</control>
@@ -458,7 +458,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 					</control>
@@ -481,7 +481,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(unread_subs)</info>
 						<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -505,7 +505,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(unread_pms)</info>
 						<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
@@ -761,7 +761,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
@@ -784,7 +784,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_subs)</info>
 							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -808,7 +808,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>black</textcolor>
+							<textcolor>FF000000</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>

@@ -40,7 +40,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>black</textcolor>
+			<textcolor>FF000000</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 		</control>
@@ -75,7 +75,7 @@
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>black</textcolor>
+						<textcolor>FF000000</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
