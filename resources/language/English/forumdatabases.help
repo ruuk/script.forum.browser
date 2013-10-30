@@ -1,0 +1,11 @@
+Forum Databases Help
+@item:fb=Forum Browser
+Browse and search user contributed forums in the Forum Browser online database.
+
+While this includes Tapatalk and Forumrunner forums, it only has those which were added to the database by the addon users.
+
+Also includes Parser Browser forums, which are forums which do not use Tapatalk or Forumrunner and are handled by the internal Parser Browser. 
+@item:tt=Tapatalk
+Search the more than 60,000 Tapatalk enabled forums in the Tapatalk database.
+@item:fr=Forumrunner
+Search the more than 7,500 Forumrunner enabled forums in the Forumrunner database.

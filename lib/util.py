@@ -387,6 +387,21 @@ def saveBookmarks(bookmarks):
 	with open(bmfile,'w') as f:
 		f.write('\n'.join(out))
 
+def rgbToHex(rgb):
+	return ('00' + hex(rgb[0]).split('x')[-1].upper())[-2:] + ('00' + hex(rgb[1]).split('x')[-1].upper())[-2:] + ('00' + hex(rgb[2]).split('x')[-1].upper())[-2:]
+
+def getImageBackgroundColor(path):
+	try:
+		from PIL import Image # @UnresolvedImport
+		img = Image.open(path).convert('RGB')
+		h = img.histogram()
+		rgb = tuple([b.index(max(b)) for b in [ h[i*256:(i+1)*256] for i in range(3) ]])
+		print rgb
+		return rgb
+	except:
+		ERROR('getImageBackgroundColor(): Failed to get background color')
+		return (255,255,255)
+	
 ###################################################################	
 ## XBMCControlConditionalVisiblity
 ###################################################################	

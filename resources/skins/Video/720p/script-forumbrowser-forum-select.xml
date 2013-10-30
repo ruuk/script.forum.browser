@@ -9,27 +9,27 @@
 		<origin x="20" y="50">Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</origin>
 	</coordinates>
 	<controls>
-		<control type="group">
-			<animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
-			<animation effect="fade" start="0" end="100" time="200">WindowOpen</animation>
-			<visible>Control.IsVisible(115)</visible>
-			<control type="image">
-				<posx>-20</posx>
-				<posy>-50</posy>
-				<width>310</width>
-				<height>720</height>
-				<texture>forum-browser-video-white.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
-			</control>
-			<control type="image">
-				<posx>290</posx>
-				<posy>510</posy>
-				<width>970</width>
-				<height>160</height>
-				<texture>forum-browser-video-white.png</texture>
-				<colordiffuse>AA000000</colordiffuse>
-			</control>
-		</control>
+<!-- 		<control type="group"> -->
+<!-- 			<animation effect="fade" start="100" end="0" time="200">WindowClose</animation> -->
+<!-- 			<animation effect="fade" start="0" end="100" time="200">WindowOpen</animation> -->
+<!-- 			<visible>Control.IsVisible(115)</visible> -->
+<!-- 			<control type="image"> -->
+<!-- 				<posx>-20</posx> -->
+<!-- 				<posy>-50</posy> -->
+<!-- 				<width>310</width> -->
+<!-- 				<height>720</height> -->
+<!-- 				<texture>forum-browser-video-white.png</texture> -->
+<!-- 				<colordiffuse>AA000000</colordiffuse> -->
+<!-- 			</control> -->
+<!-- 			<control type="image"> -->
+<!-- 				<posx>290</posx> -->
+<!-- 				<posy>510</posy> -->
+<!-- 				<width>970</width> -->
+<!-- 				<height>160</height> -->
+<!-- 				<texture>forum-browser-video-white.png</texture> -->
+<!-- 				<colordiffuse>AA000000</colordiffuse> -->
+<!-- 			</control> -->
+<!-- 		</control> -->
 		<control type="image">
 			<posx>-10</posx>
 			<posy>-10</posy>
@@ -89,7 +89,7 @@
 				<posx>10</posx>
 				<posy>50</posy>
 				<width>660</width>
-				<height>550</height>
+				<height>554</height>
 				<scrolltime>200</scrolltime>
 				<itemlayout height="39">
 					<control type="group">

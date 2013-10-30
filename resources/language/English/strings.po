@@ -2074,3 +2074,7 @@ msgstr ""
 msgctxt "#32941"
 msgid "Conversations"
 msgstr ""
+
+msgctxt "#32942"
+msgid "Auto"
+msgstr ""

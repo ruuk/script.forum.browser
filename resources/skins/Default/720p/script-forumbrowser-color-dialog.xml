@@ -424,7 +424,7 @@
 					<width>150</width>
 					<height>40</height>
 					<onleft>157</onleft>
-					<onright>111</onright>
+					<onright>113</onright>
 					<onup>158</onup>
 					<ondown>171</ondown>
 					<font>font13</font>
@@ -627,7 +627,26 @@
 					<texture border="20">forum-browser-white-outline.png</texture>
 					<visible>Control.HasFocus(175)</visible>
 				</control>
-				
+				<control type="button" id="113">
+					<description>Ok Button</description>
+					<posx>640</posx>
+					<posy>-15</posy>
+					<width>100</width>
+					<height>40</height>
+					<onleft>158</onleft>
+					<onright>150</onright>
+					<onup>113</onup>
+					<ondown>111</ondown>
+					<visible>true</visible>
+					<font>font13</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32942]</label>
+					<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
+					<textcolor>black</textcolor>
+					<disabledcolor>60000000</disabledcolor>
+					<focusedcolor>white</focusedcolor>
+				</control>
 			</control>
 			
 			<control type="group" id="112">
@@ -647,7 +666,7 @@
 					<height>40</height>
 					<onleft>158</onleft>
 					<onright>150</onright>
-					<onup>111</onup>
+					<onup>113</onup>
 					<ondown>111</ondown>
 					<visible>true</visible>
 					<font>font13</font>

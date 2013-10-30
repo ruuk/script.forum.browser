@@ -40,7 +40,14 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
   
-Current Version : 2.1.14
+Current Version : 2.1.15
+
+*** 2.1.15 ***
+
+Added option to search tapatalk.com forum database when adding a forum from online
+Added option to search forumrunner.com forum database when adding a forum from online
+Added 'Auto' button to the theme color dialog. Attempts to automatically determine the logo background color
+Some skin tweaks
 
 *** 2.1.14 ***
 

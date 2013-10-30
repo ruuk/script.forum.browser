@@ -3743,9 +3743,10 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 def addForumFromOnline(stay_open_on_select=False):
 	d = dialogs.OptionsChoiceMenu('Choose Database')
 	logoPath = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','skins','Default','Media')
-	d.addItem('fb', 'Forum Browser Database', os.path.join(logoPath,'forum-browser-logo-128.png'),'Browse user contributed forums in the Forum Browser online database.')
-	d.addItem('tt', 'Tapatalk Database', os.path.join(logoPath,'forum-browser-tapatalk.png'),'Search the more than 60,000 tapatalk enabled forums in the Tapatalk database.')
-	d.addItem('fr', 'Forumrunner Database', os.path.join(logoPath,'forum-browser-forumrunner.png'),'Search the Forumrunner enabled forums in the Forumrunner database.')
+	hlp = dialogs.loadHelp('forumdatabases.help')
+	d.addItem('fb', 'Forum Browser Database', os.path.join(logoPath,'forum-browser-logo-128.png'),hlp.get('fb',''))
+	d.addItem('tt', 'Tapatalk Database', os.path.join(logoPath,'forum-browser-tapatalk.png'),hlp.get('tt',''))
+	d.addItem('fr', 'Forumrunner Database', os.path.join(logoPath,'forum-browser-forumrunner.png'),hlp.get('fr',''))
 	source = d.getResult()
 	if not source: return None
 	if not source =='fb':
@@ -3823,7 +3824,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			interface = f.forumType
 			rf=ra=''
 			desc = f.description
-			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),'',T(32290),desc)
+			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
 			bgcolor = formatHexColorToARGB('FFFFFF')
 			menu.addItem(f, f.name, f.logo, desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		if len(flist) >= perPage:

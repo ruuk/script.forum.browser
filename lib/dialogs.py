@@ -779,6 +779,7 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 		elif controlID == 156: self.changeAll(-1)
 		elif controlID == 157: self.changeAll(1)
 		elif controlID == 158: self.setHexColor()
+		elif controlID == 113: self.autoColor()
 		elif controlID == 170: self.setHexColor('FFFFFF')
 		elif controlID == 171: self.setHexColor('000000')
 		elif controlID == 172: self.setHexColor('7E7E7E')
@@ -838,6 +839,21 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 		self.b = int(hexc[4:],16)
 		self.showColor()
 		
+	def autoColor(self):
+		if not self.image: return
+		import urllib2
+		tmp_file = os.path.join(util.CACHE_PATH,'temp_logo')
+		try:
+			open(tmp_file,'wb').write(urllib2.urlopen(self.image).read())
+		except:
+			util.ERROR('autoColor(): Failed to get image')
+		rgb = util.getImageBackgroundColor(tmp_file)
+		os.remove(tmp_file)
+		self.r = rgb[0]
+		self.g = rgb[1]
+		self.b = rgb[2]
+		self.showColor()
+	
 	def hexValue(self):
 		if self.closed: return None
 		hexR = binascii.hexlify(chr(self.r)).upper()

@@ -47,6 +47,8 @@ class ForumrunnerDatabaseInterface:
 			if name.startswith('www.'): name = name[4:]
 			if name.startswith('forum.'): name = name[6:]
 			if name.startswith('forums.'): name = name[7:]
+			self.category = ''
+			self.categoryID = jobj.get('category_id')
 			self.name = name
 			self.forumID = 'FR.' + name			
 	

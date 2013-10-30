@@ -209,6 +209,12 @@ class TapatalkDatabaseInterface:
 			if name.startswith('forums.'): name = name[7:]
 			self.name = name
 			self.forumID = 'TT.' + name
+			self.category = ''
+			self.categoryID = ''
+			cats = jobj.get('iab_cats')
+			if cats and len(cats):
+				self.category = cats[0].get('name','')
+				self.categoryID = cats[0].get('id','')
 	
 	def search(self,terms,page=1,per_page=20):
 		result = urllib2.urlopen(self.searchURL.format(terms=terms,page=page,per_page=per_page)).read()

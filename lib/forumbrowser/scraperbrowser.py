@@ -713,6 +713,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 	def browserReadURL(self,url,callback):
 		if not callback(30,T(32101)): return ''
 		response = self.browserOpen(url)
+		print response.info()
 		self.lastURL = response.geturl()
 		if not callback(60,T(32102)): return ''
 		return response.read()
