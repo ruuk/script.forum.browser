@@ -1906,7 +1906,23 @@ msgctxt "#32555"
 msgid "Right Align Text"
 msgstr ""
 
-#empty strings from id 32556 to 32899
+msgctxt "#32556"
+msgid "Back"
+msgstr ""
+
+msgctxt "#32557"
+msgid "Adding Forums"
+msgstr ""
+
+msgctxt "#32558"
+msgid "Database"
+msgstr ""
+
+msgctxt "#32559"
+msgid "Add Forum Manually"
+msgstr ""
+
+#empty strings from id 32524 to 32899
 
 #. Previous
 msgctxt "#32900"
@@ -1988,8 +2004,6 @@ msgstr ""
 msgctxt "#32919"
 msgid "Search User"
 msgstr ""
-
-#empty string with id 32920
 
 msgctxt "#32921"
 msgid "Set Title"
@@ -2075,4 +2089,8 @@ msgstr ""
 
 msgctxt "#32941"
 msgid "Conversations"
+msgstr ""
+
+msgctxt "#32942"
+msgid "Auto"
 msgstr ""
