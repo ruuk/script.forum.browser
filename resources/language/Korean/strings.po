@@ -33,8 +33,8 @@ msgid "Always Login If Possible"
 msgstr "가능하면 항상 로그인"
 
 msgctxt "#32005"
-msgid "Skin (changes require a restart)"
-msgstr "스킨 (재시작 필요)"
+msgid "Skin"
+msgstr "스킨"
 
 msgctxt "#32006"
 msgid "Use Text Editor (Experimental)"
@@ -236,6 +236,14 @@ msgctxt "#32515"
 msgid "Internet"
 msgstr "인터넷"
 
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "모양새"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "북마크"
+
 msgctxt "#32901"
 msgid "Next"
 msgstr "다음"
@@ -255,6 +263,10 @@ msgstr "확인"
 msgctxt "#32914"
 msgid "New Search"
 msgstr "새 찾기"
+
+msgctxt "#32915"
+msgid "Loading..."
+msgstr "불러오는 중..."
 
 msgctxt "#32916"
 msgid "Search"

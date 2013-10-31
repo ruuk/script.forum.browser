@@ -24,6 +24,14 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Bahasa"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Kulit"
+
+msgctxt "#32008"
+msgid "Advanced"
+msgstr "Tingkat Lanjut"
+
 msgctxt "#32012"
 msgid "Light"
 msgstr "Ringan"
@@ -139,6 +147,14 @@ msgstr "Kategori"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Internet"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Penampilan"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Bookmarks"
 
 msgctxt "#32901"
 msgid "Next"

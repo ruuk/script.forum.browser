@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Jazyk"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Vzhľad"
+
 msgctxt "#32008"
 msgid "Advanced"
 msgstr "Pokročilé"
@@ -140,6 +144,10 @@ msgctxt "#32393"
 msgid "Update"
 msgstr "Aktualizovať"
 
+msgctxt "#32400"
+msgid "Share"
+msgstr "Zdieľaný adresár"
+
 msgctxt "#32401"
 msgid "Save"
 msgstr "Uložiť"
@@ -175,6 +183,14 @@ msgstr "Prosím čakajte..."
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Internet"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Prostredie"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Záložky"
 
 msgctxt "#32901"
 msgid "Next"

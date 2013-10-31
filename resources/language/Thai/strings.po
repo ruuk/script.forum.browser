@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "ภาษา"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "หน้าตา"
+
 msgctxt "#32012"
 msgid "Light"
 msgstr "สว่าง"
@@ -159,6 +163,14 @@ msgstr "หมวด"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "อินเตอร์เน็ต"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "การแสดงผล"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "บุ๊คมาร์ค"
 
 msgctxt "#32901"
 msgid "Next"

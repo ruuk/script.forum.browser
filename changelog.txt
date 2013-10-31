@@ -54,6 +54,7 @@ Added 'Back' option when browsing FR/TT databases to return to the categories/se
 Exiting FB/TT/FR database browsing now returns to the FB/TT/FR menu
 Removed the 'Add From Online' button. Now 'Add Forum' will show a choice between Forum Browser DB, Tapatalk DB, Forumrunner DB and adding manually 
 Exiting the 'Add Forum' hierarchy will now cause a jump to the last added forum for all databases
+Updated language files from Transifex
 
 *** 2.1.17 ***
 

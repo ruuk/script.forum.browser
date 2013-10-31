@@ -24,9 +24,21 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Bahasa"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Kulit"
+
+msgctxt "#32008"
+msgid "Advanced"
+msgstr "Lanjutan"
+
 msgctxt "#32022"
 msgid "Video"
 msgstr "Video"
+
+msgctxt "#32051"
+msgid "Options"
+msgstr "Pilihan"
 
 msgctxt "#32054"
 msgid "Refresh"
@@ -36,6 +48,10 @@ msgctxt "#32141"
 msgid "Delete"
 msgstr "Hapus"
 
+msgctxt "#32175"
+msgid "Subscriptions"
+msgstr "Langganan"
+
 msgctxt "#32182"
 msgid "Link:"
 msgstr "Pautan:"
@@ -44,9 +60,17 @@ msgctxt "#32203"
 msgid "Settings"
 msgstr "Seting"
 
+msgctxt "#32205"
+msgid "Downloading"
+msgstr "Memuat turun"
+
 msgctxt "#32265"
 msgid "Yes"
 msgstr "Ya"
+
+msgctxt "#32266"
+msgid "Finished"
+msgstr "Selesai"
 
 msgctxt "#32348"
 msgid "Unknown"
@@ -56,6 +80,10 @@ msgctxt "#32363"
 msgid "Status"
 msgstr "Status"
 
+msgctxt "#32368"
+msgid "Info"
+msgstr "Maklumat"
+
 msgctxt "#32371"
 msgid "Search"
 msgstr "Cari"
@@ -63,6 +91,10 @@ msgstr "Cari"
 msgctxt "#32401"
 msgid "Save"
 msgstr "Simpan"
+
+msgctxt "#32432"
+msgid "Found"
+msgstr "Ditemui"
 
 msgctxt "#32901"
 msgid "Next"
@@ -72,6 +104,10 @@ msgctxt "#32903"
 msgid "Settings"
 msgstr "Seting"
 
+msgctxt "#32904"
+msgid "Subscriptions"
+msgstr "Langganan"
+
 msgctxt "#32913"
 msgid "OK"
 msgstr "OK"
@@ -79,6 +115,10 @@ msgstr "OK"
 msgctxt "#32916"
 msgid "Search"
 msgstr "Cari"
+
+msgctxt "#32935"
+msgid "All"
+msgstr "Semua"
 
 msgctxt "#32938"
 msgid "OK"

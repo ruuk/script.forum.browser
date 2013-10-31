@@ -45,8 +45,8 @@ msgid "Always Login If Possible"
 msgstr "Iniciar Sessão Sempre que Possível"
 
 msgctxt "#32005"
-msgid "Skin (changes require a restart)"
-msgstr "Tema (para mudanças é necessário reiniciar)"
+msgid "Skin"
+msgstr "Skin"
 
 msgctxt "#32006"
 msgid "Use Text Editor (Experimental)"
@@ -89,8 +89,8 @@ msgid "Confirm Exit On Quit"
 msgstr "Confirmar Ao Sair"
 
 msgctxt "#32016"
-msgid "Parser Browser: Ignore Forum Images In Posts"
-msgstr "Navegador Parser: Ignorar imagens em posts no fórum"
+msgid "Ignore Forum Images In Posts"
+msgstr "Ignorar imagens postadas no fórum"
 
 msgctxt "#32017"
 msgid "Disable Activity Splash"
@@ -1240,10 +1240,6 @@ msgctxt "#32423"
 msgid "Add Forum"
 msgstr "Adicionar Fórum"
 
-msgctxt "#32424"
-msgid "Enter Name And Address"
-msgstr "Entre Nome e Endereço"
-
 msgctxt "#32425"
 msgid "Forum not found or not compatible"
 msgstr "O fórum não foi encontrado, ou não é compatível"
@@ -1572,6 +1568,86 @@ msgctxt "#32525"
 msgid "Reverse Sort Search Results"
 msgstr "Inverter resultados da busca ordenada"
 
+msgctxt "#32526"
+msgid "Started By:"
+msgstr "Iniciado Por:"
+
+msgctxt "#32527"
+msgid "SHOW MENU"
+msgstr "MOSTRAR MENU"
+
+msgctxt "#32528"
+msgid "CLOSE"
+msgstr "FECHAR"
+
+msgctxt "#32529"
+msgid "Previous Page"
+msgstr "Página Anterior"
+
+msgctxt "#32530"
+msgid "Next Page"
+msgstr "Próxima Página"
+
+msgctxt "#32531"
+msgid "LINKS"
+msgstr "LINKS"
+
+msgctxt "#32532"
+msgid "IMAGES"
+msgstr "IMAGENS"
+
+msgctxt "#32533"
+msgid "HELP TOPICS"
+msgstr "TÓPICOS DE AJUDA"
+
+msgctxt "#32534"
+msgid "SHOW HELP"
+msgstr "MOSTRAR AJUDA"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Aparência"
+
+msgctxt "#32540"
+msgid "Smilies"
+msgstr "Smiles"
+
+msgctxt "#32541"
+msgid "Change Keyboard"
+msgstr "Alterar Teclado"
+
+msgctxt "#32543"
+msgid "Move Up"
+msgstr "Mover para cima"
+
+msgctxt "#32544"
+msgid "Move Down"
+msgstr "Mover para baixo"
+
+msgctxt "#32545"
+msgid "Getting Forum Stats"
+msgstr "Obter estatísticas do fórum"
+
+msgctxt "#32546"
+msgid "Members"
+msgstr "Membros"
+
+msgctxt "#32547"
+msgid "Online"
+msgstr "Online"
+
+msgctxt "#32553"
+msgid "Add Bookmark"
+msgstr "Adicionar aos Favoritos"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Marcadores"
+
+msgctxt "#32555"
+msgid "Right Align Text"
+msgstr "Alinhar o texto direita"
+
 msgctxt "#32900"
 msgid "Prev"
 msgstr "Ant."
@@ -1731,3 +1807,7 @@ msgstr "Cancelar"
 msgctxt "#32940"
 msgid "Forum Browser: New Posts"
 msgstr "Forum Browser: Novas Mensagens"
+
+msgctxt "#32941"
+msgid "Conversations"
+msgstr "Conversações"

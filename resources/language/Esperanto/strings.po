@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Lingvo"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Etoso"
+
 msgctxt "#32012"
 msgid "Light"
 msgstr "KROTALOJ"
@@ -95,6 +99,14 @@ msgstr "ReMovi"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Interreto"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Appearance"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Legosignoj"
 
 msgctxt "#32901"
 msgid "Next"

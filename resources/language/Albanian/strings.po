@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Gjuha"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Skin-i"
+
 msgctxt "#32008"
 msgid "Advanced"
 msgstr "Të shtuar"
@@ -151,6 +155,14 @@ msgstr "Kategoria"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Interneti"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Pamja"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "bookmark-at"
 
 msgctxt "#32901"
 msgid "Next"

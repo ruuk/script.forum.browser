@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Hizkuntza"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Skin-a"
+
 msgctxt "#32012"
 msgid "Light"
 msgstr "Argia"
@@ -147,6 +151,14 @@ msgstr "Kategoria"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Internet"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Itxura"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Lastermarkak"
 
 msgctxt "#32901"
 msgid "Next"

@@ -24,6 +24,10 @@ msgctxt "#32003"
 msgid "Language"
 msgstr "Език"
 
+msgctxt "#32005"
+msgid "Skin"
+msgstr "Облик"
+
 msgctxt "#32008"
 msgid "Advanced"
 msgstr "Допълнителни"
@@ -39,6 +43,10 @@ msgstr "Известия"
 msgctxt "#32022"
 msgid "Video"
 msgstr "видео"
+
+msgctxt "#32050"
+msgid "ERROR"
+msgstr "ГРЕШКА"
 
 msgctxt "#32051"
 msgid "Options"
@@ -124,6 +132,10 @@ msgctxt "#32393"
 msgid "Update"
 msgstr "Актуализиране"
 
+msgctxt "#32400"
+msgid "Share"
+msgstr "Път до споделения ресурс"
+
 msgctxt "#32401"
 msgid "Save"
 msgstr "Запиши"
@@ -151,6 +163,14 @@ msgstr "Категория"
 msgctxt "#32515"
 msgid "Internet"
 msgstr "Интернет"
+
+msgctxt "#32539"
+msgid "Appearance"
+msgstr "Изглед"
+
+msgctxt "#32554"
+msgid "Bookmarks"
+msgstr "Отметки"
 
 msgctxt "#32901"
 msgid "Next"
