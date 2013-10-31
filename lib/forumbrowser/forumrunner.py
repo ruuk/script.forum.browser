@@ -32,6 +32,7 @@ class FRCFail:
 ################################################################################
 class ForumrunnerDatabaseInterface:
 	searchURL = 'http://www.forumrunner.com/forumrunner/request.php?cmd=search_forums&search={terms}&page={page}&perpage={per_page}&frv=1.3.18&frp=a'
+	categoryURL = 'http://www.forumrunner.com/forumrunner/request.php?cmd=get_forums&id={cat_id}&page={page}&perpage={per_page}&frv=1.3.18&frp=a'
 	class ForumEntry:
 		forumType = 'FR'
 		iconURL = 'http://www.forumrunner.com/icon.php?id={sid}'
@@ -57,6 +58,19 @@ class ForumrunnerDatabaseInterface:
 		jobj = json.loads(result)
 		return self.processForums(jobj)
 		
+	def categories(self,cat_id=0,page=1,per_page=20):
+		result = urllib2.urlopen(self.categoryURL.format(cat_id=cat_id,page=page,per_page=per_page)).read()
+		jobj = json.loads(result)
+		return {'cats':self.processCategories(jobj),'forums':self.processForums(jobj)}
+	
+	def processCategories(self,jobj):
+		#{"cats":[{"id":"332","name":"Classifieds","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/332.png"},{"id":"333","name":"Computer","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/333.png"},{"id":"335","name":"Graphics","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/335.png"},{"id":"337","name":"Hardware","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/337.png"},{"id":"338","name":"Internet","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/338.png"},{"id":"336","name":"Mobile Phones","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/336.png"},{"id":"339","name":"Networking","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/339.png"},{"id":"334","name":"Security","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/334.png"},{"id":"340","name":"Software","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/340.png"},{"id":"341","name":"Support","desc":"","iconurl":"http:\/\/www.forumrunner.com\/icon\/341.png"}]
+		if not 'data' in jobj: return []
+		entries = []
+		for f in jobj.get('data',{}).get('cats',[]):
+			entries.append({'id':f.get('id',''),'name':f.get('name',''),'icon':f.get('iconurl','')})
+		return entries
+	
 	def processForums(self,jobj):
 		if not 'data' in jobj: return []
 		entries = []

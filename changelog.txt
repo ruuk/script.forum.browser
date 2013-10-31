@@ -39,8 +39,13 @@ TODO:
 
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
-  
-Current Version : 2.1.16
+
+Current Version : 2.1.17
+
+*** 2.1.17 ***
+
+Fixed infinite loop when no forums returned on Tapatalk/Forumrunner database search
+Added category browsing for Tapatalk & Forumrunner
 
 *** 2.1.16 ***
 

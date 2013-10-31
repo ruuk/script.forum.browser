@@ -3796,6 +3796,13 @@ def addForumFromOnline(stay_open_on_select=False):
 				if not stay_open_on_select: return added
 	return added
 
+def selectExternalCategory(clist=[]):
+	d = dialogs.ChoiceMenu(T(32420))
+	d.addItem('search',T(32421))
+	for e in clist:
+		d.addItem(e.get('id'),e.get('name'),e.get('icon'))
+	return d.getResult()
+
 def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	if forumrunner:
 		from lib.forumbrowser import forumrunner
@@ -3806,20 +3813,43 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	added = None
 	page = 1
 	perPage = 20
-	terms = dialogs.doKeyboard(T(32330))
-	if not terms: return
+	cat = 0
+	terms = None
 	while res:
-		splash = dialogs.showActivitySplash(T(32438))
-		try:
-			flist = db.search(terms,page=page,per_page=perPage)
-		finally:
-			splash.close()
-		if not flist:
-			dialogs.showMessage(T(32439),T(32440))
-			continue
+		cats = []
+		flist = []
+		if cat == 'search' or terms:
+			if not terms:
+				page = 1
+				terms = dialogs.doKeyboard(T(32330))
+			if not terms: continue
+			cat = None
+			splash = dialogs.showActivitySplash(T(32438))
+			try:
+				flist = db.search(terms,page=page,per_page=perPage)
+			finally:
+				splash.close()
+			if not flist:
+				dialogs.showMessage(T(32439),T(32440))
+				terms = dialogs.doKeyboard(T(32330))
+				if not terms: return
+				continue
+		else:
+			splash = dialogs.showActivitySplash(T(32438))
+			try:
+				cats = db.categories(cat_id=cat,page=page,per_page=perPage)
+			finally:
+				splash.close()
+			flist = cats.get('forums',[])
+			cats = cats.get('cats',[])
+			
 		menu = dialogs.ImageChoiceMenu('Results')
 		if page > 1:
 			menu.addItem('prev_page', '[<- Previous Page]')
+		elif not cat == 'search' and not terms and cat == 0:
+			menu.addItem('search',T(32421))
+		for c in cats:
+			menu.addItem('cat-' + c.get('id'),'Category: ' + c.get('name',''), c.get('icon',''))
 		for f in flist:
 			interface = f.forumType
 			rf=ra=''
@@ -3832,19 +3862,30 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
-			if f == 'prev_page':
+			if not f: return None
+			
+			if f == 'search':
+				cat = 'search'
+				page = 1
+				terms = None
+				break
+			elif f.startswith('cat-'):
+				cat = f[4:]
+				page = 1
+				terms = None
+				break
+			elif f == 'prev_page':
 				page -= 1
 				if page < 1: page = 1
 				break
 			elif f == 'next_page':
 				page += 1
 				break
-			elif f:
+			else:
 				forumID = doAddForumFromTTorFR_DB(f)
 				added = forumID
 				if not stay_open_on_select: return added
-			else:
-				return None
+
 	return added
 
 def formatHexColorToARGB(hexcolor):

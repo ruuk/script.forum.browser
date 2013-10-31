@@ -193,6 +193,9 @@ class CookieTransport(xmlrpclib.Transport):
 ################################################################################
 class TapatalkDatabaseInterface:
 	searchURL = 'https://directory.tapatalk.com/search.php?search={terms}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	categoryURL = 'https://directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	categoryURL2 = 'https://s2directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	
 	class ForumEntry:
 		forumType = 'TT'
 		def __init__(self,jobj):
@@ -221,6 +224,41 @@ class TapatalkDatabaseInterface:
 		import json
 		jobj = json.loads(result)
 		return self.processForums(jobj)
+	
+	def categories(self,cat_id=0,page=1,per_page=20):
+		if cat_id == 0:
+			return {'cats':self.getCategories()}
+		
+		result = urllib2.urlopen(self.categoryURL.format(cat_id=cat_id,page=page,per_page=per_page)).read()
+		import json
+		jobj = json.loads(result)
+		return {'forums':self.processForums(jobj)}
+	
+	def getCategories(self):
+		return [	{'id':'231','name':'Technology & Computing'},
+					{'id':'1','name':'Arts & Entertainment'},
+					{'id':'157','name':'Hobbies & Interests'},
+					{'id':'10','name':'Automotive'},
+					{'id':'227','name':'Sports'},
+					{'id':'35','name':'Business'},
+					{'id':'49','name':'Careers'},
+					{'id':'215','name':'Pets'},
+					{'id':'62','name':'Education'},
+					{'id':'110','name':'Health & Fitness'},
+					{'id':'79','name':'Family & Parenting'},
+					{'id':'208','name':'News'},
+					{'id':'219','name':'Religion & Spirituality'},
+					{'id':'221','name':'Science'},
+					{'id':'233','name':'Travel'},
+					{'id':'90','name':'Food & Drink'},
+					{'id':'213','name':'Personal Finance'},
+					{'id':'225','name':'Society'},
+					{'id':'223','name':'Shopping'},
+					{'id':'190','name':'Home & Garden'},
+					{'id':'201','name':'Law Government & Politics'},
+					{'id':'229','name':'Style & Fashion'},
+					{'id':'217','name':'Real Estate'}
+				]
 		
 	def processForums(self,jobj):
 		entries = []
