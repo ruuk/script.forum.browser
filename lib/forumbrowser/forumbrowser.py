@@ -36,6 +36,14 @@ def durationToShortText(unixtime):
 	if sec: return '%ss' % sec
 	return '0s'
 
+################################################################################
+# ForumEntry
+################################################################################
+class ForumEntry:
+	forumType = 'GB'
+	def getLogo(self):
+		return self.logo
+	
 class Error(Exception): pass
 
 class BrokenForumException(Exception): pass

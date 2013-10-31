@@ -1906,6 +1906,22 @@ msgctxt "#32555"
 msgid "Right Align Text"
 msgstr ""
 
+msgctxt "#32556"
+msgid "Back"
+msgstr ""
+
+msgctxt "#32557"
+msgid "Adding Forums"
+msgstr ""
+
+msgctxt "#32558"
+msgid "Database"
+msgstr ""
+
+msgctxt "#32559"
+msgid "Add Forum Manually"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

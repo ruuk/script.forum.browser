@@ -2,6 +2,8 @@ Forum Browser Changelog
 
 Special thanks to John Hanselman for all his testing which helped make Forum Browser better than it would have been without it.
 
+Icon attribution: See tapatalk.py for list of attributions from The Noun Project for the Tapatalk category icons
+
 TODO:
  Short Term:
   Right justified text for languages such as Hebrew
@@ -40,7 +42,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.17
+Current Version : 2.1.18
+
+*** 2.1.18 ***
+
+Now shows and uses Forumrunner forum icons from the FR database
+Added category icons for Tapatalk database
+Added search, next and previous icons for databases
+Fixed error when adding forums (created in last update) 
+Added 'Back' option when browsing FR/TT databases to return to the categories/search menu or parent category
+Exiting FB/TT/FR database browsing now returns to the FB/TT/FR menu
+Removed the 'Add From Online' button. Now 'Add Forum' will show a choice between Forum Browser DB, Tapatalk DB, Forumrunner DB and adding manually 
+Exiting the 'Add Forum' hierarchy will now cause a jump to the last added forum for all databases
 
 *** 2.1.17 ***
 

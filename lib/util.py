@@ -2,11 +2,18 @@ import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
 
+MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
+GENERIC_MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','media'))
 SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
 FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums_settings'))
 FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'forums'))
 FORUMS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums'))
 CACHE_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'cache'))
+TEMP_DIR = os.path.join(CACHE_PATH,'tmp')
+
+if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
+if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
+if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
 
 CURRENT_THEME = None
 DEBUG = None

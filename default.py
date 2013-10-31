@@ -55,15 +55,12 @@ THEME = util.getSavedTheme()
 PLAYER = None
 SIGNALHUB = None
 
-MEDIA_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
-FORUMS_STATIC_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'forums'))
-FORUMS_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forums'))
-FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forums_settings'))
-CACHE_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'cache'))
-if not os.path.exists(FORUMS_PATH): os.makedirs(FORUMS_PATH)
-if not os.path.exists(FORUMS_SETTINGS_PATH): os.makedirs(FORUMS_SETTINGS_PATH)
-if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
-
+MEDIA_PATH = util.MEDIA_PATH
+FORUMS_STATIC_PATH = util.FORUMS_STATIC_PATH
+FORUMS_PATH = util.FORUMS_PATH
+FORUMS_SETTINGS_PATH = util.FORUMS_SETTINGS_PATH
+CACHE_PATH = util.CACHE_PATH
+TEMP_DIR = util.TEMP_DIR
 
 STARTFORUM = None
 
@@ -496,8 +493,8 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		elif controlID == 200:
 			forumID = addForum()
 			if forumID: self.refresh(forumID)
-		elif controlID == 201:
-			forumID = addForumFromOnline(True)
+# 		elif controlID == 201:
+# 			forumID = addForumFromOnline(True)
 			if forumID: self.refresh(forumID)
 		elif controlID == 202:
 			if removeForum(forumID): self.refresh()
@@ -3637,7 +3634,7 @@ def selectForumCategory(with_all=False):
 		d.addItem(str(x), str(T(32500 + x)))
 	return d.getResult()
 
-def addForum(current=False):
+def addForumManual(current=False):
 	user = None
 	password=None
 	with dialogs.xbmcDialogProgress(T(32423),T(32424)) as dialog:
@@ -3740,17 +3737,28 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 	else:
 		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	
-def addForumFromOnline(stay_open_on_select=False):
-	d = dialogs.OptionsChoiceMenu('Choose Database')
-	logoPath = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','skins','Default','Media')
-	hlp = dialogs.loadHelp('forumdatabases.help')
-	d.addItem('fb', 'Forum Browser Database', os.path.join(logoPath,'forum-browser-logo-128.png'),hlp.get('fb',''))
-	d.addItem('tt', 'Tapatalk Database', os.path.join(logoPath,'forum-browser-tapatalk.png'),hlp.get('tt',''))
-	d.addItem('fr', 'Forumrunner Database', os.path.join(logoPath,'forum-browser-forumrunner.png'),hlp.get('fr',''))
-	source = d.getResult()
-	if not source: return None
-	if not source =='fb':
-		return addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=source == 'fr')
+def addForum(current=False):
+	stay_open_on_select=True
+	source = True
+	while source:
+		d = dialogs.OptionsChoiceMenu('Choose Database')
+		hlp = dialogs.loadHelp('forumdatabases.help')
+		d.addItem('fb', 'Forum Browser {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-logo-128.png'),hlp.get('fb',''))
+		d.addItem('tt', 'Tapatalk {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-tapatalk.png'),hlp.get('tt',''))
+		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-forumrunner.png'),hlp.get('fr',''))
+		d.addItem('manual', T(32559), os.path.join(util.MEDIA_PATH,'forum-browser-plus.png'),hlp.get('manual',''))
+
+		source = d.getResult()
+		if not source: return None
+		if source =='fb':
+			added = addForumFromOnlineFB(stay_open_on_select=stay_open_on_select)
+		elif source == 'manual':
+			added = addForumManual(current=current)
+		else:
+			added = addForumFromTapatalkDB(stay_open_on_select=stay_open_on_select,forumrunner=source == 'fr')
+		if added: return added
+			
+def addForumFromOnlineFB(stay_open_on_select=False):
 	odb = forumbrowser.FBOnlineDatabase()
 	res = True
 	added = None
@@ -3796,13 +3804,6 @@ def addForumFromOnline(stay_open_on_select=False):
 				if not stay_open_on_select: return added
 	return added
 
-def selectExternalCategory(clist=[]):
-	d = dialogs.ChoiceMenu(T(32420))
-	d.addItem('search',T(32421))
-	for e in clist:
-		d.addItem(e.get('id'),e.get('name'),e.get('icon'))
-	return d.getResult()
-
 def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	if forumrunner:
 		from lib.forumbrowser import forumrunner
@@ -3815,7 +3816,9 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	perPage = 20
 	cat = 0
 	terms = None
+	lastCat = None
 	while res:
+		clearDirFiles(util.TEMP_DIR)
 		cats = []
 		flist = []
 		if cat == 'search' or terms:
@@ -3826,18 +3829,18 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			cat = None
 			splash = dialogs.showActivitySplash(T(32438))
 			try:
-				flist = db.search(terms,page=page,per_page=perPage)
+				flist = db.search(terms,page=page,per_page=perPage,p_dialog=splash)
 			finally:
 				splash.close()
 			if not flist:
 				dialogs.showMessage(T(32439),T(32440))
 				terms = dialogs.doKeyboard(T(32330))
-				if not terms: return
+				if not terms: return added
 				continue
 		else:
 			splash = dialogs.showActivitySplash(T(32438))
 			try:
-				cats = db.categories(cat_id=cat,page=page,per_page=perPage)
+				cats = db.categories(cat_id=cat,page=page,per_page=perPage,p_dialog=splash)
 			finally:
 				splash.close()
 			flist = cats.get('forums',[])
@@ -3845,31 +3848,39 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			
 		menu = dialogs.ImageChoiceMenu('Results')
 		if page > 1:
-			menu.addItem('prev_page', '[<- Previous Page]')
+			menu.addItem('prev_page', '[<- {0}]'.format(T(32529).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		elif not cat == 'search' and not terms and cat == 0:
-			menu.addItem('search',T(32421))
+			menu.addItem('search',T(32421),os.path.join(util.GENERIC_MEDIA_PATH,'search_icon.png'),bgcolor='FF333333')
+		else:
+			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		for c in cats:
-			menu.addItem('cat-' + c.get('id'),'Category: ' + c.get('name',''), c.get('icon',''))
+			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000')
 		for f in flist:
 			interface = f.forumType
 			rf=ra=''
 			desc = f.description
 			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
 			bgcolor = formatHexColorToARGB('FFFFFF')
-			menu.addItem(f, f.name, f.logo, desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
+			menu.addItem(f, f.name, f.getLogo(), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		if len(flist) >= perPage:
-			menu.addItem('next_page', '[NEXT PAGE ->]')
+			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000')
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
-			if not f: return None
+			if not f: return added
 			
 			if f == 'search':
+				lastCat = 0
 				cat = 'search'
 				page = 1
 				terms = None
 				break
-			elif f.startswith('cat-'):
+			elif f == 'back':
+				cat = lastCat
+				terms = None
+				break
+			elif not isinstance(f,forumbrowser.ForumEntry) and f.startswith('cat-'):
+				lastCat = cat
 				cat = f[4:]
 				page = 1
 				terms = None
@@ -3908,8 +3919,10 @@ def doAddForumFromOnline(f,odb):
 def doAddForumFromTTorFR_DB(f):
 	if not f: return
 	forumID = f.forumID
-	print forumID
-	saveForum(f.forumType,forumID,f.name,f.description,f.url,f.logo,'FFFFFF')
+	if os.path.exists(f.getLogo()):
+		import shutil
+		shutil.copyfile(f.getLogo(), os.path.join(util.CACHE_PATH,os.path.basename(f.getLogo())))
+	saveForum(f.forumType,forumID,f.name,f.description,f.url,f.getLogo(),'FFFFFF')
 	odb = forumbrowser.FBOnlineDatabase()
 	rules = isinstance(f,dict) and odb.getForumRules(forumID) or {}
 	old_rules = util.loadForumSettings(forumID,get_rules=True)

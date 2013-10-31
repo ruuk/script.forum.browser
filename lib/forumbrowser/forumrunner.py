@@ -2,6 +2,7 @@ import forumbrowser, json, urllib2, urllib, sys, os,re, time
 from forumbrowser import FBData
 from texttransform import BBMessageConverter
 from lib.util import LOG, ERROR
+from lib import util
 
 DEBUG = sys.modules["__main__"].DEBUG
 
@@ -33,7 +34,7 @@ class FRCFail:
 class ForumrunnerDatabaseInterface:
 	searchURL = 'http://www.forumrunner.com/forumrunner/request.php?cmd=search_forums&search={terms}&page={page}&perpage={per_page}&frv=1.3.18&frp=a'
 	categoryURL = 'http://www.forumrunner.com/forumrunner/request.php?cmd=get_forums&id={cat_id}&page={page}&perpage={per_page}&frv=1.3.18&frp=a'
-	class ForumEntry:
+	class ForumEntry(forumbrowser.ForumEntry):
 		forumType = 'FR'
 		iconURL = 'http://www.forumrunner.com/icon.php?id={sid}'
 		def __init__(self,jobj):
@@ -51,14 +52,42 @@ class ForumrunnerDatabaseInterface:
 			self.category = ''
 			self.categoryID = jobj.get('category_id')
 			self.name = name
-			self.forumID = 'FR.' + name			
-	
-	def search(self,terms,page=1,per_page=20):
+			self.forumID = 'FR.' + name
+			self.cacheLogo()
+			
+		def cacheLogo(self):
+			self.cachedLogo = ''
+			try:
+				resp = urllib2.urlopen(self.logo)
+				try:
+					ext = resp.info().get('content-type','image/png').split('/')[-1]
+				except:
+					ext = 'png'
+				self.cachedLogo = os.path.join(util.TEMP_DIR,self.forumID + '.' + ext)
+				with open(self.cachedLogo,'wb') as f:
+					f.write(resp.read())
+			except:
+				return
+				
+		def getLogo(self):
+			return self.cachedLogo or self.logo
+		
+	def __init__(self):
+		self.progressDialog = None
+			
+	def updateProgress(self,ct,total):
+		if not self.progressDialog: return
+		pct =  int((ct * 100.0)/total)
+		self.progressDialog.update(pct, '{0}: {1}%'.format(util.T(32557),pct))
+		
+	def search(self,terms,page=1,per_page=20,p_dialog=None):
+		self.progressDialog = p_dialog
 		result = urllib2.urlopen(self.searchURL.format(terms=terms,page=page,per_page=per_page)).read()
 		jobj = json.loads(result)
 		return self.processForums(jobj)
 		
-	def categories(self,cat_id=0,page=1,per_page=20):
+	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
+		self.progressDialog = p_dialog
 		result = urllib2.urlopen(self.categoryURL.format(cat_id=cat_id,page=page,per_page=per_page)).read()
 		jobj = json.loads(result)
 		return {'cats':self.processCategories(jobj),'forums':self.processForums(jobj)}
@@ -74,8 +103,13 @@ class ForumrunnerDatabaseInterface:
 	def processForums(self,jobj):
 		if not 'data' in jobj: return []
 		entries = []
-		for f in jobj.get('data',{}).get('forums',[]):
+		forums = jobj.get('data',{}).get('forums',[])
+		ct = 0
+		total = len(forums)
+		for f in forums:
 			entries.append(self.ForumEntry(f))
+			ct+=1
+			self.updateProgress(ct, total)
 		return entries
 	
 class ForumrunnerClient():

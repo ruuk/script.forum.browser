@@ -9,3 +9,8 @@ Also includes Parser Browser forums, which are forums which do not use Tapatalk 
 Search the more than 60,000 Tapatalk enabled forums in the Tapatalk database.
 @item:fr=Forumrunner
 Search the more than 7,500 Forumrunner enabled forums in the Forumrunner database.
+@item:manual=Manual
+Find a forum by entering the main forum page URL.
+
+Forum browser will attempt to detect a Tapatalk or Forumrunner interface.
+Failing that it will attempt to use the Parser Browser.

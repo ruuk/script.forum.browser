@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*- 
+
 from lib.util import LOG, ERROR, getSetting
 from lib import util
 from lib import asyncconnections
@@ -196,7 +198,7 @@ class TapatalkDatabaseInterface:
 	categoryURL = 'https://directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
 	categoryURL2 = 'https://s2directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
 	
-	class ForumEntry:
+	class ForumEntry(forumbrowser.ForumEntry):
 		forumType = 'TT'
 		def __init__(self,jobj):
 			self.displayName = jobj.get('name','ERROR')
@@ -219,13 +221,13 @@ class TapatalkDatabaseInterface:
 				self.category = cats[0].get('name','')
 				self.categoryID = cats[0].get('id','')
 	
-	def search(self,terms,page=1,per_page=20):
+	def search(self,terms,page=1,per_page=20,p_dialog=None):
 		result = urllib2.urlopen(self.searchURL.format(terms=terms,page=page,per_page=per_page)).read()
 		import json
 		jobj = json.loads(result)
 		return self.processForums(jobj)
 	
-	def categories(self,cat_id=0,page=1,per_page=20):
+	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
 		if cat_id == 0:
 			return {'cats':self.getCategories()}
 		
@@ -235,30 +237,33 @@ class TapatalkDatabaseInterface:
 		return {'forums':self.processForums(jobj)}
 	
 	def getCategories(self):
-		return [	{'id':'231','name':'Technology & Computing'},
-					{'id':'1','name':'Arts & Entertainment'},
-					{'id':'157','name':'Hobbies & Interests'},
-					{'id':'10','name':'Automotive'},
-					{'id':'227','name':'Sports'},
-					{'id':'35','name':'Business'},
-					{'id':'49','name':'Careers'},
-					{'id':'215','name':'Pets'},
-					{'id':'62','name':'Education'},
-					{'id':'110','name':'Health & Fitness'},
-					{'id':'79','name':'Family & Parenting'},
-					{'id':'208','name':'News'},
-					{'id':'219','name':'Religion & Spirituality'},
-					{'id':'221','name':'Science'},
-					{'id':'233','name':'Travel'},
-					{'id':'90','name':'Food & Drink'},
-					{'id':'213','name':'Personal Finance'},
-					{'id':'225','name':'Society'},
-					{'id':'223','name':'Shopping'},
-					{'id':'190','name':'Home & Garden'},
-					{'id':'201','name':'Law Government & Politics'},
-					{'id':'229','name':'Style & Fashion'},
-					{'id':'217','name':'Real Estate'}
+		iconBase = os.path.join(util.GENERIC_MEDIA_PATH,'TTCat-%s.png')
+		ret = [		{'id':'231','name':'Technology & Computing'}, #Icon attribution: Public Domain
+					{'id':'1','name':'Arts & Entertainment'}, #Icon attribution: Pete Fecteau, from The Noun Project
+					{'id':'157','name':'Hobbies & Interests'}, #Icon attribution: Gary Wood, from The Noun Project
+					{'id':'10','name':'Automotive'}, #Icon attribution: Simon Child, from The Noun Project
+					{'id':'227','name':'Sports'}, #Icon attribution: ___Lo, from The Noun Project
+					{'id':'35','name':'Business'}, #Icon attribution: jose luis garcia, from The Noun Project & Jardson Araújo, from The Noun Project
+					{'id':'49','name':'Careers'}, #Icon attribution: Public Domain
+					{'id':'215','name':'Pets'}, #Icon attribution: Anne Bittencourt, from The Noun Project
+					{'id':'62','name':'Education'}, #Icon attribution: Thibault Geffroy, from The Noun Project
+					{'id':'110','name':'Health & Fitness'}, #Icon attribution: Public Domain
+					{'id':'79','name':'Family & Parenting'}, #Icon attribution: Public Domain
+					{'id':'208','name':'News'}, #Icon attribution: The Noun Project
+					{'id':'219','name':'Religion & Spirituality'}, #Icon attribution: Dan Codyre, from The Noun Project
+					{'id':'221','name':'Science'}, #Icon attribution: Public Domain
+					{'id':'233','name':'Travel'}, #Icon attribution: matthew hall, from The Noun Project
+					{'id':'90','name':'Food & Drink'}, #Icon attribution: Amelia Wattenberger, from The Noun Project
+					{'id':'213','name':'Personal Finance'}, #Icon attribution: Jules Quick, from The Noun Project
+					{'id':'225','name':'Society'}, #Icon attribution: Nicholas Menghini, from The Noun Project
+					{'id':'223','name':'Shopping'}, #Icon attribution: Juan Pablo Bravo, from The Noun Project
+					{'id':'190','name':'Home & Garden'}, #Icon attribution: Erin Gillaspy, from The Noun Project & Gemma Garner, from The Noun Project
+					{'id':'201','name':'Law Government & Politics'}, #Icon attribution: Márcio Duarte, from The Noun Project
+					{'id':'229','name':'Style & Fashion'}, #Icon attribution: Diego Naive, from The Noun Project
+					{'id':'217','name':'Real Estate'} #Icon attribution: Amelia Wattenberger, from The Noun Project
 				]
+		for r in ret: r['icon'] = iconBase % r['id']
+		return ret
 		
 	def processForums(self,jobj):
 		entries = []

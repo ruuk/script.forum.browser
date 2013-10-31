@@ -82,7 +82,7 @@
 					<description>Add Forum</description>
 					<onleft>220</onleft>
 					<onup>210</onup>
-					<ondown>201</ondown>
+					<ondown>202</ondown>
 					<posx>40</posx>
 					<posy>20</posy>
 					<width>290</width>
@@ -113,7 +113,7 @@
 					<texturenofocus></texturenofocus>
 				</control>
 				
-				<control type="button" id="201">
+				<!--  control type="button" id="201">
 					<description>Add From Online</description>
 					<onleft>220</onleft>
 					
@@ -133,12 +133,13 @@
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
 					<focusedcolor>white</focusedcolor>
-				</control>
+				</control -->
+				
 				<control type="button" id="202">
 					<description>Remove Forum</description>
 					<onleft>220</onleft>
 					
-					<onup>201</onup>
+					<onup>200</onup>
 					<ondown>203</ondown>
 					<posx>40</posx>
 					<posy>120</posy>
