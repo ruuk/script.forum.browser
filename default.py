@@ -1391,7 +1391,11 @@ def showUserExtras(post,ignore=None,just_return=False):
 	for k,v in post.getExtras(ignore=ignore).items():
 		if not hasattr(v,'decode'): v = str(v)
 		val = texttransform.convertHTMLCodes(v,FB)
-		out += FB.unicode('[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n').format(k.title(),color,val)
+		tmp = FB.unicode(u'[B]{0}:[/B] [COLOR {1}]{2}[/COLOR]\n')
+		out += tmp.format(	k.title(),
+							color,
+							FB.unicode(val)
+						)
 	if just_return: return out
 	dialogs.showMessage(T(32329),out,scroll=True)
 
