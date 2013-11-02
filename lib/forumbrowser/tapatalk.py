@@ -47,6 +47,7 @@ class CookieResponse:
 class CookieTransport(xmlrpclib.Transport):
 	def __init__(self):
 		xmlrpclib.Transport.__init__(self)
+		self.lastCharset = 'utf-8'
 		self._loggedIn = False
 		self.lastCall = time.time()
 		self.jar = cookielib.CookieJar()
@@ -104,6 +105,11 @@ class CookieTransport(xmlrpclib.Transport):
 				response = h.getresponse()
 			else:
 				response = h.getresponse(buffering=True)
+				
+			try:
+				self.lastCharset = response.info().get('content-type','utf-8').split('charset=')[-1]
+			except:
+				LOG('Tapatalk: CookieTransport.single_request(): Failed to set lastCharset')
 			
 			headers = {}
 			if DEBUG:
@@ -669,7 +675,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			raise
 		except:
 			ERROR('Failed to get forum config')
-		encoding = self.getConfigInfo('charset')
+		encoding = self.transport.lastCharset #self.getConfigInfo('charset')
 		if encoding:
 			LOG('Forum Encoding: ' + encoding)
 			self.updateEncoding(encoding,1,log_change=False)

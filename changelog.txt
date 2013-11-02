@@ -42,7 +42,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.21
+Current Version : 2.1.22
+
+*** 2.1.22 ***
+
+Changes to make encoding handling more correct
+Some skin tweaks for Add Forum forum descriptions
 
 *** 2.1.21 ***
 

@@ -8,23 +8,24 @@ T = util.T
 
 def cUConvert(m): return unichr(int(m.group(1)))
 def cTConvert(m): return unichr(htmlentitydefs.name2codepoint.get(m.group(1),32))
+
 def convertHTMLCodes(html,FB=None,encoding=None):
-	if not isinstance(html,unicode):
-		if not encoding:
-			if FB:
-				encoding = FB.getEncoding()
-			else:
-				encoding = 'utf-8'
+	if not encoding:
+		if FB:
+			encoding = FB.getEncoding()
+		else:
+			encoding = 'utf-8'
+	try:
+		html = html.decode(encoding).encode('utf-8')
+		return html
+	except:
+		detected_encoding = chardet.detect(html)
+		if util.DEBUG: util.LOG(detected_encoding)
 		try:
-			html = unicode(html,encoding)
+			html = html.decode(detected_encoding['encoding']).encode('utf-8')
+			if FB: FB.updateEncoding(detected_encoding['encoding'],detected_encoding['confidence'])
 		except:
-			detected_encoding = chardet.detect(html)
-			if util.DEBUG: util.LOG(detected_encoding)
-			try:
-				html = unicode(html,detected_encoding['encoding'])
-				if FB: FB.updateEncoding(detected_encoding['encoding'],detected_encoding['confidence'])
-			except:
-				html = unicode(html,encoding,'replace')
+			html = html.encode('utf-8','replace')
 			
 	try:
 		html = re.sub('&#(\d{1,5});',cUConvert,html)

@@ -1938,8 +1938,8 @@ class RepliesWindow(windows.PageWindow):
 		with dialogs.ActivitySplash() as splash:
 			out = ''
 			if util.getSetting('use_skin_mods',True):
-				divider = u'\u2580'*200
-				underHeader = u'\u2594'*200
+				divider = FB.unicode(u'\u2580'*200)
+				underHeader = FB.unicode(u'\u2594'*200)
 			else:
 				divider = '_'*200
 				underHeader = '-'*200
@@ -2196,7 +2196,7 @@ class ThreadsWindow(windows.PageWindow):
 			
 			if last:
 				last = FB.unicode(self.desc_base % last)
-				if preview: last += u'[CR]' + preview
+				if preview: last += '[CR]' + preview
 			else:
 				last = preview
 			if self.searchRE: last = self.highlightTerms(FB,last)
@@ -3303,7 +3303,7 @@ def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide
 			elif f.startswith('GB.'):
 				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
 				interface = 'GBalt'
-			menu.addItem(f, name,logo,desc,bgcolor=hc,interface=interface)
+			menu.addItem(f, name,logo,desc,bgcolor=hc,interface=interface,description_window='show')
 
 	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
 	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
@@ -3799,7 +3799,7 @@ def addForumFromOnlineFB(stay_open_on_select=False):
 			desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(32500 + f.get('cat',0))),T(32290),desc)
 			#desc = util.makeUnicode(desc,'windows-1251')
 			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
-			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
+			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,description_window='show')
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
@@ -3853,22 +3853,22 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			
 		menu = dialogs.ImageChoiceMenu('Results')
 		if page > 1:
-			menu.addItem('prev_page', '[<- {0}]'.format(T(32529).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000',description_window='hide')
+			menu.addItem('prev_page', '[<- {0}]'.format(T(32529).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		elif not cat == 'search' and not terms and cat == 0:
-			menu.addItem('search',T(32421),os.path.join(util.GENERIC_MEDIA_PATH,'search_icon.png'),bgcolor='FF333333',description_window='hide')
+			menu.addItem('search',T(32421),os.path.join(util.GENERIC_MEDIA_PATH,'search_icon.png'),bgcolor='FF333333')
 		else:
-			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000',description_window='hide')
+			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		for c in cats:
-			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000',description_window='hide')
+			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000')
 		for f in flist:
 			interface = f.forumType
 			rf=ra=''
 			desc = f.description
 			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
 			bgcolor = formatHexColorToARGB('FFFFFF')
-			menu.addItem(f, f.name, f.getLogo(), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
+			menu.addItem(f, f.name, f.getLogo(), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,description_window='show')
 		if len(flist) >= perPage:
-			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000',description_window='hide')
+			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000')
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)

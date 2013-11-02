@@ -131,6 +131,7 @@
 			</control>
 		</control>
 		<control type="group" id="260">
+			<visible>StringCompare(Container(120).ListItem.Property(description_window),show)</visible>
 			<posx>720</posx>
 			<posy>50</posy>
 			<control type="image">

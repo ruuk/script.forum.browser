@@ -950,15 +950,17 @@ class ForumBrowser:
 			encoding = 'utf-8'
 			
 		try:
-			return unicode.encode(string,encoding)
+			return string.decode(encoding).encode('utf-8')
 		except:
 			detected_encoding = chardet.detect(string)
 			try:
-				string = unicode(string,detected_encoding['encoding'])
+				string = string.decode(detected_encoding['encoding'])
 				self.updateEncoding(detected_encoding['encoding'],detected_encoding['confidence'])
-				return string
+				return string.encode('utf-8')
 			except:
-				return unicode(string,encoding,'replace')
+				pass
+		return string.encode('utf-8','replace')
+		
 	
 	def updateEncoding(self,encoding,confidence,log_change=True):
 		if confidence > self._encodingConfidence:
