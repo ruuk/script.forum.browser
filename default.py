@@ -2195,7 +2195,7 @@ class ThreadsWindow(windows.PageWindow):
 			if preview: preview = re.sub(u'<[^>]+?>',u'',texttransform.convertHTMLCodes(preview,FB))
 			
 			if last:
-				last = self.desc_base % last
+				last = FB.unicode(self.desc_base % last)
 				if preview: last += u'[CR]' + preview
 			else:
 				last = preview
@@ -3797,6 +3797,7 @@ def addForumFromOnlineFB(stay_open_on_select=False):
 				ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
 			desc = f.get('desc','None') or 'None'
 			desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(32500 + f.get('cat',0))),T(32290),desc)
+			#desc = util.makeUnicode(desc,'windows-1251')
 			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
 			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		f = True
@@ -3852,13 +3853,13 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			
 		menu = dialogs.ImageChoiceMenu('Results')
 		if page > 1:
-			menu.addItem('prev_page', '[<- {0}]'.format(T(32529).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
+			menu.addItem('prev_page', '[<- {0}]'.format(T(32529).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000',description_window='hide')
 		elif not cat == 'search' and not terms and cat == 0:
-			menu.addItem('search',T(32421),os.path.join(util.GENERIC_MEDIA_PATH,'search_icon.png'),bgcolor='FF333333')
+			menu.addItem('search',T(32421),os.path.join(util.GENERIC_MEDIA_PATH,'search_icon.png'),bgcolor='FF333333',description_window='hide')
 		else:
-			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
+			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000',description_window='hide')
 		for c in cats:
-			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000')
+			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000',description_window='hide')
 		for f in flist:
 			interface = f.forumType
 			rf=ra=''
@@ -3867,7 +3868,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			bgcolor = formatHexColorToARGB('FFFFFF')
 			menu.addItem(f, f.name, f.getLogo(), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra)
 		if len(flist) >= perPage:
-			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000')
+			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000',description_window='hide')
 		f = True
 		while f:
 			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)

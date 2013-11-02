@@ -42,7 +42,13 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.19
+Current Version : 2.1.20
+
+*** 2.1.20 ***
+
+Video Skin: Added forum description box for forum list on 'Add Forum' (like on the other skins)
+Changed Forumrunner icon to reflect Forumrunner's actual icon
+Various encoding handling improvements
 
 *** 2.1.19 ***
 

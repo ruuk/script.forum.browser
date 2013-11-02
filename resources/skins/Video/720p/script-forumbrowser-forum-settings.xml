@@ -388,7 +388,7 @@
 							<control type="image">
 								<posx>190</posx>
 								<posy>1</posy>
-								<width>150</width>
+								<width>196</width>
 								<height>36</height>
 								<aspectratio>stretch</aspectratio>
 								<texture>$INFO[ListItem.Label2]</texture>

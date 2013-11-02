@@ -844,8 +844,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def createForumDict(self,data,sub=False):
 		data['forumid'] = data.get('forum_id')
-		data['title'] = str(data.get('forum_name'))
-		data['description'] = str(data.get('description',''))
+		data['title'] = self.unicode(data.get('forum_name').data)
+		data['description'] = self.unicode(data.get('description','').data)
 		data['subscribed'] = data.get('is_subscribed',False)
 		data['subforum'] = sub
 		return data
@@ -940,11 +940,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		#for k,v in data.items(): print '%s: %s' % (k,v)
 		#print '--------------------------'
 		data['threadid'] = data.get('topic_id','')
-		data['starter'] = str(data.get('topic_author_name',data.get('post_author_name',self.user)))
-		data['title'] = str(data.get('topic_title',''))
-		data['short_content'] = str(data.get('short_content',''))
+		data['starter'] = self.unicode(str(data.get('topic_author_name',data.get('post_author_name',self.user))))
+		data['title'] = self.unicode(data.get('topic_title','').data)
+		data['short_content'] = self.unicode(data.get('short_content','').data)
 		data['subscribed'] = data.get('is_subscribed',False)
-		data['lastposter'] = str(data.get('last_reply_user') or data.get('last_reply_author_name',''))
+		data['lastposter'] = self.unicode(str(data.get('last_reply_user') or data.get('last_reply_author_name','')))
 		#data['forumid'] = 
 		data['sticky'] = sticky
 		return data

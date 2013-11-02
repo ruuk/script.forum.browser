@@ -1,4 +1,6 @@
 import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse
+from lib import chardet
+
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
 
@@ -409,6 +411,20 @@ def getImageBackgroundColor(path):
 		ERROR('getImageBackgroundColor(): Failed to get background color')
 		return (255,255,255)
 	
+def makeUnicode(string,encoding='utf-8'):
+		try:
+			ret = unicode.decode(string,encoding)
+			if DEBUG: LOG('util.makeUnicode(): Successfully used: %s' % encoding)
+			return ret
+		except:
+			detected_encoding = chardet.detect(string)
+			if DEBUG: LOG('util.makeUnicode(): Detected encoding: %s' % detected_encoding)
+			try:
+				string = unicode(string,detected_encoding['encoding'])
+				return string
+			except:
+				return unicode(string,encoding,'replace')
+			
 ###################################################################	
 ## XBMCControlConditionalVisiblity
 ###################################################################	

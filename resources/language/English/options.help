@@ -12,10 +12,7 @@ The function rating deals with whether you can view down the tree to posts, whet
 
 The accuracy rating indicates how well the titles and posts match the actual forum's displayed info. Whether there is a lot of extra text in the posts for example. 
 @item:addforum
-Add a forum by entering it's domain or URL.
-
-Forum Browser will attempt to find the forum via Tapatalk or Forumrunner. If that fails it will attempt to use the Parser Browser. If successful you will then be asked to edit the description and choose a logo image.
-Afterwards you may optionally share it to the Forum Browser online database.
+Choose to add a forum from either the Forum Browser database, the Tapatalk database, the Forumrunner database or manually. 
 @item:addonline
 Select a forum to add from the Forum Browser online database, or un-hide removed built-in forums.
 

@@ -10,7 +10,7 @@ Search the more than 60,000 Tapatalk enabled forums in the Tapatalk database.
 @item:fr=Forumrunner
 Search the more than 7,500 Forumrunner enabled forums in the Forumrunner database.
 @item:manual=Manual
-Find a forum by entering the main forum page URL.
+Add a forum by entering it's domain or URL.
 
-Forum browser will attempt to detect a Tapatalk or Forumrunner interface.
-Failing that it will attempt to use the Parser Browser.
+Forum Browser will attempt to find the forum via Tapatalk or Forumrunner. If that fails it will attempt to use the Parser Browser. If successful you will then be asked to edit the description and choose a logo image.
+Afterwards you may optionally share it to the Forum Browser online database.
