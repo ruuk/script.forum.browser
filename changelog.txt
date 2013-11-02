@@ -42,7 +42,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.20
+Current Version : 2.1.21
+
+*** 2.1.21 ***
+
+Fix a bug I made causing errors on tapatalk forums
 
 *** 2.1.20 ***
 

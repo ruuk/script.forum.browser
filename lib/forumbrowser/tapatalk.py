@@ -844,8 +844,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def createForumDict(self,data,sub=False):
 		data['forumid'] = data.get('forum_id')
-		data['title'] = self.unicode(data.get('forum_name').data)
-		data['description'] = self.unicode(data.get('description','').data)
+		data['title'] = self.unicode(str(data.get('forum_name')))
+		data['description'] = self.unicode(str(data.get('description','')))
 		data['subscribed'] = data.get('is_subscribed',False)
 		data['subforum'] = sub
 		return data
@@ -941,8 +941,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		#print '--------------------------'
 		data['threadid'] = data.get('topic_id','')
 		data['starter'] = self.unicode(str(data.get('topic_author_name',data.get('post_author_name',self.user))))
-		data['title'] = self.unicode(data.get('topic_title','').data)
-		data['short_content'] = self.unicode(data.get('short_content','').data)
+		data['title'] = self.unicode(str(data.get('topic_title','')))
+		data['short_content'] = self.unicode(str(data.get('short_content','')))
 		data['subscribed'] = data.get('is_subscribed',False)
 		data['lastposter'] = self.unicode(str(data.get('last_reply_user') or data.get('last_reply_author_name','')))
 		#data['forumid'] = 
