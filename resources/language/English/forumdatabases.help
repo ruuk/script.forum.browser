@@ -6,9 +6,9 @@ While this includes Tapatalk and Forumrunner forums, it only has those which wer
 
 Also includes Parser Browser forums, which are forums which do not use Tapatalk or Forumrunner and are handled by the internal Parser Browser. 
 @item:tt=Tapatalk
-Search the more than 60,000 Tapatalk enabled forums in the Tapatalk database.
+Search 60,000+ Tapatalk enabled forums in the Tapatalk database.
 @item:fr=Forumrunner
-Search the more than 7,500 Forumrunner enabled forums in the Forumrunner database.
+Search 7,500+ Forumrunner enabled forums in the Forumrunner database.
 @item:manual=Manual
 Add a forum by entering it's domain or URL.
 

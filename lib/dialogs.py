@@ -40,28 +40,29 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	THEME = util.getSavedTheme(get_current=True)
 	path = util.__addon__.getAddonInfo('path')
-	src = os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)
-	src2 = os.path.join(path,'resources','skins',theme or THEME,'720p',xmlFilename)
+	res = '720p'
+	src = os.path.join(path,'resources','skins',THEME,res,xmlFilename)
+	src2 = os.path.join(path,'resources','skins',theme or THEME,res,xmlFilename)
 	if os.path.exists(src):
 		theme = THEME
 	elif not os.path.exists(src2):
 		theme = 'Default'
-		
+		res = '720p'
 	rightAlign = util.getSetting('current_right_align',False)
 	
 	if not util.getSetting('use_skin_mods',True):
-		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
+		src = os.path.join(path,'resources','skins',theme,res,xmlFilename)
 		#path = util.util.__addon__.getAddonInfo('profile')
-		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
+		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,res)
 		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
 		xmlFilename = 'script-forumbrowser-current.xml'
 		if rightAlign: xml = rightAlignXML(xml)
 		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
 	elif rightAlign:
-		src = os.path.join(path,'resources','skins',theme,'720p',xmlFilename)
+		src = os.path.join(path,'resources','skins',theme,res,xmlFilename)
 		#path = util.util.__addon__.getAddonInfo('profile')
-		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,'720p')
+		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,res)
 		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
 		xmlFilename = 'script-forumbrowser-current.xml'
@@ -545,12 +546,19 @@ class ChoiceMenu():
 	def cancel(self):
 		self.hideSplash()
 		
-	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF',**kwargs):
+	def addItem(self,ID,display,icon='',display2='',sep=False,disabled=False,bgcolor='FFFFFFFF',update=False,**kwargs):
 		if ID is None: return self.addSep()
 		if disabled:
+			disabledText = 'DISABLED'
+			if not disabled == True: disabledText = disabled
 			display = "[COLOR FF444444]%s[/COLOR]" % display
-			display2 = "[B]DISABLED[/B][CR][CR][COLOR FF444444]%s[/COLOR]" % display2
-		self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':disabled,'bgcolor':bgcolor,'extras':kwargs})
+			display2 = "[COLOR FF880000][B]%s[/B][/COLOR][CR][CR][COLOR FF444444]%s[/COLOR]" % (disabledText,display2)
+		if not update:
+			return self.items.append({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':bool(disabled),'bgcolor':bgcolor,'extras':kwargs})
+		
+		for i in self.items:
+			if ID == i.get('id'):
+				i.update({'id':ID,'disp':display,'disp2':display2,'icon':icon,'sep':sep,'disabled':bool(disabled),'bgcolor':bgcolor,'extras':kwargs})
 		
 	def addSep(self):
 		if self.items: self.items[-1]['sep'] = True

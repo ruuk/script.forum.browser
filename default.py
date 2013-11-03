@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, sys, xbmc
+import codecs
 
 if __name__ == '__main__':
 	if sys.argv[-1].startswith('settingshelp_') or sys.argv[-1] == 'smilies':
@@ -656,7 +657,14 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			unread = unreadData.get(f) or {}
 			if not path: continue
 			if not os.path.isfile(os.path.join(path,f)): continue
-			fdata = forumbrowser.ForumData(f,path)
+			try:
+				fdata = forumbrowser.ForumData(f,path)
+			except:
+				import xbmcvfs
+				ERROR('Deleting broken forum file')
+				xbmcvfs.delete(os.path.join(path,f))
+				dialogs.showMessage('NOTICE', 'Broken forum file for:', f.split('.',1)[-1], 'was deleted.', error=True)
+				continue
 			ndata = util.loadForumSettings(f) or {}
 			name = fdata.name
 			logo = fdata.urls.get('logo','')
@@ -3735,15 +3743,22 @@ def addForumManual(current=False):
 	
 def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do these all the same. What... was I crazy?
 	if ftype == 'TT':
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
+		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	elif ftype == 'FR':
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
+		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	else:
-		open(os.path.join(FORUMS_PATH,forumID),'w').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
+		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	
+def getForumNameList():
+	flist_tmp = os.listdir(FORUMS_PATH)
+	ret = []
+	for f in flist_tmp: ret.append(f[3:])
+	return ret
+
 def addForum(current=False):
 	stay_open_on_select=True
 	source = True
+	last = None
 	while source:
 		d = dialogs.OptionsChoiceMenu('Choose Database')
 		hlp = dialogs.loadHelp('forumdatabases.help')
@@ -3752,8 +3767,9 @@ def addForum(current=False):
 		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-forumrunner.png'),hlp.get('fr',''))
 		d.addItem('manual', T(32559), os.path.join(util.MEDIA_PATH,'forum-browser-plus.png'),hlp.get('manual',''))
 
-		source = d.getResult()
+		source = d.getResult(select=last)
 		if not source: return None
+		last = source
 		if source =='fb':
 			added = addForumFromOnlineFB(stay_open_on_select=stay_open_on_select)
 		elif source == 'manual':
@@ -3761,7 +3777,20 @@ def addForum(current=False):
 		else:
 			added = addForumFromTapatalkDB(stay_open_on_select=stay_open_on_select,forumrunner=source == 'fr')
 		if added: return added
-			
+	
+def addItemToMenuFB(menu,f,existing,update=False):
+	interface = f.get('type')
+	rf=ra=''
+	if interface == 'GB':
+		rf = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_function'),'')
+		ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
+	desc = f.get('desc','None') or 'None'
+	desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(32500 + f.get('cat',0))),T(32290),desc)
+	#desc = util.makeUnicode(desc,'windows-1251')
+	bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
+	disabled = f.get('name') in existing and 'ALREADY ADDED' or False
+	menu.addItem(f, f.get('name'), f.get('logo'), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
+					
 def addForumFromOnlineFB(stay_open_on_select=False):
 	odb = forumbrowser.FBOnlineDatabase()
 	res = True
@@ -3789,26 +3818,31 @@ def addForumFromOnlineFB(stay_open_on_select=False):
 		else:
 			caption = '[COLOR FF9999FF]All[/COLOR]'
 		menu = dialogs.ImageChoiceMenu(caption)
+		existing = getForumNameList()
 		for f in flist:
-			interface = f.get('type')
-			rf=ra=''
-			if interface == 'GB':
-				rf = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_function'),'')
-				ra = {'1':'FFFF0000','2':'FFFFFF00','3':'FF00FF00'}.get(f.get('rating_accuracy'),'')
-			desc = f.get('desc','None') or 'None'
-			desc = '[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),str(T(32500 + f.get('cat',0))),T(32290),desc)
-			#desc = util.makeUnicode(desc,'windows-1251')
-			bgcolor = formatHexColorToARGB(f.get('header_color','FFFFFF'))
-			menu.addItem(f, f.get('name'), f.get('logo'), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,description_window='show')
+			addItemToMenuFB(menu,f,existing)
 		f = True
+		select = None
 		while f:
-			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
+			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True,select=select)
 			if f:
 				forumID = doAddForumFromOnline(f,odb)
 				added = forumID
 				if not stay_open_on_select: return added
+				existing = getForumNameList()
+				addItemToMenuFB(menu,f,existing,update=True)
+			select = f
 	return added
 
+def addItemToMenuNonFB(menu,f,existing,update=False):
+	interface = f.forumType
+	rf=ra=''
+	desc = f.description
+	desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
+	bgcolor = formatHexColorToARGB('FFFFFF')
+	disabled = f.name in existing and 'ALREADY ADDED' or False
+	menu.addItem(f, f.name, f.getLogo(), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
+			
 def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	if forumrunner:
 		from lib.forumbrowser import forumrunner
@@ -3822,6 +3856,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 	cat = 0
 	terms = None
 	lastCat = None
+	select = None
 	while res:
 		clearDirFiles(util.TEMP_DIR)
 		cats = []
@@ -3830,7 +3865,9 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			if not terms:
 				page = 1
 				terms = dialogs.doKeyboard(T(32330))
-			if not terms: continue
+			if not terms:
+				cat = 0
+				continue
 			cat = None
 			splash = dialogs.showActivitySplash(T(32438))
 			try:
@@ -3860,20 +3897,16 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		for c in cats:
 			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000')
+		existing = getForumNameList()
 		for f in flist:
-			interface = f.forumType
-			rf=ra=''
-			desc = f.description
-			desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
-			bgcolor = formatHexColorToARGB('FFFFFF')
-			menu.addItem(f, f.name, f.getLogo(), desc,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,description_window='show')
+			addItemToMenuNonFB(menu,f,existing)
 		if len(flist) >= perPage:
 			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000')
 		f = True
 		while f:
-			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True)
+			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True,select=select)
 			if not f: return added
-			
+			select = f
 			if f == 'search':
 				lastCat = 0
 				cat = 'search'
@@ -3901,6 +3934,8 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 				forumID = doAddForumFromTTorFR_DB(f)
 				added = forumID
 				if not stay_open_on_select: return added
+				existing = getForumNameList()
+				addItemToMenuNonFB(menu,f,existing,update=True)
 
 	return added
 

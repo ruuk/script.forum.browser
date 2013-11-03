@@ -42,12 +42,22 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.22
+Current Version : 2.1.23
+
+*** 2.1.23 ***
+
+Fix for encoding errors when saving a newly added forum (was creating an empty file which caused errors when loading a forums list)
+Added code to delete broken forum files so they won't prevent open the forums dialog
+Fixed a bug that prevented exiting the keyboard when searching the TT/FR databases
+Returning to the 'Add Forum' dialog now returns to the previously selected item
+After adding a forum from a list of forums, it now returns to the added forum in the list
+Forums that are already added are now marked as already added when browsing/searching databases
 
 *** 2.1.22 ***
 
 Changes to make encoding handling more correct
 Some skin tweaks for Add Forum forum descriptions
+Changed 'Add Forum' descriptions. Example 'Search 60,000+ forums' instead of 'Search the more than 60,000 forums'
 
 *** 2.1.21 ***
 
