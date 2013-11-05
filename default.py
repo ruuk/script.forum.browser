@@ -3263,7 +3263,7 @@ def listForumSettings():
 	return os.listdir(FORUMS_SETTINGS_PATH)
 	
 def fidSortFunction(fid):
-	if fid[:3] in ['TT.','FR.','PB.','GB.']: return fid[3:]
+	if fid[:3] in ['TT.','FR.','PB.','YK.','GB.']: return fid[3:]
 	return fid
 
 def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide_extra=False):
@@ -3308,6 +3308,8 @@ def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide
 				interface = 'FR'
 			elif f.startswith('PB.'):
 				interface = 'PB'
+			elif f.startswith('YK.'):
+				interface = 'YK'
 			elif f.startswith('GB.'):
 				interface = 'GBalt'
 			menu.addItem(f, name,logo,desc,bgcolor=hc,interface=interface,description_window='show')
@@ -3674,6 +3676,10 @@ def addForumManual(current=False):
 					ftype = 'PB'
 					label = 'ProBoards'
 					pageURL = url.split('/',1)[0]
+				elif 'yuku.com' in url:
+					ftype = 'YK'
+					label = 'Yuku'
+					pageURL = url.split('/',1)[0]
 				else:
 					ftype = 'TT'
 					label = 'Tapatalk'
@@ -3744,7 +3750,7 @@ def addForumManual(current=False):
 		return forumID
 	
 def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do these all the same. What... was I crazy?
-	if ftype == 'TT' or ftype == 'PB':
+	if ftype == 'TT' or ftype == 'PB' or ftype == 'YK':
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	elif ftype == 'FR':
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
@@ -3768,6 +3774,7 @@ def addForum(current=False):
 		d.addItem('tt', 'Tapatalk {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-tapatalk.png'),hlp.get('tt',''))
 		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-forumrunner.png'),hlp.get('fr',''))
 		d.addItem('pb', 'ProBoards {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-proboards.png'),hlp.get('pb',''))
+		d.addItem('yk', 'Yuku {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-yuku.png'),hlp.get('yk',''))
 		d.addItem('manual', T(32559), os.path.join(util.MEDIA_PATH,'forum-browser-plus.png'),hlp.get('manual',''))
 
 		source = d.getResult(select=last)
@@ -3841,7 +3848,7 @@ def addItemToMenuNonFB(menu,f,existing,update=False):
 	interface = f.forumType
 	rf=ra=''
 	desc = f.description
-	desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),desc)
+	desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),util.makeUnicode(desc,'utf-8'))
 	bgcolor = formatHexColorToARGB('FFFFFF')
 	disabled = f.name in existing and 'ALREADY ADDED' or False
 	menu.addItem(f, f.name, f.getLogo(), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
@@ -3852,6 +3859,8 @@ def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 		db = forumrunner.ForumrunnerDatabaseInterface()
 	elif source == 'pb':
 		db = tapatalk.ProBoardsDatabaseInterface()
+	elif source == 'yk':
+		db = tapatalk.YukuDatabaseInterface()
 	else:
 		db = tapatalk.TapatalkDatabaseInterface()
 	res = True
@@ -4356,10 +4365,13 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			from lib.forumbrowser import genericparserbrowser
 			if log_function: genericparserbrowser.LOG = log_function
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
-		elif forum.startswith('TT.') or forum.startswith('PB.'):
+		elif forum.startswith('TT.') or forum.startswith('PB.') or forum.startswith('YK.'):
 			err = 'getForumBrowser(): Tapatalk'
 			prefix = 'TT.'
-			if forum.startswith('PB.'): prefix = 'PB.'
+			if forum.startswith('PB.'):
+				prefix = 'PB.'
+			elif forum.startswith('YK.'):
+				prefix = 'YK.'
 			FB = tapatalk.TapatalkForumBrowser(forum,always_login=getSetting('always_login',False),prefix=prefix)
 		elif forum.startswith('FR.'):
 			err = 'getForumBrowser(): Forumrunner'

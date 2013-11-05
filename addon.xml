@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.forum.browser"
        name="Forum Browser"
-       version="2.1.24"
+       version="2.1.25"
        provider-name="Rick Phillips (ruuk)">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -30,7 +30,7 @@
     <summary lang="pt">Navegue por fórums através do XBMC</summary>
     <summary lang="pt_BR">Navegue pelos fórums através do XBMC</summary>
     <summary lang="sv">Bläddra bland forum i XBMC</summary>
-    <description lang="be">Browse Forums in XBMC. Supports Tapatalk (including ProBoards) and Forumrunner enabled forums for a total of 75,000+ forums. View forums, threads, posts, subscriptions and private messages. Follow links in Web Viewer. Post replies, send private messages, delete posts, quote posts. View images in posts, follow post forum links and download post links.</description>
+    <description lang="be">Browse Forums in XBMC. Supports Tapatalk (including ProBoards, Yuku) and Forumrunner enabled forums for a total of 90,000+ forums. View forums, threads, posts, subscriptions and private messages. Follow links in Web Viewer. Post replies, send private messages, delete posts, quote posts. View images in posts, follow post forum links and download post links.</description>
     <description lang="de">Durchsuchen Forums in XBMC. Unterstützt Tapatalk aktivierte Foren (über 60000) und Forumrunner aktivierte Foren. Unterstützt auch boxee.tv. Foren, Themen, Beiträge , Abonnements und private Nachrichten anzeigen. Folgen Sie den Links im Web Viewer. Beiträge Antworten, private Nachrichten senden, Beiträge löschen, Zitate auch. Anzeigen von Bildern in Beiträgen, Forumsbeiträge Links folgen und Links downloaden. </description>
     <description lang="el">Περιηγηθείτε σε Φόρουμ μέσω του XBMC. Υποστηρίζονται φόρουμ με ενεργό Tapatalk (πάνω από 60000) και Forumrunner, καθώς και το boxee.tv. Δείτε φόρουμ, θέματα, αναρτήσεις, συνδρομές και προσωπικά μηνύματα. Ακολουθήστε συνδέσμους στην Προβολή Ιστού. Αναρτήστε απαντήσεις, στείλτε προσωπικά μηνύματα, διαγράψτε αναρτήσεις, παραθέστε αναρτήσεις. Προβάλλετε εικόνες σε αναρτήσεις, ακολουθήστε συνδέσμους αναρτήσεων λήψεων.</description>
     <description lang="en">Browse Forums in XBMC. Supports Tapatalk enabled forums (over 60000) and Forumrunner enabled forums. Also supports boxee.tv. View forums, threads, posts, subscriptions and private messages. Follow links in Web Viewer. Post replies, send private messages, delete posts, quote posts. View images in posts, follow post forum links and download post links.</description>

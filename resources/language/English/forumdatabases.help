@@ -11,6 +11,8 @@ Brows and search 60,000+ Tapatalk enabled forums in the Tapatalk database.
 Browse and search 7,500+ Forumrunner enabled forums in the Forumrunner database.
 @item:pb=ProBoards
 Browse and search 9,000+ ProBoards forums in the ProBoards database.
+@item:yk=Yuku
+Browse and search 13,000+ Yuku forums in the Yuku database.
 @item:manual=Manual
 Add a forum by entering it's domain or URL.
 

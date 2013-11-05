@@ -30,6 +30,7 @@ def testForum(forum):
 		urls = [url]
 	else:
 		urls = forumbrowser.getForumTestUrls(forum, 'mobiquo/mobiquo.php')
+		urls += forumbrowser.getForumTestUrls(forum, 'mobiquo/mobiquo')
 	
 	for u in urls:
 		if not u: continue
@@ -293,18 +294,19 @@ class ProBoardsDatabaseInterface:
 	
 	class ForumEntry(forumbrowser.ForumEntry):
 		forumType = 'PB'
+		urlTail = '/index.cgi?action=tapatalk3'
 		def __init__(self,data):
 			#{'list': [{'name': <xmlrpclib.Binary instance at 0x169ac20>, 'url': 'reptilerescues.freeforums.net', 'forum_name': <xmlrpclib.Binary instance at 0x169a8c0>, 'forum_id': '5369004', 'logo': 'http://s29004.prbrds.com/5369004/i/dbGq_udJUza0oRZB6SWw.png', 'id': '5369004'}], 'total_match_found': 1}
 			self.displayName = data.get('name','ERROR')
 			self.description = str(data.get('name','ERROR'))
 			self.logo = data.get('logo','')
-			self.url = 'http://' + data.get('url','') + '/index.cgi?action=tapatalk3'
+			self.url = 'http://' + data.get('url','') + self.urlTail
 			name = data.get('url','')
 			if name.startswith('www.'): name = name[4:]
 			if name.startswith('forum.'): name = name[6:]
 			if name.startswith('forums.'): name = name[7:]
 			self.name = name
-			self.forumID = 'PB.' + name
+			self.forumID = self.forumType + '.' + name
 			self.category = ''
 			self.categoryID = ''
 	
@@ -325,16 +327,22 @@ class ProBoardsDatabaseInterface:
 			return []
 		return self.processForums(result)
 	
+	def _get_directory(self,page,per_page,cat_id):
+		return self.getClient().get_directory(page,per_page,cat_id,True,'DATE')
+	
 	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
 		if cat_id == 0:
 			return {'cats':self.getCategories()}
 		
-		data = self.getClient().get_directory(page,per_page,cat_id,True,'DATE')
+		data = self._get_directory(page, per_page, cat_id)
 		return {'forums':self.processForums(data)}
 	
+	def _getCategories(self):
+		return self.getClient().get_nested_category(1)
+		
 	def getCategories(self):
 		try:
-			res = self.getClient().get_nested_category(1)
+			res = self._getCategories()
 			if not 'list' in res: return []
 		except:
 			return []
@@ -354,6 +362,21 @@ class ProBoardsDatabaseInterface:
 			entries.append(self.ForumEntry(f))
 		return entries
 		
+################################################################################
+# YukuDatabaseInterface
+################################################################################
+class YukuDatabaseInterface(ProBoardsDatabaseInterface):
+	xmlrpcURL = 'http://www.yuku.com/mobiquo/directory'
+	
+	class ForumEntry(ProBoardsDatabaseInterface.ForumEntry):
+		forumType = 'YK'
+		urlTail = '/mobiquo/mobiquo'
+		
+	def _getCategories(self):
+		return self.getClient().get_category(True)
+	
+	def _get_directory(self,page,per_page,cat_id):
+		return self.getClient().get_directory(page,per_page,str(cat_id),True)
 
 ################################################################################
 # ForumPost
@@ -691,6 +714,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.isProboards = prefix=='PB.'
 		if self.isProboards:
 			self.browserType = 'proboards'
+		elif self.prefix == 'YK.':
+			self.browserType = 'yuku'
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
 		self._url = ''

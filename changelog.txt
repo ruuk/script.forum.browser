@@ -42,7 +42,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.24
+Current Version : 2.1.25
+
+*** 2.1.25 ***
+
+Added browsing/searching of yuku forums database
 
 *** 2.1.24 ***
 

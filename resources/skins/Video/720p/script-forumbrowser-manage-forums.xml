@@ -592,6 +592,12 @@
 							<texture>../../Default/media/forum-browser-proboards.png</texture>
 							<visible>StringCompare(ListItem.Property(type),PB)</visible>
 						</control>
+						<control type="image">
+							<width>24</width>
+							<height>24</height>
+							<texture>../../Default/media/forum-browser-yuku.png</texture>
+							<visible>StringCompare(ListItem.Property(type),YK)</visible>
+						</control>
 					</control>
 					<control type="image">
 						<posx>2</posx>
@@ -917,6 +923,12 @@
 							<height>24</height>
 							<texture>../../Default/media/forum-browser-proboards.png</texture>
 							<visible>StringCompare(ListItem.Property(type),PB)</visible>
+						</control>
+						<control type="image">
+							<width>24</width>
+							<height>24</height>
+							<texture>../../Default/media/forum-browser-yuku.png</texture>
+							<visible>StringCompare(ListItem.Property(type),YK)</visible>
 						</control>
 					</control>
 				</focusedlayout>
