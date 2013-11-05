@@ -254,8 +254,29 @@ class HTMLPageInfo:
 		images4 = self.getStyleImages(self.html2, self.base2)
 		for i in images2 + images3 + images4:
 			if not i in images: images.append(i)
+		if 'proboards.com' in self.url:
+			fbfid = self.url.split('://',1)[-1].split('/')[0]
+			fid = fbfid.split('.',1)[0]
+			fbfid = 'PB.' + fbfid
+			cached = self.cacheImage(fbfid, 'http://www.proboards.com/apps/logo.cgi?forum=%s' % fid)
+			return [cached] + images
 		return images
 	
+	def cacheImage(self,forumid,image):
+		self.cachedLogo = ''
+		try:
+			resp = urllib2.urlopen(image)
+			try:
+				ext = resp.info().get('content-type','image/png').split('/')[-1]
+			except:
+				ext = 'png'
+			cachedLogo = os.path.join(util.TEMP_DIR,forumid + '.' + ext)
+			with open(cachedLogo,'wb') as f:
+				f.write(resp.read())
+			return cachedLogo
+		except:
+			return ''
+			
 	def pageImages(self):
 		return self._images(self.html, self.base)
 			

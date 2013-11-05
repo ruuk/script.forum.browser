@@ -263,6 +263,7 @@ class ImageChoiceDialog(BaseDialog):
 		self.menu = kwargs.get('menu')
 		self.filtering = kwargs.get('filtering',False)
 		self.keepColors = kwargs.get('keep_colors',False)
+		self._selectFirstOnBack = kwargs.get('selectFirstOnBack',False)
 		self.terms = ''
 		self.filter = None
 		self.filterType = 'terms'
@@ -363,8 +364,15 @@ class ImageChoiceDialog(BaseDialog):
 		return target
 		
 	def onAction(self,action):
-		if action == 92 or action == 10:
+		if action == 10:
 			self.doClose()
+		elif action == 92 or action == 9:
+			if self._selectFirstOnBack:
+				if self.getControl(120).size():
+					self.getControl(120).selectItem(0)
+					xbmc.executebuiltin('Action(Select)')
+			else:
+				self.doClose()
 		elif action == 7:
 			pass
 			#self.finish()
@@ -697,9 +705,9 @@ class OptionsChoiceMenu(ChoiceMenu):
 		return self.items[result]['id']
 		
 class ImageChoiceMenu(ChoiceMenu):
-	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None,filtering=False,keep_colors=False):
+	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None,filtering=False,keep_colors=False,selectFirstOnBack=False):
 		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
-		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select,filtering=filtering,keep_colors=keep_colors)
+		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select,filtering=filtering,keep_colors=keep_colors,selectFirstOnBack=selectFirstOnBack)
 		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
 		result = w.result
 		del w

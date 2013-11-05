@@ -681,7 +681,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				colors[color] = path
 			item.setProperty('bgfile',path)
 			item.setProperty('forumID',f)
-			item.setProperty('type',f[:2])
+			item.setProperty('type','proboards.com' in f and 'PB' or f[:2])
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			up = unread.get('PM','')
 			if up:
@@ -3765,6 +3765,7 @@ def addForum(current=False):
 		d.addItem('fb', 'Forum Browser {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-logo-128.png'),hlp.get('fb',''))
 		d.addItem('tt', 'Tapatalk {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-tapatalk.png'),hlp.get('tt',''))
 		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-forumrunner.png'),hlp.get('fr',''))
+		d.addItem('pb', 'ProBoards {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-proboards.png'),hlp.get('pb',''))
 		d.addItem('manual', T(32559), os.path.join(util.MEDIA_PATH,'forum-browser-plus.png'),hlp.get('manual',''))
 
 		source = d.getResult(select=last)
@@ -3775,7 +3776,7 @@ def addForum(current=False):
 		elif source == 'manual':
 			added = addForumManual(current=current)
 		else:
-			added = addForumFromTapatalkDB(stay_open_on_select=stay_open_on_select,forumrunner=source == 'fr')
+			added = addForumFromTapatalkDB(stay_open_on_select=stay_open_on_select,source=source)
 		if added: return added
 	
 def addItemToMenuFB(menu,f,existing,update=False):
@@ -3843,10 +3844,12 @@ def addItemToMenuNonFB(menu,f,existing,update=False):
 	disabled = f.name in existing and 'ALREADY ADDED' or False
 	menu.addItem(f, f.name, f.getLogo(), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
 			
-def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
-	if forumrunner:
+def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
+	if source == 'fr':
 		from lib.forumbrowser import forumrunner
 		db = forumrunner.ForumrunnerDatabaseInterface()
+	elif source == 'pb':
+		db = tapatalk.ProBoardsDatabaseInterface()
 	else:
 		db = tapatalk.TapatalkDatabaseInterface()
 	res = True
@@ -3904,7 +3907,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,forumrunner=False):
 			menu.addItem('next_page', '[{0} ->]'.format(T(32530).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'next_icon.png'),bgcolor='00000000')
 		f = True
 		while f:
-			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True,select=select)
+			f = menu.getResult('script-forumbrowser-forum-select.xml',filtering=True,select=select,selectFirstOnBack=cat!=0 and True or False)
 			if not f: return added
 			select = f
 			if f == 'search':

@@ -52,6 +52,9 @@ Fixed a bug that prevented exiting the keyboard when searching the TT/FR databas
 Returning to the 'Add Forum' dialog now returns to the previously selected item
 After adding a forum from a list of forums, it now returns to the added forum in the list
 Forums that are already added are now marked as already added when browsing/searching databases
+When browsing forum databases, the back button will now execute the top option (ie BACK or PREVIOUS)
+Added initial support for ProBoards forums
+Added 'ProBoards Database' in the 'Add Forums' menu - just search for now
 
 *** 2.1.22 ***
 

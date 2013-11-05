@@ -21,7 +21,15 @@ def checkVersion(version1, version2):
 	return cmp(normalize(version1), normalize(version2))
 
 def testForum(forum):
-	urls = forumbrowser.getForumTestUrls(forum, 'mobiquo/mobiquo.php')
+	if 'proboards.com' in forum:
+		url = forum
+		if not url.startswith('http'): url = 'http://' + url
+		if not '=tapatalk' in url:
+			if not url.endswith('/'): url += '/'
+			url += 'index.cgi?action=tapatalk3'
+		urls = [url]
+	else:
+		urls = forumbrowser.getForumTestUrls(forum, 'mobiquo/mobiquo.php')
 	
 	for u in urls:
 		if not u: continue
@@ -274,6 +282,62 @@ class TapatalkDatabaseInterface:
 	def processForums(self,jobj):
 		entries = []
 		for f in jobj:
+			entries.append(self.ForumEntry(f))
+		return entries
+	
+################################################################################
+# ProBoardsDatabaseInterface
+################################################################################
+class ProBoardsDatabaseInterface:
+	xmlrpcURL = 'http://www.proboards.com/apps/xmlrpc.cgi'
+	
+	class ForumEntry(forumbrowser.ForumEntry):
+		forumType = 'TT'
+		def __init__(self,data):
+			#{'list': [{'name': <xmlrpclib.Binary instance at 0x169ac20>, 'url': 'reptilerescues.freeforums.net', 'forum_name': <xmlrpclib.Binary instance at 0x169a8c0>, 'forum_id': '5369004', 'logo': 'http://s29004.prbrds.com/5369004/i/dbGq_udJUza0oRZB6SWw.png', 'id': '5369004'}], 'total_match_found': 1}
+			self.displayName = data.get('name','ERROR')
+			self.description = str(data.get('name','ERROR'))
+			self.logo = data.get('logo','')
+			self.url = 'http://' + data.get('url','') + '/index.cgi?action=tapatalk3'
+			name = data.get('url','')
+			if name.startswith('www.'): name = name[4:]
+			if name.startswith('forum.'): name = name[6:]
+			if name.startswith('forums.'): name = name[7:]
+			self.name = name
+			self.forumID = 'TT.' + name
+			self.category = ''
+			self.categoryID = ''
+	
+	def __init__(self):
+		self.client = None
+		
+	def getClient(self):
+		if self.client: return self.client
+		self.client = xmlrpclib.ServerProxy(self.xmlrpcURL)
+		return self.client
+		
+	def search(self,terms,page=1,per_page=20,p_dialog=None):
+		client = self.getClient()
+		try:
+			result = client.search(xmlrpclib.Binary(terms))
+		except:
+			ERROR('ProboardsDatabaseInterface.search()')
+			return []
+		return self.processForums(result)
+	
+	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
+		if cat_id == 0:
+			return {'cats':[]}
+		return {'forums':[]}
+	
+		
+	def processForums(self,data):
+		entries = []
+		try:
+			if not 'list' in data: return []
+		except:
+			return []
+		for f in data['list']:
 			entries.append(self.ForumEntry(f))
 		return entries
 		
@@ -610,6 +674,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False):
+		self.isProboards = False
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
 		self._url = ''
@@ -625,6 +690,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.loginError = ''
 		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?) \w+:'
 		self.userInfoCache = {}
+		self._userDataDisabled = False
 		self.initialize()
 	
 	def isLoggedIn(self):
@@ -664,6 +730,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def getForumConfig(self):
 		try:
 			self.forumConfig = self.server.get_config()
+			self.isProboards = self.getConfigInfo('forum_software', '') == 'proboards'
+			self.browserType = 'proboards'
 			LOG('Forum Type: ' + self.getForumType())
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))
@@ -679,7 +747,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if encoding:
 			LOG('Forum Encoding: ' + encoding)
 			self.updateEncoding(encoding,1,log_change=False)
-	
+			
 	def getStats(self):
 		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
 		stats = self.server.get_board_stat()
@@ -741,7 +809,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		return self.forumConfig.get('version','')[:2]
 	
 	def getForumPluginVersion(self):
-		return self.forumConfig.get('version','').split('_')[-1]
+		ver = self.forumConfig.get('version','').split('_')[-1]
+		if not ver and self.isProboards: return 'proboards'
+		return ver
 	
 	def getRegURL(self):
 		sub = self.forumConfig.get('reg_url','')
@@ -1101,7 +1171,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def canSearch(self): return self.getConfigInfo('guest_search', True) or self.isLoggedIn()
 	def canSearchPosts(self): return self.canSearch()
-	def canSearchThreads(self): return self.canSearch()
+	def canSearchThreads(self): return self.canSearch() and not self.isProboards
 	def canSearchAdvanced(self,stype=None): return self.canSearch() and self.getConfigInfo('advanced_search', False)
 	
 	def searchReplies(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
@@ -1109,6 +1179,12 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			return self.finish(FBData(error='Search string must be at least %s characters in length.' % self.getConfigInfo('min_search_length',3)),donecallback)
 		return self.getReplies(terms, None, page=page, lastid=sid, callback=callback, donecallback=donecallback, page_data=page_data,search=True)
 	
+	def get_thread(self,threadid,start,end,return_html=True):
+		if self.apiOK(4):
+			return self.server.get_thread(threadid,start,end,return_html)
+		else:
+			return self.server.get_thread(threadid,start,end)
+			
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False):
 		if not callback: callback = self.fakeCallback
 		while True:
@@ -1124,7 +1200,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 						index = test.get('position')
 						start = int((index - 1) / 20) * 20
 						page = start
-						thread = self.server.get_thread(threadid,start,start + 19,True)
+						thread = self.get_thread(threadid,start,start + 19,True)							
 					else:
 						LOG('COULD NOT GET THREAD BY POST ID')
 						pid = ''
@@ -1139,10 +1215,10 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 				elif not pid:
 					thread = None
 					if page < 0:
-						test = self.server.get_thread(threadid,0,19,True)
+						test = self.get_thread(threadid,0,19,True)
 						page = self.getPageData(test,0).getPageNumber(-1)
 						if page == 0: thread = test
-					if not thread: thread = self.server.get_thread(threadid,page,page + 19,True)
+					if not thread: thread = self.get_thread(threadid,page,page + 19,True)
 					
 				sreplies = self.processThread(thread,page,callback,donecallback)
 				if not sreplies: break
@@ -1488,11 +1564,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			return None
 
 	def getUserData(self,username):
+		if self._userDataDisabled: return {}
 		if username in self.userInfoCache:
 			self.userInfoCache[username][0] = time.time()
 			return self.userInfoCache[username][1]
 		try:
 			self.userInfoCache[username] = [time.time(),self.server.get_user_info(xmlrpclib.Binary(username))]
+		except xmlrpclib.Fault,e:
+			if 'login' in e.faultString: self._userDataDisabled = True
+			self.userInfoCache[username] = [time.time(),{}]
+			LOG('Failed to get user info for: %s' % username)
+			if DEBUG: ERROR('ERROR:')
 		except:
 			self.userInfoCache[username] = [time.time(),{}]
 			LOG('Failed to get user info for: %s' % username)
