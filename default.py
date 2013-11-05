@@ -3899,7 +3899,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 		else:
 			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		for c in cats:
-			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor='FF000000')
+			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor=c.get('bgcolor','FF000000'))
 		existing = getForumNameList()
 		for f in flist:
 			addItemToMenuNonFB(menu,f,existing)

@@ -312,7 +312,7 @@ class ProBoardsDatabaseInterface:
 		self.client = None
 		
 	def getClient(self):
-		if self.client: return self.client
+		if self.client is not None: return self.client
 		self.client = xmlrpclib.ServerProxy(self.xmlrpcURL)
 		return self.client
 		
@@ -327,9 +327,22 @@ class ProBoardsDatabaseInterface:
 	
 	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
 		if cat_id == 0:
-			return {'cats':[]}
-		return {'forums':[]}
+			return {'cats':self.getCategories()}
+		
+		data = self.getClient().get_directory(page,per_page,cat_id,True,'DATE')
+		return {'forums':self.processForums(data)}
 	
+	def getCategories(self):
+		try:
+			res = self.getClient().get_nested_category(1)
+			if not 'list' in res: return []
+		except:
+			return []
+		cats = []
+		for c in res.get('list',[]):
+			count = c.get('public_num','?')
+			cats.append({'id':c.get('category_id',-1),'name':'{0} ({1})'.format(str(c.get('category_name','ERROR')),count),'icon':c.get('icon_url',''),'bgcolor':'FF808080'})
+		return cats
 		
 	def processForums(self,data):
 		entries = []

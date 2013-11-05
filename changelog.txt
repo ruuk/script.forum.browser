@@ -44,6 +44,11 @@ KNOWN ISSUES:
 
 Current Version : 2.1.23
 
+*** 2.1.24 ***
+
+Added category browsing of ProBoards forums
+Updated addon description
+
 *** 2.1.23 ***
 
 Fix for encoding errors when saving a newly added forum (was creating an empty file which caused errors when loading a forums list)
