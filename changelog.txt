@@ -42,12 +42,16 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.23
+Current Version : 2.1.24
 
 *** 2.1.24 ***
 
 Added category browsing of ProBoards forums
 Updated addon description
+Fixed a bug causing the ProBoards logo to show up on Tapatalk forums
+Finished ProBoards handling (treated as a separate type that uses the tapatalk interface)
+Added forum stats to Light and Dark skins
+Changed 'Getting Forum List' to 'Getting List' in activity splashes for database browsing
 
 *** 2.1.23 ***
 

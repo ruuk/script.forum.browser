@@ -292,7 +292,7 @@ class ProBoardsDatabaseInterface:
 	xmlrpcURL = 'http://www.proboards.com/apps/xmlrpc.cgi'
 	
 	class ForumEntry(forumbrowser.ForumEntry):
-		forumType = 'TT'
+		forumType = 'PB'
 		def __init__(self,data):
 			#{'list': [{'name': <xmlrpclib.Binary instance at 0x169ac20>, 'url': 'reptilerescues.freeforums.net', 'forum_name': <xmlrpclib.Binary instance at 0x169a8c0>, 'forum_id': '5369004', 'logo': 'http://s29004.prbrds.com/5369004/i/dbGq_udJUza0oRZB6SWw.png', 'id': '5369004'}], 'total_match_found': 1}
 			self.displayName = data.get('name','ERROR')
@@ -304,7 +304,7 @@ class ProBoardsDatabaseInterface:
 			if name.startswith('forum.'): name = name[6:]
 			if name.startswith('forums.'): name = name[7:]
 			self.name = name
-			self.forumID = 'TT.' + name
+			self.forumID = 'PB.' + name
 			self.category = ''
 			self.categoryID = ''
 	
@@ -686,8 +686,11 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	ForumPost = ForumPost
 	PageData = PageData
 	
-	def __init__(self,forum,always_login=False):
-		self.isProboards = False
+	def __init__(self,forum,always_login=False,prefix='TT.'):
+		self.prefix = prefix
+		self.isProboards = prefix=='PB.'
+		if self.isProboards:
+			self.browserType = 'proboards'
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
 		self._url = ''
@@ -744,7 +747,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		try:
 			self.forumConfig = self.server.get_config()
 			self.isProboards = self.getConfigInfo('forum_software', '') == 'proboards'
-			self.browserType = 'proboards'
+			if self.isProboards:
+				self.browserType = 'proboards'
 			LOG('Forum Type: ' + self.getForumType())
 			LOG('Forum Plugin Version: ' + self.getForumPluginVersion())
 			LOG('Forum API Level: ' + self.forumConfig.get('api_level',''))

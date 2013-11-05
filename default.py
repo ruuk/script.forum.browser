@@ -681,7 +681,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				colors[color] = path
 			item.setProperty('bgfile',path)
 			item.setProperty('forumID',f)
-			item.setProperty('type','proboards.com' in f and 'PB' or f[:2])
+			item.setProperty('type',f[:2])
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			up = unread.get('PM','')
 			if up:
@@ -3263,7 +3263,7 @@ def listForumSettings():
 	return os.listdir(FORUMS_SETTINGS_PATH)
 	
 def fidSortFunction(fid):
-	if fid[:3] in ['TT.','FR.','GB.']: return fid[3:]
+	if fid[:3] in ['TT.','FR.','PB.','GB.']: return fid[3:]
 	return fid
 
 def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide_extra=False):
@@ -3303,18 +3303,15 @@ def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide
 			desc = '[B]%s[/B]: [COLOR FFFF9999]%s[/COLOR]' % ( T(32290) , (desc or 'None') )
 			interface = ''
 			if f.startswith('TT.'):
-				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Tapatalk[/COLOR]'
 				interface = 'TT'
 			elif f.startswith('FR.'):
-				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Forumrunner[/COLOR]'
 				interface = 'FR'
+			elif f.startswith('PB.'):
+				interface = 'PB'
 			elif f.startswith('GB.'):
-				#desc += '\n\n[B]Forum Interface[/B]: [COLOR FFFF9999]Parser Browser[/COLOR]'
 				interface = 'GBalt'
 			menu.addItem(f, name,logo,desc,bgcolor=hc,interface=interface,description_window='show')
 
-	#if getSetting('experimental',False) and not just_added and not just_favs and not forumID and not hide_extra:
-	#	menu.addItem('experimental.general','Experimental General Browser','forum-browser-logo-128.png','')
 	forum = menu.getResult('script-forumbrowser-forum-select.xml',select=forumID)
 	return forum
 
@@ -3673,9 +3670,14 @@ def addForumManual(current=False):
 			ftype = ''
 			label = ''
 			if url:
-				ftype = 'TT'
-				label = 'Tapatalk'
-				pageURL = url.split('/mobiquo/',1)[0]
+				if 'proboards.com' in url or 'index.cgi?action=tapatalk' in url:
+					ftype = 'PB'
+					label = 'ProBoards'
+					pageURL = url.split('/',1)[0]
+				else:
+					ftype = 'TT'
+					label = 'Tapatalk'
+					pageURL = url.split('/mobiquo/',1)[0]
 			else:
 				if not dialog.update(13,'%s: Forumrunner' % T(32427)): return
 				from lib.forumbrowser import forumrunner #@Reimport
@@ -3742,7 +3744,7 @@ def addForumManual(current=False):
 		return forumID
 	
 def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do these all the same. What... was I crazy?
-	if ftype == 'TT':
+	if ftype == 'TT' or ftype == 'PB':
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:tapatalk_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	elif ftype == 'FR':
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
@@ -4354,9 +4356,11 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			from lib.forumbrowser import genericparserbrowser
 			if log_function: genericparserbrowser.LOG = log_function
 			FB = genericparserbrowser.GenericParserForumBrowser(forum,always_login=getSetting('always_login',False))
-		elif forum.startswith('TT.'):
+		elif forum.startswith('TT.') or forum.startswith('PB.'):
 			err = 'getForumBrowser(): Tapatalk'
-			FB = tapatalk.TapatalkForumBrowser(forum,always_login=getSetting('always_login',False))
+			prefix = 'TT.'
+			if forum.startswith('PB.'): prefix = 'PB.'
+			FB = tapatalk.TapatalkForumBrowser(forum,always_login=getSetting('always_login',False),prefix=prefix)
 		elif forum.startswith('FR.'):
 			err = 'getForumBrowser(): Forumrunner'
 			from lib.forumbrowser import forumrunner

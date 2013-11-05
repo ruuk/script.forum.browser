@@ -1435,7 +1435,7 @@ msgid "Add To Online Database"
 msgstr ""
 
 msgctxt "#32438"
-msgid "Getting Forum List"
+msgid "Getting List"
 msgstr ""
 
 msgctxt "#32439"
