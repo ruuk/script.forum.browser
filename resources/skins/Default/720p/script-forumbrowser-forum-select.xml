@@ -210,6 +210,58 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
+					<texture>forum-browser-proboards.png</texture>
+				</control>
+				<control type="label">
+					<posx>80</posx>
+					<posy>10</posy>
+					<width>300</width>
+					<height>40</height>
+					<font>ForumBrowser-font13</font>
+					<aligny>center</aligny>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<label>[B]ProBoards[/B]</label>
+				</control>
+				<visible>
+					StringCompare(Container(120).ListItem.Property(interface),PB)
+				</visible>
+			</control>
+			
+			<control type="group">
+				<posx>20</posx>
+				<posy>20</posy>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>64</width>
+					<height>64</height>
+					<texture>forum-browser-yuku.png</texture>
+				</control>
+				<control type="label">
+					<posx>80</posx>
+					<posy>10</posy>
+					<width>300</width>
+					<height>40</height>
+					<font>ForumBrowser-font13</font>
+					<aligny>center</aligny>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<label>[B]Yuku[/B]</label>
+				</control>
+				<visible>
+					StringCompare(Container(120).ListItem.Property(interface),YK)
+				</visible>
+			</control>
+			
+			<control type="group">
+				<posx>20</posx>
+				<posy>20</posy>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>64</width>
+					<height>64</height>
 					<texture>forum-browser-logo-128.png</texture>
 				</control>
 				<control type="label">
