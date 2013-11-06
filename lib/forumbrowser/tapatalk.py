@@ -223,10 +223,7 @@ class TapatalkDatabaseInterface:
 			mobiquoDir = jobj.get('mobiquo_dir')
 			if mobiquoDir: url += mobiquoDir + '/'
 			self.url = url + 'mobiquo.php'
-			name = url.split('://',1)[-1].split('/',1)[0]
-			if name.startswith('www.'): name = name[4:]
-			if name.startswith('forum.'): name = name[6:]
-			if name.startswith('forums.'): name = name[7:]
+			name = forumbrowser.nameFromURL(url)
 			self.name = name
 			self.forumID = 'TT.' + name
 			self.category = ''
@@ -301,10 +298,7 @@ class ProBoardsDatabaseInterface:
 			self.description = str(data.get('name','ERROR'))
 			self.logo = data.get('logo','')
 			self.url = 'http://' + data.get('url','') + self.urlTail
-			name = data.get('url','')
-			if name.startswith('www.'): name = name[4:]
-			if name.startswith('forum.'): name = name[6:]
-			if name.startswith('forums.'): name = name[7:]
+			name = forumbrowser.nameFromURL(data.get('url',''))
 			self.name = name
 			self.forumID = self.forumType + '.' + name
 			self.category = ''
@@ -729,7 +723,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		self.loadForumFile()
 		self.reloadForumData(self.forum)
 		self.loginError = ''
-		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?) \w+:'
+		self.altQuoteStartFilter = '\[quote\](?P<user>[^:]+?),? \w+:( (?P<pid>\d+) said:)?'
 		self.userInfoCache = {}
 		self._userDataDisabled = False
 		self.initialize()
@@ -789,7 +783,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		if encoding:
 			LOG('Forum Encoding: ' + encoding)
 			self.updateEncoding(encoding,1,log_change=False)
-			
+	
+	def getForumBrowserURLFromForumURL(self,url):
+		if not self.getConfigInfo('get_id_by_url', False): return
+		try:
+			res = self.server.get_id_by_url(url)
+			return util.createForumBrowserURL(self.getForumID(), forum=res.get('forum_id'), thread=res.get('topic_id'), post=res.get('post_id'))
+		except:
+			ERROR('FAILED')
+			return ''
+		
+	
 	def getStats(self):
 		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
 		stats = self.server.get_board_stat()

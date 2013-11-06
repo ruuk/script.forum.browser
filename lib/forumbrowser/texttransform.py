@@ -165,6 +165,7 @@ class MessageConverter:
 			self.codeEndReplace = u'`'+u'-'*300
 			self.bullet = u'*'
 			
+		self.userReplace = '@\g<user>'
 		self.codeReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32183)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
 		self.phpReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32184)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
 		self.htmlReplace = self.codeStartReplace + '[CR][B][COLOR FF999999]'+T(32185)+r'[/COLOR][/B][CR]%s[CR]' + self.codeEndReplace
@@ -533,6 +534,7 @@ class BBMessageConverter(MessageConverter):
 		self.underlineFilter = re.compile('\[/?u\](?i)')
 		self.underlineBlockFilter = re.compile('\[u\](.*?)\[/u\](?is)')
 		self.imageNumbererFilter = re.compile('\[img\](?i)')
+		self.userFilter = re.compile('\[user[^\]]*\](?P<user>[^\[]+?)\[/user\](?i)')
 		self.setReplaces()
 		self.resetRegex()
 		
@@ -583,6 +585,7 @@ class BBMessageConverter(MessageConverter):
 		if self.codeFilter: html = self.codeFilter.sub(self.codeConvert,html)
 		if self.phpFilter: html = self.phpFilter.sub(self.phpConvert,html)
 		if self.htmlFilter: html = self.htmlFilter.sub(self.htmlConvert,html)
+		html = self.userFilter.sub(self.userReplace,html)
 		html = self.indentFilter.sub(self.indentConvert,html)
 		html = self.sizeTagFilter.sub('',html)
 		
@@ -652,6 +655,7 @@ class BBMessageConverter(MessageConverter):
 		html = html.replace('<br />','\n')
 		html = self.quoteEndOnLineFilter.sub('\n[/quote]',html)
 		html = self.altQuoteStartFilter.sub(r"[quote='\1']",html)
+		altFilter = re.compile("\[quote=\'(?P<user>[^'].*?)'\]")
 		html = re.sub(self.quoteStartFilter.pattern + '(?!\n)','\g<0>\n',html)
 		lines = html.splitlines()
 		out = ''
@@ -662,7 +666,11 @@ class BBMessageConverter(MessageConverter):
 		for line in lines:
 			if ct < 0: ct = 0
 			ms = self.quoteStartFilter.search(line)
-			startFilter = self.quoteStartFilter
+			if ms:
+				startFilter = self.quoteStartFilter
+			else:
+				startFilter = altFilter
+				ms = re.search(startFilter,line)
 			if not ms: me = self.quoteEndFilter.search(line) #dont search if we don't have to
 			if ms:
 				justStarted = True

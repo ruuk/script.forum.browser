@@ -45,10 +45,7 @@ class ForumrunnerDatabaseInterface:
 			self.logo = self.iconURL.format(sid=self.searchID)
 			url = jobj.get('forum_url','')
 			self.url = url + '/forumrunner/request.php'
-			name = url.split('://',1)[-1].split('/',1)[0]
-			if name.startswith('www.'): name = name[4:]
-			if name.startswith('forum.'): name = name[6:]
-			if name.startswith('forums.'): name = name[7:]
+			name = forumbrowser.nameFromURL(url.split('://',1)[-1].split('/',1)[0])
 			self.category = ''
 			self.categoryID = jobj.get('category_id')
 			self.name = name

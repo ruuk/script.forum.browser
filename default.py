@@ -1263,6 +1263,7 @@ class MessageWindow(windows.BaseWindow):
 			video = self.videoHandler.getVideoObject(link.url)
 			if not video: video = self.videoHandler.getVideoObject(link.text)
 			if video and video.isVideo: d.addItem('copyvideo',T(32315))
+		d.addItem('open_as_forum','Open As Forum Link')
 				
 		if d.isEmpty(): return
 		result = d.getResult()
@@ -1282,6 +1283,12 @@ class MessageWindow(windows.BaseWindow):
 			else:
 				share.page = link.text
 			CLIPBOARD.setClipboard(share)
+# 		elif result == 'open_as_forum':
+# 			forumID = forumbrowser.getForumIDByURL(link.url)
+# 			if not forumID: return
+# 			if forumID == FB.getForumID():
+# 				pass
+			
 				
 	def doImageMenu(self):
 		img = self.getControl(150).getSelectedItem().getProperty('url')
@@ -3738,10 +3745,7 @@ def addForumManual(current=False):
 		if not dialog.update(40,T(32436)): return
 		logo = chooseLogo(forum,images)
 		LOG('Adding Forum: %s at URL: %s' % (forum,url))
-		name = forum
-		if name.startswith('www.'): name = name[4:]
-		if name.startswith('forum.'): name = name[6:]
-		if name.startswith('forums.'): name = name[7:]
+		name = forumbrowser.nameFromURL(forum)
 		forumID = ftype + '.' + name
 		saveForum(ftype,forumID,name,desc,url,logo)
 		if user and password: util.saveForumSettings(forumID,username=user,password=password)
@@ -3756,12 +3760,6 @@ def saveForum(ftype,forumID,name,desc,url,logo,header_color="FFFFFF"): #TODO: Do
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:forumrunner_server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
 	else:
 		codecs.open(os.path.join(FORUMS_PATH,forumID),'w','utf-8').write('#%s\n#%s\nurl:server=%s\nurl:logo=%s\ntheme:header_color=%s' % (name,desc,url,logo,header_color))
-	
-def getForumNameList():
-	flist_tmp = os.listdir(FORUMS_PATH)
-	ret = []
-	for f in flist_tmp: ret.append(f[3:])
-	return ret
 
 def addForum(current=False):
 	stay_open_on_select=True
@@ -3828,7 +3826,7 @@ def addForumFromOnlineFB(stay_open_on_select=False):
 		else:
 			caption = '[COLOR FF9999FF]All[/COLOR]'
 		menu = dialogs.ImageChoiceMenu(caption)
-		existing = getForumNameList()
+		existing = forumbrowser.getForumNameList()
 		for f in flist:
 			addItemToMenuFB(menu,f,existing)
 		f = True
@@ -3839,7 +3837,7 @@ def addForumFromOnlineFB(stay_open_on_select=False):
 				forumID = doAddForumFromOnline(f,odb)
 				added = forumID
 				if not stay_open_on_select: return added
-				existing = getForumNameList()
+				existing = forumbrowser.getForumNameList()
 				addItemToMenuFB(menu,f,existing,update=True)
 			select = f
 	return added
@@ -3911,7 +3909,7 @@ def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 			menu.addItem(u'back','[{0}]'.format(T(32556).upper()),os.path.join(util.GENERIC_MEDIA_PATH,'prev_icon.png'),bgcolor='00000000')
 		for c in cats:
 			menu.addItem('cat-' + c.get('id'),'[+] ' + c.get('name',''), c.get('icon',''),bgcolor=c.get('bgcolor','FF000000'))
-		existing = getForumNameList()
+		existing = forumbrowser.getForumNameList()
 		for f in flist:
 			addItemToMenuNonFB(menu,f,existing)
 		if len(flist) >= perPage:
@@ -3942,13 +3940,14 @@ def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 				if page < 1: page = 1
 				break
 			elif f == 'next_page':
+				select = None
 				page += 1
 				break
 			else:
 				forumID = doAddForumFromTTorFR_DB(f)
 				added = forumID
 				if not stay_open_on_select: return added
-				existing = getForumNameList()
+				existing = forumbrowser.getForumNameList()
 				addItemToMenuNonFB(menu,f,existing,update=True)
 
 	return added

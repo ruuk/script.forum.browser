@@ -497,6 +497,20 @@
 					<colordiffuse>FF555555</colordiffuse>
 				</control>
 			</control>
+			
+			<control type="label">
+				<description>Stats</description>
+				<posx>60r</posx>
+				<posy>577</posy>
+				<width>900</width>
+				<height>30</height>
+				<font>ForumBrowser-font10</font>
+				<textcolor>FF555555</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
+				<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+			</control>
+		
 			<control  type="group" id="199">
 				<control type="group" id="198">
 					<defaultcontrol>205</defaultcontrol>
@@ -689,19 +703,6 @@
 					<focusedcolor>white</focusedcolor>
 				</control>
 			</control>
-		</control>
-		
-		<control type="label">
-			<description>Stats</description>
-			<posx>60r</posx>
-			<posy>577</posy>
-			<width>900</width>
-			<height>30</height>
-			<font>ForumBrowser-font10</font>
-			<textcolor>FF555555</textcolor>
-			<aligny>center</aligny>
-			<align>right</align>
-			<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
 		</control>
 		
 		<control type="group">

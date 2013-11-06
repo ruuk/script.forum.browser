@@ -14,6 +14,7 @@ TODO:
   Finish no window stacking mode
   Implement get_participated_forum
   Post/thread/forum bookmarks
+  Fix ParserBrowser VB subscribe URLs
   
  Long Term:
   Check on optional import behavior
@@ -42,7 +43,15 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.26
+Current Version : 2.1.27
+
+*** 2.1.27 ***
+
+Fixed a bug causing encoding errors when searching forum databases
+Clicking 'Next Page' for database lists now no longer drops down to 'Next Page' on the following page
+Fixed search slideout to appear on top of forum stats for Light/Dark skins
+Fix for post quoting on some tapatalk forums
+Added parsing of [USER] tags to @username in posts
 
 *** 2.1.26 ***
 

@@ -410,20 +410,21 @@ def getImageBackgroundColor(path):
 	except:
 		ERROR('getImageBackgroundColor(): Failed to get background color')
 		return (255,255,255)
-	
+
 def makeUnicode(string,encoding='utf-8'):
+	if isinstance(string,unicode): return string
+	try:
+		ret = unicode.decode(string,encoding)
+		if DEBUG: LOG('util.makeUnicode(): Successfully used: %s' % encoding)
+		return ret
+	except:
+		detected_encoding = chardet.detect(string)
+		if DEBUG: LOG('util.makeUnicode(): Detected encoding: %s' % detected_encoding)
 		try:
-			ret = unicode.decode(string,encoding)
-			if DEBUG: LOG('util.makeUnicode(): Successfully used: %s' % encoding)
-			return ret
+			string = unicode(string,detected_encoding['encoding'])
+			return string
 		except:
-			detected_encoding = chardet.detect(string)
-			if DEBUG: LOG('util.makeUnicode(): Detected encoding: %s' % detected_encoding)
-			try:
-				string = unicode(string,detected_encoding['encoding'])
-				return string
-			except:
-				return unicode(string,encoding,'replace')
+			return unicode(string,encoding,'replace')
 			
 ###################################################################	
 ## XBMCControlConditionalVisiblity

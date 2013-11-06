@@ -3,6 +3,30 @@ import sys, os, re, urllib, urllib2, texttransform, binascii, time
 from lib import asyncconnections, chardet
 from lib import util
 
+def getForumIDByURL(url):
+	name = nameFromURL(url)
+	return getExistingFourmIDFromName(name)
+	#TODO more comprehensive search
+		
+def nameFromURL(url):
+	name = url.split('://',1)[-1].split('/',1)[0]
+	if name.startswith('www.'): name = name[4:]
+	if name.startswith('forum.'): name = name[6:]
+	if name.startswith('forums.'): name = name[7:]
+	return name
+
+def getForumNameList():
+	idList = os.listdir(util.FORUMS_PATH)
+	ret = []
+	for ID in idList: ret.append(ID[3:])
+	return ret
+
+def getExistingFourmIDFromName(name):
+	idList = os.listdir(util.FORUMS_PATH)
+	for ID in idList:
+		if name == ID[3:]: return ID
+	return None
+
 def getForumTestUrls(base,subpath=''):
 	urls = []
 	import urlparse
@@ -992,6 +1016,9 @@ class ForumBrowser:
 	def domain(self):
 		domain = self._url.split('://',1)[-1]
 		return domain.split('/')[0]
+	
+	def getForumBrowserURLFromForumURL(self,url):
+		return None
 	
 	def getThreadLinkRE(self,others=()):
 		ft = self.getForumType()
