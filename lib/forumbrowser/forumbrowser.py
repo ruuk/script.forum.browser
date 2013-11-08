@@ -1223,6 +1223,8 @@ class ForumBrowser:
 	def canGetUserPosts(self): return False
 	def canGetUserThreads(self): return False
 
+	def canGetUnreadThreads(self): return False
+	
 	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads() or self.canSearchAdvanced()
 	def canSearchPosts(self): return False
 	def canSearchThreads(self): return False

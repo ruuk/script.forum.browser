@@ -214,16 +214,25 @@
 			<control type="group">
 				<posx>20</posx>
 				<posy>665</posy>
+				
 				<control type="image">
 					<posx>0</posx>
 					<posy>-5</posy>
-					<width>252</width>
+					<width>172</width>
 					<height>60</height>
 					<texture border="30">forum-browser-dark-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
-					<posx>252</posx>
+					<posx>162</posx>
+					<posy>-5</posy>
+					<width>232</width>
+					<height>60</height>
+					<texture border="30">forum-browser-dark-white-box.png</texture>
+					<colordiffuse>AA000000</colordiffuse>
+				</control>
+				<control type="image">
+					<posx>384</posx>
 					<posy>-5</posy>
 					<width>252</width>
 					<height>60</height>
@@ -231,7 +240,15 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
-					<posx>504</posx>
+					<posx>624</posx>
+					<posy>-5</posy>
+					<width>232</width>
+					<height>60</height>
+					<texture border="30">forum-browser-dark-white-box.png</texture>
+					<colordiffuse>AA000000</colordiffuse>
+				</control>
+				<control type="image">
+					<posx>846</posx>
 					<posy>-5</posy>
 					<width>252</width>
 					<height>60</height>
@@ -239,17 +256,9 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="image">
-					<posx>756</posx>
+					<posx>1088</posx>
 					<posy>-5</posy>
-					<width>252</width>
-					<height>60</height>
-					<texture border="30">forum-browser-dark-white-box.png</texture>
-					<colordiffuse>AA000000</colordiffuse>
-				</control>
-				<control type="image">
-					<posx>1008</posx>
-					<posy>-5</posy>
-					<width>252</width>
+					<width>172</width>
 					<height>60</height>
 					<texture border="30">forum-browser-dark-white-box.png</texture>
 					<colordiffuse>AA000000</colordiffuse>
@@ -263,7 +272,7 @@
 					<ondown>105</ondown>
 					<posx>0</posx>
 					<posy>0</posy>
-					<width>232</width>
+					<width>152</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
@@ -272,20 +281,20 @@
 					<label>$ADDON[script.forum.browser 32905]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="201">
-					<description>The Button</description>
+					<description>Subscriptions</description>
 					<onleft>202</onleft>
 					<onright>203</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
-					<posx>252</posx>
+					<posx>162</posx>
 					<posy>0</posy>
-					<width>232</width>
+					<width>212</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
@@ -294,18 +303,18 @@
 					<label>$ADDON[script.forum.browser 32904]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
       
 				<control type="button" id="203">
-					<description>The Button</description>
+					<description>Messages</description>
 					<onleft>201</onleft>
-					<onright>204</onright>
+					<onright>208</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
-					<posx>504</posx>
+					<posx>384</posx>
 					<posy>0</posy>
 					<width>232</width>
 					<height>40</height>
@@ -316,20 +325,42 @@
 					<label>$ADDON[script.forum.browser 32909]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
-			      
+			    
+			    <control type="button" id="208">
+					<description>Unread Threads</description>
+					<onleft>203</onleft>
+					<onright>204</onright>
+					<onup>120</onup>
+					<ondown>105</ondown>
+					<posx>624</posx>
+					<posy>0</posy>
+					<width>212</width>
+					<height>40</height>
+					<visible>true</visible>
+					<colordiffuse>FFFFFFFF</colordiffuse>
+					<font>ForumBrowser-font13</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32565]</label>
+					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
+					<textcolor>FFFFFFFF</textcolor>
+					<disabledcolor>50FFFFFF</disabledcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+				</control>
+				
 				<control type="button" id="200">
-					<description>The Button</description>
+					<description>Settings</description>
 					<onleft>204</onleft>
 					<onright>120</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
-					<posx>1008</posx>
+					<posx>1088</posx>
 					<posy>0</posy>
-					<width>232</width>
+					<width>152</width>
 					<height>40</height>
 					<visible>true</visible>
 					<colordiffuse>FFFFFFFF</colordiffuse>
@@ -338,11 +369,10 @@
 					<label>$ADDON[script.forum.browser 32903]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
-				
 			</control>
       
 			<control type="group">
@@ -396,7 +426,7 @@
 				<width>1192</width>
 				<height>45</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -439,7 +469,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 						<visible>StringCompare(ListItem.Genre,)</visible>
@@ -481,7 +511,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 						<visible>StringCompare(ListItem.Genre,)</visible>
@@ -556,7 +586,7 @@
 			<control  type="group" id="199">
 				<control type="group" id="198">
 					<defaultcontrol>205</defaultcontrol>
-					<posx>20</posx>
+					<posx>100</posx>
 					<posy>665</posy>
 					<control type="group">
 						<animation effect="slide" end="0,-220" time="400" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
@@ -600,7 +630,7 @@
 						<hitrect x="746" y="-15" w="252" h="55" />
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search User</description>
-						<onleft>203</onleft>
+						<onleft>208</onleft>
 						<onright>200</onright>
 						<onup>207</onup>
 						<ondown>206</ondown>
@@ -615,9 +645,9 @@
 						<label>$ADDON[script.forum.browser 32919]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>50FFFFFF</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					
 					<control type="button">
@@ -639,7 +669,7 @@
 						<animation effect="slide" end="0,-100" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Threads</description>
-						<onleft>203</onleft>
+						<onleft>208</onleft>
 						<onright>200</onright>
 						<onup>207</onup>
 						<ondown>205</ondown>
@@ -654,9 +684,9 @@
 						<label>$ADDON[script.forum.browser 32918]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>50FFFFFF</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					
 					<control type="button">
@@ -678,7 +708,7 @@
 						<animation effect="slide" end="0,-50" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Posts</description>
-						<onleft>203</onleft>
+						<onleft>208</onleft>
 						<onright>200</onright>
 						<onup>206</onup>
 						<ondown>204</ondown>
@@ -693,20 +723,20 @@
 						<label>$ADDON[script.forum.browser 32917]</label>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>50FFFFFF</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 				</control>
 				<control type="button" id="204">
 					<description>Search</description>
 					<visible allowhiddenfocus="true">Control.HasFocus(204)</visible>
 					<onclick>Control.SetFocus(198)</onclick>
-					<onleft>203</onleft>
+					<onleft>208</onleft>
 					<onright>200</onright>
 					<onup>120</onup>
 					<ondown>105</ondown>
-					<posx>776</posx>
+					<posx>866</posx>
 					<posy>665</posy>
 					<width>232</width>
 					<height>40</height>
@@ -717,19 +747,19 @@
 					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="197">
 					<visible>!Control.IsVisible(204)</visible>
 					<description>Search Mouse</description>
 					<enable>Control.IsEnabled(204)</enable>
-					<onleft>203</onleft>
+					<onleft>208</onleft>
 					<onright>200</onright>
 					<onup>206</onup>
 					<ondown>204</ondown>
-					<posx>776</posx>
+					<posx>866</posx>
 					<posy>665</posy>
 					<width>232</width>
 					<height>40</height>
@@ -740,9 +770,9 @@
 					<label>$ADDON[script.forum.browser 32916]</label>
 					<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 					<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>50FFFFFF</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 		</control>

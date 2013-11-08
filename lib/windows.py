@@ -332,7 +332,7 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 	
 	def setupSearch(self):
 		self.searchRE = None
-		if self.search and not self.search.startswith('@!RECENT'):
+		if self.search and not (self.search.startswith('@!RECENT') or self.search.startswith('@!UNREAD')):
 			self.searchRE = [re.compile(re.sub('[\'"]','',self.search),re.I)]
 			words = self.getSearchWords(self.search)
 			if len(words) > 1:

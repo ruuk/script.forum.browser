@@ -1123,6 +1123,26 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		normal = self.sortDictList(normal, 'post_time')
 		return normal, pd
 	
+	def getUnreadThreads(self,page=0,sid='',callback=None,donecallback=None,page_data=None):
+		if page_data.searchID: sid = page_data.searchID
+		if not callback: callback = self.fakeCallback
+		while True:
+			result = self.server.get_unread_topic(page,int(page) + 19,sid)
+			if not result.get('result'):
+				err = str(result.get('result_text',''))
+				LOG('Unread Threads: %s' % err)
+				return self.finish(FBData(error=err),donecallback)
+			if not callback(90,self.lang(32103)): break
+			pd = self.getPageData(result,page)
+			pd.searchID = result.get('search_id')
+			threads = result.get('topics',[])
+			for n in threads: self.createThreadDict(n)
+			return self.finish(FBData(threads,pd),donecallback)
+			
+		if donecallback:
+			donecallback(None,None)
+		return (None,None)
+	
 	def searchThreads(self,terms,page=0,sid='',callback=None,donecallback=None,page_data=None):
 		if page_data.searchID: sid = page_data.searchID
 		if len(terms)  < self.getConfigInfo('min_search_length',3):
@@ -1228,6 +1248,8 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def canGetUserPosts(self): return 50
 	def canGetUserThreads(self): return 50
+	
+	def canGetUnreadThreads(self): return True
 	
 	def canSearch(self): return self.getConfigInfo('guest_search', True) or self.isLoggedIn()
 	def canSearchPosts(self): return self.canSearch()

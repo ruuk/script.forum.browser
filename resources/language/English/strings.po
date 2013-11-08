@@ -1942,6 +1942,10 @@ msgctxt "#32564"
 msgid "Use Default Image Save Path Without Asking"
 msgstr ""
 
+msgctxt "#32565"
+msgid "Unread Threads"
+msgstr ""
+
 
 #empty strings from id 32524 to 32899
 

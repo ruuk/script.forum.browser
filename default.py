@@ -2140,6 +2140,9 @@ class ThreadsWindow(windows.PageWindow):
 			if self.search == '@!RECENTTHREADS!@':
 				t = self.getThread(FB.getUserThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='USERRECENTTHREADS')
 				t.setArgs(uname=self.search_uname,page=page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
+			elif self.search == '@!UNREAD!@':
+				t = self.getThread(FB.getUnreadThreads,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='UNREADTHREADS')
+				t.setArgs(page=page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData)
 			elif self.fid:
 				t = self.getThread(FB.searchAdvanced,finishedCallback=self.doFillThreadList,errorCallback=self.errorCallback,name='SEARCHTHREADS')
 				t.setArgs(self.search,page or 0,callback=t.progressCallback,donecallback=t.finishedCallback,page_data=self.pageData,fid=self.fid)
@@ -2507,6 +2510,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.getControl(201).setEnabled(False)
 		self.getControl(203).setEnabled(False)
 		self.getControl(204).setEnabled(False)
+		self.getControl(208).setEnabled(False)
 		if all_at_once:
 			t = self.getThread(self.openForum,finishedCallback=self.doFillForumList,errorCallback=self.errorCallback,name='OPENFORUM')
 			t.setArgs(forum=forum,url=url,callback=t.progressCallback,donecallback=t.finishedCallback)
@@ -2905,6 +2909,8 @@ class ForumsWindow(windows.BaseWindow):
 			searchThreads(FB.getForumID())
 		elif controlID == 207:
 			searchUser()
+		elif controlID == 208:
+			self.showUnread()
 		elif controlID == 120:
 			if not self.empty: self.stopThread()
 			self.openThreadsWindow()
@@ -2970,8 +2976,7 @@ class ForumsWindow(windows.BaseWindow):
 						if FB.canSubscribeForum(fid): d.addItem('subscribecurrentforum', T(32243))
 					if FB.canSearchAdvanced('FID'):
 						d.addItem('search','{0} [B][I]{1}[/I][/B]'.format(T(32371),item.getProperty('topic')[:30]))
-				if FB.canGetOnlineUsers():
-					d.addItem('online',T(32369))
+				if FB.canGetOnlineUsers(): d.addItem('online',T(32369))
 				d.addItem('foruminfo',T(32370))
 			d.addItem('bookmarks',T(32554))
 			d.addItem('refresh',T(32054))
@@ -3007,7 +3012,10 @@ class ForumsWindow(windows.BaseWindow):
 		for k,v in FB.getForumInfo():
 			out += u'[B]%s[/B]: [COLOR FFA00000]%s[/COLOR][CR]' % (k.replace('_',' ').title(),v)
 		dialogs.showMessage(T(32372),out,scroll=True)
-				
+			
+	def showUnread(self):
+		dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",search_terms='@!UNREAD!@',topic=T(32565))
+			
 	def preClose(self):
 		if not getSetting('ask_close_on_exit') == 'true': return True
 		if self.closed: return True
@@ -3044,6 +3052,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.getControl(205).setEnabled(FB.canSearchPosts())
 		self.getControl(206).setEnabled(FB.canSearchThreads())
 		self.getControl(207).setEnabled(FB.canSearchAdvanced('UNAME'))
+		self.getControl(208).setEnabled(FB.canGetUnreadThreads())
 		
 	def openSettings(self):
 		#if not FB: return
