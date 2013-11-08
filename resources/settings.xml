@@ -14,6 +14,7 @@
     <setting id="message_dialog_always_show_ok" type="bool" label="32014" default="false" />
     <setting id="enable_ssl" type="bool" label="32235" default="false" visible="false"/>
     <setting id="save_logos" type="bool" label="32245" default="false" />
+    <setting id="assume_default_image_save_path" type="bool" label="32564" default="false" />
     <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
   </category>
   <category label="32539">

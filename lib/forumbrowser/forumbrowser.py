@@ -427,6 +427,12 @@ class ForumData:
 class Action:
 	def __init__(self,action=''):
 		self.action = action
+		
+class ChangeForumAction(Action):
+	def __init__(self,url):
+		Action.__init__(self, 'CHANGE-FORUM')
+		self.url = url
+		
 
 class PMLink:
 	linkImageFilter = re.compile('https?://.+?\.(?:jpg|jpeg|png|gif|bmp)$')

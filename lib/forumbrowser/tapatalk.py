@@ -58,6 +58,7 @@ class CookieTransport(xmlrpclib.Transport):
 		xmlrpclib.Transport.__init__(self)
 		self.lastCharset = 'utf-8'
 		self._loggedIn = False
+		self.FB = None
 		self.lastCall = time.time()
 		self.jar = cookielib.CookieJar()
 		self.endheadersTakesOneArg = httplib.HTTPConnection.endheaders.func_code.co_argcount < 2 #@UndefinedVariable
@@ -116,7 +117,7 @@ class CookieTransport(xmlrpclib.Transport):
 				response = h.getresponse(buffering=True)
 				
 			try:
-				self.lastCharset = response.info().get('content-type','utf-8').split('charset=')[-1]
+				self.lastCharset = response.info().get('content-type','utf-8').split('charset=',1)[-1]
 			except:
 				LOG('Tapatalk: CookieTransport.single_request(): Failed to set lastCharset')
 			
@@ -127,6 +128,10 @@ class CookieTransport(xmlrpclib.Transport):
 				#Mobiquo_is_login: false
 				if DEBUG:
 					LOG('  %s=%s' % (k,v))
+				if self.FB.isProboards:
+					if k.lower() == 'set-cookie':
+						if 's_app=' in v or self.FB.user in v:
+							self._loggedIn = True
 				if k.lower() == 'mobiquo_is_login':
 					#print '%s=%s' % (k,v)
 					self._loggedIn = (v =='true')
@@ -147,6 +152,7 @@ class CookieTransport(xmlrpclib.Transport):
 			raise
 
 		#discard any response data and raise exception
+		html = ''
 		if (response.getheader("content-length", 0)):
 			html = response.read()
 		if response.status == httplib.MOVED_PERMANENTLY:
@@ -753,6 +759,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			self._url = 'http://%s/mobiquo/mobiquo.php' % forum
 		self.forum = forum
 		self.transport = CookieTransport()
+		self.transport.FB = self
 		url = self._url
 		#if getSetting('enable_ssl') == 'true':
 		#	LOG('Enabling SSL')
@@ -981,7 +988,14 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			if not callback(20,self.lang(32102)): break
 			
 			try:
-				flist = self.server.get_forum()
+				if self.apiOK(4):
+					try:
+						flist = self.server.get_forum(True)
+					except xmlrpclib.Fault:
+						LOG('WARNING: API 4 reported but get_forum() failed with level 4 params')
+						flist = self.server.get_forum()
+				else:
+					flist = self.server.get_forum()
 			except:
 				em = ERROR('ERROR GETTING FORUMS')
 				#callback(-1,'%s' % em)

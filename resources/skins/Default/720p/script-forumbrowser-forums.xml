@@ -88,62 +88,67 @@
 				<wrapmultiline>true</wrapmultiline>
 			</control>
 			
-			<control type="image" id="300">
+			<control type="group">
+				<description>Progress Indicator</description>
 				<posx>1010</posx>
-				<posy>35</posy>
-				<width>130</width>
-				<height>60</height>
-				<texture>-</texture>
-			</control>
-			<control type="image">
-				<description>bg</description>
-				<posx>1011</posx>
-				<posy>36</posy>
-				<width>128</width>
-				<height>58</height>
-				<texture border="20">forum-browser-white-boxr-no-border.png</texture>
-				<visible>Control.isVisible(105)</visible>
-			</control>
-			<control type="image" id="310">
-				<description>Progress</description>
-				<posx>1010</posx>
-				<posy>35</posy>
-				<width>130</width>
-				<height>60</height>
-				<colordiffuse>FF555555</colordiffuse>
-				<texture border="20">forum-browser-grey-boxr.png</texture>
-				<visible>Control.isVisible(105)</visible>
-			</control>
-			<control type="image">
-				<description>Loading</description>
-				<posx>968</posx>
-				<posy>49</posy>
-				<width>32</width>
-				<height>32</height>
-				<texture>forum-browser-loading3.png</texture>
-				<animation effect="rotate" end="-3600" center="984,65" time="20000" loop="true" condition="Control.IsVisible(105)">Conditional</animation>
-				<visible>Control.isVisible(105)</visible>
-			</control>
-			<control type="button" id="105">
-				<description>Stop Button</description>
-				<posx>1010</posx>
-				<posy>35</posy>
-				<width>130</width>
-				<height>60</height>
-				<onleft>202</onleft>
-				<onright>200</onright>
-				<onup>202</onup>
-				<ondown>120</ondown>
-				<font>ForumBrowser-font12</font>
-				<textcolor>FF000000</textcolor>
-				<focusedcolor>FF000000</focusedcolor>
-				<aligny>center</aligny>
-				<align>center</align>
-				<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
-				<colordiffuse>FFFF0000</colordiffuse>
-				<pulseonselect>false</pulseonselect>
-				<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>
-				<texturenofocus border="20">forum-browser-white-trans-boxr-nf.png</texturenofocus>
+				<posy>25</posy>
+					<control type="image" id="300">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>130</width>
+					<height>60</height>
+					<texture>-</texture>
+				</control>
+				<control type="image">
+					<description>bg</description>
+					<posx>1</posx>
+					<posy>1</posy>
+					<width>128</width>
+					<height>58</height>
+					<texture border="20">forum-browser-white-boxr-no-border.png</texture>
+					<visible>Control.isVisible(105)</visible>
+				</control>
+				<control type="image" id="310">
+					<description>Progress</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>130</width>
+					<height>60</height>
+					<colordiffuse>FF555555</colordiffuse>
+					<texture border="20">forum-browser-grey-boxr.png</texture>
+					<visible>Control.isVisible(105)</visible>
+				</control>
+				<control type="image">
+					<description>Loading</description>
+					<posx>-42</posx>
+					<posy>14</posy>
+					<width>32</width>
+					<height>32</height>
+					<texture>forum-browser-loading3.png</texture>
+					<animation effect="rotate" end="-3600" center="-26,30" time="20000" loop="true" condition="Control.IsVisible(105)">Conditional</animation>
+					<visible>Control.isVisible(105)</visible>
+				</control>
+				<control type="button" id="105">
+					<description>Stop Button</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>130</width>
+					<height>60</height>
+					<onleft>202</onleft>
+					<onright>200</onright>
+					<onup>202</onup>
+					<ondown>120</ondown>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FF000000</textcolor>
+					<focusedcolor>FF000000</focusedcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
+					<colordiffuse>FFFF0000</colordiffuse>
+					<pulseonselect>false</pulseonselect>
+					<texturefocus border="20">forum-browser-white-trans-boxr.png</texturefocus>
+					<texturenofocus border="20">forum-browser-white-trans-boxr-nf.png</texturenofocus>
+				</control>
 			</control>
 			
 			<control type="image" id="351">
@@ -167,17 +172,36 @@
 				<align>right</align>
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
 			</control>
-			<control type="label" id="109">
+			
+			<control type="group">
 				<description>Version</description>
 				<posx>1250</posx>
 				<posy>95</posy>
-				<width>200</width>
-				<height>10</height>
-				<font>ForumBrowser-font10</font>
-				<textcolor>FF000000</textcolor>
-				<aligny>center</aligny>
-				<align>right</align>
+				<control type="label">
+					<visible>StringCompare(Window.Property(header_is_dark),1)</visible>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>200</width>
+					<height>10</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>right</align>
+					<label>$INFO[Control.GetLabel(109)]</label>
+				</control>
+				<control type="label" id="109">
+					<visible>!StringCompare(Window.Property(header_is_dark),1)</visible>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>200</width>
+					<height>10</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF000000</textcolor>
+					<aligny>center</aligny>
+					<align>right</align>
+				</control>
 			</control>
+			
 			<control type="group">
 				<posx>20</posx>
 				<posy>665</posy>
@@ -517,17 +541,34 @@
 				</control>
 			</control>
 			
-			<control type="label">
+			<control type="group">
 				<description>Stats</description>
-				<posx>60r</posx>
-				<posy>577</posy>
-				<width>900</width>
-				<height>30</height>
-				<font>ForumBrowser-font10</font>
-				<textcolor>FF222222</textcolor>
-				<aligny>center</aligny>
-				<align>right</align>
-				<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+				<posx>110r</posx>
+				<posy>85</posy>
+				<control type="label">
+					<visible>StringCompare(Window.Property(header_is_dark),1)</visible>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>900</width>
+					<height>30</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FFBBBBBB</textcolor>
+					<aligny>center</aligny>
+					<align>right</align>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+				</control>
+				<control type="label">
+					<visible>!StringCompare(Window.Property(header_is_dark),1)</visible>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>900</width>
+					<height>30</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF444444</textcolor>
+					<aligny>center</aligny>
+					<align>right</align>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+				</control>
 			</control>
 		
 			<control  type="group" id="199">

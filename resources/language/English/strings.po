@@ -1922,6 +1922,27 @@ msgctxt "#32559"
 msgid "Add Forum Manually"
 msgstr ""
 
+msgctxt "#32560"
+msgid "Use Default?"
+msgstr ""
+
+msgctxt "#32561"
+msgid "Use default path:"
+msgstr ""
+
+msgctxt "#32562"
+msgid "Or choose a new path?"
+msgstr ""
+
+msgctxt "#32563"
+msgid "Default"
+msgstr ""
+
+msgctxt "#32564"
+msgid "Use Default Image Save Path Without Asking"
+msgstr ""
+
+
 #empty strings from id 32524 to 32899
 
 #. Previous

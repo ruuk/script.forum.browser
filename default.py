@@ -187,27 +187,33 @@ class ImagesDialog(windows.BaseWindowDialog):
 			source = result[0]
 		filename = dialogs.doKeyboard(T(32259), firstfname)
 		if filename == None: return
-		default = getSetting('last_download_path') or ''
-		result = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True,default)
-		setSetting('last_download_path',result)
+		path = getSetting('last_download_path') or ''
+		if path:
+			if not util.getSetting('assume_default_image_save_path', False):
+				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
+				if new: path = ''
+		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True,'/')
+		if path == '/': return
+		setSetting('last_download_path',path)
 		if not os.path.exists(source): return
-		target = os.path.join(result,filename)
+		target = os.path.join(path,filename)
 		ct = 1
 		original = filename
 		while os.path.exists(target):
 			fname, ext = os.path.splitext(original)
 			filename = fname + '_' + str(ct) + ext
 			ct+=1
-			if os.path.exists(os.path.join(result,filename)): continue
+			if os.path.exists(os.path.join(path,filename)): continue
 			yes = dialogs.dialogYesNo(T(32261),T(32262),T(32263),filename + '?',T(32264),T(32265))
+			if yes is None: return
 			if not yes:
 				ct = 0
 				filename = dialogs.doKeyboard(T(32259), filename)
 				original = filename
 				if filename == None: return
-			target = os.path.join(result,filename)
-		import shutil
-		shutil.copy(source, target)
+			target = os.path.join(path,filename)
+		import xbmcvfs
+		xbmcvfs.copy(source, target)
 		dialogs.showMessage(T(32266),T(32267),os.path.basename(target),success=True)
 
 ######################################################################################
@@ -1263,7 +1269,7 @@ class MessageWindow(windows.BaseWindow):
 			video = self.videoHandler.getVideoObject(link.url)
 			if not video: video = self.videoHandler.getVideoObject(link.text)
 			if video and video.isVideo: d.addItem('copyvideo',T(32315))
-		d.addItem('open_as_forum','Open As Forum Link')
+		#d.addItem('open_as_forum','Open As Forum Link')
 				
 		if d.isEmpty(): return
 		result = d.getResult()
@@ -1283,11 +1289,13 @@ class MessageWindow(windows.BaseWindow):
 			else:
 				share.page = link.text
 			CLIPBOARD.setClipboard(share)
-# 		elif result == 'open_as_forum':
-# 			forumID = forumbrowser.getForumIDByURL(link.url)
-# 			if not forumID: return
-# 			if forumID == FB.getForumID():
-# 				pass
+		elif result == 'open_as_forum':
+			forumID = forumbrowser.getForumIDByURL(link.url)
+			if not forumID: return
+			self.action = forumbrowser.ChangeForumAction(link.url)
+			self.doClose()
+			#if forumID == FB.getForumID():
+			#	pass
 			
 				
 	def doImageMenu(self):
@@ -1423,6 +1431,7 @@ class RepliesWindow(windows.PageWindow):
 	info_display = {'postcount':'posts','joindate':'joined'}
 	def __init__( self, *args, **kwargs ):
 		windows.PageWindow.__init__( self,total_items=int(kwargs.get('reply_count',0)),*args, **kwargs )
+		self.action = None
 		self.setPageData(FB)
 		self.pageData.isReplies = True
 		self.threadItem = item = kwargs.get('item')
@@ -1789,6 +1798,9 @@ class RepliesWindow(windows.PageWindow):
 			elif w.action.action == 'GOTOPOST':
 				self.firstRun = True
 				self.fillRepliesList(self.pageData.getPageNumber(),pid=w.action.pid)
+			elif w.action.action == 'CHANGE-FORUM':
+				self.action = w.action
+				self.doClose()
 		del w
 		
 	def onClick(self,controlID):
@@ -2072,6 +2084,7 @@ def unSubscribeForum(fid):
 ######################################################################################
 class ThreadsWindow(windows.PageWindow):
 	def __init__( self, *args, **kwargs ):
+		self.action = None
 		self.fid = kwargs.get('fid','')
 		self.topic = kwargs.get('topic','')
 		self.forumItem = kwargs.get('item')
@@ -2274,13 +2287,19 @@ class ThreadsWindow(windows.PageWindow):
 		fid = item.getProperty('fid') or self.fid
 		topic = item.getProperty('title')
 		if item.getProperty('is_forum') == 'True':
-			dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",fid=fid,topic=topic,item=item)
+			w = dialogs.openWindow(ThreadsWindow,"script-forumbrowser-threads.xml",return_window=True,fid=fid,topic=topic,item=item)
 			#self.fid = fid
 			#self.topic = topic
 			#self.setTheme()
 			#self.fillThreadList()
 		else:
-			dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,fid=fid,topic=topic,item=item,search_re=self.searchRE,forumElements=forumElements)
+			w = dialogs.openWindow(RepliesWindow,"script-forumbrowser-replies.xml" ,return_window=True,fid=fid,topic=topic,item=item,search_re=self.searchRE,forumElements=forumElements)
+		
+		action = w.action
+		del w
+		if action and action.action == 'CHANGE-FORUM':
+			self.action = action
+			self.doClose()
 
 	def onFocus( self, controlId ):
 		self.controlId = controlId
@@ -2561,8 +2580,15 @@ class ForumsWindow(windows.BaseWindow):
 			self.getControl(100).setColorDiffuse(hc)
 			self.getControl(251).setVisible(False)
 		else:
+			self.headerIsDark = False
 			self.getControl(100).setColorDiffuse('FF888888')
 			self.getControl(251).setVisible(True)
+			
+		if self.headerIsDark:
+			self.setProperty('header_is_dark', '1')
+		else:
+			self.setProperty('header_is_dark', '0')
+			
 		self.setLabels()
 		
 	def hexColorIsDark(self,h):
@@ -4292,7 +4318,9 @@ class Downloader:
 	def getUrlFile(self,url,target=None,callback=None):
 		if not target: return #do something else eventually if we need to
 		if not callback: callback = self.fakeCallback
-		urlObj = urllib2.urlopen(url)
+		opener = urllib2.build_opener()
+		opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+		urlObj = opener.open(url)
 		size = int(urlObj.info().get("content-length",-1))
 		ftype = urlObj.info().get("content-type",'')
 		ext = None

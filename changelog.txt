@@ -43,7 +43,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.27
+Current Version : 2.1.28
+
+*** 2.1.28 ***
+
+Moved forum stats (and progress indicator to make room) on Light and Dark skins
+Stats and version now change between black/white on light/dark themes
+Now gets forum descriptions for Tapatalk API v4 forums (you need to specifically ask for it after v3)
+Workaround for ProBoards forums not properly reporting logged in status
+When saving an image it now asks if you want to use the default or change the path
+When exiting the dialog asking if you want to set a new image file name when the file name exists, it now aborts the save instead of saving
+Fix for some images not saving because of forbidden (403) errors
+Added a Settings:General option 'Use Default Image Save Path Without Asking'
 
 *** 2.1.27 ***
 
