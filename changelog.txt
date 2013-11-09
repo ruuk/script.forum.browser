@@ -49,6 +49,7 @@ Current Version : 2.1.30
 
 Add as Settings:General option 'Don't Ask For Image Filename When Saving'
 Fix for XBMC skins button offset messing with Forum Browser skins
+Fix for inital source when selecting a new path when saving an image
 
 *** 2.1.29 ***
 

@@ -1616,7 +1616,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Failed to create thread: ' + str(text))
 			return text
 	
-	def canGetOnlineUsers(self): return self.getConfigInfo('get_online_users', False)
+	def canGetOnlineUsers(self): return self.getConfigInfo('get_online_users', True)
 	
 	def getOnlineUsers(self):
 		result = self.server.get_online_users()

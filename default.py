@@ -191,7 +191,7 @@ class ImagesDialog(windows.BaseWindowDialog):
 			if not util.getSetting('assume_default_image_save_path', False):
 				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
 				if new: path = ''
-		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True,'/')
+		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True)
 		if path == '/': return
 		setSetting('last_download_path',path)
 		if not os.path.exists(source): return
