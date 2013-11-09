@@ -79,7 +79,7 @@
 				<font>ForumBrowser-font10</font>
 				<align>center</align>
 				<aligny>center</aligny>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 			</control>
 			<control type="image">
 				<posx>48</posx>

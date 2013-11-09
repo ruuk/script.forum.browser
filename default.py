@@ -185,8 +185,7 @@ class ImagesDialog(windows.BaseWindowDialog):
 				dialogs.showMessage(T(32257),T(32258),success=False)
 				return
 			source = result[0]
-		filename = dialogs.doKeyboard(T(32259), firstfname)
-		if filename == None: return
+
 		path = getSetting('last_download_path') or ''
 		if path:
 			if not util.getSetting('assume_default_image_save_path', False):
@@ -196,6 +195,11 @@ class ImagesDialog(windows.BaseWindowDialog):
 		if path == '/': return
 		setSetting('last_download_path',path)
 		if not os.path.exists(source): return
+		if util.getSetting('dont_ask_image_filename', False):
+			filename = firstfname
+		else:
+			filename = dialogs.doKeyboard(T(32259), firstfname)
+			if filename == None: return
 		target = os.path.join(path,filename)
 		ct = 1
 		original = filename

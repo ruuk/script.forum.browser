@@ -93,6 +93,7 @@
 				</control>
 				<control type="group">
 					<control type="button" id="200">
+						<textoffsetx>0</textoffsetx>
 						<description>Previous</description>
 						<onleft>201</onleft>
 						<onright>105</onright>
@@ -111,6 +112,7 @@
 						<texturenofocus>forum-browser-dark-left-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="202">
+						<textoffsetx>0</textoffsetx>
 						<description>Next</description>
 						<onleft>106</onleft>
 						<onright>201</onright>
@@ -129,6 +131,7 @@
 						<texturenofocus>forum-browser-dark-right-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="105">
+						<textoffsetx>0</textoffsetx>
 						<description>Page Button</description>
 						<posx>25</posx>
 						<posy>0</posy>
@@ -143,9 +146,9 @@
 						<align>center</align>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
@@ -177,6 +180,7 @@
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="button" id="106">
+					<textoffsetx>0</textoffsetx>
 					<description>Stop Button</description>
 					<posx>25</posx>
 					<posy>0</posy>
@@ -203,6 +207,7 @@
 				<posx>1200</posx>
 				<posy>15</posy>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Close Button</description>
 					<posx>30</posx>
 					<posy>0</posy>
@@ -221,7 +226,7 @@
 					<width>400</width>
 					<height>10</height>
 					<font>ForumBrowser-font10</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
 				</control>
@@ -243,7 +248,7 @@
 				<width>1192</width>
 				<height>45</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -257,7 +262,7 @@
 				<width>1192</width>
 				<height>45</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -319,7 +324,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<selectedcolor>FF000000</selectedcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
@@ -357,7 +362,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label2][/B]</label>
 						<visible>StringCompare(ListItem.property(unread),unread)</visible>
@@ -403,7 +408,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>StringCompare(ListItem.Director,)</visible>
@@ -440,7 +445,7 @@
 						<height>38</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label2][/B]</label>
 						<visible>StringCompare(ListItem.property(unread),unread) + Control.IsVisible(400)</visible>
@@ -466,7 +471,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label2][/B]</label>
 							<visible>StringCompare(ListItem.property(unread),unread)</visible>

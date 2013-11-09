@@ -139,6 +139,7 @@
 					<visible>StringCompare(Window.Property(hidebutton),)</visible>
 				</control>
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>670</posx>
 					<posy>380</posy>
@@ -156,7 +157,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<onclick>PreviousMenu</onclick>
 				</control>
 				<control type="scrollbar" id="123">

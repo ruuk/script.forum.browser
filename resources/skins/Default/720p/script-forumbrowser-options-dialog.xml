@@ -33,7 +33,7 @@
 				<height>20</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>center</align>
 			</control>
 			<control type='list' id="120">
@@ -70,7 +70,7 @@
 						<height>60</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -105,7 +105,7 @@
 						<height>60</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -136,7 +136,7 @@
 				<width>420</width>
 				<height>580</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>left</align>
 				<info>Container(120).ListItem.Label2</info>
 			</control>

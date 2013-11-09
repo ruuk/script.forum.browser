@@ -125,7 +125,7 @@
 							<height>30</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Label</info>
 						</control>
@@ -137,7 +137,7 @@
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>Control.IsVisible(115)</visible>
@@ -200,7 +200,7 @@
 							<height>30</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Label</info>
 						</control>
@@ -246,7 +246,7 @@
 							<height>30</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Label</info>
 						</control>
@@ -279,7 +279,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 			<visible>!Control.IsVisible(115)</visible>
@@ -291,7 +291,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 			<visible>Control.IsVisible(115)</visible>
@@ -342,7 +342,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>[B]Tapatalk[/B]</label>
 				</control>
@@ -368,7 +368,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>[B]Forumrunner[/B]</label>
 				</control>
@@ -394,7 +394,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>[B]ProBoards[/B]</label>
 				</control>
@@ -420,7 +420,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>[B]Yuku[/B]</label>
 				</control>
@@ -446,7 +446,7 @@
 					<height>40</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>[B]Parser Browser[/B]</label>
 				</control>
@@ -491,7 +491,7 @@
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>$ADDON[script.forum.browser 32936]</label>
 				</control>
@@ -502,7 +502,7 @@
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<label>$ADDON[script.forum.browser 32937]</label>
 				</control>
@@ -518,7 +518,7 @@
 				<width>420</width>
 				<height>380</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>center</align>
 				<info>Container(120).ListItem.Label2</info>
 			</control>

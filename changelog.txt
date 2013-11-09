@@ -43,7 +43,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.29
+Current Version : 2.1.30
+
+*** 2.1.30 ***
+
+Add as Settings:General option 'Don't Ask For Image Filename When Saving'
+Fix for XBMC skins button offset messing with Forum Browser skins
 
 *** 2.1.29 ***
 

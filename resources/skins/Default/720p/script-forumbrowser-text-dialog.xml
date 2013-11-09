@@ -67,6 +67,7 @@
 			</control>
 			
 			<control type="button" id="110">
+				<textoffsetx>0</textoffsetx>
 				<description>Close Button</description>
 				<posx>1150</posx>
 				<posy>15</posy>

@@ -1946,6 +1946,10 @@ msgctxt "#32565"
 msgid "Unread Threads"
 msgstr ""
 
+msgctxt "#32566"
+msgid "Don't Ask For Image Filename When Saving"
+msgstr ""
+
 
 #empty strings from id 32524 to 32899
 

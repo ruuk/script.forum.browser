@@ -42,6 +42,7 @@
 			</control>
 
 			<control type="button" id="200">
+				<textoffsetx>0</textoffsetx>
 				<description>The Button</description>
 				<posx>320</posx>
 				<posy>625</posy>
@@ -58,6 +59,7 @@
 				<texturenofocus>forum-browser-video-left-arrow.png</texturenofocus>
 			</control>
 			<control type="button" id="202">
+				<textoffsetx>0</textoffsetx>
 				<description>The Button</description>
 				<posx>738</posx>
 				<posy>625</posy>

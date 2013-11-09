@@ -193,7 +193,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label2][/B]</label>
 							<visible>!StringCompare(ListItem.Property(unread),)</visible>
@@ -220,7 +220,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label2][/B]</label>
 							<visible>!StringCompare(ListItem.Property(unread),)</visible>
@@ -297,7 +297,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label2][/B]</label>
 							<visible>!StringCompare(ListItem.Property(unread),)</visible>
@@ -324,7 +324,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label2][/B]</label>
 							<visible>!StringCompare(ListItem.Property(unread),)</visible>
@@ -361,6 +361,7 @@
 				<height>490</height>
 			
 				<control type="button" id="200">
+					
 					<description>Prev</description>
 					<onright>120</onright>
 					<onup>106</onup>
@@ -377,9 +378,9 @@
 					<label>$ADDON[script.forum.browser 32529]</label>
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button">
 					<description>Prev Disabled</description>
@@ -400,12 +401,13 @@
 					<label>$INFO[Control.GetLabel(200)]</label>
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="105">
+					
 					<description>Page</description>
 					<onright>120</onright>
 					<onup>200</onup>
@@ -421,12 +423,13 @@
 					<textoffsetx>40</textoffsetx>
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 
 				<control type="button" id="202">
+					
 					<description>Next</description>
 					<onright>120</onright>
 					<onup>105</onup>
@@ -443,9 +446,9 @@
 					<label>$ADDON[script.forum.browser 32530]</label>
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>s>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button">
 					<description>Next Disabled</description>
@@ -466,12 +469,13 @@
 					<label>$INFO[Control.GetLabel(202)]</label>
 					<texturefocus>forum-browser-video-select-indicator.png</texturefocus>s>
 					<texturenofocus>forum-browser-video-unselect.png</texturenofocus>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<disabledcolor>FF555555</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="106">
+					
 					<description>Stop Button</description>
 					<posx>300r</posx>
 					<posy>141</posy>
@@ -481,8 +485,8 @@
 					<onup>202</onup>
 					<ondown>200</ondown>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
-					<focusedcolor>white</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<aligny>center</aligny>
 					<align>right</align>
 					<textoffsetx>40</textoffsetx>
@@ -515,7 +519,7 @@
 				<width>1140</width>
 				<height>25</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>top</aligny>
 				<label>[B]$INFO[Container(120).ListItem.Property(title)][/B]</label>
 			</control>
@@ -605,7 +609,7 @@
 				<width>230</width>
 				<height>60</height>
 				<font>ForumBrowser-font30</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<label>[B]$ADDON[script.forum.browser 32911][/B]</label>
 				<wrapmultiline>true</wrapmultiline>
@@ -617,7 +621,7 @@
 				<width>1000</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[B]$ADDON[script.forum.browser 32915][/B]</label>
@@ -638,6 +642,7 @@
 			</control>
 
 			<control type="button" id="110">
+				<textoffsetx>0</textoffsetx>
 				<description>Close Button</description>
 				<posx>34r</posx>
 				<posy>10</posy>

@@ -45,6 +45,7 @@
 					<texture border="10">forum-browser-keyboard/forum-browser-keyboard-boxr.png</texture>
 				</control>
 				<control type="button" id="299">
+					<textoffsetx>0</textoffsetx>
 					<description>smile</description>
 					<posx>20</posx>
 					<posy>20</posy>
@@ -70,6 +71,7 @@
 					<onclick>SendClick(,48)</onclick>
 				</control>
 				<control type="button" id="298">
+					<textoffsetx>0</textoffsetx>
 					<description>frown</description>
 					<posx>60</posx>
 					<posy>20</posy>
@@ -95,6 +97,7 @@
 					<onclick>SendClick(,57)</onclick>
 				</control>
 				<control type="button" id="297">
+					<textoffsetx>0</textoffsetx>
 					<description>smile</description>
 					<posx>20</posx>
 					<posy>60</posy>
@@ -120,6 +123,7 @@
 					<onclick>SendClick(,48)</onclick>
 				</control>
 				<control type="button" id="296">
+					<textoffsetx>0</textoffsetx>
 					<description>frown</description>
 					<posx>60</posx>
 					<posy>60</posy>
@@ -145,6 +149,7 @@
 					<onclick>SendClick(,68)</onclick>
 				</control>
 				<control type="button" id="295">
+					<textoffsetx>0</textoffsetx>
 					<description>smile</description>
 					<posx>20</posx>
 					<posy>100</posy>
@@ -170,6 +175,7 @@
 					<onclick>SendClick(,80)</onclick>
 				</control>
 				<control type="button" id="294">
+					<textoffsetx>0</textoffsetx>
 					<description>frown</description>
 					<posx>60</posx>
 					<posy>100</posy>
@@ -194,6 +200,7 @@
 					<onclick>SendClick(,79)</onclick>
 				</control>
 				<control type="button" id="293">
+					<textoffsetx>0</textoffsetx>
 					<description>smile</description>
 					<posx>20</posx>
 					<posy>140</posy>
@@ -221,6 +228,7 @@
 					<onclick>SendClick(,81)</onclick>
 				</control>
 				<control type="button" id="292">
+					<textoffsetx>0</textoffsetx>
 					<description>frown</description>
 					<posx>60</posx>
 					<posy>140</posy>
@@ -247,6 +255,7 @@
 					<onclick>SendClick(,48)</onclick>
 				</control>
 				<control type="button" id="291">
+					<textoffsetx>0</textoffsetx>
 					<description>More</description>
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_siteSmilies),1) + StringCompare(Window(10000).Property(ForumBrowser_modKeyboard),1)</visible>
 					<posx>20</posx>
@@ -261,7 +270,7 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<focusedcolor>FF000000</focusedcolor>
 					<onclick>RunScript(script.forum.browser,smilies)</onclick>
 				</control>
@@ -337,7 +346,7 @@
 				<align>left</align>
 				<aligny>top</aligny>
 				<wrapmultiline>true</wrapmultiline>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 			</control>
 				
 			<control type="group">
@@ -457,6 +466,7 @@
 				</control>
 			
 				<control type="button" id="300">
+					<textoffsetx>5</textoffsetx>
 					<description>DONE button</description>
 					<posx>0</posx>
 					<posy>0</posy>
@@ -472,9 +482,10 @@
 					<align>left</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="48">
+					<textoffsetx>0</textoffsetx>
 					<description>'0' button</description>
 					<posx>100</posx>
 					<posy>0</posy>
@@ -489,9 +500,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="49">
+					<textoffsetx>0</textoffsetx>
 					<description>'1' button</description>
 					<posx>135</posx>
 					<posy>0</posy>
@@ -506,9 +518,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="50">
+					<textoffsetx>0</textoffsetx>
 					<description>'2' button</description>
 					<posx>170</posx>
 					<posy>0</posy>
@@ -523,9 +536,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="51">
+					<textoffsetx>0</textoffsetx>
 					<description>'3' button</description>
 					<posx>205</posx>
 					<posy>0</posy>
@@ -540,9 +554,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="52">
+					<textoffsetx>0</textoffsetx>
 					<description>'4' button</description>
 					<posx>240</posx>
 					<posy>0</posy>
@@ -557,9 +572,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="53">
+					<textoffsetx>0</textoffsetx>
 					<description>'5' button</description>
 					<posx>275</posx>
 					<posy>0</posy>
@@ -574,9 +590,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="54">
+					<textoffsetx>0</textoffsetx>
 					<description>'6' button</description>
 					<posx>310</posx>
 					<posy>0</posy>
@@ -591,9 +608,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="55">
+					<textoffsetx>0</textoffsetx>
 					<description>'7' button</description>
 					<posx>345</posx>
 					<posy>0</posy>
@@ -608,9 +626,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="56">
+					<textoffsetx>0</textoffsetx>
 					<description>'8' button</description>
 					<posx>380</posx>
 					<posy>0</posy>
@@ -625,9 +644,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="57">
+					<textoffsetx>0</textoffsetx>
 					<description>'9' button</description>
 					<posx>415</posx>
 					<posy>0</posy>
@@ -642,9 +662,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="radiobutton" id="302">
+					<textoffsetx>5</textoffsetx>
 					<description>SHIFT button</description>
 					<posx>0</posx>
 					<posy>25</posy>
@@ -663,9 +684,10 @@
 					<align>left</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font10</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="65">
+					<textoffsetx>0</textoffsetx>
 					<description>'A' button</description>
 					<posx>100</posx>
 					<posy>25</posy>
@@ -680,9 +702,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="66">
+					<textoffsetx>0</textoffsetx>
 					<description>'B' button</description>
 					<posx>135</posx>
 					<posy>25</posy>
@@ -697,9 +720,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="67">
+					<textoffsetx>0</textoffsetx>
 					<description>'C' button</description>
 					<posx>170</posx>
 					<posy>25</posy>
@@ -714,9 +738,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="68">
+					<textoffsetx>0</textoffsetx>
 					<description>'D' button</description>
 					<posx>205</posx>
 					<posy>25</posy>
@@ -731,9 +756,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="69">
+					<textoffsetx>0</textoffsetx>
 					<description>'E' button</description>
 					<posx>240</posx>
 					<posy>25</posy>
@@ -748,9 +774,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="70">
+					<textoffsetx>0</textoffsetx>
 					<description>'F' button</description>
 					<posx>275</posx>
 					<posy>25</posy>
@@ -765,9 +792,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="71">
+					<textoffsetx>0</textoffsetx>
 					<description>'G' button</description>
 					<posx>310</posx>
 					<posy>25</posy>
@@ -782,9 +810,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="72">
+					<textoffsetx>0</textoffsetx>
 					<description>'H' button</description>
 					<posx>345</posx>
 					<posy>25</posy>
@@ -799,9 +828,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="73">
+					<textoffsetx>0</textoffsetx>
 					<description>'I' button</description>
 					<posx>380</posx>
 					<posy>25</posy>
@@ -816,9 +846,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="74">
+					<textoffsetx>0</textoffsetx>
 					<description>'J' button</description>
 					<posx>415</posx>
 					<posy>25</posy>
@@ -833,9 +864,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="radiobutton" id="303">
+					<textoffsetx>5</textoffsetx>
 					<description>CAPS LOCK button</description>
 					<posx>0</posx>
 					<posy>50</posy>
@@ -854,9 +886,10 @@
 					<align>left</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font10</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="75">
+					<textoffsetx>0</textoffsetx>
 					<description>'K' button</description>
 					<posx>100</posx>
 					<posy>50</posy>
@@ -871,9 +904,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="76">
+					<textoffsetx>0</textoffsetx>
 					<description>'L' button</description>
 					<posx>135</posx>
 					<posy>50</posy>
@@ -888,9 +922,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="77">
+					<textoffsetx>0</textoffsetx>
 					<description>'M' button</description>
 					<posx>170</posx>
 					<posy>50</posy>
@@ -905,9 +940,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="78">
+					<textoffsetx>0</textoffsetx>
 					<description>'N' button</description>
 					<posx>205</posx>
 					<posy>50</posy>
@@ -922,9 +958,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="79">
+					<textoffsetx>0</textoffsetx>
 					<description>'O' button</description>
 					<posx>240</posx>
 					<posy>50</posy>
@@ -939,9 +976,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="80">
+					<textoffsetx>0</textoffsetx>
 					<description>'P' button</description>
 					<posx>275</posx>
 					<posy>50</posy>
@@ -956,9 +994,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="81">
+					<textoffsetx>0</textoffsetx>
 					<description>'Q' button</description>
 					<posx>310</posx>
 					<posy>50</posy>
@@ -973,9 +1012,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="82">
+					<textoffsetx>0</textoffsetx>
 					<description>'R' button</description>
 					<posx>345</posx>
 					<posy>50</posy>
@@ -990,9 +1030,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="83">
+					<textoffsetx>0</textoffsetx>
 					<description>'S' button</description>
 					<posx>380</posx>
 					<posy>50</posy>
@@ -1007,9 +1048,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="84">
+					<textoffsetx>0</textoffsetx>
 					<description>'T' button</description>
 					<posx>415</posx>
 					<posy>50</posy>
@@ -1024,9 +1066,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="radiobutton" id="304">
+					<textoffsetx>5</textoffsetx>
 					<description>Symbols button</description>
 					<posx>0</posx>
 					<posy>75</posy>
@@ -1045,9 +1088,10 @@
 					<align>left</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font10</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="85">
+					<textoffsetx>0</textoffsetx>
 					<description>'U' button</description>
 					<posx>100</posx>
 					<posy>75</posy>
@@ -1062,9 +1106,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="86">
+					<textoffsetx>0</textoffsetx>
 					<description>'V' button</description>
 					<posx>135</posx>
 					<posy>75</posy>
@@ -1079,9 +1124,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="87">
+					<textoffsetx>0</textoffsetx>
 					<description>'W' button</description>
 					<posx>170</posx>
 					<posy>75</posy>
@@ -1096,9 +1142,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="88">
+					<textoffsetx>0</textoffsetx>
 					<description>'X' button</description>
 					<posx>205</posx>
 					<posy>75</posy>
@@ -1113,9 +1160,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="89">
+					<textoffsetx>0</textoffsetx>
 					<description>'Y' button</description>
 					<posx>240</posx>
 					<posy>75</posy>
@@ -1130,9 +1178,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="90">
+					<textoffsetx>0</textoffsetx>
 					<description>'Z' button</description>
 					<posx>275</posx>
 					<posy>75</posy>
@@ -1147,9 +1196,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="8">
+					<textoffsetx>0</textoffsetx>
 					<description>BACKSPACE button</description>
 					<posx>310</posx>
 					<posy>75</posy>
@@ -1165,9 +1215,10 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="307">
+					<textoffsetx>5</textoffsetx>
 					<description>IP Input button</description>
 					<posx>0</posx>
 					<posy>100</posy>
@@ -1183,9 +1234,10 @@
 					<onright>32</onright>
 					<onup>304</onup>
 					<ondown>300</ondown>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 				</control>
 				<control type="button" id="32">
+					<textoffsetx>0</textoffsetx>
 					<description>SPACE button</description>
 					<posx>100</posx>
 					<posy>100</posy>
@@ -1197,13 +1249,14 @@
 					<align>center</align>
 					<aligny>center</aligny>
 					<font>ForumBrowser-font12</font>
-					<textcolor>white</textcolor><focusedcolor>FF000000</focusedcolor>
+					<textcolor>FFFFFFFF</textcolor><focusedcolor>FF000000</focusedcolor>
 					<onleft>307</onleft>
 					<onright>305</onright>
 					<onup>85</onup>
 					<ondown>48</ondown>
 				</control>
 				<control type="button" id="305">
+					<textoffsetx>0</textoffsetx>
 					<description>previous button</description>
 					<posx>350</posx>
 					<posy>100</posy>
@@ -1223,6 +1276,7 @@
 					<ondown>54</ondown>
 				</control>
 				<control type="button" id="306">
+					<textoffsetx>0</textoffsetx>
 					<description>next button</description>
 					<posx>400</posx>
 					<posy>100</posy>

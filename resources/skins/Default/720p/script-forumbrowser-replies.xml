@@ -66,6 +66,7 @@
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="button" id="201">
+				<textoffsetx>0</textoffsetx>
 				<description>Post Reply</description>
 				<onleft>202</onleft>
 				<onright>200</onright>
@@ -83,7 +84,7 @@
 				<texturefocus border="20">forum-browser-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
-				<focusedcolor>white</focusedcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
 				<disabledcolor>FFCCCCCC</disabledcolor>
 			</control>
 
@@ -115,6 +116,7 @@
 				</control>
 				<control type="group">
 					<control type="button" id="200">
+						<textoffsetx>0</textoffsetx>
 						<description>Previous</description>
 						<onleft>201</onleft>
 						<onright>105</onright>
@@ -133,6 +135,7 @@
 						<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="202">
+						<textoffsetx>0</textoffsetx>
 						<description>Next</description>
 						<onleft>106</onleft>
 						<onright>201</onright>
@@ -151,6 +154,7 @@
 						<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="105">
+						<textoffsetx>0</textoffsetx>
 						<description>Page Button</description>
 						<posx>25</posx>
 						<posy>0</posy>
@@ -167,7 +171,7 @@
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
@@ -198,6 +202,7 @@
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="button" id="106">
+					<textoffsetx>0</textoffsetx>
 					<description>Stop Button</description>
 					<posx>25</posx>
 					<posy>0</posy>
@@ -224,6 +229,7 @@
 				<posx>1200</posx>
 				<posy>15</posy>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Close Button</description>
 					<posx>30</posx>
 					<posy>0</posy>
@@ -345,7 +351,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -616,7 +622,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>

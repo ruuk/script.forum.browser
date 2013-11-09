@@ -66,7 +66,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 			<visible>!Control.IsVisible(115)</visible>
@@ -78,7 +78,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 			<visible>Control.IsVisible(115)</visible>
@@ -97,7 +97,7 @@
 					<height>30</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<info>ListItem.Label</info>
 					<visible>!Control.IsVisible(115)</visible>
@@ -109,7 +109,7 @@
 					<height>30</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<info>ListItem.Label</info>
 					<visible>Control.IsVisible(115)</visible>
@@ -139,7 +139,7 @@
 					<height>30</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<info>ListItem.Label</info>
 					<visible>!Control.IsVisible(115)</visible>
@@ -151,7 +151,7 @@
 					<height>30</height>
 					<font>ForumBrowser-font13</font>
 					<aligny>center</aligny>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<align>left</align>
 					<info>ListItem.Label</info>
 					<visible>Control.IsVisible(115)</visible>

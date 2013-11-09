@@ -804,7 +804,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def getStats(self):
 		#{'total_threads': 148712, 'guest_online': 737, 'total_members': 140118, 'total_online': 1016, 'total_posts': 1390480}
 		stats = self.server.get_board_stat()
-		if isinstance(stats,dict) and 'total_threads'in stats:
+		if isinstance(stats,dict) and 'total_threads' in stats:
 			if not self.canGetOnlineUsers():
 				del stats['total_online']
 				del stats['guest_online']
@@ -1616,7 +1616,7 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			LOG('Failed to create thread: ' + str(text))
 			return text
 	
-	def canGetOnlineUsers(self): return self.forumConfig.get('get_online_users',True)
+	def canGetOnlineUsers(self): return self.getConfigInfo('get_online_users', False)
 	
 	def getOnlineUsers(self):
 		result = self.server.get_online_users()

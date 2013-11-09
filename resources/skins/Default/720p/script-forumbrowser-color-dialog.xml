@@ -76,6 +76,7 @@
 			</control>
 
 			<control type="button" id="110">
+				<textoffsetx>0</textoffsetx>
 				<description>Close Button</description>
 				<posx>750</posx>
 				<posy>15</posy>
@@ -116,7 +117,7 @@
 					<width>100</width>
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 				</control>
@@ -134,6 +135,7 @@
 				</control>
 				
 				<control type="button" id="150">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>5</posx>
 					<posy>5</posy>
@@ -149,11 +151,12 @@
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]-[/B]</label>
 				</control>
 
 				<control type="button" id="151">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>55</posx>
 					<posy>5</posy>
@@ -169,7 +172,7 @@
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]+[/B]</label>
 				</control>
 				
@@ -198,7 +201,7 @@
 					<width>100</width>
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 				</control>
@@ -216,6 +219,7 @@
 				</control>
 				
 				<control type="button" id="152">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>120</posx>
 					<posy>5</posy>
@@ -231,11 +235,12 @@
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]-[/B]</label>
 				</control>
 
 				<control type="button" id="153">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>170</posx>
 					<posy>5</posy>
@@ -251,7 +256,7 @@
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]+[/B]</label>
 				</control>
 				
@@ -280,7 +285,7 @@
 					<width>100</width>
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 				</control>
@@ -298,6 +303,7 @@
 				</control>
 				
 				<control type="button" id="154">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>235</posx>
 					<posy>5</posy>
@@ -313,11 +319,12 @@
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]-[/B]</label>
 				</control>
 
 				<control type="button" id="155">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>285</posx>
 					<posy>5</posy>
@@ -333,7 +340,7 @@
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]+[/B]</label>
 				</control>
 				
@@ -362,13 +369,14 @@
 					<width>100</width>
 					<height>20</height>
 					<font>ForumBrowser-font13</font>
-					<textcolor>white</textcolor>
+					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
 					<label>$ADDON[script.forum.browser 32935]</label>
 				</control>
 				
 				<control type="button" id="156">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>350</posx>
 					<posy>5</posy>
@@ -384,11 +392,12 @@
 					<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]-[/B]</label>
 				</control>
 
 				<control type="button" id="157">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>400</posx>
 					<posy>5</posy>
@@ -404,7 +413,7 @@
 					<texturenofocus>forum-browser-right-nofocus.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<label>[B]+[/B]</label>
 				</control>
 				
@@ -418,6 +427,7 @@
 				</control>
 				
 				<control type="button" id="158">
+					<textoffsetx>0</textoffsetx>
 					<description>Hex</description>
 					<posx>460</posx>
 					<posy>-15</posy>
@@ -433,7 +443,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="image">
@@ -445,6 +455,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="170">
+					<textoffsetx>0</textoffsetx>
 					<posx>460</posx>
 					<posy>35</posy>
 					<width>40</width>
@@ -477,6 +488,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="171">
+					<textoffsetx>0</textoffsetx>
 					<posx>510</posx>
 					<posy>35</posy>
 					<width>40</width>
@@ -509,6 +521,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="172">
+					<textoffsetx>0</textoffsetx>
 					<posx>560</posx>
 					<posy>35</posy>
 					<width>40</width>
@@ -541,6 +554,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="173">
+					<textoffsetx>0</textoffsetx>
 					<posx>460</posx>
 					<posy>85</posy>
 					<width>40</width>
@@ -573,6 +587,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="174">
+					<textoffsetx>0</textoffsetx>
 					<posx>510</posx>
 					<posy>85</posy>
 					<width>40</width>
@@ -605,6 +620,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="175">
+					<textoffsetx>0</textoffsetx>
 					<posx>560</posx>
 					<posy>85</posy>
 					<width>40</width>
@@ -628,6 +644,7 @@
 					<visible>Control.HasFocus(175)</visible>
 				</control>
 				<control type="button" id="113">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>640</posx>
 					<posy>-15</posy>
@@ -645,7 +662,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 			
@@ -659,6 +676,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>670</posx>
 					<posy>380</posy>
@@ -676,7 +694,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 

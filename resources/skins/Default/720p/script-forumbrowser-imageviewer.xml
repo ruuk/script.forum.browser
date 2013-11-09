@@ -34,6 +34,7 @@
 			</control>
 
 			<control type="button" id="200">
+				<textoffsetx>0</textoffsetx>
 				<description>The Button</description>
 				<posx>320</posx>
 				<posy>625</posy>
@@ -50,6 +51,7 @@
 				<texturenofocus>forum-browser-left-nofocus.png</texturenofocus>
 			</control>
 			<control type="button" id="110">
+				<textoffsetx>0</textoffsetx>
 				<description>Close Button</description>
 				<onleft>200</onleft>
 				<onright>202</onright>
@@ -63,6 +65,7 @@
 				<onclick>PreviousMenu</onclick>
 			</control>
 			<control type="button" id="202">
+				<textoffsetx>0</textoffsetx>
 				<description>The Button</description>
 				<posx>738</posx>
 				<posy>625</posy>

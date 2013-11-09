@@ -82,7 +82,7 @@
 				<width>760</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<label>[B]$INFO[Window.Property(caption)][/B]</label>
@@ -94,13 +94,14 @@
 				<width>725</width>
 				<height>281</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<visible>true</visible>
 				<label>$INFO[Window.Property(text)]</label>
 			</control>
 			<control type="group" id="112">
 				<defaultcontrol>111</defaultcontrol>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>332</posy>
@@ -116,10 +117,11 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>380</posy>
@@ -135,7 +137,7 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 		</control>
@@ -215,7 +217,7 @@
 				<width>260</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<label>[B]$INFO[Window.Property(caption)][/B]</label>
@@ -227,13 +229,14 @@
 				<width>260</width>
 				<height>522</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<visible>true</visible>
 				<label>$INFO[Window.Property(text)]</label>
 			</control>
 			<control type="group" id="112">
 				<defaultcontrol>111</defaultcontrol>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>572</posy>
@@ -249,9 +252,10 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>620</posy>
@@ -267,7 +271,7 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 		</control>

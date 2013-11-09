@@ -82,7 +82,7 @@
 				<width>760</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<label>[B]$INFO[Window.Property(caption)][/B]</label>
@@ -95,13 +95,14 @@
 				<height>329</height>
 				<font>ForumBrowser-font13</font>
 				<scroll>true</scroll>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<visible>true</visible>
 				<pagecontrol>123</pagecontrol>
 				<label>$INFO[Window.Property(message)]</label>
 			</control>
 			<control type="group" id="112">
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>380</posy>
@@ -120,7 +121,7 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<onclick>PreviousMenu</onclick>
 				</control>
 				<control type="scrollbar" id="123">
@@ -220,7 +221,7 @@
 				<width>260</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<label>[B]$INFO[Window.Property(caption)][/B]</label>
@@ -233,13 +234,14 @@
 				<height>570</height>
 				<font>ForumBrowser-font13</font>
 				<scroll>true</scroll>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<visible>true</visible>
 				<pagecontrol>123</pagecontrol>
 				<label>$INFO[Window.Property(message)]</label>
 			</control>
 			<control type="group" id="112">
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>Ok Button</description>
 					<posx>10</posx>
 					<posy>620</posy>
@@ -258,7 +260,7 @@
 					<texturenofocus border="10">forum-browser-video-unselect-gray.png</texturenofocus>
 					<textcolor>FF333333</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 					<onclick>PreviousMenu</onclick>
 				</control>
 				<control type="scrollbar" id="123">

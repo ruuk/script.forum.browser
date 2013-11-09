@@ -32,7 +32,7 @@
 				<height>20</height>
 				<font>ForumBrowser-font13</font>
 				<aligny>center</aligny>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>center</align>
 			</control>
 			<control type='list' id="120">

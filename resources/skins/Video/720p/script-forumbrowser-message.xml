@@ -61,7 +61,7 @@
 			<colordiffuse>FFFFFFFF</colordiffuse>
 			<font>ForumBrowser-font12</font>
 			<scroll>true</scroll>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<visible>true</visible>
 			<label>$INFO[Control.GetLabel(122)]</label>
 			<align>left</align>
@@ -76,7 +76,7 @@
 			<colordiffuse>FFFFFFFF</colordiffuse>
 			<font>ForumBrowser-font13</font>
 			<scroll>true</scroll>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<visible>true</visible>
 			<pagecontrol>126</pagecontrol>
 			<label>$INFO[Control.GetLabel(122)]</label>
@@ -110,7 +110,7 @@
 				<width>270</width>
 				<height>22</height>
 				<font>ForumBrowser-font10</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 			</control>
@@ -121,7 +121,7 @@
 				<width>270</width>
 				<height>40</height>
 				<font>ForumBrowser-font10</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -134,7 +134,7 @@
 				<width>270</width>
 				<height>330</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>top</aligny>
 				<align>left</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -282,7 +282,7 @@
 				<width>200</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>left</align>
 			</control>
@@ -293,7 +293,7 @@
 				<width>446</width>
 				<height>22</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[B]$ADDON[script.forum.browser 32915][/B]</label>
@@ -505,8 +505,8 @@
 					<height>30</height>
 					<font>ForumBrowser-font30</font>
 					<aligny>top</aligny>
-					<textcolor>white</textcolor>
-					<selectedcolor>white</selectedcolor>
+					<textcolor>FFFFFFFF</textcolor>
+					<selectedcolor>FFFFFFFF</selectedcolor>
 					<align>left</align>
 					<haspath>true</haspath>
 					<info>Container(150).ListItem.Label</info>
@@ -519,8 +519,8 @@
 					<height>30</height>
 					<font>ForumBrowser-font12</font>
 					<aligny>top</aligny>
-					<textcolor>white</textcolor>
-					<selectedcolor>white</selectedcolor>
+					<textcolor>FFFFFFFF</textcolor>
+					<selectedcolor>FFFFFFFF</selectedcolor>
 					<align>left</align>
 					<haspath>true</haspath>
 					<info>Container(150).ListItem.Property(url)</info>
@@ -534,7 +534,7 @@
 					<font>ForumBrowser-font10</font>
 					<aligny>top</aligny>
 					<textcolor>FFAAAAAA</textcolor>
-					<selectedcolor>white</selectedcolor>
+					<selectedcolor>FFFFFFFF</selectedcolor>
 					<align>left</align>
 					<info>Container(150).ListItem.Property(wrapped_url)</info>
 					<visible>true</visible>
@@ -568,8 +568,8 @@
 						<height>14</height>
 						<font>ForumBrowser-font12</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<selectedcolor>white</selectedcolor>
+						<textcolor>FFFFFFFF</textcolor>
+						<selectedcolor>FFFFFFFF</selectedcolor>
 						<align>center</align>
 						<info>ListItem.Label</info>
 						<visible>true</visible>
@@ -595,8 +595,8 @@
 						<height>14</height>
 						<font>ForumBrowser-font12</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
-						<selectedcolor>white</selectedcolor>
+						<textcolor>FFFFFFFF</textcolor>
+						<selectedcolor>FFFFFFFF</selectedcolor>
 						<align>center</align>
 						<info>ListItem.Label</info>
 						<visible>true</visible>
@@ -652,7 +652,7 @@
 						<height>20</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>true</visible>
@@ -693,7 +693,7 @@
 						<height>20</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 						<visible>true</visible>
@@ -706,7 +706,7 @@
 						<height>20</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label2</info>
 						<visible>true</visible>

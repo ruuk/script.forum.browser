@@ -55,7 +55,7 @@
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -85,7 +85,7 @@
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -114,7 +114,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>white</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 		</control>

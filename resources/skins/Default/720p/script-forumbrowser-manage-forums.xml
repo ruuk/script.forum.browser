@@ -79,6 +79,7 @@
 				</control>
 				
 				<control type="button" id="200">
+					<textoffsetx>0</textoffsetx>
 					<description>Add Forum</description>
 					<onleft>220</onleft>
 					<onup>210</onup>
@@ -96,10 +97,11 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="button" id="299">
+					<textoffsetx>0</textoffsetx>
 					<description>Mouse Focus</description>
 					<onleft>200</onleft>
 					<onup>200</onup>
@@ -132,10 +134,11 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control -->
 				
 				<control type="button" id="202">
+					<textoffsetx>0</textoffsetx>
 					<description>Remove Forum</description>
 					<onleft>220</onleft>
 					
@@ -154,9 +157,10 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="203">
+					<textoffsetx>0</textoffsetx>
 					<description>Add To Favorites</description>
 					<onleft>220</onleft>
 					
@@ -174,9 +178,10 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="204">
+					<textoffsetx>0</textoffsetx>
 					<description>Remove From Favs</description>
 					<onleft>220</onleft>
 					
@@ -194,9 +199,10 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="205">
+					<textoffsetx>0</textoffsetx>
 					<description>Forum Settings</description>
 					<onleft>220</onleft>
 					
@@ -213,10 +219,11 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 
 				<control type="button" id="207">
+					<textoffsetx>0</textoffsetx>
 					<description>Add Online</description>
 					<onleft>220</onleft>
 					
@@ -233,9 +240,10 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="208">
+					<textoffsetx>0</textoffsetx>
 					<description>Theme Online</description>
 					<onleft>220</onleft>
 					
@@ -252,7 +260,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="group">
@@ -261,6 +269,7 @@
 					<posy>435</posy>
 					<width>290</width>
 					<control type="button" id="211">
+						<textoffsetx>0</textoffsetx>
 						<description>Fav Up</description>
 						<onleft>220</onleft>
 						<onup>208</onup>
@@ -276,9 +285,10 @@
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					<control type="button" id="212">
+						<textoffsetx>0</textoffsetx>
 						<description>Fav Down</description>
 						<onleft>220</onleft>
 						<onup>211</onup>
@@ -294,11 +304,12 @@
 						<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 						<textcolor>FF000000</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 				</control>
 				
 				<control type="button" id="210">
+					<textoffsetx>0</textoffsetx>
 					<description>Help</description>
 					<onleft>220</onleft>
 					<onup>212</onup>
@@ -314,7 +325,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 			</control>
 			
@@ -332,7 +343,7 @@
 				<width>560</width>
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
 			</control>
@@ -656,7 +667,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
@@ -679,7 +690,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_subs)</info>
 							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -703,7 +714,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>

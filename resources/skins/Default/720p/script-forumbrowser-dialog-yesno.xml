@@ -138,6 +138,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Yes Button</description>
 					<posx>30</posx>
 					<posy>380</posy>
@@ -152,7 +153,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 				<control type="image">
@@ -164,6 +165,7 @@
 					<colordiffuse>AA000000</colordiffuse>
 				</control>
 				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
 					<description>No Button</description>
 					<posx>405</posx>
 					<posy>380</posy>
@@ -178,7 +180,7 @@
 					<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 					<textcolor>FF000000</textcolor>
 					<disabledcolor>60000000</disabledcolor>
-					<focusedcolor>white</focusedcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				
 			</control>

@@ -65,6 +65,7 @@
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
 			<control type="button" id="201">
+				<textoffsetx>0</textoffsetx>
 				<description>Post Reply</description>
 				<onleft>202</onleft>
 				<onright>200</onright>
@@ -81,8 +82,8 @@
 				<label>$ADDON[script.forum.browser 32902]</label>
 				<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 				<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-				<textcolor>white</textcolor>
-				<focusedcolor>white</focusedcolor>
+				<textcolor>FFFFFFFF</textcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
 			</control>
 
 			<control type="label" id="104">
@@ -112,6 +113,7 @@
 				</control>
 				<control type="group">
 					<control type="button" id="200">
+						<textoffsetx>0</textoffsetx>
 						<description>Previous</description>
 						<onleft>201</onleft>
 						<onright>105</onright>
@@ -124,12 +126,13 @@
 						<visible>true</visible>
 						<font>ForumBrowser-font12</font>
 						<align>right</align>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>20555555</disabledcolor>
 						<texturefocus>forum-browser-dark-left-focus.png</texturefocus>
 						<texturenofocus>forum-browser-dark-left-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="202">
+						<textoffsetx>0</textoffsetx>
 						<description>Next</description>
 						<onleft>106</onleft>
 						<onright>201</onright>
@@ -142,12 +145,13 @@
 						<visible>true</visible>
 						<font>ForumBrowser-font12</font>
 						<align>left</align>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>20555555</disabledcolor>
 						<texturefocus>forum-browser-dark-right-focus.png</texturefocus>
 						<texturenofocus>forum-browser-dark-right-nofocus.png</texturenofocus>
 					</control>
 					<control type="button" id="105">
+						<textoffsetx>0</textoffsetx>
 						<description>Page Button</description>
 						<posx>25</posx>
 						<posy>0</posy>
@@ -162,9 +166,9 @@
 						<align>center</align>
 						<texturefocus border="20">forum-browser-dark-grey-boxr.png</texturefocus>
 						<texturenofocus border="20">forum-browser-dark-black-box.png</texturenofocus>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<disabledcolor>60000000</disabledcolor>
-						<focusedcolor>white</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 					</control>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
@@ -196,6 +200,7 @@
 					<visible>Control.isVisible(106)</visible>
 				</control>
 				<control type="button" id="106">
+					<textoffsetx>0</textoffsetx>
 					<description>Stop Button</description>
 					<posx>25</posx>
 					<posy>0</posy>
@@ -222,6 +227,7 @@
 				<posx>1200</posx>
 				<posy>15</posy>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Close Button</description>
 					<posx>30</posx>
 					<posy>0</posy>
@@ -343,7 +349,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -422,7 +428,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
 					</control>
@@ -463,7 +469,7 @@
 						<width>1010</width>
 						<height>65</height>
 						<font>ForumBrowser-font10</font>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>
@@ -611,7 +617,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Label</info>
 					</control>
@@ -698,7 +704,7 @@
 						<height>15</height>
 						<font>ForumBrowser-font10</font>
 						<aligny>center</aligny>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Property(title)][/B]</label>
 					</control>
@@ -739,7 +745,7 @@
 						<width>1010</width>
 						<height>165</height>
 						<font>ForumBrowser-font10</font>
-						<textcolor>white</textcolor>
+						<textcolor>FFFFFFFF</textcolor>
 						<align>left</align>
 						<info>ListItem.Property(message)</info>
 						<visible>true</visible>

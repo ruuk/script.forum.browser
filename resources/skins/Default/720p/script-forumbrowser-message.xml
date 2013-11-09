@@ -93,6 +93,7 @@
 				<posx>1200</posx>
 				<posy>15</posy>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Close Button</description>
 					<posx>30</posx>
 					<posy>0</posy>

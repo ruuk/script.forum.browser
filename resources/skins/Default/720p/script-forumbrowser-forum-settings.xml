@@ -32,7 +32,7 @@
 				<width>380</width>
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32928][/B]</label>
 			</control>
@@ -64,6 +64,7 @@
 			</control>
 			
 			<control type="button" id="100">
+				<textoffsetx>0</textoffsetx>
 				<description>OK</description>
 				<onleft>101</onleft>
 				<onright>101</onright>
@@ -82,9 +83,10 @@
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<disabledcolor>60000000</disabledcolor>
-				<focusedcolor>white</focusedcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
 			</control>
 			<control type="button" id="101">
+				<textoffsetx>0</textoffsetx>
 				<description>Cancel</description>
 				<onleft>100</onleft>
 				<onright>100</onright>
@@ -103,7 +105,7 @@
 				<texturenofocus border="20">forum-browser-white-boxr.png</texturenofocus>
 				<textcolor>FF000000</textcolor>
 				<disabledcolor>60000000</disabledcolor>
-				<focusedcolor>white</focusedcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
 			</control>
 				
 			<!-- ** Required ** Do not change <id> or <type> -->
@@ -274,7 +276,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>left</align>
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
@@ -285,7 +287,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>right</align>
 								<label>$INFO[ListItem.Label2]</label>
 							</control>
@@ -299,7 +301,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>left</align>
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
@@ -331,7 +333,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>left</align>
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
@@ -361,7 +363,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>left</align>
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>
@@ -383,7 +385,7 @@
 								<height>38</height>
 								<font>ForumBrowser-font13</font>
 								<aligny>center</aligny>
-								<textcolor>white</textcolor>
+								<textcolor>FFFFFFFF</textcolor>
 								<align>left</align>
 								<label>[B]$INFO[ListItem.Label][/B]</label>
 							</control>	

@@ -36,7 +36,7 @@
 				<width>560</width>
 				<height>38</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>white</textcolor>
+				<textcolor>FFFFFFFF</textcolor>
 				<align>left</align>
 				<label>[B]$ADDON[script.forum.browser 32940][/B]</label>
 			</control>
@@ -274,7 +274,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<label>[B]$INFO[ListItem.Label][/B]</label>
 						</control>
@@ -297,7 +297,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_subs)</info>
 							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
@@ -321,7 +321,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font13</font>
 							<aligny>center</aligny>
-							<textcolor>white</textcolor>
+							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>

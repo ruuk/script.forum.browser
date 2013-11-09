@@ -138,6 +138,7 @@
 					<visible>Control.isVisible(105)</visible>
 				</control>
 				<control type="button" id="105">
+					<textoffsetx>0</textoffsetx>
 					<description>Stop Button</description>
 					<posx>0</posx>
 					<posy>0</posy>
@@ -265,6 +266,7 @@
 				</control>
 				
 				<control type="button" id="202">
+					<textoffsetx>0</textoffsetx>
 					<description>Forums</description>
 					<onleft>120</onleft>
 					<onright>201</onright>
@@ -287,6 +289,7 @@
 				</control>
 				
 				<control type="button" id="201">
+					<textoffsetx>0</textoffsetx>
 					<description>Subscriptions</description>
 					<onleft>202</onleft>
 					<onright>203</onright>
@@ -309,6 +312,7 @@
 				</control>
       
 				<control type="button" id="203">
+					<textoffsetx>0</textoffsetx>
 					<description>Messages</description>
 					<onleft>201</onleft>
 					<onright>208</onright>
@@ -331,6 +335,7 @@
 				</control>
 			    
 			    <control type="button" id="208">
+					<textoffsetx>0</textoffsetx>
 					<description>Unread Threads</description>
 					<onleft>203</onleft>
 					<onright>204</onright>
@@ -353,6 +358,7 @@
 				</control>
 				
 				<control type="button" id="200">
+					<textoffsetx>0</textoffsetx>
 					<description>Settings</description>
 					<onleft>204</onleft>
 					<onright>120</onright>
@@ -379,6 +385,7 @@
 				<posx>1200</posx>
 				<posy>15</posy>
 				<control type="button" id="110">
+					<textoffsetx>0</textoffsetx>
 					<description>Close Button</description>
 					<posx>30</posx>
 					<posy>0</posy>
@@ -626,6 +633,7 @@
 					</control>
 					
 					<control type="button" id="207">
+						<textoffsetx>0</textoffsetx>
 						<animation effect="slide" end="0,-150" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<hitrect x="746" y="-15" w="252" h="55" />
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
@@ -666,6 +674,7 @@
 					</control>
 					
 					<control type="button" id="206">
+						<textoffsetx>0</textoffsetx>
 						<animation effect="slide" end="0,-100" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Threads</description>
@@ -705,6 +714,7 @@
 					</control>
 					
 					<control type="button" id="205">
+						<textoffsetx>0</textoffsetx>
 						<animation effect="slide" end="0,-50" time="200" delay="200" condition="ControlGroup(198).HasFocus(0) | Control.HasFocus(197)">Conditional</animation>
 						<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0) | Control.HasFocus(197)</visible>
 						<description>Search Posts</description>
@@ -729,6 +739,7 @@
 					</control>
 				</control>
 				<control type="button" id="204">
+					<textoffsetx>0</textoffsetx>
 					<description>Search</description>
 					<visible allowhiddenfocus="true">Control.HasFocus(204)</visible>
 					<onclick>Control.SetFocus(198)</onclick>
@@ -752,6 +763,7 @@
 					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
 				<control type="button" id="197">
+					<textoffsetx>0</textoffsetx>
 					<visible>!Control.IsVisible(204)</visible>
 					<description>Search Mouse</description>
 					<enable>Control.IsEnabled(204)</enable>
