@@ -18,7 +18,7 @@
 				<colordiffuse>FF222222</colordiffuse>
 			</control>
 
-			<control type="image" id="251">
+			<control type="image">
 				<description>Large Back</description>
 				<posx>10</posx>
 				<posy>4</posy>
@@ -35,6 +35,16 @@
 				<texture border="20">forum-browser-white-box.png</texture>
 			</control>
 			<control type="image" id="251">
+				<description>Large Back</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_header_color)]</colordiffuse>
+			</control>
+			
+			<control type="image">
 				<description>Smaller Back</description>
 				<posx>10</posx>
 				<posy>84</posy>
@@ -50,7 +60,7 @@
 				<width>100</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32912][/B]</label>
@@ -95,7 +105,7 @@
 				<width>600</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -175,15 +185,30 @@
 					</control>
 					<visible>!Control.IsVisible(106)</visible>
 				</control>
-				<control type="image">
+				
+				<control type="group">
 					<description>Loading</description>
 					<posx>-17</posx>
 					<posy>14</posy>
-					<width>32</width>
-					<height>32</height>
-					<texture>forum-browser-loading.gif</texture>
 					<visible>Control.isVisible(106)</visible>
+					<control type="image">
+						<description>Loading</description>
+						<posx>-4</posx>
+						<posy>-4</posy>
+						<width>40</width>
+						<height>40</height>
+						<texture>forum-browser-loading-bg.png</texture>
+					</control>
+					<control type="image">
+						<description>Loading</description>
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>32</width>
+						<height>32</height>
+						<texture>forum-browser-loading.gif</texture>
+					</control>
 				</control>
+				
 				<control type="image" id="300">
 					<posx>25</posx>
 					<posy>0</posy>

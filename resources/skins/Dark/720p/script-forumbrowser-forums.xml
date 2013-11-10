@@ -137,16 +137,30 @@
 					<texture border="20">forum-browser-dark-white-boxr.png</texture>
 					<visible>Control.isVisible(105)</visible>
 				</control>
-				<control type="image">
+				
+				<control type="group">
 					<description>Loading</description>
 					<posx>-42</posx>
 					<posy>14</posy>
-					<width>32</width>
-					<height>32</height>
-					<texture>forum-browser-dark-loading3.png</texture>
-					<animation effect="rotate" end="-3600" center="-26,30" time="20000" loop="true" condition="Control.IsVisible(105)">Conditional</animation>
 					<visible>Control.isVisible(105)</visible>
+					<control type="image">
+						<description>Loading</description>
+						<posx>-4</posx>
+						<posy>-4</posy>
+						<width>40</width>
+						<height>40</height>
+						<texture>../../Default/media/forum-browser-loading-bg.png</texture>
+					</control>
+					<control type="image">
+						<description>Loading</description>
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>32</width>
+						<height>32</height>
+						<texture>../../Default/media/forum-browser-loading.gif</texture>
+					</control>
 				</control>
+				
 				<control type="button" id="105">
 					<textoffsetx>0</textoffsetx>
 					<description>Stop Button</description>
@@ -193,33 +207,19 @@
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>
 			</control>
 			
-			<control type="group">
+			<control type="label" id="109">
 				<description>Version</description>
 				<posx>1250</posx>
 				<posy>95</posy>
-				<control type="label">
-					<visible>StringCompare(Window.Property(header_is_dark),1)</visible>
-					<posx>0</posx>
-					<posy>0</posy>
-					<width>200</width>
-					<height>10</height>
-					<font>ForumBrowser-font10</font>
-					<textcolor>FFFFFFFF</textcolor>
-					<aligny>center</aligny>
-					<align>right</align>
-					<label>$INFO[Control.GetLabel(109)]</label>
-				</control>
-				<control type="label" id="109">
-					<visible>!StringCompare(Window.Property(header_is_dark),1)</visible>
-					<posx>0</posx>
-					<posy>0</posy>
-					<width>200</width>
-					<height>10</height>
-					<font>ForumBrowser-font10</font>
-					<textcolor>FF000000</textcolor>
-					<aligny>center</aligny>
-					<align>right</align>
-				</control>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>200</width>
+				<height>10</height>
+				<font>ForumBrowser-font10</font>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
+				<aligny>center</aligny>
+				<align>right</align>
+				<label>$INFO[Window(10000).Property(ForumBrowser_version)]</label>
 			</control>
 			
 			<control type="group">

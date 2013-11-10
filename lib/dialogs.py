@@ -5,6 +5,7 @@ from lib.forumbrowser import forumbrowser
 
 DEBUG = None
 CACHE_PATH = None
+GLOBAL_WINDOW = None
 
 def clearDirFiles(filepath):
 	if not os.path.exists(filepath): return
@@ -13,31 +14,31 @@ def clearDirFiles(filepath):
 		if os.path.isfile(f): os.remove(f)
 				
 def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=False):
-	if mod: xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
+	if mod: setGlobalSkinProperty('ForumBrowser_modKeyboard','1') #I set the home window, because that's the only way I know to get it to work before the window displays
 	if smilies is not False:
 		if smilies: saveSmilies(smilies)
-		xbmcgui.Window(10000).setProperty('FB_smiley_0',forumbrowser.getSmiley(':)')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_1',forumbrowser.getSmiley(':(')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_2',forumbrowser.getSmiley(';)')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_3',forumbrowser.getSmiley(':D')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_4',forumbrowser.getSmiley(':P')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_5',forumbrowser.getSmiley(':o')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_6',forumbrowser.getSmiley(':-/')[0])
-		xbmcgui.Window(10000).setProperty('FB_smiley_7',forumbrowser.getSmiley('8-)')[0])
+		setGlobalSkinProperty('FB_smiley_0',forumbrowser.getSmiley(':)')[0])
+		setGlobalSkinProperty('FB_smiley_1',forumbrowser.getSmiley(':(')[0])
+		setGlobalSkinProperty('FB_smiley_2',forumbrowser.getSmiley(';)')[0])
+		setGlobalSkinProperty('FB_smiley_3',forumbrowser.getSmiley(':D')[0])
+		setGlobalSkinProperty('FB_smiley_4',forumbrowser.getSmiley(':P')[0])
+		setGlobalSkinProperty('FB_smiley_5',forumbrowser.getSmiley(':o')[0])
+		setGlobalSkinProperty('FB_smiley_6',forumbrowser.getSmiley(':-/')[0])
+		setGlobalSkinProperty('FB_smiley_7',forumbrowser.getSmiley('8-)')[0])
 	else:
-		xbmcgui.Window(10000).setProperty('FB_smiley_0','')
+		setGlobalSkinProperty('FB_smiley_0','')
 		
-	xbmcgui.Window(10000).setProperty('ForumBrowser_siteSmilies',smilies and '1' or '')
+	setGlobalSkinProperty('ForumBrowser_siteSmilies',smilies and '1' or '')
 		
 	keyboard = xbmc.Keyboard(default,prompt)
 	keyboard.setHiddenInput(hidden)
 	keyboard.doModal()
-	xbmcgui.Window(10000).setProperty('ForumBrowser_modKeyboard','0') #I set the home window, because that's the only way I know to get it to work before the window displays
+	setGlobalSkinProperty('ForumBrowser_modKeyboard','0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	if not keyboard.isConfirmed(): return None
 	return keyboard.getText()
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
-	xbmcgui.Window(10000).setProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
+	setGlobalSkinProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
 	THEME = util.getSavedTheme(get_current=True)
 	path = util.__addon__.getAddonInfo('path')
 	res = '720p'
@@ -883,6 +884,10 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 			self.closed = True
 			self.close()
 
+def setGlobalSkinProperty(key,val):
+	window = GLOBAL_WINDOW or xbmcgui.Window(10000)
+	window.setProperty(key,val)
+	
 ###################################################################	
 ## Bookmarks
 ###################################################################			

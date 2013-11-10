@@ -2559,22 +2559,22 @@ class ForumsWindow(windows.BaseWindow):
 			self.forumElements = None
 		
 	def setVersion(self):
-		self.getControl(109).setLabel('v' + __version__)
+		dialogs.setGlobalSkinProperty('ForumBrowser_version', 'v' + __version__)
 		
 	def setTheme(self):
 		hc = FB.theme.get('header_color')
 		if hc and hc.upper() != 'FFFFFF':
 			self.headerIsDark = self.hexColorIsDark(hc)
-			xbmcgui.Window(10000).setProperty('ForumBrowser_header_color','FF' + hc.upper())
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_color','FF' + hc.upper())
 		else:
 			self.headerIsDark = False
-			xbmcgui.Window(10000).setProperty('ForumBrowser_header_color','')
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_color','')
 		if self.headerIsDark:
 			self.setProperty('header_is_dark', '1')
-			xbmcgui.Window(10000).setProperty('ForumBrowser_header_text_color','FFFFFFFF')
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FFFFFFFF')
 		else:
 			self.setProperty('header_is_dark', '0')
-			xbmcgui.Window(10000).setProperty('ForumBrowser_header_text_color','FF000000')
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FF000000')
 			
 		self.setLabels()
 		

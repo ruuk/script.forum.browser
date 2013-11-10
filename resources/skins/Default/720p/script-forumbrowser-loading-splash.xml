@@ -19,7 +19,7 @@
 				<posx>-20</posx>
 				<posy>-10</posy>
 				<width>208</width>
-				<height>198</height>
+				<height>218</height>
 				<texture border="20">forum-browser-white-box.png</texture>
 				<colordiffuse>AA000000</colordiffuse>
 			</control>
@@ -27,7 +27,7 @@
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>168</width>
-				<height>168</height>
+				<height>188</height>
 				<texture border="20">forum-browser-white-boxr.png</texture>
 				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
@@ -41,21 +41,36 @@
 				<aligny>center</aligny>
 				<textcolor>FF000000</textcolor>
 			</control>
-			<control type="image">
-				<posx>48</posx>
-				<posy>48</posy>
-				<width>72</width>
-				<height>72</height>
-				<texture>forum-browser-loading.gif</texture>
-				<colordiffuse>FFFFFFFF</colordiffuse>
-			</control>
+			
+			<control type="group">
+					<description>Loading</description>
+					<posx>20</posx>
+					<posy>40</posy>
+					<control type="image">
+						<description>Loading</description>
+						<posx>-10</posx>
+						<posy>-10</posy>
+						<width>148</width>
+						<height>148</height>
+						<texture>forum-browser-loading-bg.png</texture>
+					</control>
+					<control type="image">
+						<description>Loading</description>
+						<posx>4</posx>
+						<posy>4</posy>
+						<width>120</width>
+						<height>120</height>
+						<texture>forum-browser-loading.gif</texture>
+					</control>
+				</control>
+				
 			<control type="button" id="200">
 				<textoffsetx>0</textoffsetx>
 				<description>Stop Button</description>
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>168</width>
-				<height>168</height>
+				<height>188</height>
 				<font>ForumBrowser-font12</font>
 				<textcolor>FF000000</textcolor>
 				<focusedcolor>FF000000</focusedcolor>

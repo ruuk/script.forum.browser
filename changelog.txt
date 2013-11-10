@@ -41,14 +41,19 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.31
+Current Version : 2.1.32
+
+*** 2.1.32 ***
+
+Theme colors now carried up through message view on Light and Dark skins
+New shared activity spinner for Light and dark skins
 
 *** 2.1.31 ***
 
 When saving an image, exiting the browse dialog without selecting OK now aborts the save
 Fixed a bug causing default save location to be erased when aborting the browse menu
 Added version check to update skin mods for recent changes
-Them colors now carried through to threds/subscriptions window
+Theme colors now carried through to threads/subscriptions window
 
 *** 2.1.30 ***
 

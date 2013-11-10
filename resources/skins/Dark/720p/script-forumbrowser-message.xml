@@ -18,7 +18,7 @@
 				<colordiffuse>FF222222</colordiffuse>
 			</control>
 
-			<control type="image" id="251">
+			<control type="image">
 				<description>Large Back</description>
 				<posx>10</posx>
 				<posy>4</posy>
@@ -36,6 +36,24 @@
 				<colordiffuse>FF888888</colordiffuse>
 			</control>
 			<control type="image" id="251">
+				<description>Large Back</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-dark-white-boxr.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_header_color)]</colordiffuse>
+			</control>
+			<control type="image">
+				<description>page header tab icon</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-dark-white-outline.png</texture>
+			</control>
+			
+			<control type="image">
 				<description>Smaller Back</description>
 				<posx>10</posx>
 				<posy>84</posy>
@@ -57,7 +75,7 @@
 				<width>150</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32922][/B]</label>
@@ -72,7 +90,7 @@
 				<width>680</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
@@ -85,7 +103,7 @@
 				<width>330</width>
 				<height>60</height>
 				<font>ForumBrowser-font10</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 			</control>
@@ -113,7 +131,7 @@
 					<width>400</width>
 					<height>10</height>
 					<font>ForumBrowser-font10</font>
-					<textcolor>FF000000</textcolor>
+					<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 					<aligny>top</aligny>
 					<align>right</align>
 				</control>
