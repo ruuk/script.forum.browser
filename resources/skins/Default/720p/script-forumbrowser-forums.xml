@@ -26,8 +26,7 @@
 				<colordiffuse>CC000000</colordiffuse>
 			</control>
 			<!-- ** Required ** Do not change <id> or <type> -->
-
-			<control type="image"  id="100">
+			<control type="image">
 				<description>page header tab icon</description>
 				<posx>10</posx>
 				<posy>4</posy>
@@ -42,6 +41,15 @@
 				<width>1260</width>
 				<height>125</height>
 				<texture border="20">forum-browser-white-box.png</texture>
+			</control>
+			<control type="image"  id="100">
+				<description>page header tab icon</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-white-boxr.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_header_color)]</colordiffuse>
 			</control>
 			<control type="image" id="249">
 				<description>Type Logo</description>
@@ -67,7 +75,7 @@
 				<width>230</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
@@ -81,7 +89,7 @@
 				<width>380</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32915][/B]</label>

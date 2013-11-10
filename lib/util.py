@@ -1,4 +1,4 @@
-import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse
+import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii
 from lib import chardet
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
@@ -425,7 +425,20 @@ def makeUnicode(string,encoding='utf-8'):
 			return string
 		except:
 			return unicode(string,encoding,'replace')
-			
+
+def makeColorGif(hex6color,outpath):
+	sourceGIF = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')),'resources','media','white1px.gif')
+	gifReplace = chr(255)*6
+	try:
+		replace = binascii.unhexlify(hex6color)
+	except:
+		replace = chr(255)*3
+	replace += replace
+	with open(outpath,'w') as t:
+		with open(sourceGIF,'r') as c:
+			t.write(c.read().replace(gifReplace,replace))
+	return outpath
+	
 ###################################################################	
 ## XBMCControlConditionalVisiblity
 ###################################################################	

@@ -6,7 +6,7 @@ Icon attribution: See tapatalk.py for list of attributions from The Noun Project
 
 TODO:
  Short Term:
-  Right justified text for languages such as Hebrew
+  Right justified text for languages such as Hebrew - done?
   Strings for bookmarks
   Better bookmarks dialog for light/dark skin
   ParserBrowser: More parsing of profile links and allow user to view in webviewer
@@ -28,10 +28,8 @@ TODO:
   Logo url from field in forum config data?
   Add missing smilies other forum types
   Add missing quote formats for other forum systems
-  Tapatalk: Use charset from get_config
   Find forum mobiquo.php path from tapatalk.js path in html page
-  Latest Threads
-  Today's New Posts?
+  Newest Threads
   Make a million dollars
   
  Investigated And Possibly Unfixable:
@@ -43,11 +41,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.30
+Current Version : 2.1.31
+
+*** 2.1.31 ***
+
+When saving an image, exiting the browse dialog without selecting OK now aborts the save
+Fixed a bug causing default save location to be erased when aborting the browse menu
+Added version check to update skin mods for recent changes
+Them colors now carried through to threds/subscriptions window
 
 *** 2.1.30 ***
 
-Add as Settings:General option 'Don't Ask For Image Filename When Saving'
+Added a Settings:General option 'Don't Ask For Image Filename When Saving'
 Fix for XBMC skins button offset messing with Forum Browser skins
 Fix for inital source when selecting a new path when saving an image
 

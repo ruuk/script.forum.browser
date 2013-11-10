@@ -192,7 +192,7 @@ class ImagesDialog(windows.BaseWindowDialog):
 				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
 				if new: path = ''
 		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True)
-		if path == '/': return
+		if not path: return
 		setSetting('last_download_path',path)
 		if not os.path.exists(source): return
 		if util.getSetting('dont_ask_image_filename', False):
@@ -402,17 +402,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		return logo
 	
 	def makeColorFile(self,color):
-		path = self.colorsDir
-		try:
-			replace = binascii.unhexlify(color)
-		except:
-			replace = chr(255)
-		replace += replace
-		target = os.path.join(path,color + '.gif')
-		with open(target,'w') as t:
-			with open(self.colorGif,'r') as c:
-				t.write(c.read().replace(self.gifReplace,replace))
-		return target
+		return util.makeColorGif(color, os.path.join(self.colorsDir,color + '.gif'))
 		
 def editForumSettings(forumID):
 	w = dialogs.openWindow(ForumSettingsDialog,'script-forumbrowser-forum-settings.xml',return_window=True,modal=False,theme='Default')
@@ -735,14 +725,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		self.fillList()
 	
 	def makeColorFile(self,color,path):
-		try:
-			replace = binascii.unhexlify(color)
-		except:
-			replace = chr(255)
-		replace += replace
-		target = os.path.join(path,color + '.gif')
-		open(target,'w').write(open(self.colorGif,'r').read().replace(self.gifReplace,replace))
-		return target
+		return util.makeColorGif(color, os.path.join(path,color + '.gif'))
 	
 	def loadLastData(self):
 		dataFile = os.path.join(CACHE_PATH,'notifications')
@@ -2580,22 +2563,18 @@ class ForumsWindow(windows.BaseWindow):
 		
 	def setTheme(self):
 		hc = FB.theme.get('header_color')
-		self.headerTextFormat = '[B]%s[/B]'
 		if hc and hc.upper() != 'FFFFFF':
 			self.headerIsDark = self.hexColorIsDark(hc)
-			if self.headerIsDark: self.headerTextFormat = '[COLOR FFFFFFFF][B]%s[/B][/COLOR]'
-			hc = 'FF' + hc.upper()
-			self.getControl(100).setColorDiffuse(hc)
-			self.getControl(251).setVisible(False)
+			xbmcgui.Window(10000).setProperty('ForumBrowser_header_color','FF' + hc.upper())
 		else:
 			self.headerIsDark = False
-			self.getControl(100).setColorDiffuse('FF888888')
-			self.getControl(251).setVisible(True)
-			
+			xbmcgui.Window(10000).setProperty('ForumBrowser_header_color','')
 		if self.headerIsDark:
 			self.setProperty('header_is_dark', '1')
+			xbmcgui.Window(10000).setProperty('ForumBrowser_header_text_color','FFFFFFFF')
 		else:
 			self.setProperty('header_is_dark', '0')
+			xbmcgui.Window(10000).setProperty('ForumBrowser_header_text_color','FF000000')
 			
 		self.setLabels()
 		
@@ -3414,7 +3393,7 @@ def updateOldVersion():
 	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
 	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
 		convertForumSettings_1_1_4()
-	if StrictVersion(lastVersion) < StrictVersion('2.1.10') and not lastVersion == '0.0.0':
+	if StrictVersion(lastVersion) < StrictVersion('2.1.30') and not lastVersion == '0.0.0':
 		if getSetting('use_skin_mods',False):
 			dialogs.showMessage(T(32393),T(32394))
 			mods.installSkinMods(update=True)

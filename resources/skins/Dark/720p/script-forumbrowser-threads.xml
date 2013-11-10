@@ -26,7 +26,7 @@
 				<colordiffuse>CC000000</colordiffuse>
 			</control>
 
-			<control type="image" id="251">
+			<control type="image">
 				<description>page header tab icon</description>
 				<posx>10</posx>
 				<posy>4</posy>
@@ -42,6 +42,23 @@
 				<height>125</height>
 				<texture border="20">forum-browser-dark-white-box.png</texture>
 				<colordiffuse>FF888888</colordiffuse>
+			</control>
+			<control type="image" id="251">
+				<description>page header tab icon</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-dark-white-boxr.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_header_color)]</colordiffuse>
+			</control>
+			<control type="image">
+				<description>page header tab icon</description>
+				<posx>10</posx>
+				<posy>4</posy>
+				<width>1260</width>
+				<height>712</height>
+				<texture border="20">forum-browser-dark-white-outline.png</texture>
 			</control>
 			<control type="image" id="351">
 				<description>page header tab icon</description>
@@ -59,7 +76,7 @@
 				<width>200</width>
 				<height>40</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<label>[B]$ADDON[script.forum.browser 32911][/B]</label>
@@ -73,7 +90,7 @@
 				<width>630</width>
 				<height>60</height>
 				<font>ForumBrowser-font13</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>center</align>
 				<wrapmultiline>true</wrapmultiline>
