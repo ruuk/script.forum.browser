@@ -403,6 +403,10 @@ class PageWindow(BaseWindow):
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
 		elif controlID == 202:
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
+		if controlID == 203:
+			if self.pageData.prev: self.gotoPage(self.pageData.getPageNumber(1))
+		elif controlID == 204:
+			if self.pageData.next: self.gotoPage(self.pageData.getPageNumber(-1))
 		elif controlID == 105:
 			self.pageMenu()
 		BaseWindow.onClick(self,controlID)

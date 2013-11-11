@@ -141,7 +141,7 @@ def getSavedTheme(current=None,get_current=False):
 		CURRENT_THEME = current
 	if get_current and CURRENT_THEME: return CURRENT_THEME
 	try:			
-		return ('Default','Dark','Video')[getSetting('skin',0)]
+		return ('Default','Dark','Video','Sequel')[getSetting('skin',0)]
 	except:
 		return 'Default'
 

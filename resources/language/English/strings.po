@@ -1950,6 +1950,9 @@ msgctxt "#32566"
 msgid "Don't Ask For Image Filename When Saving"
 msgstr ""
 
+msgctxt "#32567"
+msgid "Sequel (W.I.P)"
+msgstr ""
 
 #empty strings from id 32524 to 32899
 

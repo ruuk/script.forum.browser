@@ -46,7 +46,7 @@ Current Version : 2.1.32
 *** 2.1.32 ***
 
 Theme colors now carried up through message view on Light and Dark skins
-New shared activity spinner for Light and dark skins
+New shared activity spinner for Light and Dark skins
 
 *** 2.1.31 ***
 

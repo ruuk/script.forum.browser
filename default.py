@@ -1697,12 +1697,17 @@ class RepliesWindow(windows.PageWindow):
 			showIndicators = getSetting('show_media_indicators',True)
 			countLinkImages = getSetting('smi_count_link_images',False)
 			items = []
+			lastItem = len(data.data) - 1
 			for post,idx in zip(data.data,range(0,len(data.data))):
 				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
 				user = re.sub('<.*?>','',post.userName)
 				item = xbmcgui.ListItem(label=post.isSent and 'To: ' + user or user)
 				if user == self.me: item.setInfo('video',{"Director":'me'})
+				if idx == lastItem:
+					item.setProperty('end_item','last')
+				elif idx == 0:
+					item.setProperty('end_item','first')
 				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
 				items.append(item)
 			self.getControl(120).addItems(items)
