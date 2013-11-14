@@ -1491,12 +1491,15 @@ class RepliesWindow(windows.PageWindow):
 		if self.isPM():
 			self.getControl(201).setEnabled(FB.canPrivateMessage())
 			self.getControl(201).setLabel(T(32177))
+			self.setProperty('mode', 'pm')
 		elif self.search:
 			self.getControl(201).setEnabled(True)
 			self.getControl(201).setLabel(T(32914))
+			self.setProperty('mode', 'search')
 		else:
 			self.getControl(201).setEnabled(FB.canPost())
 			self.getControl(201).setLabel(T(32902))
+			self.setProperty('mode', 'post')
 			
 	def setPMBox(self,boxid=None):
 		if not self.isPM(): return
@@ -2582,6 +2585,8 @@ class ForumsWindow(windows.BaseWindow):
 			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FF000000')
 			
 		self.setLabels()
+		windows.setWindowSlideUp()
+		windows.setWindowColorsDark()
 		
 	def hexColorIsDark(self,h):
 		r,g,b = self.hexToRGB(h)

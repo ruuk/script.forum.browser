@@ -399,16 +399,22 @@ class PageWindow(BaseWindow):
 		self.controlId = controlId
 
 	def onClick( self, controlID ):
-		if controlID == 200:
+		if controlID == 200 or controlID == 180:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
-		elif controlID == 202:
+		elif controlID == 202 or controlID == 181:
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
-		if controlID == 203:
+		if controlID == 203 or controlID == 182:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPageNumber(1))
-		elif controlID == 204:
+		elif controlID == 204 or controlID == 183:
 			if self.pageData.next: self.gotoPage(self.pageData.getPageNumber(-1))
-		elif controlID == 105:
+		elif controlID == 105 or controlID == 184:
 			self.pageMenu()
+		elif controlID == 185:
+			self.askPageNumber()
+		elif controlID == 186:
+			self.toggleSlideUp()
+		elif controlID == 187:
+			self.toggleDark()
 		BaseWindow.onClick(self,controlID)
 	
 	def onAction(self,action):
@@ -417,6 +423,14 @@ class PageWindow(BaseWindow):
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
 		elif action == ACTION_PREV_ITEM:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
+		
+	def toggleSlideUp(self):
+		val = not util.getSetting('window_slide_up', False)
+		setWindowSlideUp(val)
+		
+	def toggleDark(self):
+		val = not util.getSetting('window_colors_dark', False)
+		setWindowColorsDark(val)
 		
 	def pageMenu(self):
 		options = [self._firstPage,self._lastPage]
@@ -502,3 +516,23 @@ class WindowData():
 		self.nextKWArgs = kwargs or {}
 		self.nextData = data
 		return self
+	
+def setWindowSlideUp(up=None):
+	if up == None:
+		up = util.getSetting('window_slide_up', False)
+	else:
+		util.setSetting('window_slide_up', up)
+	dialogs.setGlobalSkinProperty('ForumBrowser_window_slide_up', up and '1' or '0')
+
+def setWindowColorsDark(dark=None):
+	if dark == None:
+		dark = util.getSetting('window_colors_dark', False)
+	else:
+		util.setSetting('window_colors_dark', dark)
+	dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_dark', dark and '1' or '0')
+	if dark:
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore', 'FFFFFFFF')
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back', 'FF000000')
+	else:
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore', 'FF000000')
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back', 'FFFFFFFF')
