@@ -2117,9 +2117,20 @@ class ThreadsWindow(windows.PageWindow):
 		if self.fid == 'subscriptions':
 			self.getControl(103).setLabel('[B]%s[/B]' % T(32175))
 			self.getControl(104).setLabel('')
+			self.setProperty('mode', 'subscriptions')
 		else:
 			self.getControl(103).setLabel('[B]%s[/B]' % T(32160))
 			self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
+			if self.search and not self.search == '@!RECENTTHREADS!@' and not self.search == '@!UNREAD!@':
+				self.setProperty('mode', 'search')
+			else:
+				self.setProperty('mode', 'threads')
+		create = False
+		if not self.search and not self.fid == 'subscriptions': create = FB.canCreateThread(self.fid)
+		try:
+			self.getControl(201).setEnabled(create)
+		except:
+			pass
 	
 	def errorCallback(self,error):
 		dialogs.showMessage(T(32050),T(32161),error.message,error=True)
@@ -2234,6 +2245,10 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty('announcement',unicode(tdict.get('announcement','')))
 			item.setProperty('reply_count',reply_count)
 			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
+			item.setProperty('avatar',str(tdict.get('icon_url') or ''))
+			item.setProperty('replies',str(tdict.get('reply_number') or ''))
+			item.setProperty('views',str(tdict.get('view_number') or ''))
+			item.setProperty('last_reply_time',str(tdict.get('last_reply_time') or ''))
 			self.getControl(120).addItem(item)
 		return True
 			
@@ -2309,6 +2324,9 @@ class ThreadsWindow(windows.PageWindow):
 		elif controlID == 106:
 			self.stopThread()
 			return
+		elif controlID == 201:
+			self.createThread()
+			
 		if self.empty: self.fillThreadList()
 		windows.PageWindow.onClick(self,controlID)
 	

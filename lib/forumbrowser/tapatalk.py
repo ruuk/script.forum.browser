@@ -1083,6 +1083,17 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 		data['lastposter'] = self.unicode(str(data.get('last_reply_user') or data.get('last_reply_author_name','')))
 		#data['forumid'] = 
 		data['sticky'] = sticky
+		date = data.get('last_reply_time')
+		if date:
+			try:
+				date = str(date)
+				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
+				datetuple = iso8601.parse_date(date).timetuple()
+				self.unixtime = time.mktime(datetuple)
+				date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
+				data['last_reply_time'] = date
+			except:
+				data['last_reply_time'] = 'ERROR'
 		return data
 	
 	def _getThreads(self,forumid,topic_num,callback,donecallback):

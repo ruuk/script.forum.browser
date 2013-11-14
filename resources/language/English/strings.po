@@ -693,7 +693,7 @@ msgid "No messages"
 msgstr ""
 
 msgctxt "#32252"
-msgid "Create New Thread"
+msgid "Create Thread"
 msgstr ""
 
 msgctxt "#32253"
