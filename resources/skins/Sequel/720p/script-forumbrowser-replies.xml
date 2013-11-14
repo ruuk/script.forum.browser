@@ -56,7 +56,7 @@
 				<width>1280</width>
 				<height>90</height>
 				<texture>forum-browser-sequel-white_square.png</texture>
-				<colordiffuse>FFCCCCCC</colordiffuse>
+				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
 			<control type="image">
 				<description>MenuBGBG-NoColor</description>
@@ -189,28 +189,6 @@
 					<disabledcolor>FFCCCCCC</disabledcolor>
 					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
-				<control type="button" id="106">
-					<textoffsetx>0</textoffsetx>
-					<description>Stop Button</description>
-					<posx>60</posx>
-					<posy>0</posy>
-					<width>200</width>
-					<height>30</height>
-					<onleft>185</onleft>
-					<onright>202</onright>
-					<onup>120</onup>
-					<ondown>120</ondown>
-					<font>ForumBrowser-font12</font>
-					<textcolor>FFAAAAAA</textcolor>
-					<disabledcolor>FFCCCCCC</disabledcolor>
-					<focusedcolor>FFFFFFFF</focusedcolor>
-					<aligny>center</aligny>
-					<align>center</align>
-					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
-					<pulseonselect>false</pulseonselect>
-					<texturefocus></texturefocus>
-					<texturenofocus></texturenofocus>
-				</control>
 				<control type="button" id="202">
 					<description>Next</description>
 					<onleft>106</onleft>
@@ -239,6 +217,28 @@
 					<visible>Control.IsVisible(202)</visible>
 				</control>
 				<visible>!Control.IsVisible(106)</visible>
+			</control>
+			
+			<control type="button" id="106">
+				<textoffsetx>0</textoffsetx>
+				<description>Stop Button</description>
+				<posx>540</posx>
+				<posy>59</posy>
+				<width>200</width>
+				<height>30</height>
+				<onleft>185</onleft>
+				<onright>202</onright>
+				<onup>120</onup>
+				<ondown>120</ondown>
+				<font>ForumBrowser-font12</font>
+				<textcolor>FFAAAAAA</textcolor>
+				<disabledcolor>FFCCCCCC</disabledcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
+				<aligny>center</aligny>
+				<align>center</align>
+				<texturefocus></texturefocus>
+				<texturenofocus></texturenofocus>
+				<label>[B][UPPERCASE]$ADDON[script.forum.browser 32910][/UPPERCASE][/B]</label>
 			</control>
 			
 			<control type="group">

@@ -56,7 +56,7 @@
 				<width>1280</width>
 				<height>90</height>
 				<texture>forum-browser-sequel-white_square.png</texture>
-				<colordiffuse>FFCCCCCC</colordiffuse>
+				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
 			<control type="image">
 				<description>MenuBGBG-NoColor</description>
@@ -189,28 +189,6 @@
 					<disabledcolor>FFCCCCCC</disabledcolor>
 					<focusedcolor>FFFFFFFF</focusedcolor>
 				</control>
-				<control type="button" id="106">
-					<textoffsetx>0</textoffsetx>
-					<description>Stop Button</description>
-					<posx>60</posx>
-					<posy>0</posy>
-					<width>200</width>
-					<height>30</height>
-					<onleft>185</onleft>
-					<onright>202</onright>
-					<onup>120</onup>
-					<ondown>120</ondown>
-					<font>ForumBrowser-font12</font>
-					<textcolor>FFAAAAAA</textcolor>
-					<disabledcolor>FFCCCCCC</disabledcolor>
-					<focusedcolor>FFFFFFFF</focusedcolor>
-					<aligny>center</aligny>
-					<align>center</align>
-					<label>[B]$ADDON[script.forum.browser 32910][/B]</label>
-					<pulseonselect>false</pulseonselect>
-					<texturefocus></texturefocus>
-					<texturenofocus></texturenofocus>
-				</control>
 				<control type="button" id="202">
 					<description>Next</description>
 					<onleft>106</onleft>
@@ -241,6 +219,28 @@
 				<visible>!Control.IsVisible(106)</visible>
 			</control>
 			
+			<control type="button" id="106">
+				<textoffsetx>0</textoffsetx>
+				<description>Stop Button</description>
+				<posx>540</posx>
+				<posy>59</posy>
+				<width>200</width>
+				<height>30</height>
+				<onleft>185</onleft>
+				<onright>202</onright>
+				<onup>120</onup>
+				<ondown>120</ondown>
+				<font>ForumBrowser-font12</font>
+				<textcolor>FFAAAAAA</textcolor>
+				<disabledcolor>FFCCCCCC</disabledcolor>
+				<focusedcolor>FFFFFFFF</focusedcolor>
+				<aligny>center</aligny>
+				<align>center</align>
+				<texturefocus></texturefocus>
+				<texturenofocus></texturenofocus>
+				<label>[B][UPPERCASE]$ADDON[script.forum.browser 32910][/UPPERCASE][/B]</label>
+			</control>
+				
 			<control type="group">
 				<posx>1190</posx>
 				<posy>59</posy>
@@ -469,35 +469,6 @@
 				<visible>system.getbool(input.enablemouse)</visible>
 				<onclick>PreviousMenu</onclick>
 			</control>
-		</control>
-		
-		<control type="label">
-			<description>First Page</description>
-			<visible>!Control.IsVisible(200) + StringCompare(Container(120).ListItem.Property(end_item),first)</visible>
-			<animation effect="fade" time="100" delay="200">Visible</animation>
-			<posx>0</posx>
-			<posy>235</posy>
-			<width>1280</width>
-			<height>40</height>
-			<font>ForumBrowser-font20</font>
-			<textcolor>FF666666</textcolor>
-			<aligny>center</aligny>
-			<align>center</align>
-			<label>FIRST POST</label>
-		</control>
-		<control type="label">
-			<description>Last Page</description>
-			<visible>!Control.IsVisible(202) + StringCompare(Container(120).ListItem.Property(end_item),last)</visible>
-			<animation effect="fade" time="100" delay="300">Visible</animation>
-			<posx>0</posx>
-			<posy>500</posy>
-			<width>1280</width>
-			<height>40</height>
-			<font>ForumBrowser-font20</font>
-			<textcolor>FF666666</textcolor>
-			<aligny>center</aligny>
-			<align>center</align>
-			<label>LAST POST</label>
 		</control>
 				
 		<control type="group">

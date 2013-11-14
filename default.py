@@ -2701,17 +2701,23 @@ class ForumsWindow(windows.BaseWindow):
 					fdict = f
 				fid = fdict.get('forumid','')
 				title = fdict.get('title',T(32050))
-				desc = fdict.get('description') or T(32172)
+				realdesc = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',fdict.get('description'))),FB)
 				sub = fdict.get('subforum')
-				if sub: desc = T(32173)
+				if sub and not realdesc:
+					desc = T(32173)
+				else:
+					desc = realdesc or T(32172)
+				
 				title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?',FB)
 				item = xbmcgui.ListItem(label=title)
 				item.setInfo('video',{"Genre":sub and 'sub' or ''})
 				item.setProperty("ignore",fdict.get('ignore') and 'ignore' or '')
-				item.setProperty("description",texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB))
+				item.setProperty("description",desc)
+				item.setProperty("realdescription",realdesc)
 				item.setProperty("topic",title)
 				item.setProperty("id",unicode(fid))
 				item.setProperty("link",fdict.get('link',''))
+				item.setProperty("artwork",fdict.get('logo_url') or '')
 				if fdict.get('new_post'): item.setProperty('unread','unread')
 				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)

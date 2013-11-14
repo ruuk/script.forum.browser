@@ -191,7 +191,7 @@
 				<width>200</width>
 				<height>10</height>
 				<font>ForumBrowser-font12</font>
-				<textcolor>FF000000</textcolor>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_header_text_color)]</textcolor>
 				<aligny>center</aligny>
 				<align>right</align>
 				<label>[COLOR FF808080][B]$INFO[System.Time][/B][/COLOR]</label>

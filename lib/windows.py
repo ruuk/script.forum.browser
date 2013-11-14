@@ -282,8 +282,19 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 	def _getExternalWindow(self): pass
 	
 	def onClick( self, controlID ):
-		return False
-			
+		if controlID == 186:
+			self.toggleSlideUp()
+		elif controlID == 187:
+			self.toggleDark()
+	
+	def toggleSlideUp(self):
+		val = not util.getSetting('window_slide_up', False)
+		setWindowSlideUp(val)
+		
+	def toggleDark(self):
+		val = not util.getSetting('window_colors_dark', False)
+		setWindowColorsDark(val)
+		
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
@@ -357,6 +368,9 @@ class BaseWindow(xbmcgui.WindowXML,BaseWindowFunctions):
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
 	
+	def onClick(self,controlID):
+		BaseWindowFunctions.onClick(self,controlID)
+		
 	def setProperty(self,key,value):
 		self.externalWindow().setProperty(key,value)
 		
@@ -374,6 +388,9 @@ class BaseWindowDialog(xbmcgui.WindowXMLDialog,BaseWindowFunctions):
 	def onAction(self,action):
 		BaseWindowFunctions.onAction(self,action)
 	
+	def onClick(self,controlID):
+		BaseWindowFunctions.onClick(self,controlID)
+		
 	def setProperty(self,key,value):
 		self.externalWindow().setProperty(key,value)
 		
@@ -411,10 +428,6 @@ class PageWindow(BaseWindow):
 			self.pageMenu()
 		elif controlID == 185:
 			self.askPageNumber()
-		elif controlID == 186:
-			self.toggleSlideUp()
-		elif controlID == 187:
-			self.toggleDark()
 		BaseWindow.onClick(self,controlID)
 	
 	def onAction(self,action):
@@ -423,14 +436,6 @@ class PageWindow(BaseWindow):
 			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
 		elif action == ACTION_PREV_ITEM:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
-		
-	def toggleSlideUp(self):
-		val = not util.getSetting('window_slide_up', False)
-		setWindowSlideUp(val)
-		
-	def toggleDark(self):
-		val = not util.getSetting('window_colors_dark', False)
-		setWindowColorsDark(val)
 		
 	def pageMenu(self):
 		options = [self._firstPage,self._lastPage]
