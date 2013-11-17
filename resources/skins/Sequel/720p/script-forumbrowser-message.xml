@@ -1,6 +1,6 @@
 <window>
 	<onload>SetProperty(ignore_media_click,1)</onload>
-	<defaultcontrol>123</defaultcontrol>
+	<defaultcontrol>127</defaultcontrol>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>
@@ -37,7 +37,7 @@
 					<width>1280</width>
 					<height>720</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>C0FFFFFF</colordiffuse>
+					<colordiffuse>A0FFFFFF</colordiffuse>
 					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_MESSAGE),1)</visible>
 				</control>
 				<control type="image">
@@ -51,14 +51,46 @@
 				</control>
 			</control>
 			
+			<control type="group">
+				<visible>!Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_window_background_MESSAGE),)</visible>
+				<posx>0</posx>
+				<posy>90</posy>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_MESSAGE)]</texture>
+					<aspectration>stretch</aspectration>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>A0FFFFFF</colordiffuse>
+					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_MESSAGE),1)</visible>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>C0000000</colordiffuse>
+					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_MESSAGE),1)</visible>
+				</control>
+			</control>
+			
 			<control type="label"  id="122">
-			<posx>-10</posx>
-			<posy>-10</posy>
-			<width>5</width>
-			<height>5</height>
-		</control>
+				<posx>-10</posx>
+				<posy>-10</posy>
+				<width>5</width>
+				<height>5</height>
+			</control>
 					
-		<control type="group">
+		<control type="group" id="127">
 			<animation effect="slide" end="0,-72" time="200" condition="!Control.IsVisible(149)">Conditional</animation>
 			<posx>20</posx>
 			<posy>163</posy>
@@ -87,12 +119,12 @@
 						<posy>0</posy>
 						<width>4</width>
 						<height>558</height>
-						<onleft>148</onleft>
+						<onleft>146</onleft>
 						<onright>124</onright>
 						<onup>150</onup>
 						<ondown>124</ondown>
 						<texturesliderbackground>-</texturesliderbackground>
-						<texturesliderbar border="1">forum-browser-sequel-white_square.png</texturesliderbar>
+						<texturesliderbar></texturesliderbar>
 						<texturesliderbarfocus border="1">forum-browser-sequel-white_square.png</texturesliderbarfocus>
 						<textureslidernib>-</textureslidernib>
 						<textureslidernibfocus>-</textureslidernibfocus>
@@ -133,7 +165,7 @@
 						<onup>123</onup>
 						<ondown>124</ondown>
 						<texturesliderbackground>-</texturesliderbackground>
-						<texturesliderbar border="1">forum-browser-sequel-white_square.png</texturesliderbar>
+						<texturesliderbar></texturesliderbar>
 						<texturesliderbarfocus border="1">forum-browser-sequel-white_square.png</texturesliderbarfocus>
 						<textureslidernib>-</textureslidernib>
 						<textureslidernibfocus>-</textureslidernibfocus>
@@ -150,10 +182,10 @@
 			<posx>0</posx>
 			<posy>30</posy>
 			<width>1280</width>
-			<height>690</height>
+			<height>750</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
 			<colordiffuse>40404040</colordiffuse>
-			<visible>!Control.HasFocus(123) + !Control.HasFocus(124) + !Control.HasFocus(148)</visible>
+			<visible>!Control.HasFocus(123) + !Control.HasFocus(124) + !Control.HasFocus(148) + !Control.HasFocus(146)</visible>
 		</control>
 		
 		<control type="group">
@@ -195,9 +227,9 @@
 			</control>
 			<control type="image">
 				<posx>0</posx>
-				<posy>-46</posy>
+				<posy>-47</posy>
 				<width>1344</width>
-				<height>119</height>
+				<height>120</height>
 				<texture border="0,51,0,5">forum-browser-sequel-menu_bg.png</texture>
 			</control>
 			<control type="fixedlist" id="150">
@@ -208,6 +240,7 @@
 				<height>72</height>
 				<onup>186</onup>
 				<ondown>123</ondown>
+				<onright>186</onright>
 				<viewtype label="535">list</viewtype>
 				<scrolltime>200</scrolltime>
 				<orientation>horizontal</orientation>
@@ -341,7 +374,7 @@
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>640</width>
-				<height>630</height>
+				<height>690</height>
 				<texture>forum-browser-sequel-white_square.png</texture>
 				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_back_MESSAGE)]</colordiffuse>
 			</control>
@@ -349,7 +382,7 @@
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>686</width>
-				<height>630</height>
+				<height>690</height>
 				<texture border="5,0,51,0">forum-browser-sequel-left_menu_bg.png</texture>
 				<visible>true</visible>
 				<colordiffuse></colordiffuse>
@@ -357,7 +390,7 @@
 			<control type="list" id="148">
 				<posx>0</posx>
 				<posy>0</posy>
-				<width>640</width>
+				<width>710</width>
 				<height>630</height>
 				<onleft>124</onleft>
 				<onright>123</onright>
@@ -460,6 +493,56 @@
 			</control>
 		</control>
 		
+		<control type="group">
+			<animation effect="slide" end="100,0" time="200" condition="Control.HasFocus(146)">Conditional</animation>
+			<posx>-100</posx>
+			<posy>90</posy>
+			<defaultcontrol>146</defaultcontrol>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>54</width>
+				<height>690</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_back_MESSAGE)]</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>100</width>
+				<height>690</height>
+				<texture border="5,0,51,0">forum-browser-sequel-left_menu_bg.png</texture>
+				<visible>true</visible>
+				<colordiffuse></colordiffuse>
+			</control>
+			<control type="label">
+				<textoffsetx>30</textoffsetx>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>690</width>
+				<height>690</height>
+				<angle>90</angle>
+				<label>[B]NO LINKS[/B]</label>
+				<aligny>center</aligny>
+				<align>left</align>
+				<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_MESSAGE)]</textcolor>
+				<font>ForumBrowser-font30</font>
+			</control>
+			<control type="button" id="146">
+				<visible>!StringCompare(Window.Property(has_links),1)</visible>
+				<onleft>148</onleft>
+				<onright>123</onright>
+				<onup>123</onup>
+				<ondown>123</ondown>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>110</width>
+				<height>690</height>
+				<texturefocus></texturefocus>
+				<texturenofocus></texturenofocus>
+			</control>
+		</control>
+		
 			<control type="image">
 				<description>Header-NoColor</description>
 				<posx>0</posx>
@@ -497,11 +580,11 @@
 			</control>
 				
 			<control type="group">
-				<posx>1190</posx>
+				<posx>1160</posx>
 				<posy>59</posy>
 				<control type="button" id="186">
 					<description>Slide Toggle</description>
-					<onleft>187</onleft>
+					<onleft>188</onleft>
 					<onright>187</onright>
 					<onup>186</onup>
 					<ondown>150</ondown>
@@ -548,7 +631,7 @@
 				<control type="button" id="187">
 					<description>Toggle Light</description>
 					<onleft>186</onleft>
-					<onright>186</onright>
+					<onright>188</onright>
 					<onup>187</onup>
 					<ondown>150</ondown>
 					<posx>30</posx>
@@ -589,6 +672,20 @@
 					<width>20</width>
 					<height>20</height>
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
+				</control>
+				
+				<control type="button" id="188">
+					<description>Settings</description>
+					<onleft>187</onleft>
+					<onright>186</onright>
+					<onup>188</onup>
+					<ondown>150</ondown>
+					<posx>60</posx>
+					<posy>6</posy>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-settings.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-settings_nofocus.png</texturenofocus>
 				</control>
 			</control>
 				

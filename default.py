@@ -1097,7 +1097,7 @@ class MessageWindow(windows.BaseWindow):
 			if checkVideo: break
 		s = None
 		if checkVideo: s = dialogs.showActivitySplash(T(32311))
-		if links: self.hasLinks = True
+			
 		try:
 			for link in links:
 				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
@@ -1114,24 +1114,32 @@ class MessageWindow(windows.BaseWindow):
 					item.setLabel2('%s: %s' % (video.sourceName,video.ID))
 					item.setProperty('video',link.url)
 					mlist.addItem(item)
+					self.hasImages = True
+					self.setProperty('has_media', '1')
 					continue
-				elif link.textIsImage():
-					item.setIconImage(link.text)
 				elif link.isImage():
-					item.setIconImage(link.url)
+					if link.textIsImage():
+						item.setIconImage(link.text)
+					else:
+						item.setIconImage(link.url)
 					item2 = xbmcgui.ListItem('',iconImage=link.url)
 					item2.setProperty('wrapped_url',textwrap.fill(link.url, 60, break_long_words=True))	
 					item.setProperty('url',link.url)
 					mlist.addItem(item2)
 					self.hasImages = True
-					self.setProperty('has_media', '1')
+				elif link.textIsImage():
+					item.setIconImage(link.text)
 				elif link.isPost():
 					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
 				elif link.isThread():
 					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-thread.png'))
 				else:
 					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-link.png'))
+				self.hasLinks = True
 				ulist.addItem(item)
+				
+			if self.hasLinks: self.setProperty('has_links', '1')
+			if self.hasImages: self.setProperty('has_media', '1')
 		finally:
 			if s: s.close()
 
@@ -1231,9 +1239,9 @@ class MessageWindow(windows.BaseWindow):
 			finally:
 				s.close()
 		
-		if link.isImage() and not link.textIsImage():
-			self.showImage(link.url)
-		elif link.isPost() or link.isThread():
+# 		if link.isImage() and not link.textIsImage():
+# 			self.showImage(link.url)
+		if link.isPost() or link.isThread():
 			self.action = forumbrowser.PostMessage(tid=link.tid,pid=link.pid)
 			self.doClose()
 		else:
@@ -1267,9 +1275,13 @@ class MessageWindow(windows.BaseWindow):
 				self.doMenu()
 			return
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2 or action == ACTION_PREVIOUS_MENU:
-			if self.getFocusId() == 148 or self.getFocusId() == 150:
+			if self.getFocusId() == 148:
 				self.setFocusId(127)
 				return
+			elif self.getFocusId() == 150:
+				if not self.getProperty('ignore_media_click') == '1': 
+					self.setFocusId(127)
+					return
 		windows.BaseWindow.onAction(self,action)
 		
 	def onClose(self):
@@ -4572,7 +4584,8 @@ def startForumBrowser(forumID=None):
 	
 	windows.setWindowSlideUp()
 	windows.setWindowColorsDark()
-		
+	windows.setWindowBackgroundImage()
+	
 	WM = windows.WindowManager()
 	WM.start(ForumsWindow,"script-forumbrowser-forums.xml")
 	#sys.modules.clear()

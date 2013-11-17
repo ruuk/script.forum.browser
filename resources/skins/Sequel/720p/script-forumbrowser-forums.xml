@@ -35,7 +35,7 @@
 					<width>1280</width>
 					<height>720</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>C0FFFFFF</colordiffuse>
+					<colordiffuse>A0FFFFFF</colordiffuse>
 					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
 				</control>
 				<control type="image">
@@ -48,6 +48,39 @@
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
 				</control>
 			</control>
+			
+			<control type="group">
+				<visible>!Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_window_background_FORUM),)</visible>
+				<posx>0</posx>
+				<posy>150</posy>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>840</height>
+					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_FORUM)]</texture>
+					<aspectration>stretch</aspectration>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>840</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>A0FFFFFF</colordiffuse>
+					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>840</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>C0000000</colordiffuse>
+					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
+				</control>
+			</control>
+			
 			<control type="image">
 				<description>Header-NoColor</description>
 				<posx>0</posx>
@@ -92,7 +125,7 @@
 					<posy>-1</posy>
 					<width>1</width>
 					<height>29</height>
-					<colordiffuse>FF00B000</colordiffuse>
+					<colordiffuse>B000FF00</colordiffuse>
 					<texture>forum-browser-sequel-white_square.png</texture>
 					<visible>Control.isVisible(105)</visible>
 				</control>
@@ -135,7 +168,7 @@
 				<posy>122</posy>
 				<width>1120</width>
 				<height>27</height>
-				<onleft>187</onleft>
+				<onleft>188</onleft>
 				<onright>186</onright>
 				<onup>120</onup>
 				<ondown>120</ondown>
@@ -257,7 +290,7 @@
 				</control>
 			
 			<control type="group">
-				<posx>1190</posx>
+				<posx>1160</posx>
 				<posy>119</posy>
 				<control type="button" id="186">
 					<description>Slide Toggle</description>
@@ -308,7 +341,7 @@
 				<control type="button" id="187">
 					<description>Toggle Light</description>
 					<onleft>186</onleft>
-					<onright>202</onright>
+					<onright>188</onright>
 					<onup>120</onup>
 					<ondown>120</ondown>
 					<posx>30</posx>
@@ -349,6 +382,20 @@
 					<width>20</width>
 					<height>20</height>
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
+				</control>
+				
+				<control type="button" id="188">
+					<description>Settings</description>
+					<onleft>187</onleft>
+					<onright>202</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>60</posx>
+					<posy>6</posy>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-settings.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-settings_nofocus.png</texturenofocus>
 				</control>
 			</control>
 			
@@ -527,7 +574,7 @@
 				<posy>150</posy>
 				<width>1280</width>
 				<height>690</height>
-				<onleft>187</onleft>
+				<onleft>188</onleft>
 				<onright>202</onright>
 				<onup>105</onup>
 				<ondown>202</ondown>

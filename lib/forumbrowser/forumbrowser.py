@@ -435,7 +435,7 @@ class ChangeForumAction(Action):
 		
 
 class PMLink:
-	linkImageFilter = re.compile('https?://.+?\.(?:jpg|jpeg|png|gif|bmp)$')
+	linkImageFilter = re.compile('https?://[^\?]+?\.(?:jpg|jpeg|png|gif|bmp)$')
 	#urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 	def __init__(self,fb,match=None):
 		self.FB = fb
@@ -458,7 +458,7 @@ class PMLink:
 	def processURL(self):
 		if not self.url: return
 		self.url = self.url.replace('&amp;','&')
-		self._isImage = self.linkImageFilter.search(self.url) and True or False
+		self._isImage = bool(self.linkImageFilter.search(self.url))
 		if self._isImage: return
 		pm = tm = None
 		for plre in self.FB.getPostLinkRE():

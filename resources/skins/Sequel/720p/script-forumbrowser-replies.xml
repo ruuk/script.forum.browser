@@ -36,7 +36,7 @@
 					<width>1280</width>
 					<height>720</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>C0FFFFFF</colordiffuse>
+					<colordiffuse>A0FFFFFF</colordiffuse>
 					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
 				</control>
 				<control type="image">
@@ -49,6 +49,39 @@
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
 				</control>
 			</control>
+			
+			<control type="group">
+				<visible>!Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_window_background_POST),)</visible>
+				<posx>0</posx>
+				<posy>90</posy>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_POST)]</texture>
+					<aspectration>stretch</aspectration>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>A0FFFFFF</colordiffuse>
+					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>760</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>C0000000</colordiffuse>
+					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
+				</control>
+			</control>
+			
 			<control type="image">
 				<description>Header-NoColor</description>
 				<posx>0</posx>
@@ -93,7 +126,7 @@
 					<posy>-1</posy>
 					<width>1</width>
 					<height>29</height>
-					<colordiffuse>FF00B000</colordiffuse>
+					<colordiffuse>B000FF00</colordiffuse>
 					<texture>forum-browser-sequel-white_square.png</texture>
 					<visible>Control.isVisible(106)</visible>
 				</control>
@@ -117,7 +150,7 @@
 			<control type="button" id="201">
 				<textoffsetx>0</textoffsetx>
 				<description>Post Reply</description>
-				<onleft>187</onleft>
+				<onleft>188</onleft>
 				<onright>203</onright>
 				<onup>120</onup>
 				<ondown>120</ondown>
@@ -256,7 +289,7 @@
 			</control>
 			
 			<control type="group">
-				<posx>1190</posx>
+				<posx>1160</posx>
 				<posy>59</posy>
 				<control type="button" id="186">
 					<description>Slide Toggle</description>
@@ -307,7 +340,7 @@
 				<control type="button" id="187">
 					<description>Toggle Light</description>
 					<onleft>186</onleft>
-					<onright>201</onright>
+					<onright>188</onright>
 					<onup>120</onup>
 					<ondown>120</ondown>
 					<posx>30</posx>
@@ -348,6 +381,20 @@
 					<width>20</width>
 					<height>20</height>
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
+				</control>
+				
+				<control type="button" id="188">
+					<description>Settings</description>
+					<onleft>187</onleft>
+					<onright>201</onright>
+					<onup>120</onup>
+					<ondown>120</ondown>
+					<posx>60</posx>
+					<posy>6</posy>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-settings.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-settings_nofocus.png</texturenofocus>
 				</control>
 			</control>
 				
@@ -525,7 +572,7 @@
 				<posy>90</posy>
 				<width>1280</width>
 				<height>690</height>
-				<onleft>187</onleft>
+				<onleft>188</onleft>
 				<onright>201</onright>
 				<onup>120</onup>
 				<ondown>120</ondown>
@@ -567,7 +614,7 @@
 							<posy>0</posy>
 							<width>10</width>
 							<height>10</height>
-							<texture>forum-browser-sequel-white_circle.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FF333333</colordiffuse>
 							<visible>StringCompare(ListItem.Property(online),)</visible>
 						</control>
@@ -576,17 +623,9 @@
 							<posy>0</posy>
 							<width>10</width>
 							<height>10</height>
-							<texture>forum-browser-sequel-white_circle.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FF00FF00</colordiffuse>
 							<visible>StringCompare(ListItem.Property(online),online)</visible>
-						</control>
-						<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>10</width>
-							<height>10</height>
-							<texture>forum-browser-sequel-white_circle_outline.png</texture>
-							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_POST)]</colordiffuse>
 						</control>
 					</control>
 					<control type="group">
@@ -813,7 +852,7 @@
 							<posy>0</posy>
 							<width>10</width>
 							<height>10</height>
-							<texture>forum-browser-sequel-white_circle.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FF333333</colordiffuse>
 							<visible>StringCompare(ListItem.Property(online),)</visible>
 						</control>
@@ -822,17 +861,9 @@
 							<posy>0</posy>
 							<width>10</width>
 							<height>10</height>
-							<texture>forum-browser-sequel-white_circle.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FF00FF00</colordiffuse>
 							<visible>StringCompare(ListItem.Property(online),online)</visible>
-						</control>
-						<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>10</width>
-							<height>10</height>
-							<texture>forum-browser-sequel-white_circle_outline.png</texture>
-							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_POST)]</colordiffuse>
 						</control>
 					</control>
 					<control type="group">

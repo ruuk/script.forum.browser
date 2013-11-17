@@ -287,6 +287,8 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 			self.toggleSlideUp()
 		elif controlID == 187:
 			self.toggleDark()
+		elif controlID == 188:
+			self.openWindowSettings()
 	
 	def toggleSlideUp(self):
 		val = not util.getSetting('window_slide_up_%s' % self.viewType, False)
@@ -296,6 +298,24 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		val = not util.getSetting('window_colors_dark_%s' % self.viewType, False)
 		setWindowColorsDark(val,view=self.viewType)
 		
+	def openWindowSettings(self):
+		d = dialogs.ChoiceMenu('Options')
+		d.addItem('back_view','Set Default Background Image For This View')
+		#d.addItem('back_view_forum','Set Background Image For This View On This Forum')
+		d.addItem('clear_back_view','Clear The Default Background Image For This View')
+		#d.addItem('clear_back_view_forum','Clear The Background Image For This View On This Forum')
+		d.addItem('set_fade','Set The Background Fade Level')
+		res = d.getResult()
+		if not res: return
+		if res == 'back_view':
+			val = xbmcgui.Dialog().browse(2,'Choose Image','files','',True,False)
+			if not val: return
+			setWindowBackgroundImage(val,view=self.viewType)
+		elif res == 'clear_back_view':
+			setWindowBackgroundImage('',view=self.viewType,clear=True)
+		elif res == 'set_fade':
+			dialogs.showMessage('Uhh...', 'Hmmm, this is embarassing. I haven\'t implemented this yet :)')
+	
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
@@ -568,3 +588,19 @@ def setWindowColorsDark(dark=None,view=None):
 	else:
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore', 'FF000000')
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back', 'FFFFFFFF')
+
+def setWindowBackgroundImage(image=None,view=None,clear=False):
+	if clear:
+		util.setSetting('window_background_%s' % view, '')
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,'')
+		return
+	if image == None:
+		for v in VIEW_TYPES:
+			i = util.getSetting('window_background_%s' % v,'')
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % v,i)
+	else:
+		if view:
+			util.setSetting('window_background_%s' % view, image)
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,image)
+			
+		
