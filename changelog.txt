@@ -7,6 +7,7 @@ Icon attribution: See tapatalk.py for list of attributions from The Noun Project
 TODO:
  Short Term:
   Right justified text for languages such as Hebrew - done?
+  Finish conversations
   Strings for bookmarks
   Better bookmarks dialog for light/dark skin
   ParserBrowser: More parsing of profile links and allow user to view in webviewer

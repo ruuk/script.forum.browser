@@ -1050,6 +1050,7 @@ class MessageWindow(windows.BaseWindow):
 		self.videoHandler = video.WebVideo()
 		if self.post: FB.updateAppURL(post=self.post.postId)
 		windows.BaseWindow.__init__( self, *args, **kwargs )
+		self.viewType = 'MESSAGE'
 		
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
@@ -1071,21 +1072,22 @@ class MessageWindow(windows.BaseWindow):
 			self.getControl(122).setText(text)
 		self.getControl(102).setImage(self.post.avatarFinal)
 		self.setTheme()
-		self.getImages()
 		self.getLinks()
+		self.getImages()
 		self.setWindowProperties()
 		
 	def setTheme(self):
-		self.getControl(103).setLabel('[B]%s[/B]' % self.post.cleanUserName() or '')
+		self.getControl(103).setLabel(self.post.cleanUserName() or '')
 		title = []
 		if self.post.postNumber: title.append('#' + str(self.post.postNumber))
 		if self.post.title: title.append(self.post.title)
 		title = ' '.join(title)
-		self.getControl(104).setLabel('[B]%s[/B]' % title)
+		self.getControl(104).setLabel(title)
 		self.getControl(105).setLabel(self.post.date or '')
 		
 	def getLinks(self):
 		ulist = self.getControl(148)
+		mlist = self.getControl(150)
 		links = self.post.links()
 		checkVideo = False
 		for link in links:
@@ -1110,10 +1112,19 @@ class MessageWindow(windows.BaseWindow):
 					item.setIconImage(video.thumbnail)
 					if video.title: item.setLabel(video.title)
 					item.setLabel2('%s: %s' % (video.sourceName,video.ID))
+					item.setProperty('video',link.url)
+					mlist.addItem(item)
+					continue
 				elif link.textIsImage():
 					item.setIconImage(link.text)
 				elif link.isImage():
 					item.setIconImage(link.url)
+					item2 = xbmcgui.ListItem('',iconImage=link.url)
+					item2.setProperty('wrapped_url',textwrap.fill(link.url, 60, break_long_words=True))	
+					item.setProperty('url',link.url)
+					mlist.addItem(item2)
+					self.hasImages = True
+					self.setProperty('has_media', '1')
 				elif link.isPost():
 					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
 				elif link.isThread():
@@ -1127,7 +1138,9 @@ class MessageWindow(windows.BaseWindow):
 	def getImages(self):
 		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
 		urls = self.post.imageURLs()
-		if urls: self.hasImages = True
+		if urls:
+			self.hasImages = True
+			self.setProperty('has_media', '1')
 		for i,url in urls:
 			try:
 				i = int(i)
@@ -1162,15 +1175,22 @@ class MessageWindow(windows.BaseWindow):
 		if self.hasImages: self.setProperty('hasimages','1')
 		if self.post.online: self.setProperty('online','1')
 	
-	def onFocus( self, controlId ):
-		self.controlId = controlId
+	def onFocus( self, controlID ):
+		if controlID != 150: self.setProperty('media_preview', '0')
 		
 	def onClick( self, controlID ):
 		if windows.BaseWindow.onClick(self, controlID): return
 		if controlID == 148:
 			self.linkSelected()
 		elif controlID == 150:
-			self.showImage(self.getControl(150).getSelectedItem().getProperty('url'))
+			if self.getProperty('ignore_media_click'):
+				self.setProperty('media_preview', self.getProperty('media_preview') == '1' and '0' or '1')
+				return
+			item = self.getControl(150).getSelectedItem()
+			if item.getProperty('video'):
+				self.handleVideoLinkURL(item.getProperty('video'))
+			else:
+				self.showImage(item.getProperty('url'))
 	
 	def showVideo(self,source):
 		if video.isPlaying() and getSetting('video_ask_interrupt',True):
@@ -1187,6 +1207,16 @@ class MessageWindow(windows.BaseWindow):
 		if idx >= len(links): return None
 		return links[idx]
 		
+	def handleVideoLinkURL(self,url):
+		s = dialogs.showActivitySplash()
+		try:
+			video = self.videoHandler.getVideoObject(url)
+			if video and video.isVideo:
+				self.showVideo(video.getPlayableURL())
+				return
+		finally:
+			s.close()
+			
 	def linkSelected(self):
 		link = self.getSelectedLink()
 		if not link: return
@@ -1288,15 +1318,69 @@ class MessageWindow(windows.BaseWindow):
 	def doImageMenu(self):
 		img = self.getControl(150).getSelectedItem().getProperty('url')
 		d = dialogs.ChoiceMenu(T(32316))
+		d.addItem('save', T(32129))
 		if CLIPBOARD:
 			d.addItem('copy',T(32314))
 		if d.isEmpty(): return
 		result = d.getResult()
+		if not result: return
 		if result == 'copy':
 			share = CLIPBOARD.getShare('script.evernote','image')
 			share.url = img
 			CLIPBOARD.setClipboard(share)
-	
+		elif result == 'save':
+			self.saveImage(img)
+			
+	def downloadImage(self,url):
+		base = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'slideshow'))
+		if not os.path.exists(base): os.makedirs(base)
+		clearDirFiles(base)
+		return Downloader(message=T(32148)).downloadURLs(base,[url],'.jpg')
+		
+	def saveImage(self,source):
+		#browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
+		firstfname = os.path.basename(source)
+		if source.startswith('http'):
+			result = self.downloadImage(source)
+			if not result:
+				dialogs.showMessage(T(32257),T(32258),success=False)
+				return
+			source = result[0]
+
+		path = getSetting('last_download_path') or ''
+		if path:
+			if not util.getSetting('assume_default_image_save_path', False):
+				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
+				if new: path = ''
+		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True)
+		if not path: return
+		setSetting('last_download_path',path)
+		if not os.path.exists(source): return
+		if util.getSetting('dont_ask_image_filename', False):
+			filename = firstfname
+		else:
+			filename = dialogs.doKeyboard(T(32259), firstfname)
+			if filename == None: return
+		target = os.path.join(path,filename)
+		ct = 1
+		original = filename
+		while os.path.exists(target):
+			fname, ext = os.path.splitext(original)
+			filename = fname + '_' + str(ct) + ext
+			ct+=1
+			if os.path.exists(os.path.join(path,filename)): continue
+			yes = dialogs.dialogYesNo(T(32261),T(32262),T(32263),filename + '?',T(32264),T(32265))
+			if yes is None: return
+			if not yes:
+				ct = 0
+				filename = dialogs.doKeyboard(T(32259), filename)
+				original = filename
+				if filename == None: return
+			target = os.path.join(path,filename)
+		import xbmcvfs
+		xbmcvfs.copy(source, target)
+		dialogs.showMessage(T(32266),T(32267),os.path.basename(target),success=True)
+
 	def doMenu(self):
 		d = dialogs.ChoiceMenu(T(32051))
 		if FB.canPost(): d.addItem('quote',self.post.isPM and T(32249) or T(32134))
@@ -1418,6 +1502,7 @@ class RepliesWindow(windows.PageWindow):
 	info_display = {'postcount':'posts','joindate':'joined'}
 	def __init__( self, *args, **kwargs ):
 		windows.PageWindow.__init__( self,total_items=int(kwargs.get('reply_count',0)),*args, **kwargs )
+		self.viewType = 'POST'
 		self.action = None
 		self.setPageData(FB)
 		self.pageData.isReplies = True
@@ -2099,6 +2184,7 @@ class ThreadsWindow(windows.PageWindow):
 		FB.updateAppURL(forum=self.fid)
 		windows.PageWindow.__init__( self, *args, **kwargs )
 		self.setPageData(FB)
+		self.viewType = 'THREAD'
 		
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
@@ -2470,6 +2556,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.forumsManagerWindowIsOpen = False
 		self.lastFB = None
 		self.data = kwargs.get('data')
+		self.viewType = 'FORUM'
 	
 	def newPostsCallback(self,signal,data):
 		self.openForumsManager(external=True)
@@ -2603,8 +2690,6 @@ class ForumsWindow(windows.BaseWindow):
 			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FF000000')
 			
 		self.setLabels()
-		windows.setWindowSlideUp()
-		windows.setWindowColorsDark()
 		
 	def hexColorIsDark(self,h):
 		r,g,b = self.hexToRGB(h)
@@ -2701,7 +2786,7 @@ class ForumsWindow(windows.BaseWindow):
 					fdict = f
 				fid = fdict.get('forumid','')
 				title = fdict.get('title',T(32050))
-				realdesc = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',fdict.get('description'))),FB)
+				realdesc = texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',fdict.get('description',''))),FB)
 				sub = fdict.get('subforum')
 				if sub and not realdesc:
 					desc = T(32173)
@@ -4484,6 +4569,9 @@ def startForumBrowser(forumID=None):
 		STARTFORUM = sys.argv[-1].split('=',1)[-1]
 	elif sys.argv[-1].startswith('forumbrowser://'):
 		STARTFORUM = sys.argv[-1]
+	
+	windows.setWindowSlideUp()
+	windows.setWindowColorsDark()
 		
 	WM = windows.WindowManager()
 	WM.start(ForumsWindow,"script-forumbrowser-forums.xml")

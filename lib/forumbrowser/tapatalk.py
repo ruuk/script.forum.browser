@@ -4,7 +4,7 @@ from lib.util import LOG, ERROR, getSetting
 from lib import util
 from lib import asyncconnections
 asyncconnections.LOG = LOG
-import xmlrpclib, httplib, sys, re, time, os, urlparse
+import xmlrpclib, httplib, sys, re, time, os, urlparse, datetime
 import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
@@ -117,7 +117,7 @@ class CookieTransport(xmlrpclib.Transport):
 				response = h.getresponse(buffering=True)
 				
 			try:
-				self.lastCharset = response.info().get('content-type','utf-8').split('charset=',1)[-1]
+				self.lastCharset = dict(response.getheaders()).get('content-type','utf-8').split('charset=',1)[-1]
 			except:
 				LOG('Tapatalk: CookieTransport.single_request(): Failed to set lastCharset')
 			
@@ -1088,9 +1088,15 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 			try:
 				date = str(date)
 				date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
-				datetuple = iso8601.parse_date(date).timetuple()
-				self.unixtime = time.mktime(datetuple)
-				date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
+				now = datetime.datetime.now()
+				yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+				dateDT = iso8601.parse_date(date)
+				if now.day == dateDT.day and now.month == dateDT.month and now.year == dateDT.year:
+					date = dateDT.strftime('Today - %I:%M %p')
+				elif yesterday.day == dateDT.day and yesterday.month == dateDT.month and yesterday.year == dateDT.year:
+					date = dateDT.strftime('Yesterday - %I:%M %p')
+				else:
+					date = dateDT.strftime('%I:%M %p - %A %B %d, %Y')
 				data['last_reply_time'] = date
 			except:
 				data['last_reply_time'] = 'ERROR'

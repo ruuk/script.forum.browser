@@ -272,6 +272,7 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		self.headerTextFormat = '%s'
 		self._externalWindow = None
 		self._progressWidth = 1
+		self.viewType = None
 		ThreadWindow.__init__(self)
 		ManagedWindow.__init__(self)
 		
@@ -288,12 +289,12 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 			self.toggleDark()
 	
 	def toggleSlideUp(self):
-		val = not util.getSetting('window_slide_up', False)
-		setWindowSlideUp(val)
+		val = not util.getSetting('window_slide_up_%s' % self.viewType, False)
+		setWindowSlideUp(val,view=self.viewType)
 		
 	def toggleDark(self):
-		val = not util.getSetting('window_colors_dark', False)
-		setWindowColorsDark(val)
+		val = not util.getSetting('window_colors_dark_%s' % self.viewType, False)
+		setWindowColorsDark(val,view=self.viewType)
 		
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
@@ -522,18 +523,44 @@ class WindowData():
 		self.nextData = data
 		return self
 	
-def setWindowSlideUp(up=None):
+VIEW_TYPES = ('FORUM','THREAD','POST','MESSAGE')
+def setWindowSlideUp(up=None,view=None):
 	if up == None:
 		up = util.getSetting('window_slide_up', False)
+		for v in VIEW_TYPES:
+			u = util.getSetting('window_slide_up_%s' % v, False)
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_slide_up_%s' % v, u and '1' or '0')
 	else:
+		if view:
+			util.setSetting('window_slide_up_%s' % view, up)
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_slide_up_%s' % view, up and '1' or '0')
 		util.setSetting('window_slide_up', up)
 	dialogs.setGlobalSkinProperty('ForumBrowser_window_slide_up', up and '1' or '0')
 
-def setWindowColorsDark(dark=None):
+def setWindowColorsDark(dark=None,view=None):
 	if dark == None:
 		dark = util.getSetting('window_colors_dark', False)
+		for v in VIEW_TYPES:
+			d = util.getSetting('window_colors_dark_%s' % v, False)
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_dark_%s' % v, d and '1' or '0')
+			if d:
+				dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore_%s' % v, 'FFFFFFFF')
+				dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back_%s' % v, 'FF000000')
+			else:
+				dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore_%s' % v, 'FF000000')
+				dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back_%s' % v, 'FFFFFFFF')
+	elif view:
+		util.setSetting('window_colors_dark_%s' % view, dark)
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_dark_%s' % view, dark and '1' or '0')
+		if dark:
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore_%s' % view, 'FFFFFFFF')
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back_%s' % view, 'FF000000')
+		else:
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore_%s' % view, 'FF000000')
+			dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back_%s' % view, 'FFFFFFFF')
 	else:
 		util.setSetting('window_colors_dark', dark)
+		
 	dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_dark', dark and '1' or '0')
 	if dark:
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore', 'FFFFFFFF')
