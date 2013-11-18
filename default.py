@@ -4582,9 +4582,7 @@ def startForumBrowser(forumID=None):
 	elif sys.argv[-1].startswith('forumbrowser://'):
 		STARTFORUM = sys.argv[-1]
 	
-	windows.setWindowSlideUp()
-	windows.setWindowColorsDark()
-	windows.setWindowBackgroundImage()
+	windows.setWindowProperties()
 	
 	WM = windows.WindowManager()
 	WM.start(ForumsWindow,"script-forumbrowser-forums.xml")

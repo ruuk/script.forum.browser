@@ -1,0 +1,33 @@
+<window>
+	<defaultcontrol>100</defaultcontrol>
+	<coordinates>
+		<system>1</system>
+		<posx>490</posx>
+		<posy>310</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>300</width>
+			<height>100</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>FF000000</colordiffuse>
+		</control>
+		<control type="slider" id="100">
+		      <description>My first slider control</description>
+		      <posx>10</posx>
+		      <posy>10</posy>
+		      <width>280</width>
+		      <height>3</height>
+		      <visible>true</visible>
+		      <onup>100</onup>
+		      <ondown>100</ondown>
+		      <onleft>100</onleft>
+		      <onright>100</onright>
+		      <texturesliderbar>forum-browser-sequel-white_square.png</texturesliderbar>
+		      <textureslidernib>forum-browser-sequel-up.png</textureslidernib>
+		      <textureslidernibfocus>forum-browser-sequel-up.png</textureslidernibfocus>
+		</control>
+	</controls>
+</window>

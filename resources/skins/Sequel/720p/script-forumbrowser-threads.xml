@@ -68,7 +68,7 @@
 					<width>1280</width>
 					<height>760</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>A0FFFFFF</colordiffuse>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_background_fade_white_THREAD)]</colordiffuse>
 					<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_THREAD),1)</visible>
 				</control>
 				<control type="image">
@@ -77,7 +77,7 @@
 					<width>1280</width>
 					<height>760</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>C0000000</colordiffuse>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_background_fade_black_THREAD)]</colordiffuse>
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_THREAD),1)</visible>
 				</control>
 			</control>

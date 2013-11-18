@@ -314,7 +314,8 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		elif res == 'clear_back_view':
 			setWindowBackgroundImage('',view=self.viewType,clear=True)
 		elif res == 'set_fade':
-			dialogs.showMessage('Uhh...', 'Hmmm, this is embarassing. I haven\'t implemented this yet :)')
+			#dialogs.showMessage('Uhh...', 'Hmmm, this is embarassing. I haven\'t implemented this yet :)')
+			dialogs.showFadeDialog(view_type=self.viewType)
 	
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
@@ -603,4 +604,16 @@ def setWindowBackgroundImage(image=None,view=None,clear=False):
 			util.setSetting('window_background_%s' % view, image)
 			dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,image)
 			
+def setWindowBackgroundFades():
+	for v in VIEW_TYPES:
+		f = util.getSetting('background_fade_%s' % v, 50)
+		val = hex(int((f/100.0)*255))[2:].upper()
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_fade_white_%s' % v,val + 'FFFFFF')
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_fade_black_%s' % v,val + '000000')
 		
+def setWindowProperties():
+	setWindowSlideUp()
+	setWindowColorsDark()
+	setWindowBackgroundImage()
+	setWindowBackgroundFades()
+	

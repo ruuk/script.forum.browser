@@ -762,6 +762,33 @@ class xbmcDialogProgress:
 	def close(self):
 		self.dialog.close()
 		
+class FadeDialog(BaseDialog):
+	def __init__( self, *args, **kwargs ):
+		self.viewType = kwargs.get('view_type')
+		self.startVal = util.getSetting('background_fade_%s' % self.viewType, 50)
+		self.slider = None
+	
+	def onInit(self):
+		self.slider = self.getControl(100)
+		self.slider.setPercent(self.startVal)
+		
+	def onAction(self,action):
+		try:
+			pct = self.slider.getPercent()
+			val = hex(int((pct/100.0)*255))[2:].upper()
+			setGlobalSkinProperty('ForumBrowser_window_background_fade_white_%s' % self.viewType,val + 'FFFFFF')
+			setGlobalSkinProperty('ForumBrowser_window_background_fade_black_%s' % self.viewType,val + '000000')
+			if action == 92 or action == 10 or action == 7:
+				util.setSetting('background_fade_%s' % self.viewType, pct)
+			if action == 7: self.close()
+		except:
+			util.ERROR('ERROR')
+
+		BaseDialog.onAction(self,action)
+		
+def showFadeDialog(view_type):
+	openWindow(FadeDialog,'script-forumbrowser-fade-dialog.xml',view_type=view_type)
+	
 def getHexColor(hexc=None):
 	hexc = doKeyboard(util.T(32475),default=hexc)
 	if not hexc: return None

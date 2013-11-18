@@ -77,7 +77,7 @@ def _processSettingForWrite(value):
 		value = ':!,!:'.join(value)
 	elif isinstance(value,bool):
 		value = value and 'true' or 'false'
-	return value
+	return str(value)
 		
 def getSettingExternal(key,default=None):
 	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
