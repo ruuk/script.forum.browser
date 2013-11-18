@@ -2,32 +2,61 @@
 	<defaultcontrol>100</defaultcontrol>
 	<coordinates>
 		<system>1</system>
-		<posx>490</posx>
-		<posy>310</posy>
+		<posx>0</posx>
+		<posy>-30</posy>
 	</coordinates>
 	<controls>
 		<control type="image">
 			<posx>0</posx>
-			<posy>0</posy>
-			<width>300</width>
-			<height>100</height>
+			<posy>53</posy>
+			<width>1280</width>
+			<height>47</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
-			<colordiffuse>FF000000</colordiffuse>
+			<colordiffuse>DD000000</colordiffuse>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>1280</width>
+			<height>100</height>
+			<texture>forum-browser-sequel-menu_bg.png</texture>
 		</control>
 		<control type="slider" id="100">
 		      <description>My first slider control</description>
-		      <posx>10</posx>
-		      <posy>10</posy>
+		      <posx>500</posx>
+		      <posy>74</posy>
 		      <width>280</width>
-		      <height>3</height>
+		      <height>4</height>
 		      <visible>true</visible>
 		      <onup>100</onup>
 		      <ondown>100</ondown>
 		      <onleft>100</onleft>
 		      <onright>100</onright>
-		      <texturesliderbar>forum-browser-sequel-white_square.png</texturesliderbar>
-		      <textureslidernib>forum-browser-sequel-up.png</textureslidernib>
-		      <textureslidernibfocus>forum-browser-sequel-up.png</textureslidernibfocus>
+		      <texturesliderbar border="2">forum-browser-sequel-slider_bar.png</texturesliderbar>
+		      <textureslidernib>forum-browser-sequel-slider_nib.png</textureslidernib>
+		      <textureslidernibfocus>forum-browser-sequel-slider_nib.png</textureslidernibfocus>
+		</control>
+		<control type="label" id="160">
+			<posx>490</posx>
+			<posy>65</posy>
+			<width>400</width>
+			<height>20</height>
+			<font>ForumBrowser-font12</font>
+			<textcolor>FFFFFFFF</textcolor>
+			<aligny>center</aligny>
+			<align>right</align>
+			<label>[B]BACKGROUND IMAGE[/B]</label>
+		</control>
+		<control type="label" id="160">
+			<posx>790</posx>
+			<posy>65</posy>
+			<width>400</width>
+			<height>20</height>
+			<font>ForumBrowser-font12</font>
+			<textcolor>FFFFFFFF</textcolor>
+			<aligny>center</aligny>
+			<align>left</align>
+			<label>[B]BACKGROUND COLOR[/B]</label>
 		</control>
 	</controls>
 </window>
