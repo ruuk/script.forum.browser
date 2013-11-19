@@ -582,22 +582,6 @@
 				<pagecontrol>121</pagecontrol>
 				<scrolltime>200</scrolltime>
 				<itemlayout height="50">
-					<control type="image" id="101">
-						<posx>-1</posx>
-						<posy>0</posy>
-						<width>1280</width>
-						<height>1</height>
-						<texture>forum-browser-sequel-white_square.png</texture>
-						<colordiffuse>40808080</colordiffuse>
-					</control>
-					<control>
-						<posx>50</posx>
-						<posy>0</posy>
-						<width>1280</width>
-						<height>1</height>
-						<texture>forum-browser-sequel-white_square.png</texture>
-						<colordiffuse>40808080</colordiffuse>
-					</control>
 					<control type="group">
 						<visible>StringCompare(Listitem.Property(artwork),)</visible>
 						<posx>20</posx>
@@ -638,7 +622,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -649,7 +633,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -663,7 +647,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -674,7 +658,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -728,7 +712,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -739,7 +723,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -753,7 +737,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -764,26 +748,16 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 						</control>
 					</control>
-				</itemlayout>
-				<focusedlayout height="50">
-					<control type="image" id="101">
-						<posx>-1</posx>
-						<posy>0</posy>
-						<width>1280</width>
-						<height>1</height>
-						<texture>forum-browser-sequel-white_square.png</texture>
-						<colordiffuse>40808080</colordiffuse>
-					</control>
-					<control>
-						<posx>50</posx>
-						<posy>0</posy>
+					<control type="image">
+						<posx>0</posx>
+						<posy>-1</posy>
 						<width>1280</width>
 						<height>1</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
@@ -791,21 +765,47 @@
 					</control>
 					<control type="image">
 						<posx>0</posx>
+						<posy>49</posy>
+						<width>1280</width>
+						<height>1</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>20808080</colordiffuse>
+					</control>
+				</itemlayout>
+				<focusedlayout height="50">
+					<control type="image">
+						<posx>0</posx>
 						<posy>0</posy>
 						<width>1280</width>
 						<height>50</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
-						<colordiffuse>40808080</colordiffuse>
+						<colordiffuse>202080FF</colordiffuse>
+						<visible>!Control.HasFocus(120)</visible>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1280</width>
+						<height>50</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>802080FF</colordiffuse>
 						<visible>Control.HasFocus(120)</visible>
 					</control>
 					<control type="image">
 						<posx>0</posx>
-						<posy>0</posy>
+						<posy>-1</posy>
 						<width>1280</width>
-						<height>50</height>
+						<height>1</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
-						<colordiffuse>20808080</colordiffuse>
-						<visible>!Control.HasFocus(120)</visible>
+						<colordiffuse>FF808080</colordiffuse>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>49</posy>
+						<width>1280</width>
+						<height>1</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF808080</colordiffuse>
 					</control>
 					<control type="group">
 						<visible>StringCompare(Listitem.Property(artwork),)</visible>
@@ -847,7 +847,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -858,7 +858,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -872,7 +872,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -883,7 +883,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -937,7 +937,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -948,7 +948,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FF444444</textcolor>
+									<textcolor>FF333333</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
@@ -962,7 +962,7 @@
 									<height>32</height>
 									<font>ForumBrowser-font13</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]  $INFO[ListItem.Label] [/I]</label>
 								</control>
@@ -973,7 +973,7 @@
 									<height>10</height>
 									<font>ForumBrowser-font10</font>
 									<aligny>center</aligny>
-									<textcolor>FFAAAAAA</textcolor>
+									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
 									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>

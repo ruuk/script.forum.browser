@@ -161,7 +161,7 @@
 						<width>4</width>
 						<height>558</height>
 						<onleft>123</onleft>
-						<onright>150</onright>
+						<onright>149</onright>
 						<onup>123</onup>
 						<ondown>124</ondown>
 						<texturesliderbackground>-</texturesliderbackground>
@@ -213,6 +213,9 @@
 			<description>Images</description>
 			<posx>-64</posx>
 			<posy>90</posy>
+			<onup>186</onup>
+			<ondown>123</ondown>
+			<onright>186</onright>
 			<defaultcontrol>150</defaultcontrol>
 			<width>1344</width>
 			<height>72</height>
@@ -240,7 +243,6 @@
 				<height>72</height>
 				<onup>186</onup>
 				<ondown>123</ondown>
-				<onright>186</onright>
 				<viewtype label="535">list</viewtype>
 				<scrolltime>200</scrolltime>
 				<orientation>horizontal</orientation>

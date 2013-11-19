@@ -761,7 +761,7 @@
 						<height>100</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
 						<visible>Control.HasFocus(120)</visible>
-						<colordiffuse>80808080</colordiffuse>
+						<colordiffuse>602080FF</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>0</posx>

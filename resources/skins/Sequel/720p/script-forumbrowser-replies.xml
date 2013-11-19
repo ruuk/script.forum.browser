@@ -1077,17 +1077,17 @@
 							<posx>0</posx>
 							<posy>0</posy>
 							<width>14</width>
-							<height>200</height>
+							<height>196</height>
 							<texture>forum-browser-sequel-white_square.png</texture>
-							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_POST)]</colordiffuse>
+							<colordiffuse>802080FF</colordiffuse>
 						</control>
 						<control type="image">
 							<posx>1266</posx>
 							<posy>0</posy>
 							<width>14</width>
-							<height>200</height>
+							<height>196</height>
 							<texture>forum-browser-sequel-white_square.png</texture>
-							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_POST)]</colordiffuse>
+							<colordiffuse>802080FF</colordiffuse>
 						</control>
 					</control>
 				</focusedlayout>
