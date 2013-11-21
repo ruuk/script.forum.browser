@@ -305,6 +305,7 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		d.addItem('clear_back_view','Clear The Default Background Image For This View')
 		#d.addItem('clear_back_view_forum','Clear The Background Image For This View On This Forum')
 		d.addItem('set_fade','Set The Background Fade Level')
+		d.addItem('set_selection_color','Set The List Selection Color')
 		res = d.getResult()
 		if not res: return
 		if res == 'back_view':
@@ -316,6 +317,14 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		elif res == 'set_fade':
 			#dialogs.showMessage('Uhh...', 'Hmmm, this is embarassing. I haven\'t implemented this yet :)')
 			dialogs.showFadeDialog(view_type=self.viewType)
+		elif res == 'set_selection_color':
+			image = util.getSetting('window_background_%s' % self.viewType)
+			f = util.getSetting('background_fade_%s' % self.viewType, 50)
+			val = hex(int((f/100.0)*255))[2:].upper()
+			fade = val
+			color = util.getSetting('selection_color_%s' % self.viewType, '802080FF')
+			color = dialogs.showSelectionColorDialog(start_color=color,preview_image=image,fade=fade)
+			setWindowSelectionColors(color,view=self.viewType)
 	
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
@@ -611,9 +620,23 @@ def setWindowBackgroundFades():
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_fade_white_%s' % v,val + 'FFFFFF')
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_fade_black_%s' % v,val + '000000')
 		
+def setWindowSelectionColors(color=None,view=None):
+	if not color:
+		for v in VIEW_TYPES:
+			sc = util.getSetting('selection_color_%s' % v, '802080FF')
+			v_nf = dialogs.binascii.hexlify(chr(int(ord(dialogs.binascii.unhexlify(sc[:2])) / 4))) + sc[2:]
+			dialogs.setGlobalSkinProperty('ForumBrowser_selection_color_%s' % v,sc)
+			dialogs.setGlobalSkinProperty('ForumBrowser_selection_color_nofocus_%s' % v,v_nf)
+	else:
+		util.setSetting('selection_color_%s' % view, color)
+		color_nf = dialogs.binascii.hexlify(chr(int(ord(dialogs.binascii.unhexlify(color[:2])) / 4))) + color[2:]
+		dialogs.setGlobalSkinProperty('ForumBrowser_selection_color_%s' % view,color)
+		dialogs.setGlobalSkinProperty('ForumBrowser_selection_color_nofocus_%s' % view,color_nf)
+		
 def setWindowProperties():
 	setWindowSlideUp()
 	setWindowColorsDark()
 	setWindowBackgroundImage()
 	setWindowBackgroundFades()
+	setWindowSelectionColors()
 	

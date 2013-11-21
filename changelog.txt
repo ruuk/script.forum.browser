@@ -6,6 +6,7 @@ Icon attribution: See tapatalk.py for list of attributions from The Noun Project
 
 TODO:
  Short Term:
+  Check on double quoting when quoting a message
   Right justified text for languages such as Hebrew - done?
   Finish conversations
   Strings for bookmarks
@@ -42,7 +43,15 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.35
+Current Version : 2.1.36
+
+*** 2.1.36 ***
+
+Sequel skin:
+	Added a color selection dialog
+	Added the ability to set list selection color
+	Background images will now fill the window AND keep their aspect ratio
+	Some text color tweaks on the threads window
 
 *** 2.1.35 ***
 

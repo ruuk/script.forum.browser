@@ -789,14 +789,254 @@ class FadeDialog(BaseDialog):
 def showFadeDialog(view_type):
 	openWindow(FadeDialog,'script-forumbrowser-fade-dialog.xml',view_type=view_type)
 	
-def getHexColor(hexc=None):
+class Slider:
+	def __init__(self,window,back_id,back2_id,nib_id,button_id,max_val,start):
+		self.back = window.getControl(back_id)
+		self.back2 = back2_id and window.getControl(back2_id) or None
+		self.nib = window.getControl(nib_id)
+		self.button = window.getControl(button_id)
+		self.ID = button_id
+		self.max = max_val
+		self.start, self.y = self.back.getPosition()
+		self.start -= int(self.nib.getWidth()/2)
+		self.width = self.back.getWidth()
+		self.val = start
+		self.placeNib()
+		
+	def moveLeft(self):
+		self.val -= 1
+		if self.val < 0:
+			self.val = 0
+			return
+		self.placeNib()
+	
+	def moveRight(self):
+		self.val += 1
+		if self.val > self.max:
+			self.val = self.max
+			return
+		self.placeNib()
+	
+	def updateVal(self,val):
+		self.val = val
+		self.placeNib()
+		
+	def placeNib(self):
+		pos = int((self.val/float(self.max))*(self.width-1))
+		self.nib.setPosition(self.start + pos,self.y)
+		
+	def setBacks(self,hex1,hex2):
+		self.back.setColorDiffuse(hex1)
+		self.back2.setColorDiffuse(hex2)
+	
+	
+class AlphaColorDialog(BaseDialog):
+	def __init__( self, *args, **kwargs ):
+		self.hex = kwargs.get('start_color','FF808080') or 'FF808080'
+		self.defaultColor = kwargs.get('default_color','802080FF') or '802080FF'
+		self.previewImage = kwargs.get('preview_image','')
+		self.fade = kwargs.get('fade') or 'A0000000'
+		self.startColor = self.hex
+		self.rSlider = None
+		self.gSlider = None
+		self.bSlider = None
+		self.vSlider = None
+		self.sSlider = None
+		self.aSlider = None
+		self.vLastRGB = (0,0,0)
+		self.sLastRGB = (0,0,0)
+		self.sliders = {}
+	
+	def onInit(self):
+		self.rSlider = Slider(self,200,300,201,202,255,int(self.hex[6:],16))
+		self.gSlider = Slider(self,203,303,204,205,255,int(self.hex[4:6],16))
+		self.bSlider = Slider(self,206,306,207,208,255,int(self.hex[2:4],16))
+		self.vSlider = Slider(self,209,309,210,211,255,0)
+		self.sSlider = Slider(self,212,312,213,214,255,0)
+		self.aSlider = Slider(self,215,None,216,217,255,int(self.hex[:2],16))
+		self.sliders[self.rSlider.ID] = self.rSlider
+		self.sliders[self.gSlider.ID] = self.gSlider
+		self.sliders[self.bSlider.ID] = self.bSlider
+		self.sliders[self.vSlider.ID] = self.vSlider
+		self.sliders[self.sSlider.ID] = self.sSlider
+		self.sliders[self.aSlider.ID] = self.aSlider
+		
+		self.vLastRGB = self.getRGB()
+		self.sLastRGB = self.getRGB()
+		
+		self.preview = self.getControl(100)
+		self.hexButton = self.getControl(101)
+		self.colorBox = self.getControl(102)
+		self.previewBack = self.getControl(103)
+		self.backFadeLight = self.getControl(104)
+		self.backFadeDark = self.getControl(105)
+		if self.previewImage: self.previewBack.setImage(self.previewImage)
+		self.backFadeLight.setColorDiffuse(self.fade + 'FFFFFF')
+		self.backFadeDark.setColorDiffuse(self.fade + '000000')
+		
+		self.updatePreview()
+		
+	def onClick(self,controlID):
+		if controlID == 101:
+			self.askHexColor()
+		elif controlID == 110:
+			self.updateColors(self.defaultColor)
+			self.updatePreview()
+		elif controlID == 111:
+			self.updateColors(self.startColor)
+			self.updatePreview()
+			
+	def onAction(self,action):
+		try:
+			currentID = self.getFocusId()
+			if action == ACTION_MOVE_LEFT:
+				if currentID in self.sliders:
+					self.sliders[currentID].moveLeft()
+					self.onSliderMove(currentID)
+					self.updatePreview(currentID)
+					
+			elif action == ACTION_MOVE_RIGHT:
+				if currentID in self.sliders:
+					self.sliders[currentID].moveRight()
+					self.onSliderMove(currentID)
+					self.updatePreview(currentID)
+			#setGlobalSkinProperty('ForumBrowser_window_background_fade_black_%s' % self.viewType,val + '000000')
+			#if action == 92 or action == 10 or action == 7:
+				#util.setSetting('background_fade_%s' % self.viewType, pct)
+		except:
+			util.ERROR('ERROR')
+
+		BaseDialog.onAction(self,action)
+		
+	def updateColors(self,new=None):
+		if new: self.hex = new
+		self.rSlider.updateVal(int(self.hex[2:4],16))
+		self.gSlider.updateVal(int(self.hex[4:6],16))
+		self.bSlider.updateVal(int(self.hex[6:],16))
+		self.aSlider.updateVal(int(self.hex[:2],16))
+		self.vLastRGB = self.getRGB()
+		self.sLastRGB = self.getRGB()
+		
+	def getRGB(self):
+		return (self.rSlider.val,self.gSlider.val,self.bSlider.val)
+	
+	def onSliderMove(self,sliderID):
+		if sliderID == self.vSlider.ID:
+			self.processValueSliderMove()
+			rgb = self.getRGB()
+			if not max(rgb): rgb = (1,1,1)
+			self.sLastRGB = rgb
+		elif sliderID == self.sSlider.ID:
+			self.processSaturationSliderMove()
+			rgb = self.getRGB()
+			if not max(rgb): rgb = (1,1,1)
+			self.vLastRGB = rgb
+		else:
+			rgb = self.getRGB()
+			if not max(rgb): rgb = (1,1,1)
+			self.sLastRGB = self.vLastRGB = rgb
+		
+	def processValueSliderMove(self):
+		v = self.vSlider.val
+		r,g,b = self.vLastRGB
+		maxC = float(max(r,g,b))
+		self.rSlider.updateVal(int((r/maxC)*v))
+		self.gSlider.updateVal(int((g/maxC)*v))
+		self.bSlider.updateVal(int((b/maxC)*v))
+				
+	def processSaturationSliderMove(self):
+		s = self.sSlider.val
+		r,g,b = self.sLastRGB
+		top = max(self.sLastRGB)
+		bottom = min(self.sLastRGB)
+		if top == bottom: return
+		sRange = top - bottom
+		sMax = self.sSlider.max * (sRange / float(top))
+		satFraction = s/float(sMax)
+		r = top - int(satFraction * (top - r))
+		g = top - int(satFraction * (top - g))
+		b = top - int(satFraction * (top - b))
+		self.rSlider.updateVal(r)
+		self.gSlider.updateVal(g)
+		self.bSlider.updateVal(b)
+	
+	def updateFades(self,currentID):
+		r,g,b = self.rSlider.val,self.gSlider.val,self.bSlider.val
+		if currentID == self.vSlider.ID:
+			pass
+		self.rSlider.setBacks(self.hexFromRGB(255, g, b), self.hexFromRGB(0, g, b))
+		self.gSlider.setBacks(self.hexFromRGB(r, 255, b), self.hexFromRGB(r, 0, b))
+		self.bSlider.setBacks(self.hexFromRGB(r, g, 255), self.hexFromRGB(r, g, 0))
+		if currentID != self.vSlider.ID:
+			self.vSlider.updateVal(max(self.rSlider.val,self.gSlider.val,self.bSlider.val))
+			self.vSlider.setBacks(self.hexFromRGB(*self.calculateLevelTop()), self.hexFromRGB(0, 0, 0))
+		if currentID != self.sSlider.ID:
+			self.updateSaturationSlider()
+		
+	def updateSaturationSlider(self):
+		top = max(self.rSlider.val,self.gSlider.val,self.bSlider.val)
+		bottom = min(self.rSlider.val,self.gSlider.val,self.bSlider.val)
+		
+		satFraction = top/(float(top - bottom) or 1)
+		r = top - int(round(satFraction * (top - self.rSlider.val)))
+		g = top - int(round(satFraction * (top - self.gSlider.val)))
+		b = top - int(round(satFraction * (top - self.bSlider.val)))
+		
+		self.sSlider.updateVal(self.sSlider.max - int((bottom/float(top or 1)*self.sSlider.max)))
+		self.sSlider.setBacks(self.hexFromRGB(r,g,b), self.hexFromRGB(top,top,top))
+	
+	def calculateLevelTop(self):
+		level = self.vSlider.val
+		levelMax = self.vSlider.max
+		levelFraction = levelMax/(float(level) or 1)
+		r = int(round(levelFraction * self.rSlider.val))
+		g = int(round(levelFraction * self.gSlider.val))
+		b = int(round(levelFraction * self.bSlider.val))
+		if not (r + g + b):
+			return 255,255,255
+		else:
+			return r,g,b
+	
+	def hexFromRGB(self,r,g,b):
+		hexR = binascii.hexlify(chr(r)).upper()
+		hexG = binascii.hexlify(chr(g)).upper()
+		hexB = binascii.hexlify(chr(b)).upper()
+		return 'FF' + hexR+hexG+hexB
+	
+	def askHexColor(self):
+		hexc = getHexColor(self.hex,hlen=8)
+		if len(hexc) < 8: hexc = 'FF' + hexc
+		self.updateColors(hexc)
+		self.updatePreview()
+		
+		
+	def updatePreview(self,currentID=None):
+		self.updateFades(currentID)
+		hexR = binascii.hexlify(chr(self.rSlider.val)).upper()
+		hexG = binascii.hexlify(chr(self.gSlider.val)).upper()
+		hexB = binascii.hexlify(chr(self.bSlider.val)).upper()
+		hexA = binascii.hexlify(chr(self.aSlider.val)).upper()
+		self.hex = hexA+hexR+hexG+hexB
+		opaque = 'FF' + hexR+hexG+hexB
+		self.colorBox.setColorDiffuse(opaque)
+		self.preview.setColorDiffuse(self.hex)
+		self.hexButton.setLabel(self.hex)
+		
+def showSelectionColorDialog(start_color=None,preview_image=None,fade=None):
+	w = openWindow(AlphaColorDialog,'script-forumbrowser-color-dialog.xml',modal=False,return_window=True,start_color=start_color,preview_image=preview_image,fade=fade)
+	w.doModal()
+	hexC = w.hex
+	del w
+	return hexC
+	
+def getHexColor(hexc=None,hlen=6):
 	hexc = doKeyboard(util.T(32475),default=hexc)
 	if not hexc: return None
-	while len(hexc) != 6 or re.search('[^1234567890abcdef](?i)',hexc):
+	while (len(hexc) != 6 and len(hexc) != hlen) or re.search('[^1234567890abcdef](?i)',hexc):
 		showMessage(util.T(32050),util.T(32474))
 		hexc = doKeyboard(util.T(32475),default=hexc)
 		if not hexc: return None
-	return hexc
+	return hexc.upper()
 
 class ColorDialog(xbmcgui.WindowXMLDialog):
 	def __init__( self, *args, **kwargs ):

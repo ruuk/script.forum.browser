@@ -1,0 +1,650 @@
+<window>
+	<defaultcontrol>202</defaultcontrol>
+	<coordinates>
+		<system>1</system>
+		<posx>0</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>1280</width>
+			<height>262</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>DD000000</colordiffuse>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>1280</width>
+			<height>308</height>
+			<texture border="0,5,0,51" flipy="true">forum-browser-sequel-menu_bg.png</texture>
+			<visible>true</visible>
+		</control>
+		
+		<control type="group">
+			<posx>393</posx>
+			<posy>30</posy>
+			
+			<control type="image">
+				<posx>-180</posx>
+				<posy>-10</posy>
+				<width>445</width>
+				<height>220</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>80606060</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>-180</posx>
+				<posy>-10</posy>
+				<width>445</width>
+				<height>220</height>
+				<texture border="2">forum-browser-sequel-beveled_outline.png</texture>
+				<colordiffuse>A0FFFFFF</colordiffuse>
+			</control>
+		
+			<control type="group">
+				<posx>300</posx>
+				<posy>-10</posy>
+				<control type="image" id="103">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>384</width>
+					<height>216</height>
+					<texture>forum-browser-sequel-transparent_preview.png</texture>
+				</control>
+				<control type="image" id="104">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>192</width>
+					<height>216</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+				</control>
+				<control type="image" id="105">
+					<posx>192</posx>
+					<posy>0</posy>
+					<width>192</width>
+					<height>216</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF000000</colordiffuse>
+				</control>
+				<control type="image" id="100">
+					<posx>0</posx>
+					<posy>20</posy>
+					<width>384</width>
+					<height>176</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>72</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF808080</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>144</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF000000</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+				<control type="label">
+					<posx>192</posx>
+					<posy>0</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+				<control type="label">
+					<posx>192</posx>
+					<posy>72</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF808080</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+				<control type="label">
+					<posx>192</posx>
+					<posy>144</posy>
+					<width>192</width>
+					<height>72</height>
+					<font>ForumBrowser-font10</font>
+					<textcolor>FF000000</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Preview</label>
+				</control>
+			</control>
+			
+			<control type="image" id="102">
+				<posx>-170</posx>
+				<posy>0</posy>
+				<width>128</width>
+				<height>128</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+			</control>
+				
+			<control type="group">
+				<posx>0</posx>
+				<posy>0</posy>
+				<control type="group">
+					<description>Red</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<control type="button" id="202">
+						<onup>101</onup>
+						<ondown>205</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FFFF0000</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]R[/B]</label>
+					</control>
+					<control type="image" id="300">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FFFF0000</colordiffuse>
+					</control>
+					<control type="image" id="200">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FFFF0000</colordiffuse>
+					</control>
+					<control type="image" id="201">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+				</control>
+				
+				<control type="group">
+					<description>Green</description>
+					<posx>0</posx>
+					<posy>26</posy>
+					<control type="button" id="205">
+						<onup>202</onup>
+						<ondown>208</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF00FF00</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]G[/B]</label>
+					</control>
+					<control type="image" id="303">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF00FF00</colordiffuse>
+					</control>
+					<control type="image" id="203">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FF00FF00</colordiffuse>
+					</control>
+					<control type="image" id="204">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+				</control>
+				
+				<control type="group">
+					<description>Blue</description>
+					<posx>0</posx>
+					<posy>52</posy>
+					<control type="button" id="208">
+						<onup>205</onup>
+						<ondown>211</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF0000FF</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]B[/B]</label>
+					</control>
+					<control type="image" id="306">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FFFF0000</colordiffuse>
+					</control>
+					<control type="image" id="206">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FF0000FF</colordiffuse>
+					</control>
+					<control type="image" id="207">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+				</control>
+				
+				<control type="group">
+					<description>Value</description>
+					<posx>0</posx>
+					<posy>78</posy>
+					<control type="button" id="211">
+						<onup>208</onup>
+						<ondown>214</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]V[/B]</label>
+					</control>
+					<control type="image"  id="309">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
+					</control>
+					<control type="image" id="209">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+					<control type="image" id="210">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+					</control>
+				</control>
+				
+				<control type="group">
+					<description>Saturation</description>
+					<posx>0</posx>
+					<posy>104</posy>
+					<control type="button" id="214">
+						<onup>211</onup>
+						<ondown>217</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]S[/B]</label>
+					</control>
+					<control type="image"  id="312">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF808080</colordiffuse>
+					</control>
+					<control type="image" id="212">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+					<control type="image" id="213">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+					</control>
+				</control>
+				
+				<control type="group">
+					<description>Alpha</description>
+					<posx>0</posx>
+					<posy>150</posy>
+					<control type="button" id="217">
+						<onup>214</onup>
+						<ondown>101</ondown>
+						
+						<textoffsetx>0</textoffsetx>
+						<posx>-2</posx>
+						<posy>-2</posy>
+						<width>260</width>
+						<height>20</height>
+						<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+						<texturenofocus></texturenofocus>
+					</control>
+					<control type="image">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>FF000000</colordiffuse>
+					</control>
+					<control type="label" id="160">
+						<posx>-26</posx>
+						<posy>0</posy>
+						<width>16</width>
+						<height>16</height>
+						<font>ForumBrowser-font10</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<aligny>center</aligny>
+						<align>center</align>
+						<label>[B]A[/B]</label>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-transparent_preview.png</texture>
+						<aspectratio>scale</aspectratio>
+					</control>
+					<control type="image" id="215">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>256</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-fade_from_left.png</texture>
+						<colordiffuse>FFFFFFFF</colordiffuse>
+					</control>
+					<control type="image" id="216">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>7</width>
+						<height>16</height>
+						<texture>forum-browser-sequel-color_slider_nib.png</texture>
+					</control>
+				</control>
+			</control>
+			
+			<control type="group">
+				<posx>0</posx>
+				<posy>182</posy>
+				<control type="button" id="101">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>256</width>
+					<height>20</height>
+					<onup>217</onup>
+					<ondown>202</ondown>
+					<onleft>111</onleft>
+					<onright>110</onright>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+					<textcolor>FFFFFFFF</textcolor>
+					<disabledcolor>FFCCCCCC</disabledcolor>
+					<focusedcolor>FF000000</focusedcolor>
+				</control>
+				<control type="image">
+					<posx>2</posx>
+					<posy>2</posy>
+					<width>252</width>
+					<height>16</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF000000</colordiffuse>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>256</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>$INFO[Control.GetLabel(101)]</label>
+				</control>
+			</control>
+			<control type="group">
+				<posx>-170</posx>
+				<posy>182</posy>
+				<control type="button" id="110">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>80</width>
+					<height>20</height>
+					<onup>217</onup>
+					<ondown>202</ondown>
+					<onleft>101</onleft>
+					<onright>111</onright>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+					<textcolor>FFFFFFFF</textcolor>
+					<disabledcolor>FFCCCCCC</disabledcolor>
+					<focusedcolor>FF000000</focusedcolor>
+				</control>
+				<control type="image">
+					<posx>2</posx>
+					<posy>2</posy>
+					<width>76</width>
+					<height>16</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF000000</colordiffuse>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>80</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Default</label>
+				</control>
+			</control>
+			<control type="group">
+				<posx>-85</posx>
+				<posy>182</posy>
+				<control type="button" id="111">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>80</width>
+					<height>20</height>
+					<onup>217</onup>
+					<ondown>202</ondown>
+					<onleft>110</onleft>
+					<onright>101</onright>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+					<textcolor>FFFFFFFF</textcolor>
+					<disabledcolor>FFCCCCCC</disabledcolor>
+					<focusedcolor>FF000000</focusedcolor>
+				</control>
+				<control type="image">
+					<posx>2</posx>
+					<posy>2</posy>
+					<width>76</width>
+					<height>16</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF000000</colordiffuse>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>80</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFFFFFFF</textcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>Revert</label>
+				</control>
+			</control>
+		</control>
+	</controls>
+</window>

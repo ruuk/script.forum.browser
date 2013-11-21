@@ -60,7 +60,7 @@
 					<width>1280</width>
 					<height>760</height>
 					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_THREAD)]</texture>
-					<aspectration>stretch</aspectration>
+					<aspectratio>scale</aspectratio>
 				</control>
 				<control type="image">
 					<posx>0</posx>
@@ -655,7 +655,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
-							<textcolor>FF008000</textcolor>
+							<textcolor>FF006000</textcolor>
 							<align>left</align>
 							<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
 							<visible>StringCompare(ListItem.Director,me)</visible>
@@ -734,7 +734,7 @@
 							<width>1202</width>
 							<height>35</height>
 							<font>ForumBrowser-font10</font>
-							<textcolor>FF444444</textcolor>
+							<textcolor>FF222222</textcolor>
 							<align>left</align>
 							<label>$INFO[ListItem.Property(preview)]</label>
 						</control>
@@ -761,7 +761,7 @@
 						<height>100</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
 						<visible>Control.HasFocus(120)</visible>
-						<colordiffuse>602080FF</colordiffuse>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_THREAD)]</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>0</posx>
@@ -770,7 +770,7 @@
 						<height>100</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
 						<visible>!Control.HasFocus(120)</visible>
-						<colordiffuse>40808080</colordiffuse>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_nofocus_THREAD)]</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>0</posx>
@@ -877,7 +877,7 @@
 							<height>38</height>
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
-							<textcolor>FF008000</textcolor>
+							<textcolor>FF006000</textcolor>
 							<align>left</align>
 							<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
 							<visible>StringCompare(ListItem.Director,me)</visible>
@@ -956,7 +956,7 @@
 							<width>1202</width>
 							<height>35</height>
 							<font>ForumBrowser-font10</font>
-							<textcolor>FF444444</textcolor>
+							<textcolor>FF222222</textcolor>
 							<align>left</align>
 							<label>$INFO[ListItem.Property(preview)]</label>
 						</control>

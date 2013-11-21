@@ -60,7 +60,7 @@
 					<width>1280</width>
 					<height>760</height>
 					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_POST)]</texture>
-					<aspectration>stretch</aspectration>
+					<aspectratio>scale</aspectratio>
 				</control>
 				<control type="image">
 					<posx>0</posx>
@@ -1079,7 +1079,7 @@
 							<width>14</width>
 							<height>196</height>
 							<texture>forum-browser-sequel-white_square.png</texture>
-							<colordiffuse>802080FF</colordiffuse>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_POST)]</colordiffuse>
 						</control>
 						<control type="image">
 							<posx>1266</posx>
@@ -1087,7 +1087,7 @@
 							<width>14</width>
 							<height>196</height>
 							<texture>forum-browser-sequel-white_square.png</texture>
-							<colordiffuse>802080FF</colordiffuse>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_POST)]</colordiffuse>
 						</control>
 					</control>
 				</focusedlayout>

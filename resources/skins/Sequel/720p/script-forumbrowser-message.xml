@@ -61,7 +61,7 @@
 					<width>1280</width>
 					<height>760</height>
 					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_MESSAGE)]</texture>
-					<aspectration>stretch</aspectration>
+					<aspectratio>scale</aspectratio>
 				</control>
 				<control type="image">
 					<posx>0</posx>
@@ -125,12 +125,12 @@
 						<ondown>124</ondown>
 						<texturesliderbackground>-</texturesliderbackground>
 						<texturesliderbar></texturesliderbar>
-						<texturesliderbarfocus border="1">forum-browser-sequel-white_square.png</texturesliderbarfocus>
+						<texturesliderbarfocus>forum-browser-sequel-white_square.png</texturesliderbarfocus>
 						<textureslidernib>-</textureslidernib>
 						<textureslidernibfocus>-</textureslidernibfocus>
 						<orientation>vertical</orientation>
 						<showonepage>true</showonepage>
-						<colordiffuse>BB808080</colordiffuse>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
 						<visible>true</visible>
 					</control>
 				</control>
@@ -166,12 +166,12 @@
 						<ondown>124</ondown>
 						<texturesliderbackground>-</texturesliderbackground>
 						<texturesliderbar></texturesliderbar>
-						<texturesliderbarfocus border="1">forum-browser-sequel-white_square.png</texturesliderbarfocus>
+						<texturesliderbarfocus>forum-browser-sequel-white_square.png</texturesliderbarfocus>
 						<textureslidernib>-</textureslidernib>
 						<textureslidernibfocus>-</textureslidernibfocus>
 						<orientation>vertical</orientation>
 						<showonepage>true</showonepage>
-						<colordiffuse>BB808080</colordiffuse>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
 						<visible>true</visible>
 					</control>
 				</control>
