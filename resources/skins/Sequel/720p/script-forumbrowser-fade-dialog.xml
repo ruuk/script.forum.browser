@@ -1,9 +1,11 @@
 <window>
 	<defaultcontrol>100</defaultcontrol>
+	<animation effect="slide" end="0,70" time="200">WindowOpen</animation>
+	<animation effect="slide" start="0,70" end="0,0" time="200">WindowClose</animation>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>
-		<posy>-30</posy>
+		<posy>-100</posy>
 	</coordinates>
 	<controls>
 		<control type="image">

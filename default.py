@@ -766,17 +766,26 @@ class PostDialog(windows.BaseWindow):
 		self.moderated = False
 		self.display_base = '%s\n \n'
 		windows.BaseWindow.__init__( self, *args, **kwargs )
+		self.viewType = 'EDITOR'
+		self.textLines = []
 	
+	def setPreview(self,text):
+		try:
+			self.getControl(122).setLabel(text)
+		except:
+			self.getControl(122).setText(text)
+			
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
-		self.getControl(122).setText(' ') #to remove scrollbar
+		self.setLoggedIn()
+		self.setPreview(' ') #to remove scrollbar
 		if self.failedPM:
 			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
 				yes = dialogs.dialogYesNo(T(32296),T(32297))
 				if yes:
 					self.post = self.failedPM
-					for line in self.post.message.split('\n'): self.addQuote(line)
-					self.updatePreview()
+					self.textLines = self.stripEmptyLines(self.post.message.split('\n'))
+					self.updatePreview(-1)
 					self.setTheme()
 					PostDialog.failedPM = None
 					return
@@ -787,18 +796,33 @@ class PostDialog(windows.BaseWindow):
 				#This won't work with other formats, need to do this better TODO
 				if not pid or self.isPM(): qformat = qformat.replace(';!POSTID!','')
 				for line in qformat.replace('!USER!',self.post.quser).replace('!POSTID!',self.post.pid).replace('!QUOTE!',self.post.quote).split('\n'):
-					self.addQuote(line)
+					self.textLines.append(line)
 			else:
-				for line in self.post.quote.split('\n'): self.addQuote(line)
+				self.textLines = self.stripEmptyLines(self.post.quote.split('\n'))
 		elif self.post.isEdit:
-			for line in self.post.message.split('\n'): self.addQuote(line)
+			self.textLines = self.stripEmptyLines(self.post.message.split('\n'))
 				
-		self.updatePreview()
+		self.updatePreview(-1)
 		self.setTheme()
 		if self.post.moderated:
 			self.moderated = True
 			dialogs.showMessage(T(32298),T(32299),T(32300))
 		if self.isPM() or self.doNotPost: self.setTitle() #We're creating a thread
+	
+	def stripEmptyLines(self,lines):
+		lines2 = []
+		started = False
+		for l in lines: #Strip empty lines from top
+			if l.strip() or started:
+				lines2.append(l)
+				started = True
+		lines = []
+		started = False
+		for l in reversed(lines2): #Strip empty lines from bottom
+			if l.strip() or started:
+				lines.insert(0,l)
+				started = True
+		return lines
 	
 	def setTheme(self):
 		self.setProperty('loggedin',FB.isLoggedIn() and 'loggedin' or '')
@@ -840,7 +864,7 @@ class PostDialog(windows.BaseWindow):
 	def isPM(self):
 		return str(self.post.pid).startswith('PM') or self.post.to
 	
-	def getOutput(self): pass
+	def getOutput(self): return '\n'.join(self.textLines)
 	
 	def setTitle(self):
 		title = dialogs.doKeyboard(T(32125), self.title)
@@ -895,7 +919,7 @@ class PostDialog(windows.BaseWindow):
 			ret = FB.MC.aQuoteReplace % quote
 		return re.sub(FB.getQuoteFormat(),self.processQuote,ret)
 	
-	def updatePreview(self):
+	def updatePreview(self,pos=None):
 		disp = self.display_base % self.getOutput()
 		if FB.browserType == 'ScraperForumBrowser':
 			qf = FB.getQuoteFormat()
@@ -905,18 +929,65 @@ class PostDialog(windows.BaseWindow):
 			disp = re.sub('\[(/?)i\]',r'[\1I]',disp)
 		else:
 			disp =  FB.MC.messageToDisplay(disp.replace('\n','[CR]'))
-		self.getControl(122).reset()
-		self.getControl(122).setText(self.parseCodes(disp).replace('\n','[CR]'))
-
-class LinePostDialog(PostDialog):
-	def addQuote(self,quote):
-		self.addLine(quote)
+		self.setPreview('')
+		self.setPreview(self.parseCodes(disp).replace('\n','[CR]'))
+		items = []
+		for line in self.textLines:
+			items.append(xbmcgui.ListItem(label=self.displayLine(line)))
+		plusItem = xbmcgui.ListItem(label='')
+		plusItem.setProperty('plus_item','1')
+		items.append(plusItem)
+		self.getControl(120).reset()
+		self.getControl(120).addItems(items)
+		if pos is not None: self.resumePos(pos)
 		
+	def resumePos(self,pos):
+		llist = self.getControl(120)
+		size = llist.size()
+		if pos > size or pos < 0:
+			pos = size - 1
+		llist.selectItem(pos)
+		
+	def getText(self,pos):
+		try:
+			return self.textLines[pos]
+		except:
+			ERROR('',hide_tb=True)
+			return None
+		
+	def setText(self,pos,text):
+		try:
+			self.textLines[pos] = text
+		except:
+			ERROR('',hide_tb=True)
+	
+	def displayLine(self,line):
+		return line	.replace('\n',' ')\
+					.replace('[/B]','[/b]')\
+					.replace('[/I]','[/i]')\
+					.replace('[/COLOR]','[/color]')
+					
+	def setLoggedIn(self):
+		try:
+			if FB.isLoggedIn():
+				self.getControl(111).setColorDiffuse('FF00FF00')
+			else:
+				self.getControl(111).setColorDiffuse('FF555555')
+		except:
+			pass
+					
+class LinePostDialog(PostDialog):
 	def onClick( self, controlID ):
 		if controlID == 200:
 			self.addLineSingle()
 		elif controlID == 201:
 			self.addLineMulti()
+		elif controlID == 301:
+			self.deleteLine()
+		elif controlID == 302:
+			self.addLineSingle(before=True)
+		elif controlID == 303:
+			self.addLineSingle(after=True)
 		elif controlID == 120:
 			self.editLine()
 		PostDialog.onClick(self, controlID)
@@ -931,11 +1002,13 @@ class LinePostDialog(PostDialog):
 	def doMenu(self):
 		d = dialogs.ChoiceMenu(T(32051))
 		item = self.getControl(120).getSelectedItem()
+		skinLevel = self.skinLevel()
 		if item:
-			d.addItem('addbefore',T(32128))
-			d.addItem('delete',T(32122))
+			if skinLevel < 1:
+				d.addItem('addbefore',T(32128))
+				d.addItem('delete',T(32122))
 			if CLIPBOARD and CLIPBOARD.hasData(('link','image','video')):
-				d.addItem('pastebefore',T(32308) + ' %s' % CLIPBOARD.hasData().title())
+				if not item.getProperty('plus_item'): d.addItem('pastebefore',T(32308) + ' %s' % CLIPBOARD.hasData().title())
 		if CLIPBOARD and CLIPBOARD.hasData(('link','image','video')):
 			d.addItem('paste',T(32309) + ' %s' % CLIPBOARD.hasData().title())
 		d.addItem('help',T(32244))
@@ -962,47 +1035,25 @@ class LinePostDialog(PostDialog):
 			self.addLineSingle(paste,True,False)
 		else:
 			self.addLine(paste)
-		self.updatePreview()
-			
-	def getOutput(self):
-		llist = self.getControl(120)
-		out = ''
-		for x in range(0,llist.size()):
-			out += llist.getListItem(x).getProperty('text') + '\n'
-		return out
+			self.updatePreview(pos=-1)
 		
 	def addLine(self,line=''):
-		item = xbmcgui.ListItem(label=self.displayLine(line))
-		#we set text separately so we can have the display be formatted...
-		item.setProperty('text',line)
-		self.getControl(120).addItem(item)
-		self.getControl(120).selectItem(self.getControl(120).size()-1)
+		self.textLines.append(line)
 		return True
-		
-	def displayLine(self,line):
-		return line	.replace('\n',' ')\
-					.replace('[/B]','[/b]')\
-					.replace('[/I]','[/i]')\
-					.replace('[/COLOR]','[/color]')
 			
-	def addLineSingle(self,line=None,before=False,update=True):
+	def addLineSingle(self,line=None,before=False,update=True,after=False):
 		if line == None: line = dialogs.doKeyboard(T(32123),'',mod=True,smilies=FB.getSmilies())
 		if line == None: return False
-		if before:
-			clist = self.getControl(120)
-			idx = clist.getSelectedPosition()
-			lines = []
-			for i in range(0,clist.size()):
-				if i == idx: lines.append(line)
-				lines.append(clist.getListItem(i).getProperty('text'))
-			clist.reset()
-			for l in lines: self.addLine(l)
-			self.updatePreview()
+		clist = self.getControl(120)
+		pos = clist.getSelectedPosition()
+		if before or after:
+			if after: pos += 1
+			self.textLines.insert(pos,line)
+			self.updatePreview(pos)
 			return True
-				
 		else:
 			self.addLine(line)
-			self.updatePreview()
+			self.updatePreview(-1)
 			return True
 		
 	def addLineMulti(self):
@@ -1011,23 +1062,23 @@ class LinePostDialog(PostDialog):
 	def deleteLine(self):
 		llist = self.getControl(120)
 		pos = llist.getSelectedPosition()
-		lines = []
-		for x in range(0,llist.size()):
-			if x != pos: lines.append(llist.getListItem(x).getProperty('text'))
-		llist.reset()
-		for line in lines: self.addLine(line)
-		self.updatePreview()
-		if pos > llist.size(): pos = llist.size()
-		llist.selectItem(pos)
+		try:
+			self.textLines.pop(pos)
+		except:
+			ERROR('Error Deleting Post Line',hide_tb=True)
+		self.updatePreview(pos)
 	
 	def editLine(self):
-		item = self.getControl(120).getSelectedItem()
-		if not item: return
-		line = dialogs.doKeyboard(T(32124),item.getLabel(),mod=True,smilies=FB.getSmilies())
+		pos = self.getControl(120).getSelectedPosition()
+		if pos < 0: return
+		if pos >= len(self.textLines):
+			return self.addLineSingle()
+		text = self.getText(pos)
+		if text == None: return
+		line = dialogs.doKeyboard(T(32124),text,mod=True,smilies=FB.getSmilies())
 		if line == None: return False
-		item.setProperty('text',line)
-		item.setLabel(self.displayLine(line))
-		self.updatePreview()
+		self.setText(pos,line)
+		self.updatePreview(pos)
 		#re.sub(q,'[QUOTE=\g<user>;\g<postid>]\g<quote>[/QUOTE]',FB.MC.lineFilter.sub('',test3))
 
 ######################################################################################

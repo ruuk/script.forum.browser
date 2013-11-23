@@ -1,2 +1,3 @@
 forum-browser-sequel-light_bulb.png: liPascual Bilotta, from The Noun Project
-forum-browser-sequel-power.png: Adriano Emerick, from The Noun Project
+forum-browser-sequel-delete.png: Convoy Interactive, from The Noun Project
+forum-browser-sequel-plus.png: Mateo Zlatar, from The Noun Project

@@ -276,6 +276,12 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		ThreadWindow.__init__(self)
 		ManagedWindow.__init__(self)
 		
+	def skinLevel(self):
+		try:
+			return int(self.getProperty('skin_level'))
+		except:
+			return 0
+		
 	def externalWindow(self):
 		if not self._externalWindow: self._externalWindow = self._getExternalWindow()
 		return self._externalWindow
@@ -553,7 +559,7 @@ class WindowData():
 		self.nextData = data
 		return self
 	
-VIEW_TYPES = ('FORUM','THREAD','POST','MESSAGE')
+VIEW_TYPES = ('FORUM','THREAD','POST','MESSAGE','EDITOR')
 def setWindowSlideUp(up=None,view=None):
 	if up == None:
 		up = util.getSetting('window_slide_up', False)

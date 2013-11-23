@@ -45,6 +45,13 @@ KNOWN ISSUES:
 
 Current Version : 2.1.36
 
+*** 2.1.37 ***
+
+Sequel skin: Added animation to color selection dialog
+Sequel skin: Added animation to the background fade level dialog
+Sequel skin: Added message editor window
+Reworked some message editor code
+
 *** 2.1.36 ***
 
 Sequel skin:
