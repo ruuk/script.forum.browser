@@ -73,12 +73,12 @@ class ForumPost(forumbrowser.ForumPost):
 	def messageAsText(self):
 		return self.messageToText(self.getMessage())
 		
-	def messageAsDisplay(self,short=False,raw=False):
+	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if self.isPM:
 			self.MC = texttransform.BBMessageConverter(self.FB)
-			message = self.MC.messageToDisplay(re.sub('(?<!\n)(\[quote)(?i)',r'\n\1',self.message)) #self.MC.parseCodes(self.getMessage())
+			message = self.MC.messageToDisplay(re.sub('(?<!\n)(\[quote)(?i)',r'\n\1',self.message),quote_wrap=quote_wrap) #self.MC.parseCodes(self.getMessage())
 		else:
-			message = self.MC.messageToDisplay(self.getMessage())
+			message = self.MC.messageToDisplay(self.getMessage(),quote_wrap=quote_wrap)
 		message = re.sub('\[(/?)b\]',r'[\1B]',message)
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		return message

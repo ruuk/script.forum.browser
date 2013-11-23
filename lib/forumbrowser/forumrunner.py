@@ -220,8 +220,8 @@ class ForumPost(forumbrowser.ForumPost):
 		if self.hideSignature: return self.message
 		return self.message + self.signature
 	
-	def messageToDisplay(self,message):
-		return self.MC.messageToDisplay(message)
+	def messageToDisplay(self,message,quote_wrap=80):
+		return self.MC.messageToDisplay(message,quote_wrap=quote_wrap)
 	
 	def filterMessage(self,message):
 		message = message.replace('<br/>','\n').replace('</color>','')#'[/COLOR]')

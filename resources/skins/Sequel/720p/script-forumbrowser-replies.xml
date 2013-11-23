@@ -1,4 +1,5 @@
 <window>
+	<onload>SetProperty(quote_wrap,150)</onload>
 	<defaultcontrol>120</defaultcontrol>
 	<coordinates>
 		<system>1</system>

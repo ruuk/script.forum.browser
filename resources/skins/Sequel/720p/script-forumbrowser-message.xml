@@ -1,5 +1,6 @@
 <window>
 	<onload>SetProperty(ignore_media_click,1)</onload>
+	<onload>SetProperty(quote_wrap,100)</onload>
 	<defaultcontrol>127</defaultcontrol>
 	<coordinates>
 		<system>1</system>

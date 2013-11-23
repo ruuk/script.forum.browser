@@ -282,6 +282,12 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		except:
 			return 0
 		
+	def quoteWrap(self):
+		try:
+			return int(self.getProperty('quote_wrap'))
+		except:
+			return 80
+		
 	def externalWindow(self):
 		if not self._externalWindow: self._externalWindow = self._getExternalWindow()
 		return self._externalWindow

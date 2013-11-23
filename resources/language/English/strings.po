@@ -1954,6 +1954,26 @@ msgctxt "#32567"
 msgid "Sequel (W.I.P)"
 msgstr ""
 
+msgctxt "#32568"
+msgid "Add Multiple Lines"
+msgstr ""
+
+msgctxt "#32569"
+msgid "Add Multiple Lines Here"
+msgstr ""
+
+msgctxt "#32570"
+msgid "Preview"
+msgstr ""
+
+msgctxt "#32571"
+msgid "Add Line After"
+msgstr ""
+
+msgctxt "#32572"
+msgid "Context Menu For More Options"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

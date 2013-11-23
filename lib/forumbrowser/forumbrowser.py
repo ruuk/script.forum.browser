@@ -765,7 +765,7 @@ class ForumPost:
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage())
 		
-	def messageAsDisplay(self,short=False,raw=False):
+	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if short:
 			message = self.getShortMessage()
 		else:
@@ -773,7 +773,7 @@ class ForumPost:
 		message = message.replace('\n','[CR]')
 		message = re.sub('\[(/?)b\]',r'[\1B]',message)
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
-		return self.messageToDisplay(message)
+		return self.messageToDisplay(message,quote_wrap=quote_wrap)
 		
 	def hasMedia(self,webvid=None,count_link_images=False):
 		if not webvid:
@@ -788,7 +788,7 @@ class ForumPost:
 		if not images: images = bool(self.imageURLs())
 		return images,video
 			
-	def messageToDisplay(self,message): return message
+	def messageToDisplay(self,message,quote_wrap=80): return message
 	
 	def messageAsQuote(self): return ''
 		

@@ -193,7 +193,8 @@ class MessageConverter:
 		self.ordered = ordered
 		self.ordered_count = 0
 		
-	def messageToDisplay(self,html):
+	def messageToDisplay(self,html,quote_wrap=80):
+		self.textwrap.width = quote_wrap
 		#html = self.lineFilter.sub('',html)
 		html = re.sub('[_]{10,}',r'\n\g<0>\n',html)
 		html = html.replace('[hr]','\n[hr]\n')
@@ -565,7 +566,8 @@ class BBMessageConverter(MessageConverter):
 		self.quoteEndOnLineFilter = re.compile('(?!<\n)\s*\[\/quote\](?i)')
 		self.fakeHrFilter = re.compile('[_]{10,}')
 		
-	def messageToDisplay(self,html,image_count=0):
+	def messageToDisplay(self,html,image_count=0,quote_wrap=80):
+		self.textwrap.width = quote_wrap
 		#import codecs
 		#codecs.open('test.txt','w','utf8').write(html)
 		html = html.replace('[CR]','\n')

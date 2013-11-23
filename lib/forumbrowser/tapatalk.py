@@ -557,7 +557,7 @@ class ForumPost(forumbrowser.ForumPost):
 	def messageAsText(self):
 		return sys.modules["__main__"].messageToText(self.getMessage(True))
 		
-	def messageAsDisplay(self,short=False,raw=False):
+	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if short:
 			message = self.getShortMessage()
 		else:
@@ -566,7 +566,7 @@ class ForumPost(forumbrowser.ForumPost):
 		#if self.isPM:
 		#	return self.MC.parseCodes(message)
 		#else:
-		return self.MC.messageToDisplay(message)
+		return self.MC.messageToDisplay(message,quote_wrap=quote_wrap)
 		
 	def messageAsQuote(self):
 		if self.isPM:

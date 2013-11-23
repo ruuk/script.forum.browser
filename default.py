@@ -768,6 +768,7 @@ class PostDialog(windows.BaseWindow):
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		self.viewType = 'EDITOR'
 		self.textLines = []
+		self.quote_wrap = 80
 	
 	def setPreview(self,text):
 		try:
@@ -779,6 +780,7 @@ class PostDialog(windows.BaseWindow):
 		windows.BaseWindow.onInit(self)
 		self.setLoggedIn()
 		self.setPreview(' ') #to remove scrollbar
+		self.quote_wrap = self.quoteWrap()
 		if self.failedPM:
 			if self.failedPM.isPM == self.post.isPM and self.failedPM.tid == self.post.tid and self.failedPM.to == self.post.to:
 				yes = dialogs.dialogYesNo(T(32296),T(32297))
@@ -928,7 +930,7 @@ class PostDialog(windows.BaseWindow):
 			disp = re.sub('\[(/?)b\]',r'[\1B]',disp)
 			disp = re.sub('\[(/?)i\]',r'[\1I]',disp)
 		else:
-			disp =  FB.MC.messageToDisplay(disp.replace('\n','[CR]'))
+			disp =  FB.MC.messageToDisplay(disp.replace('\n','[CR]'),quote_wrap=self.quote_wrap)
 		self.setPreview('')
 		self.setPreview(self.parseCodes(disp).replace('\n','[CR]'))
 		items = []
@@ -994,7 +996,12 @@ class LinePostDialog(PostDialog):
 			
 	def onAction(self,action):
 		if action == ACTION_CONTEXT_MENU:
-			self.doMenu()
+			if self.getFocusId() == 302:
+				self.doAddLinesMenu('before')
+			elif self.getFocusId() == 303:
+				self.doAddLinesMenu('after')
+			else:
+				self.doMenu()
 		elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
 			action = ACTION_PREVIOUS_MENU
 		PostDialog.onAction(self,action)
@@ -1002,6 +1009,7 @@ class LinePostDialog(PostDialog):
 	def doMenu(self):
 		d = dialogs.ChoiceMenu(T(32051))
 		item = self.getControl(120).getSelectedItem()
+		if item.getProperty('plus_item'): return self.doAddLinesMenu()
 		skinLevel = self.skinLevel()
 		if item:
 			if skinLevel < 1:
@@ -1019,6 +1027,18 @@ class LinePostDialog(PostDialog):
 		elif result == 'pastebefore': self.paste(before=True)
 		elif result == 'help': dialogs.showHelp('editor')
 		
+	def doAddLinesMenu(self,mode='normal'):
+		d = dialogs.ChoiceMenu(T(32051))
+		d.addItem('addlines',mode == 'normal' and T(32568) or T(32569))
+		res = d.getResult()
+		if not res: return
+		if mode == 'before':
+			self.addLineMulti(before=True)
+		elif mode == 'after':
+			self.addLineMulti(after=True)
+		else:
+			self.addLineMulti()
+	
 	def paste(self,before=False):
 		share = CLIPBOARD.getClipboard()
 		if share.shareType == 'link':
@@ -1056,8 +1076,12 @@ class LinePostDialog(PostDialog):
 			self.updatePreview(-1)
 			return True
 		
-	def addLineMulti(self):
-		while self.addLineSingle(): pass
+	def addLineMulti(self, before=False,after=False):
+		clist = self.getControl(120)
+		while self.addLineSingle(before=before,after=after):
+			if before:
+				pos = clist.getSelectedPosition() + 1
+				self.resumePos(pos)
 		
 	def deleteLine(self):
 		llist = self.getControl(120)
@@ -1111,7 +1135,7 @@ class MessageWindow(windows.BaseWindow):
 		self.setWindowProperties()
 		s = dialogs.showActivitySplash()
 		try:
-			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True)
+			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True,quote_wrap=self.quoteWrap())
 			#open('/home/ruuk/test.txt','w').write(repr(text))
 		finally:
 			s.close()
@@ -1622,6 +1646,7 @@ class RepliesWindow(windows.PageWindow):
 	
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
+		self.quote_wrap = self.quoteWrap()
 		self.setLoggedIn()
 		if self.started: return
 		self.started = True
@@ -1733,7 +1758,7 @@ class RepliesWindow(windows.PageWindow):
 	def setMessageProperty(self,post,item,short=False):
 		title = (self.search and post.topic or post.title) or ''
 		item.setProperty('title',title)
-		message = post.messageAsDisplay(short)
+		message = post.messageAsDisplay(short,quote_wrap=self.quote_wrap)
 		if self.searchRE: message = self.highlightTerms(FB,message)
 		item.setProperty('message',message)
 	

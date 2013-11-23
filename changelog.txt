@@ -51,6 +51,7 @@ Sequel skin: Added animation to color selection dialog
 Sequel skin: Added animation to the background fade level dialog
 Sequel skin: Added message editor window
 Reworked some message editor code
+Created per skin quote wrapping width and increased width on Sequel skin for the various post views
 
 *** 2.1.36 ***
 
