@@ -2375,6 +2375,7 @@ class ThreadsWindow(windows.PageWindow):
 				self.forumElements = None
 			
 	def addThreads(self,threads):
+		self.setProperty('bullet',FB.MC.bullet)
 		if not threads: return False
 		for t in threads:
 			if hasattr(t,'groupdict'):
@@ -2397,8 +2398,8 @@ class ThreadsWindow(windows.PageWindow):
 			item = xbmcgui.ListItem(label=starterbase % starter,label2=titleDisplay)
 			if tdict.get('new_post'): item.setProperty('unread','unread')
 			item.setInfo('video',{"Genre":sticky})
-			item.setInfo('video',{"Director":starter == self.me and 'me' or ''})
-			item.setInfo('video',{"Studio":last == self.me and 'me' or ''})
+			item.setInfo('video',{"Director":starter == self.me and FB.MC.bullet or ''})
+			item.setInfo('video',{"Studio":last == self.me and FB.MC.bullet or ''})
 			item.setProperty("id",unicode(tid))
 			item.setProperty("fid",unicode(fid))
 			item.setProperty("lastposter",last)

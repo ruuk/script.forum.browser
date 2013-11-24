@@ -43,12 +43,13 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.37
+Current Version : 2.1.38
 
 *** 2.1.38 ***
 
 Add some language strings
-Change highlight for 'Started By:' field on threads view when started by self
+Change highlight for 'Started By:' and added highlight for 'Last Post By:' fields on threads view when started by self
+Change for 'Delete Line' highlight to make it look less selected and flow better with the add before/after lines
 
 *** 2.1.37 ***
 

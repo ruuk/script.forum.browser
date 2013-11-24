@@ -586,7 +586,7 @@
 				<aligny>top</aligny>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32526] $INFO[Container(120).ListItem.Property(starter)]</label>
-				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + !StringCompare(Container(120).ListItem.Director,me)</visible>
+				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + StringCompare(Container(120).ListItem.Director,)</visible>
 			</control>
 			<control type="label">
 				<description>Starter</description>
@@ -599,7 +599,7 @@
 				<aligny>top</aligny>
 				<wrapmultiline>true</wrapmultiline>
 				<label>$ADDON[script.forum.browser 32526] [COLOR FF00FF00]$INFO[Container(120).ListItem.Property(starter)][/COLOR]</label>
-				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + StringCompare(Container(120).ListItem.Director,me)</visible>
+				<visible>!StringCompare(Container(120).ListItem.Property(starter),) + !StringCompare(Container(120).ListItem.Director,)</visible>
 			</control>
 			
 			<control type="label" id="103">

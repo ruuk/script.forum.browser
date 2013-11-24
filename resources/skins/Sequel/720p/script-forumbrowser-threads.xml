@@ -655,11 +655,10 @@
 							<height>38</height>
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
-							<textcolor>FF006000</textcolor>
-							<shadowcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</shadowcolor>
+							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 							<align>left</align>
-							<label>[B]$ADDON[script.forum.browser 32526] $INFO[ListItem.Label][/B]</label>
-							<visible>StringCompare(ListItem.Director,me)</visible>
+							<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR][/B]</label>
+							<visible>!StringCompare(ListItem.Director,)</visible>
 						</control>
 						<control type="label">
 							<posx>320</posx>
@@ -671,7 +670,19 @@
 							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 							<align>left</align>
 							<label>$ADDON[script.forum.browser 32162] $INFO[ListItem.Property(lastposter)] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-							<visible>!StringCompare(ListItem.Property(lastposter),)</visible>
+							<visible>!StringCompare(ListItem.Property(lastposter),) + StringCompare(ListItem.Studio,)</visible>
+						</control>
+						<control type="label">
+							<posx>320</posx>
+							<posy>0</posy>
+							<width>650</width>
+							<height>38</height>
+							<font>ForumBrowser-font12</font>
+							<aligny>center</aligny>
+							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
+							<align>left</align>
+							<label>$ADDON[script.forum.browser 32162] [B]$INFO[ListItem.Property(lastposter)][COLOR FFFF0000]$INFO[ListItem.Studio][/COLOR][/B] $INFO[ListItem.Property(last_reply_time),(,)]</label>
+							<visible>!StringCompare(ListItem.Property(lastposter),) + !StringCompare(ListItem.Studio,)</visible>
 						</control>
 						<control type="group">
 							<posx>990</posx>
@@ -878,11 +889,10 @@
 							<height>38</height>
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
-							<textcolor>FF006000</textcolor>
-							<shadowcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</shadowcolor>
+							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 							<align>left</align>
-							<label>[B]$ADDON[script.forum.browser 32526] $INFO[ListItem.Label][/B]</label>
-							<visible>StringCompare(ListItem.Director,me)</visible>
+							<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][/B][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR]</label>
+							<visible>!StringCompare(ListItem.Director,)</visible>
 						</control>
 						<control type="label">
 							<posx>320</posx>
@@ -894,7 +904,19 @@
 							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 							<align>left</align>
 							<label>$ADDON[script.forum.browser 32162] $INFO[ListItem.Property(lastposter)] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-							<visible>!StringCompare(ListItem.Property(lastposter),)</visible>
+							<visible>!StringCompare(ListItem.Property(lastposter),) + StringCompare(ListItem.Studio,)</visible>
+						</control>
+						<control type="label">
+							<posx>320</posx>
+							<posy>0</posy>
+							<width>650</width>
+							<height>38</height>
+							<font>ForumBrowser-font12</font>
+							<aligny>center</aligny>
+							<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
+							<align>left</align>
+							<label>$ADDON[script.forum.browser 32162] [B]$INFO[ListItem.Property(lastposter)][COLOR FFFF0000]$INFO[ListItem.Studio][/COLOR][/B] $INFO[ListItem.Property(last_reply_time),(,)]</label>
+							<visible>!StringCompare(ListItem.Property(lastposter),) + !StringCompare(ListItem.Studio,)</visible>
 						</control>
 						<control type="group">
 							<posx>990</posx>
