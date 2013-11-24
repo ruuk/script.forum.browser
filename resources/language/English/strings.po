@@ -1974,6 +1974,26 @@ msgctxt "#32572"
 msgid "Context Menu For More Options"
 msgstr ""
 
+msgctxt "#32573"
+msgid "No Links"
+msgstr ""
+
+msgctxt "#32574"
+msgid "First Post"
+msgstr ""
+
+msgctxt "#32575"
+msgid "Last Post"
+msgstr ""
+
+msgctxt "#32576"
+msgid "Revert"
+msgstr ""
+
+msgctxt "#32577"
+msgid "To Menubar"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

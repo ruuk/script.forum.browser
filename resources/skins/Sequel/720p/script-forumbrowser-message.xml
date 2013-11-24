@@ -525,7 +525,7 @@
 				<width>690</width>
 				<height>690</height>
 				<angle>90</angle>
-				<label>[B]NO LINKS[/B]</label>
+				<label>[UPPERCASE][B]$ADDON[script.forum.browser 32573][/B][/UPPERCASE]</label>
 				<aligny>center</aligny>
 				<align>left</align>
 				<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_MESSAGE)]</textcolor>

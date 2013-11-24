@@ -437,7 +437,7 @@
 					<width>300</width>
 					<height>10</height>
 					<font>ForumBrowser-font12</font>
-					<label>[UPPERCASE][B]To Menubar[/B][/UPPERCASE]</label>
+					<label>[UPPERCASE][B]$ADDON[script.forum.browser 32577][/B][/UPPERCASE]</label>
 					<textcolor>FF000000</textcolor>
 					<angle>90</angle>
 					<align>center</align>

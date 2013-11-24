@@ -45,6 +45,11 @@ KNOWN ISSUES:
 
 Current Version : 2.1.37
 
+*** 2.1.38 ***
+
+Add some language strings
+Change highlight for 'Started By:' field on threads view when started by self
+
 *** 2.1.37 ***
 
 Sequel skin: Added animation to color selection dialog

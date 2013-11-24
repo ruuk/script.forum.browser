@@ -87,7 +87,7 @@
 					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 				<control type="label">
 					<posx>0</posx>
@@ -98,7 +98,7 @@
 					<textcolor>FF808080</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 				<control type="label">
 					<posx>0</posx>
@@ -109,7 +109,7 @@
 					<textcolor>FF000000</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 				<control type="label">
 					<posx>192</posx>
@@ -120,7 +120,7 @@
 					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 				<control type="label">
 					<posx>192</posx>
@@ -131,7 +131,7 @@
 					<textcolor>FF808080</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 				<control type="label">
 					<posx>192</posx>
@@ -142,7 +142,7 @@
 					<textcolor>FF000000</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Preview</label>
+					<label>$ADDON[script.forum.browser 32570]</label>
 				</control>
 			</control>
 			
@@ -602,7 +602,7 @@
 					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Default</label>
+					<label>[UPPERCASE]$ADDON[script.forum.browser 32563][/UPPERCASE]</label>
 				</control>
 			</control>
 			<control type="group">
@@ -644,7 +644,7 @@
 					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>Revert</label>
+					<label>[UPPERCASE]$ADDON[script.forum.browser 32576][/UPPERCASE]</label>
 				</control>
 			</control>
 		</control>

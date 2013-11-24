@@ -656,8 +656,9 @@
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
 							<textcolor>FF006000</textcolor>
+							<shadowcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</shadowcolor>
 							<align>left</align>
-							<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
+							<label>[B]$ADDON[script.forum.browser 32526] $INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Director,me)</visible>
 						</control>
 						<control type="label">
@@ -878,8 +879,9 @@
 							<font>ForumBrowser-font12</font>
 							<aligny>center</aligny>
 							<textcolor>FF006000</textcolor>
+							<shadowcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</shadowcolor>
 							<align>left</align>
-							<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
+							<label>[B]$ADDON[script.forum.browser 32526] $INFO[ListItem.Label][/B]</label>
 							<visible>StringCompare(ListItem.Director,me)</visible>
 						</control>
 						<control type="label">
