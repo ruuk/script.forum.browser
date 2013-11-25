@@ -241,8 +241,8 @@
 					<description>Add Online</description>
 					<width>20</width>
 					<height>20</height>
-					<texturefocus>forum-browser-sequel-plus.png</texturefocus>
-					<texturenofocus>forum-browser-sequel-plus_nofocus.png</texturenofocus>
+					<texturefocus>forum-browser-sequel-add_database.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-add_database_nofocus.png</texturenofocus>
 				</control>
 				<control type="button" id="208">
 					<textoffsetx>0</textoffsetx>
