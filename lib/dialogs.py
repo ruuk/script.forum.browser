@@ -1023,7 +1023,7 @@ class AlphaColorDialog(BaseDialog):
 		self.hexButton.setLabel(self.hex)
 		
 def showSelectionColorDialog(start_color=None,preview_image=None,fade=None):
-	w = openWindow(AlphaColorDialog,'script-forumbrowser-color-dialog.xml',modal=False,return_window=True,start_color=start_color,preview_image=preview_image,fade=fade)
+	w = openWindow(AlphaColorDialog,'script-forumbrowser-alpha-color-dialog.xml',modal=False,return_window=True,start_color=start_color,preview_image=preview_image,fade=fade)
 	w.doModal()
 	hexC = w.hex
 	del w

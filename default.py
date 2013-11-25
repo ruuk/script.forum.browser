@@ -2773,9 +2773,11 @@ class ForumsWindow(windows.BaseWindow):
 			dialogs.setGlobalSkinProperty('ForumBrowser_header_color','')
 		if self.headerIsDark:
 			self.setProperty('header_is_dark', '1')
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_is_dark','1')
 			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FFFFFFFF')
 		else:
 			self.setProperty('header_is_dark', '0')
+			dialogs.setGlobalSkinProperty('ForumBrowser_header_is_dark','0')
 			dialogs.setGlobalSkinProperty('ForumBrowser_header_text_color','FF000000')
 			
 		self.setLabels()

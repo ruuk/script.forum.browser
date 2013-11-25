@@ -45,6 +45,10 @@ KNOWN ISSUES:
 
 Current Version : 2.1.38
 
+*** 2.1.39 ***
+
+Darkened menu bar for light themed forums
+
 *** 2.1.38 ***
 
 Add some language strings

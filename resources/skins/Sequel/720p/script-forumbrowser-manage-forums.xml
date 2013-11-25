@@ -1,0 +1,825 @@
+<!-- IGNORE_RIGHT_ALIGN -->
+<window>
+	<defaultcontrol>220</defaultcontrol>
+	<animation effect="slide" end="640,0" time="200">WindowOpen</animation>
+	<animation effect="slide" start="640,0" end="0,0" time="200">WindowClose</animation>
+	<coordinates>
+		<system>1</system>
+		<posx>-640</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		<control type="group">
+			<posx>620</posx>
+			<posy>0</posy>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>10</width>
+				<height>720</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>FF666666</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>56</width>
+				<height>720</height>
+				<texture border="5,0,51,0">forum-browser-sequel-left_menu_bg.png</texture>
+				<visible>true</visible>
+				<colordiffuse></colordiffuse>
+			</control>
+		</control>
+		<control type="group">
+			<visible allowhiddenfocus="true">ControlGroup(260).HasFocus(0)</visible>
+			<animation effect="slide" end="600,0" time="200" condition="ControlGroup(260).HasFocus(0)">Conditional</animation>
+			<posx>-600</posx>
+			<posy>0</posy>
+			<control type="image">
+				<posx>605</posx>
+				<posy>312</posy>
+				<width>1006</width>
+				<height>39</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>FF000000</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>605</posx>
+				<posy>311</posy>
+				<width>1006</width>
+				<height>2</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>FF808080</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>605</posx>
+				<posy>350</posy>
+				<width>1006</width>
+				<height>2</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>FF808080</colordiffuse>
+			</control>
+			<control type="group">
+				<posx>960</posx>
+				<posy>322</posy>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32923]</label>
+					<visible>Control.HasFocus(200)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32925]</label>
+					<visible>Control.HasFocus(202)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32926]</label>
+					<visible>Control.HasFocus(203)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32927]</label>
+					<visible>Control.HasFocus(204)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32928]</label>
+					<visible>Control.HasFocus(205)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32929]</label>
+					<visible>Control.HasFocus(207)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32930]</label>
+					<visible>Control.HasFocus(208)</visible>
+				</control>
+				
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32543]</label>
+					<visible>Control.HasFocus(211)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32544]</label>
+					<visible>Control.HasFocus(212)</visible>
+				</control>
+				<control type="label">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>600</width>
+					<height>20</height>
+					<font>ForumBrowser-font12</font>
+					<aligny>center</aligny>
+					<textcolor>FFFFFFFF</textcolor>
+					<align>left</align>
+					<label>$ADDON[script.forum.browser 32931]</label>
+					<visible>Control.HasFocus(210)</visible>
+				</control>
+			</control>
+			<control type="grouplist" id="260">
+				<orientation>horizontal</orientation>
+				<posx>660</posx>
+				<posy>322</posy>
+				<width>600</width>
+				<height>20</height>
+				<onleft>220</onleft>
+				<onup>220</onup>
+				<ondown>220</ondown>
+				<control type="button" id="200">
+					<textoffsetx>0</textoffsetx>
+					<description>Add Forum</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-plus.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-plus_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="202">
+					<textoffsetx>0</textoffsetx>
+					<description>Remove Forum</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-delete.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-delete_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="203">
+					<textoffsetx>0</textoffsetx>
+					<description>Add To Favorites</description>
+					<width>20</width>
+					<height>20</height>
+					<visible>!StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
+					<texturefocus>forum-browser-sequel-add_favorite.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-add_favorite_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="204">
+					<textoffsetx>0</textoffsetx>
+					<description>Remove From Favs</description>
+					<width>20</width>
+					<height>20</height>
+					<visible>StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
+					<texturefocus>forum-browser-sequel-remove_favorite.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-remove_favorite_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="205">
+					<textoffsetx>0</textoffsetx>
+					<description>Forum Settings</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-settings.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-settings_nofocus.png</texturenofocus>
+				</control>
+	
+				<control type="button" id="207">
+					<textoffsetx>0</textoffsetx>
+					<description>Add Online</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-plus.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-plus_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="208">
+					<textoffsetx>0</textoffsetx>
+					<description>Theme Online</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-up.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-up_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="211">
+					<visible>StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
+					<textoffsetx>0</textoffsetx>
+					<description>Fav Up</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-up.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-up_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="212">
+					<visible>StringCompare(Container(220).ListItem.Property(favorite),favorite)</visible>
+					<textoffsetx>0</textoffsetx>
+					<description>Fav Down</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus flipy="true">forum-browser-sequel-up.png</texturefocus>
+					<texturenofocus flipy="true">forum-browser-sequel-up_nofocus.png</texturenofocus>
+				</control>
+				<control type="button" id="210">
+					<textoffsetx>0</textoffsetx>
+					<description>Help</description>
+					<width>20</width>
+					<height>20</height>
+					<texturefocus>forum-browser-sequel-help.png</texturefocus>
+					<texturenofocus>forum-browser-sequel-help_nofocus.png</texturenofocus>
+				</control>
+			</control>
+		</control>
+		
+		<control type="group">
+			<posx>0</posx>
+			<posy>40</posy>
+			<control type="image" id="251">
+				<posx>0</posx>
+				<posy>-40</posy>
+				<width>620</width>
+				<height>40</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>FF444444</colordiffuse>
+			</control>
+			<control type="label" id="250">
+				<posx>40</posx>
+				<posy>-35</posy>
+				<width>560</width>
+				<height>38</height>
+				<font>ForumBrowser-font13</font>
+				<textcolor>FFFFFFFF</textcolor>
+				<align>left</align>
+				<label>[B]$ADDON[script.forum.browser 32905][/B]</label>
+			</control>
+			<control type="label">
+				<posx>426</posx>
+				<posy>-35</posy>
+				<width>80</width>
+				<height>38</height>
+				<font>ForumBrowser-font13</font>
+				<aligny>center</aligny>
+				<textcolor>FF000000</textcolor>
+				<align>left</align>
+				<label>$ADDON[script.forum.browser 32932]</label>
+			</control>
+			<control type="label">
+				<posx>516</posx>
+				<posy>-35</posy>
+				<width>40</width>
+				<height>38</height>
+				<font>ForumBrowser-font13</font>
+				<aligny>center</aligny>
+				<textcolor>FF000000</textcolor>
+				<align>left</align>
+				<label>$ADDON[script.forum.browser 32933]</label>
+			</control>
+
+			<control type="image" id="253">
+				<posx>581</posx>
+				<posy>-28</posy>
+				<width>24</width>
+				<height>24</height>
+				<texture flipy="true">../../Default/media/forum-browser-info.png</texture>
+				<colordiffuse>FF001100</colordiffuse>
+			</control>
+			<control type="image" id="254">
+				<posx>581</posx>
+				<posy>-28</posy>
+				<width>24</width>
+				<height>24</height>
+				<texture flipy="true">../../Default/media/forum-browser-info.png</texture>
+				<colordiffuse>FFFF0000</colordiffuse>
+				<visible>StringCompare(Window.Property(PulseNotify),1)</visible>
+				<animation effect="fade" start="0" end="100" time="1000" pulse="true" condition="StringCompare(Window.Property(PulseNotify),1)">Conditional</animation>
+			</control>
+			<control type="image" id="251">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>620</width>
+				<height>720</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<visible>!Control.IsVisible(252)</visible>
+			</control>
+			<control type="group"id="301">
+				<control type="fixedlist" id="220">
+					<focusposition>7</focusposition>
+					<onleft>300</onleft>
+					<onright>260</onright>
+					<onup>220</onup>
+					<ondown>220</ondown>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>620</width>
+					<height>680</height>
+					<viewtype label="535">list</viewtype>
+					<pagecontrol>121</pagecontrol>
+					<scrolltime>200</scrolltime>
+					<itemlayout height="39">
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>$INFO[ListItem.Property(bgfile)]</texture>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>$INFO[ListItem.Icon]</texture>
+							<aspectratio align="right">keep</aspectratio>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						
+						<control type="image">
+							<posx>414</posx>
+							<posy>0</posy>
+							<width>1</width>
+							<height>38</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						<control type="label">
+							<posx>55</posx>
+							<posy>0</posy>
+							<width>361</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF000000</textcolor>
+							<align>left</align>
+							<label>[B]$INFO[ListItem.Label][/B]</label>
+						</control>
+						<control type="label">
+							<posx>426</posx>
+							<posy>0</posy>
+							<width>80</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF999999</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_subs)</info>
+							<visible>StringCompare(ListItem.Property(new_subs),)</visible>
+						</control>
+						<control type="label">
+							<posx>426</posx>
+							<posy>0</posy>
+							<width>80</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF000000</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_subs)</info>
+							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
+						</control>
+						<control type="label">
+							<posx>516</posx>
+							<posy>0</posy>
+							<width>40</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF999999</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_pms)</info>
+							<visible>StringCompare(ListItem.Property(new_PMs),)</visible>
+						</control>
+						<control type="label">
+							<posx>516</posx>
+							<posy>0</posy>
+							<width>40</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF000000</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_pms)</info>
+							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
+						</control>
+						<control type="image">
+							<posx>586</posx>
+							<posy>11</posy>
+							<width>16</width>
+							<height>16</height>
+							<texture>forum-browser-sequel-logged_in.png</texture>
+							<colordiffuse>FFAAAAAA</colordiffuse>
+							<visible>StringCompare(ListItem.Property(notify),)</visible>
+						</control>
+						<control type="image">
+							<posx>586</posx>
+							<posy>11</posy>
+							<width>16</width>
+							<height>16</height>
+							<texture>forum-browser-sequel-logged_in.png</texture>
+							<colordiffuse>FF00FF00</colordiffuse>
+							<visible>StringCompare(ListItem.Property(notify),notify)</visible>
+						</control>
+						<control type="group">
+							<posx>25</posx>
+							<posy>7</posy>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+								<visible>StringCompare(ListItem.Property(type),TT)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+								<visible>StringCompare(ListItem.Property(type),FR)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-logo-128.png</texture>
+								<visible>StringCompare(ListItem.Property(type),GB)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-proboards.png</texture>
+								<visible>StringCompare(ListItem.Property(type),PB)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-yuku.png</texture>
+								<visible>StringCompare(ListItem.Property(type),YK)</visible>
+							</control>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>-2</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>37</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+							<visible>StringCompare(ListItem.Property(separator),)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>37</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF000000</colordiffuse>
+							<visible>!StringCompare(ListItem.Property(separator),)</visible>
+						</control>
+					</itemlayout>
+					<focusedlayout height="39">
+						<control type="image">
+							<posx>0</posx>
+							<posy>-2</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>37</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+							<visible>StringCompare(ListItem.Property(separator),)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>37</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF000000</colordiffuse>
+							<visible>!StringCompare(ListItem.Property(separator),)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>620</width>
+							<height>38</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+							<visible>ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>620</width>
+							<height>38</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF000000</colordiffuse>
+							<visible>!ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>$INFO[ListItem.Property(bgfile)]</texture>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>$INFO[ListItem.Icon]</texture>
+							<aspectratio align="right">keep</aspectratio>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<colordiffuse>FFFFFFFF</colordiffuse>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+							<aspectratio>stretch</aspectratio>
+							<visible>ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						<control type="image">
+							<posx>114</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>38</height>
+							<texture>forum-browser-fade-overlay.png</texture>
+							<colordiffuse>FF000000</colordiffuse>
+							<aspectratio>stretch</aspectratio>
+							<visible>!ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						<control type="image">
+							<posx>0</posx>
+							<posy>37</posy>
+							<width>620</width>
+							<height>2</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+						</control>
+						<control type="image">
+							<posx>414</posx>
+							<posy>0</posy>
+							<width>1</width>
+							<height>38</height>
+							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>FF999999</colordiffuse>
+							<aspectratio>stretch</aspectratio>
+						</control>
+						<control type="label">
+							<posx>55</posx>
+							<posy>0</posy>
+							<width>361</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FFFFFFFF</textcolor>
+							<align>left</align>
+							<label>[B]$INFO[ListItem.Label][/B]</label>
+							<visible>ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						<control type="label">
+							<posx>55</posx>
+							<posy>0</posy>
+							<width>361</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FFFFFFFF</textcolor>
+							<align>left</align>
+							<label>[B]$INFO[ListItem.Label][/B]</label>
+							<visible>!ControlGroup(301).HasFocus(0)</visible>
+						</control>
+						<control type="label">
+							<posx>426</posx>
+							<posy>0</posy>
+							<width>80</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF999999</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_subs)</info>
+							<visible>StringCompare(ListItem.Property(new_subs),)</visible>
+						</control>
+						<control type="label">
+							<posx>426</posx>
+							<posy>0</posy>
+							<width>80</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FFFFFFFF</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_subs)</info>
+							<visible>StringCompare(ListItem.Property(new_subs),newsubs)</visible>
+						</control>
+						<control type="label">
+							<posx>516</posx>
+							<posy>0</posy>
+							<width>40</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FF999999</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_pms)</info>
+							<visible>StringCompare(ListItem.Property(new_PMs),)</visible>
+						</control>
+						<control type="label">
+							<posx>516</posx>
+							<posy>0</posy>
+							<width>40</width>
+							<height>38</height>
+							<font>ForumBrowser-font13</font>
+							<aligny>center</aligny>
+							<textcolor>FFFFFFFF</textcolor>
+							<align>left</align>
+							<info>ListItem.Property(unread_pms)</info>
+							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
+						</control>
+							
+						<control type="image">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>620</width>
+							<height>38</height>
+							<texture>forum-browser-black-outline.png</texture>
+							<visible>ControlGroup(301).HasFocus(0)</visible>
+						</control>
+	
+						<control type="image">
+							<posx>586</posx>
+							<posy>11</posy>
+							<width>16</width>
+							<height>16</height>
+							<texture>forum-browser-sequel-logged_in.png</texture>
+							<colordiffuse>FFAAAAAA</colordiffuse>
+							<visible>StringCompare(ListItem.Property(notify),)</visible>
+						</control>
+						<control type="image">
+							<posx>586</posx>
+							<posy>11</posy>
+							<width>16</width>
+							<height>16</height>
+							<texture>forum-browser-sequel-logged_in.png</texture>
+							<colordiffuse>FF00FF00</colordiffuse>
+							<visible>StringCompare(ListItem.Property(notify),notify)</visible>
+						</control>
+						<control type="group">
+							<posx>25</posx>
+							<posy>7</posy>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+								<visible>StringCompare(ListItem.Property(type),TT)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+								<visible>StringCompare(ListItem.Property(type),FR)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-logo-128.png</texture>
+								<visible>StringCompare(ListItem.Property(type),GB)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-proboards.png</texture>
+								<visible>StringCompare(ListItem.Property(type),PB)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../Default/media/forum-browser-yuku.png</texture>
+								<visible>StringCompare(ListItem.Property(type),YK)</visible>
+							</control>
+						</control>
+					</focusedlayout>
+				</control>
+				<control type="button" id="300">
+					<description>Close On Focus Button</description>
+					<posx>-20</posx>
+					<posy>-20</posy>
+					<width>10</width>
+					<height>10</height>
+					<onleft>220</onleft>
+					<onright>220</onright>
+					<onup>220</onup>
+					<ondown>220</ondown>
+					<visible>true</visible>
+					<texturefocus></texturefocus>
+					<texturenofocus></texturenofocus>
+					<onfocus>PreviousMenu</onfocus>
+				</control>
+			</control>
+			<control type="group">
+				<posx>616</posx>
+				<posy>0</posy>
+				<control type="scrollbar" id="121">
+					<description>scroll bar indicator for lists</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>4</width>
+					<height>680</height>
+					<onleft>220</onleft>
+					<onright>260</onright>
+					<texturesliderbackground>-</texturesliderbackground>
+					<texturesliderbar>forum-browser-sequel-white_square.png</texturesliderbar>
+					<texturesliderbarfocus>forum-browser-sequel-white_square.png</texturesliderbarfocus>
+					<textureslidernib>-</textureslidernib>
+					<textureslidernibfocus>-</textureslidernibfocus>
+					<orientation>vertical</orientation>
+					<showonepage>false</showonepage>
+					<visible>Control.HasFocus(220)</visible>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+				</control>
+			</control>
+		</control>
+	</controls>
+</window>

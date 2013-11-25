@@ -556,15 +556,6 @@
 				<colordiffuse>FFFFFFFF</colordiffuse>
 			</control>
 			<control type="image">
-				<description>MenuBGBG-NoColor</description>
-				<posx>0</posx>
-				<posy>60</posy>
-				<width>1280</width>
-				<height>30</height>
-				<texture>forum-browser-sequel-white_square.png</texture>
-				<colordiffuse>FF444444</colordiffuse>
-			</control>
-			<control type="image">
 				<description>Header</description>
 				<posx>0</posx>
 				<posy>0</posy>
@@ -572,6 +563,16 @@
 				<height>90</height>
 				<texture>forum-browser-sequel-white_square.png</texture>
 				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_header_color)]</colordiffuse>
+			</control>
+			<control type="image">
+				<visible>!StringCompare(Window(10000).Property(ForumBrowser_header_is_dark),1)</visible>
+				<description>MenuBGBG-NoColor</description>
+				<posx>0</posx>
+				<posy>60</posy>
+				<width>1280</width>
+				<height>30</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>BB000000</colordiffuse>
 			</control>
 			
 			<control type="image">
