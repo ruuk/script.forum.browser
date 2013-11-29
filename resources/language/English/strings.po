@@ -1994,6 +1994,10 @@ msgctxt "#32577"
 msgid "To Menubar"
 msgstr ""
 
+msgctxt "#32578"
+msgid "Slide Up On Video (On Suported Skins)"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

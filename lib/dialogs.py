@@ -39,6 +39,11 @@ def doKeyboard(prompt,default='',hidden=False,mod=False,smilies=False):
 
 def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None,*args,**kwargs):
 	setGlobalSkinProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
+	if util.getSetting('hide_pnp',False):
+		setGlobalSkinProperty('ForumBrowser_slideUpOnVideo','0')
+	else:
+		setGlobalSkinProperty('ForumBrowser_slideUpOnVideo',util.getSetting('slide_up_on_video',False) and '1' or '0') #I set the home window, because that's the only way I know to get it to work before the window displays
+		
 	THEME = util.getSavedTheme(get_current=True)
 	path = util.__addon__.getAddonInfo('path')
 	res = '720p'
@@ -1126,11 +1131,16 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 	def autoColor(self):
 		if not self.image: return
 		import urllib2
-		tmp_file = os.path.join(util.CACHE_PATH,'temp_logo')
-		try:
-			open(tmp_file,'wb').write(urllib2.urlopen(self.image).read())
-		except:
-			util.ERROR('autoColor(): Failed to get image')
+		print self.image
+		if os.path.exists(self.image):
+			tmp_file = self.image
+		else:
+			tmp_file = os.path.join(util.CACHE_PATH,'temp_logo')
+			try:
+				open(tmp_file,'wb').write(urllib2.urlopen(self.image).read())
+			except:
+				util.ERROR('autoColor(): Failed to get image')
+				return
 		rgb = util.getImageBackgroundColor(tmp_file)
 		os.remove(tmp_file)
 		self.r = rgb[0]

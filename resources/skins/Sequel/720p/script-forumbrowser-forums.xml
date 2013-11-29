@@ -4,7 +4,7 @@
 		<system>1</system>
 		<posx>0</posx>
 		<posy>0</posy>
-		<origin x="0" y="-120">StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1)</origin>
+		<origin x="0" y="-120">StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1) | [Player.Playing + Player.HasVideo + StringCompare(Window(10000).Property(ForumBrowser_slideUpOnVideo),1)]</origin>
 	</coordinates>
 	<controls>
 		<control type="group">
@@ -19,7 +19,7 @@
 				<texture>forum-browser-sequel-white_square.png</texture>
 			</control>
 			<control type="group" id="115">
-				<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1)</visible>
+				<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1) + !StringCompare(Window(10000).Property(ForumBrowser_slideUpOnVideo),1)</visible>
 				<posx>0</posx>
 				<posy>0</posy>
 				<control type="videowindow">
@@ -157,17 +157,18 @@
 			
 			<control type="image">
 				<posx>30</posx>
-				<posy>122</posy>
+				<posy>121</posy>
 				<width>10</width>
-				<height>27</height>
+				<height>28</height>
 				<texture border="3">forum-browser-sequel-vertical_beveled_line.png</texture>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 			</control>
 			<control type="grouplist" id="199">
 				<itemgap>0</itemgap>
 				<posx>40</posx>
-				<posy>122</posy>
+				<posy>121</posy>
 				<width>1120</width>
-				<height>27</height>
+				<height>28</height>
 				<onleft>188</onleft>
 				<onright>186</onright>
 				<onup>120</onup>
@@ -177,12 +178,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Forums</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32905]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -191,12 +193,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Subscriptions</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32904]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -206,12 +209,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Messages</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32909]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -221,12 +225,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Unread Threads</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32565]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -236,12 +241,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Search</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32916]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -252,12 +258,13 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Settings</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
 						<align>center</align>
 						<label>$ADDON[script.forum.browser 32903]</label>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 						<textcolor>FFAAAAAA</textcolor>
 						<focusedcolor>FFFFFFFF</focusedcolor>
 						<disabledcolor>22CCCCCC</disabledcolor>
@@ -266,17 +273,18 @@
 						<textoffsetx>0</textoffsetx>
 						<description>Stop Button</description>
 						<width>180</width>
-						<height>27</height>
+						<height>29</height>
 						<font>ForumBrowser-font12</font>
-						<textcolor>FFAA0000</textcolor>
+						<textcolor>FFAAAAAA</textcolor>
 						<disabledcolor>FFCCCCCC</disabledcolor>
-						<focusedcolor>FFFF0000</focusedcolor>
+						<focusedcolor>FFFFFFFF</focusedcolor>
 						<aligny>center</aligny>
 						<align>center</align>
 						<label>[B][UPPERCASE]$ADDON[script.forum.browser 32910][/UPPERCASE][/B]</label>
 						<pulseonselect>false</pulseonselect>
 						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 					</control>
 				</control>
 			
@@ -304,6 +312,15 @@
 					<height>20</height>
 					<texturefocus></texturefocus>
 					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<visible>Control.HasFocus(186)</visible>
+					<posx>-2</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 				</control>
 				<control type="image">
 					<visible>Control.HasFocus(186) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1)</visible>
@@ -352,6 +369,15 @@
 					<texturenofocus></texturenofocus>
 				</control>
 				<control type="image">
+					<visible>Control.HasFocus(187)</visible>
+					<posx>28</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+				</control>
+				<control type="image">
 					<visible>Control.HasFocus(187) + !StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
 					<posx>30</posx>
 					<posy>6</posy>
@@ -384,6 +410,15 @@
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
 				</control>
 				
+				<control type="image">
+					<visible>Control.HasFocus(188)</visible>
+					<posx>58</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+				</control>
 				<control type="button" id="188">
 					<description>Settings</description>
 					<onleft>187</onleft>
@@ -1011,7 +1046,7 @@
 			<width>1280</width>
 			<height>30</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
-			<colordiffuse>AA000000</colordiffuse>
+			<colordiffuse>AA808080</colordiffuse>
 		</control>
 		<control type="image">
 			<visible>Control.IsVisible(198)</visible>
@@ -1085,7 +1120,7 @@
 		</control>
 				
 		<control type="group">
-			<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_FORUM),1)</visible>
+			<visible>Player.Playing + Player.HasVideo + !Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 			<posx>640</posx>
 			<posy>480</posy>
 			<control type="image">

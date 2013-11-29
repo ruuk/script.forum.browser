@@ -43,11 +43,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.38
+Current Version : 2.1.39
 
 *** 2.1.39 ***
 
-Darkened menu bar for light themed forums
+Sequel Skin:
+	Added skin for forums manager
+	Darkened menu bar for light themed forums
+	Extended selection color to window buttons
+	Various skin tweaks
+Added setting 'Slide Up On Video (On Supported Skins)' in Settings:Video
+Fix for header color editor using new color dialog (it's not supposed to do that yet :) )
+
 
 *** 2.1.38 ***
 

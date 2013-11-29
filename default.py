@@ -545,17 +545,31 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			elif focusID > 199 and focusID < 210:
 				helpname = ''
 				if focusID  == 200: helpname = 'addforum'
-				if focusID  == 201: helpname = 'addonline'
-				if focusID  == 202: helpname = 'removeforum'
-				if focusID  == 203: helpname = 'addfavorite'
-				if focusID  == 204: helpname = 'removefavorite'
-				if focusID  == 205: helpname = 'setlogins'
-				if focusID  == 206: helpname = 'setcurrentcolor'
-				if focusID  == 207: helpname = 'addcurrentonline'
-				if focusID  == 208: helpname = 'updatethemeodb'
-				if focusID  == 209: helpname = 'parserbrowser'
+				elif focusID  == 201: helpname = 'addonline'
+				elif focusID  == 202: helpname = 'removeforum'
+				elif focusID  == 203: helpname = 'addfavorite'
+				elif focusID  == 204: helpname = 'removefavorite'
+				elif focusID  == 205: helpname = 'settings'
+				elif focusID  == 207: helpname = 'addcurrentonline'
+				elif focusID  == 208: helpname = 'updatethemeodb'
 				dialogs.showMessage(str(self.getControl(focusID).getLabel()),dialogs.loadHelp('options.help').get(helpname,''))
 
+	def onFocus(self, focusID):
+		if focusID < 200 or focusID > 212: return
+		if focusID  == 200: helpname = 'addforum'
+		elif focusID  == 201: helpname = 'addonline'
+		elif focusID  == 202: helpname = 'removeforum'
+		elif focusID  == 203: helpname = 'addfavorite'
+		elif focusID  == 204: helpname = 'removefavorite'
+		elif focusID  == 205: helpname = 'settings'
+		elif focusID  == 207: helpname = 'addcurrentonline'
+		elif focusID  == 208: helpname = 'updatethemeodb'
+		else:
+			self.setProperty('menu_help','')
+			return
+		
+		self.setProperty('menu_help',dialogs.loadHelp('options.help').get(helpname,''))
+				
 	def moveFavoriteUp(self,forumID):
 		favs = getFavorites()
 		if not forumID in favs: return
@@ -3657,6 +3671,11 @@ def doSettings(window=None):
 		FB.MC.resetRegex()
 		FB.MC.setReplaces()
 	forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
+	dialogs.setGlobalSkinProperty('ForumBrowser_hidePNP',util.getSetting('hide_pnp',False) and '1' or '0')
+	if util.getSetting('hide_pnp',False):
+		dialogs.setGlobalSkinProperty('ForumBrowser_slideUpOnVideo','0')
+	else:
+		dialogs.setGlobalSkinProperty('ForumBrowser_slideUpOnVideo',util.getSetting('slide_up_on_video',False) and '1' or '0')
 	if mods.checkForSkinMods():
 		util.setRefreshXBMCSkin()
 		return True

@@ -6,7 +6,7 @@
 		<system>1</system>
 		<posx>0</posx>
 		<posy>0</posy>
-		<origin x="0" y="-60">StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)</origin>
+		<origin x="0" y="-60">StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1) | [Player.Playing + Player.HasVideo + StringCompare(Window(10000).Property(ForumBrowser_slideUpOnVideo),1)]</origin>
 	</coordinates>
 	<controls>
 		<control type="group">
@@ -22,7 +22,7 @@
 				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_window_colors_back_MESSAGE)]</colordiffuse>
 			</control>
 			<control type="group" id="115">
-				<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)</visible>
+				<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1) + !StringCompare(Window(10000).Property(ForumBrowser_slideUpOnVideo),1)</visible>
 				<posx>0</posx>
 				<posy>0</posy>
 				<control type="videowindow">
@@ -303,6 +303,7 @@
 							<width>128</width>
 							<height>72</height>
 							<texture>forum-browser-sequel-white_square.png</texture>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
 							<visible>Control.HasFocus(150)</visible>
 						</control>
 						<control type="image">
@@ -360,6 +361,7 @@
 							<width>128</width>
 							<height>72</height>
 							<texture>forum-browser-sequel-film_light.png</texture>
+							<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
 							<visible>Control.HasFocus(150)</visible>
 						</control>
 					</control>
@@ -600,6 +602,15 @@
 					<texturenofocus></texturenofocus>
 				</control>
 				<control type="image">
+					<visible>Control.HasFocus(186)</visible>
+					<posx>-2</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
+				</control>
+				<control type="image">
 					<visible>Control.HasFocus(186) + !StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)</visible>
 					<posx>0</posx>
 					<posy>6</posy>
@@ -646,6 +657,15 @@
 					<texturenofocus></texturenofocus>
 				</control>
 				<control type="image">
+					<visible>Control.HasFocus(187)</visible>
+					<posx>28</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
+				</control>
+				<control type="image">
 					<visible>Control.HasFocus(187) + !StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_MESSAGE),1)</visible>
 					<posx>30</posx>
 					<posy>6</posy>
@@ -678,6 +698,15 @@
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
 				</control>
 				
+				<control type="image">
+					<visible>Control.HasFocus(188)</visible>
+					<posx>58</posx>
+					<posy>4</posy>
+					<width>24</width>
+					<height>24</height>
+					<texture>forum-browser-sequel-white_circle_faded_edges.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_MESSAGE)]</colordiffuse>
+				</control>
 				<control type="button" id="188">
 					<description>Settings</description>
 					<onleft>187</onleft>
@@ -791,7 +820,7 @@
 		</control>
 		
 		<control type="group">
-			<visible>Player.Playing + Player.HasVideo + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1) + StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)</visible>
+			<visible>Player.Playing + Player.HasVideo + !Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 			<posx>640</posx>
 			<posy>420</posy>
 			<control type="image">
