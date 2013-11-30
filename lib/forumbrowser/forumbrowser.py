@@ -763,7 +763,7 @@ class ForumPost:
 		return self.message + self.signature
 	
 	def messageAsText(self):
-		return sys.modules["__main__"].messageToText(self.getMessage())
+		return texttransform.messageToText(self.getMessage())
 		
 	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if short:

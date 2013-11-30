@@ -773,6 +773,16 @@ class BBMessageConverter(MessageConverter):
 ######################################################################################
 # Functions
 ######################################################################################
+lineFilter = re.compile('[\n\r\t]')
+def messageToText(html):
+	html = lineFilter.sub('',html)
+	html = re.sub('<br[^>]*?>','\n',html)
+	html = html.replace('</table>','\n\n')
+	html = html.replace('</div></div>','\n') #to get rid of excessive new lines
+	html = html.replace('</div>','\n')
+	html = re.sub('<[^>]*?>','',html)
+	return convertHTMLCodes(html).strip()
+
 def makeUnicode(html):
 	if not isinstance(html,unicode):
 		try:

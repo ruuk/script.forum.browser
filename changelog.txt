@@ -53,9 +53,18 @@ Sequel Skin:
 	Added Yes/No Dialog skin
 	Added Select Dialog skin
 	Added Small Select Dialog skin
+	Added Smilies Dialog skin
+	Added Forum Select Dialog skin
+	Added Image Choice Dialog skin
+	Added Splash Dialog skin
+	Added Options Dialog skin
+	Added Text Dialog skin
 	
 When posting new/edited posts/messages, the splash now closes before displaying the notification dialog
 Fixed an issue when opening a post bookmark where closing the post view would result in it automatically re-opening
+Fixed a bug where videos were not playing when being clicked from the media list on the post view
+Fixed a bug where closing the 'More' smilies dialog caused XBMC to crash
+Re-arranged and improved a bunch of code in the process of fixing the smilies crash bug
 
 *** 2.1.39 ***
 

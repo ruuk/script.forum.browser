@@ -1,5 +1,6 @@
-import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii
+import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii, math
 from lib import chardet
+from webviewer import video #@UnresolvedImport
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
@@ -19,6 +20,7 @@ if not os.path.exists(TEMP_DIR): os.makedirs(TEMP_DIR)
 
 CURRENT_THEME = None
 DEBUG = None
+PLAYER = None
 
 class AbortRequestedException(Exception): pass
 class StopRequestedException(Exception): pass
@@ -224,7 +226,123 @@ class StoppableThread(threading.Thread):
 		thread represented by this instance.
 		"""
 		_async_raise( self._get_my_tid(), exctype )
+
+######################################################################################
+#
+# PlayerMonitor
+#
+######################################################################################
+def initPlayer():
+	global PLAYER
+	PLAYER = PlayerMonitor()
+	return PLAYER
+	
+class PlayerMonitor(xbmc.Player):
+	def __init__(self,core=None):
+		self.init()
+		xbmc.Player.__init__(core)
 		
+	def init(self):
+		self.interrupted = None
+		self.isSelfPlaying = False
+		self.stack = 0
+		self.currentTime = None
+		self.FBisRunning = True
+		
+	def start(self,path):
+		interrupted = None
+		if getSetting('video_return_interrupt',True):
+			interrupted = video.current()
+			self.getCurrentTime()
+		self.interrupted = interrupted
+		self.doPlay(path)
+		
+	def finish(self):
+		self.FBisRunning = False
+		if getSetting('video_stop_on_exit',True):
+			self.doStop()
+			if self.interrupted: self.wait()
+		else:
+			if getSetting('video_return_interrupt_after_exit',False) and self.interrupted:
+				self.waitLong()
+		LOG('PLAYER: Exiting')
+		
+	def doPlay(self,path):
+		self.played = path
+		self.isSelfPlaying = True
+		if getSetting('video_start_preview',True):
+			video.play(path, preview=True)
+		else:
+			self.play(path)
+		
+	def doStop(self):
+		if not self.isSelfPlaying: return
+		LOG('PLAYER: Stopping forum video')
+		self.stop()
+		
+	def wait(self):
+		LOG('PLAYER: Waiting for video to stop...')
+		ct = 0
+		while self.interrupted and not xbmc.abortRequested:
+			xbmc.sleep(1000)
+			ct+=1
+			if ct > 19: break #Don't know if this is necessary, but it's here just in case.
+			
+	def waitLong(self):
+		LOG('PLAYER: Waiting after FB close to resume interrupted video...')
+		while self.interrupted and not xbmc.abortRequested:
+			xbmc.sleep(1000)
+		
+	def playInterrupted(self):
+		if not self.isSelfPlaying: return
+		self.isSelfPlaying = False
+		if self.interrupted:
+			LOG('PLAYER: Playing interrupted video')
+			if getSetting('video_bypass_resume_dialog',True) and self.currentTime:
+				try:
+					xbmc.sleep(1000)
+					video.playAt(self.interrupted, *self.currentTime)
+				except:
+					ERROR('PLAYER: Failed manually resume video - sending to XBMC')
+					xbmc.sleep(1000)
+					video.play(self.interrupted)
+			else:
+				xbmc.sleep(1000)
+				video.play(self.interrupted,getSetting('video_resume_as_preview',False))
+		self.interrupted = None
+		self.currentTime = None
+	
+	def onPlayBackStarted(self):
+		if self.FBisRunning and getSetting('video_resume_as_preview',False) and not self.isSelfPlaying:
+			xbmc.sleep(1000)
+			xbmc.executebuiltin('Action(FullScreen)')
+		
+	def onPlayBackEnded(self):
+		self.playInterrupted()
+		
+	def onPlayBackStopped(self):
+		self.playInterrupted()
+		
+	def pauseStack(self):
+		if not self.stack: video.pause()
+		self.stack += 1
+		
+	def resumeStack(self):
+		self.stack -= 1
+		if self.stack < 1:
+			self.stack = 0
+			video.resume()
+		
+	def getCurrentTime(self):
+		if not video.isPlaying(): return None
+		offset = getSetting('video_resume_offset',0)
+		val = self.getTime() - offset
+		if val < 0: val = 0
+		(ms,tsec) = math.modf(val)
+		m, s = divmod(int(tsec), 60)
+		h, m = divmod(m, 60)
+		self.currentTime = (h,m,s,int(ms*1000))
+
 def setRefreshXBMCSkin():
 	setSetting('refresh_skin',True)
 	

@@ -1,0 +1,104 @@
+<window>
+	<defaultcontrol>250</defaultcontrol>
+	<animation effect="slide" end="640,0" time="200">WindowOpen</animation>
+	<animation effect="slide" start="640,0" end="0,0" time="200">WindowClose</animation>
+	<zorder>2</zorder>
+	<coordinates>
+		<system>1</system>
+		<posx>-640</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>640</width>
+			<height>720</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>EE606060</colordiffuse>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>687</width>
+			<height>720</height>
+			<texture border="5,5,51,5">forum-browser-sequel-left_menu_bg.png</texture>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>640</width>
+			<height>50</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>60000000</colordiffuse>
+		</control>
+		<control type="label" id="300">
+			<posx>0</posx>
+			<posy>15</posy>
+			<width>640</width>
+			<height>30</height>
+			<font>ForumBrowser-font13</font>
+			<aligny>center</aligny>
+			<textcolor>FFFFFFFF</textcolor>
+			<align>center</align>
+		</control>
+			
+		<control type="group" id="250">
+			<defaultcontrol>120</defaultcontrol>
+			<posx>0</posx>
+			<posy>0</posy>
+			<control type='list' id="120">
+				<posx>0</posx>
+				<posy>50</posy>
+				<width>640</width>
+				<height>670</height>
+				<onleft>120</onleft>
+				<onright>120</onright>
+				<onup>120</onup>
+				<ondown>120</ondown>
+				<!-- pagecontrol>121</pagecontrol -->
+				<scrolltime>200</scrolltime>
+				<itemlayout height="200">
+					<control type="image">
+						<posx>20</posx>
+						<posy>5</posy>
+						<width>600</width>
+						<height>190</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+					</control>
+					<control type="image">
+						<posx>30</posx>
+						<posy>5</posy>
+						<width>580</width>
+						<height>190</height>
+						<texture>$INFO[ListItem.Thumb]</texture>
+					</control>
+				</itemlayout>
+				<focusedlayout height="200">
+					<control type="image">
+						<posx>20</posx>
+						<posy>5</posy>
+						<width>600</width>
+						<height>190</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+					</control>
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>640</width>
+						<height>200</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					</control>
+					<control type="image">
+						<posx>30</posx>
+						<posy>5</posy>
+						<width>580</width>
+						<height>190</height>
+						<texture>$INFO[ListItem.Thumb]</texture>
+					</control>
+				</focusedlayout>
+			</control>
+		</control>
+	</controls>
+</window>

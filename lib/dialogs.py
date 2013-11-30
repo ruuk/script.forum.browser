@@ -117,10 +117,10 @@ def showMessage(caption,text,text2='',text3='',error=False,success=None,scroll=F
 	theme = 'Default'
 	if os.path.exists(os.path.join(path,'resources','skins',THEME,'720p',xmlFilename)): theme = THEME
 	w = MessageDialog(xmlFilename ,path,theme,caption=caption,text=text,error=error,success=success,scroll=scroll)
-	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+	if util.getSetting('video_pause_on_dialog',True): util.PLAYER.pauseStack()
 	w.doModal()
 	del w
-	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+	if util.getSetting('video_pause_on_dialog',True): util.PLAYER.resumeStack()
 
 def showMessageSilent(caption,text,text2='',text3='',error=False,success=None,scroll=False): pass
 
@@ -175,12 +175,12 @@ def showHelp(helptype):
 		if h['id'] == 'sep':
 			dialog.addSep()
 		else:
-			dialog.addItem(h['id'],h['name'],'forum-browser-info.png',h['help'])
+			dialog.addItem(h['id'],h['name'],'../../Default/media/forum-browser-info.png',h['help'])
 	result = dialog.getResult()
 	if result == 'changelog':
 		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 		changelogPath = os.path.join(addonPath,'changelog.txt')
-		showText('Changelog',open(changelogPath,'r').read())
+		showText('Changelog',open(changelogPath,'r').read().replace('\t','    '))
 
 def showInfo(infotype):
 	infotype += '.info'
@@ -590,15 +590,15 @@ class ChoiceMenu():
 	def getResult(self,close_on_context=True,xml_file=None):
 		self.closeContext = close_on_context
 		self.hideSplash()
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.pauseStack()
 		idx = self.getChoiceIndex(xml_file)
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.resumeStack()
 		if idx < 0: return None
 		if self.items[idx]['disabled']: return None
 		return self.items[idx]['id']
 
 def dialogSelect(heading,ilist,autoclose=0):
-	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+	if util.getSetting('video_pause_on_dialog',True): util.PLAYER.pauseStack()
 	c = ChoiceMenu(heading)
 	i=0
 	for disp in ilist:
@@ -606,7 +606,7 @@ def dialogSelect(heading,ilist,autoclose=0):
 		i+=1
 	result = c.getResult()
 	#result =  xbmcgui.Dialog().select(heading,ilist,autoclose)
-	if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+	if util.getSetting('video_pause_on_dialog',True): util.PLAYER.resumeStack()
 	return result
 	
 class SmiliesDialog(BaseDialog):
@@ -701,9 +701,9 @@ class SmiliesChoiceMenu(ChoiceMenu):
 class OptionsChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-options-dialog.xml',select=None,close_on_context=True):
 		self.closeContext = close_on_context
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select)
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None
@@ -712,9 +712,9 @@ class OptionsChoiceMenu(ChoiceMenu):
 		
 class ImageChoiceMenu(ChoiceMenu):
 	def getResult(self,windowFile='script-forumbrowser-image-dialog.xml',select=None,filtering=False,keep_colors=False,selectFirstOnBack=False):
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.pauseStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.pauseStack()
 		w = openWindow(ImageChoiceDialog,windowFile ,return_window=True,theme='Default',menu=self,items=self.items,caption=self.caption,select=select,filtering=filtering,keep_colors=keep_colors,selectFirstOnBack=selectFirstOnBack)
-		if util.getSetting('video_pause_on_dialog',True): sys.modules["__main__"].PLAYER.resumeStack()
+		if util.getSetting('video_pause_on_dialog',True): util.PLAYER.resumeStack()
 		result = w.result
 		del w
 		if result == None: return None

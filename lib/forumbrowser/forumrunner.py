@@ -4,7 +4,7 @@ from texttransform import BBMessageConverter
 from lib.util import LOG, ERROR
 from lib import util
 
-DEBUG = sys.modules["__main__"].DEBUG
+DEBUG = util.DEBUG
 
 def testForum(forum):
 	urls = forumbrowser.getForumTestUrls(forum, 'forumrunner/request.php')
@@ -243,7 +243,7 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 	def __init__(self,forum,always_login=False):
 		forumbrowser.ForumBrowser.__init__(self, forum, always_login,BBMessageConverter)
 		self.forum = forum[3:]
-		self.T = sys.modules["__main__"].T
+		self.T = util.T
 		self.online = {}
 		self.lastOnlineCheck = 0
 		self.version = {}
@@ -325,9 +325,9 @@ class ForumrunnerForumBrowser(forumbrowser.ForumBrowser):
 		
 	def loadForumFile(self):
 		forum = self.getForumID()
-		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)
+		fname = os.path.join(util.FORUMS_PATH,forum)
 		if not os.path.exists(fname):
-			fname = os.path.join(sys.modules["__main__"].FORUMS_STATIC_PATH,forum)
+			fname = os.path.join(util.FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
 		self.loadForumData(fname)
 		self._url = self.urls.get('forumrunner_server','')

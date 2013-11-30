@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 
-from lib.util import LOG, ERROR, getSetting
+from lib.util import LOG, ERROR, DEBUG, getSetting
 from lib import util
 from lib import asyncconnections
 asyncconnections.LOG = LOG
@@ -9,11 +9,9 @@ import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser
 from forumbrowser import FBData
-from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode
+from texttransform import BBMessageConverter, convertHTMLCodes, makeUnicode, messageToText
 
 #import xbmc #@UnresolvedImport
-
-DEBUG = sys.modules["__main__"].DEBUG
 
 def checkVersion(version1, version2):
 	def normalize(v):
@@ -555,7 +553,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return makeUnicode(self.message) + makeUnicode(sig)
 	
 	def messageAsText(self):
-		return sys.modules["__main__"].messageToText(self.getMessage(True))
+		return messageToText(self.getMessage(True))
 		
 	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if short:
@@ -740,9 +738,9 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	
 	def loadForumFile(self):
 		forum = self.getForumID()
-		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)
+		fname = os.path.join(util.FORUMS_PATH,forum)
 		if not os.path.exists(fname):
-			fname = os.path.join(sys.modules["__main__"].FORUMS_STATIC_PATH,forum)
+			fname = os.path.join(util.FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
 		self.loadForumData(fname)
 		self._url = self.urls.get('tapatalk_server','')

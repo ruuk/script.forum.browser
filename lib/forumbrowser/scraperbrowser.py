@@ -1,7 +1,8 @@
 import sys, re, time, os, urllib2
 import forumbrowser, texttransform
 from forumbrowser import FBData
-from lib.util import LOG, ERROR, __addon__, T
+from lib.util import LOG, ERROR, DEBUG, T, FORUMS_STATIC_PATH, CACHE_PATH
+from lib import util, dialogs
 from lib import asyncconnections
 
 import locale
@@ -9,8 +10,6 @@ loc = locale.getdefaultlocale()
 print loc
 ENCODING = loc[1] or 'utf-8'
 
-DEBUG = sys.modules["__main__"].DEBUG
-FORUMS_STATIC_PATH = sys.modules["__main__"].FORUMS_STATIC_PATH
 
 ######################################################################################
 # Forum Browser Classes
@@ -454,7 +453,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			_urllib2_fork.HTTPHandler.http_open = http_open
 			from webviewer import mechanize #@UnresolvedImport
 			import xbmc
-			cookiesPath = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'cache','cookies')
+			cookiesPath = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('profile')),'cache','cookies')
 			LOG('Cookies will be saved to: ' + cookiesPath)
 			cookies = mechanize.LWPCookieJar(cookiesPath)
 			if os.path.exists(cookiesPath): cookies.load()
@@ -487,7 +486,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				if sec: c.value = sec
 			
 	def doCaptcha(self,url):
-		cachePath = sys.modules["__main__"].CACHE_PATH
+		cachePath = CACHE_PATH
 		captchaPath = os.path.join(cachePath,'captcha'+str(time.time()))
 		open(captchaPath,'w').write(self.browser.open_novisit(url).read())
 		url = captchaPath
@@ -503,11 +502,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			def update(self,url):
 				self.getControl(100).setImage(url)
 				
-		w = CaptchaWindow('script-forumbrowser-captcha.xml',xbmc.translatePath(__addon__.getAddonInfo('path')),'Default','720p',url=url)
+		w = CaptchaWindow('script-forumbrowser-captcha.xml',xbmc.translatePath(util.__addon__.getAddonInfo('path')),'Default','720p',url=url)
 		w.show()
 		w.update(url)
 		try:
-			return sys.modules["__main__"].doModKeyboard('Enter security code')
+			return dialogs.doKeyboard('Enter security code')
 		finally:
 			os.remove(captchaPath)
 			w.close()

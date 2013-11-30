@@ -10,9 +10,9 @@
 	<controls>
 		<control type="image">
 			<posx>8</posx>
-			<posy>45</posy>
+			<posy>8</posy>
 			<width>294</width>
-			<height>262</height>
+			<height>299</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
 			<colordiffuse>FF808080</colordiffuse>
 		</control>
@@ -23,7 +23,7 @@
 			<width>290</width>
 			<height>80</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
-			<colordiffuse>FFAAAAAA</colordiffuse>
+			<colordiffuse>FF333333</colordiffuse>
 		</control>
 		<control type="label">
 			<posx>20</posx>
@@ -32,7 +32,7 @@
 			<height>30</height>
 			<font>ForumBrowser-font13</font>
 			<aligny>center</aligny>
-			<textcolor>FF000000</textcolor>
+			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
 			<label>[B]$INFO[Window.Property(caption)][/B]</label>
 		</control>
@@ -48,10 +48,10 @@
 		
 		<control type="group" id="119">
 			<control type='list' id="111">
-				<posx>20</posx>
-				<posy>50</posy>
-				<width>270</width>
-				<height>252</height>
+				<posx>10</posx>
+				<posy>47</posy>
+				<width>290</width>
+				<height>258</height>
 				<scrolltime>200</scrolltime>
 				<itemlayout height="38">
 					<control type="image">
@@ -64,7 +64,7 @@
 					<control type="label">
 						<posx>60</posx>
 						<posy>12</posy>
-						<width>200</width>
+						<width>230</width>
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>
@@ -77,7 +77,7 @@
 					<control type="image">
 						<posx>0</posx>
 						<posy>8</posy>
-						<width>270</width>
+						<width>290</width>
 						<height>38</height>
 						<texture>forum-browser-sequel-white_square.png</texture>
 						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
@@ -85,7 +85,7 @@
 					<control type="label">
 						<posx>60</posx>
 						<posy>12</posy>
-						<width>200</width>
+						<width>230</width>
 						<height>30</height>
 						<font>ForumBrowser-font13</font>
 						<aligny>center</aligny>

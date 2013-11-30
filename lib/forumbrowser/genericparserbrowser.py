@@ -56,9 +56,9 @@ class GenericParserForumBrowser(scraperbrowser.ScraperForumBrowser):
 								'color_start':'\[color=?["\']?#?(?P<color>\w+)["\']?\](?i)'})
 						
 		forum = self.getForumID()
-		fname = os.path.join(sys.modules["__main__"].FORUMS_PATH,forum)
+		fname = os.path.join(util.FORUMS_PATH,forum)
 		if not os.path.exists(fname):
-			fname = os.path.join(sys.modules["__main__"].FORUMS_STATIC_PATH,forum)
+			fname = os.path.join(util.FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
 		self.loadForumData(fname)
 		self._url = self.urls.get('server',self._url)

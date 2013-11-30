@@ -92,7 +92,7 @@
 			</control>
 		</control>
 		<control type="group">
-			<visible allowhiddenfocus="true">ControlGroup(260).HasFocus(0)</visible>
+			<visible allowhiddenfocus="true">ControlGroup(260).HasFocus(0) + !StringCompare(Window.Property(inactive),1)</visible>
 			<animation effect="slide" end="600,0" time="200" condition="ControlGroup(260).HasFocus(0)">Conditional</animation>
 			<posx>-600</posx>
 			<posy>0</posy>

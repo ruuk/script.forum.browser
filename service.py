@@ -16,14 +16,13 @@ def ERROR(txt):
 	
 def LOG(txt): pass
 
+util.LOG = LOG
+
 FB = None
-import default
 from lib.util import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
-from default import getForumBrowser, listForumSettings, forumsManager, getNotifyList #@UnusedImport
+from main import getForumBrowser, listForumSettings, forumsManager, getNotifyList #@UnusedImport
 from webviewer import video #@UnresolvedImport
 
-default.LOG = LOG
-default.tapatalk.LOG = LOG
 
 ADDONID = util.__addon__.getAddonInfo('id')
 
