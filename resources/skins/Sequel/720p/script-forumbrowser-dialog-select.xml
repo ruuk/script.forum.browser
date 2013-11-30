@@ -1,0 +1,102 @@
+<window>
+	<defaultcontrol always="true">112</defaultcontrol>
+	<animation effect="slide" end="640,0" time="200">WindowOpen</animation>
+	<animation effect="slide" start="640,0" end="0,0" time="200">WindowClose</animation>
+	<zorder>1</zorder>
+	<type>dialog</type>
+	<coordinates>
+		<system>1</system>
+		<posx>-640</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>640</width>
+			<height>720</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>EE606060</colordiffuse>
+		</control>
+		<control type="image">
+			<posx>-14</posx>
+			<posy>0</posy>
+			<width>700</width>
+			<height>720</height>
+			<texture border="5,5,51,5">forum-browser-sequel-left_menu_bg.png</texture>
+		</control>
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>640</width>
+			<height>50</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>99000000</colordiffuse>
+		</control>
+		<control type="label">
+			<posx>0</posx>
+			<posy>15</posy>
+			<width>640</width>
+			<height>20</height>
+			<font>ForumBrowser-font13</font>
+			<aligny>center</aligny>
+			<textcolor>FFFFFFFF</textcolor>
+			<align>center</align>
+			<label>[B]$INFO[Window.Property(caption)][/B]</label>
+		</control>
+		<control type="button" id="200">
+			<posx>-20</posx>
+			<posy>-20</posy>
+			<width>10</width>
+			<height>10</height>
+			<onfocus>PreviousMenu</onfocus>
+		</control>
+		<control type="group" id="112">
+			<defaultcontrol>111</defaultcontrol>
+			<control type="list" id="111">
+				<posx>0</posx>
+				<posy>50</posy>
+				<width>640</width>
+				<height>670</height>
+				<scrolltime>200</scrolltime>
+				<onleft>200</onleft>
+				<onright>200</onright>
+				<itemlayout height="38">
+					<control type="label">
+						<posx>20</posx>
+						<posy>4</posy>
+						<width>600</width>
+						<height>30</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFFFFFFF</textcolor>
+						<align>left</align>
+						<info>ListItem.Label</info>
+					</control>
+				</itemlayout>
+				<focusedlayout height="38">
+					<control type="image">
+						<posx>0</posx>
+						<posy>-1</posy>
+						<width>640</width>
+						<height>40</height>
+						<texture>forum-browser-sequel-white_square.png</texture>
+						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					</control>
+					<control type="label">
+						<posx>20</posx>
+						<posy>4</posy>
+						<width>600</width>
+						<height>30</height>
+						<font>ForumBrowser-font13</font>
+						<aligny>center</aligny>
+						<textcolor>FFFFFFFF</textcolor>
+						<align>left</align>
+						<info>ListItem.Label</info>
+					</control>
+				</focusedlayout>
+			</control>
+		</control>
+	</controls>
+</window>

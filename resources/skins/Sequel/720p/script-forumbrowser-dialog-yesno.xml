@@ -1,7 +1,7 @@
 <window>
 	<defaultcontrol>112</defaultcontrol>
-	<animation effect="slide" end="0,360" time="360">WindowOpen</animation>
-	<animation effect="slide" start="0,360" end="0,0" time="360">WindowClose</animation>
+	<animation effect="slide" end="0,360" time="200">WindowOpen</animation>
+	<animation effect="slide" start="0,360" end="0,0" time="200">WindowClose</animation>
 	<zorder>2</zorder>
 	<coordinates>
 		<system>1</system>

@@ -51,6 +51,11 @@ Sequel Skin:
 	Added Forum Settings skin
 	Added Message Dialog skin
 	Added Yes/No Dialog skin
+	Added Select Dialog skin
+	Added Small Select Dialog skin
+	
+When posting new/edited posts/messages, the splash now closes before displaying the notification dialog
+Fixed an issue when opening a post bookmark where closing the post view would result in it automatically re-opening
 
 *** 2.1.39 ***
 
@@ -114,7 +119,7 @@ Theme colors now carried through to threads/subscriptions window
 
 Added a Settings:General option 'Don't Ask For Image Filename When Saving'
 Fix for XBMC skins button offset messing with Forum Browser skins
-Fix for inital source when selecting a new path when saving an image
+Fix for initial source when selecting a new path when saving an image
 
 *** 2.1.29 ***
 

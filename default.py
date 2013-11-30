@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os, sys, xbmc
-import codecs
 
 if __name__ == '__main__':
 	if sys.argv[-1].startswith('settingshelp_') or sys.argv[-1] == 'smilies':
@@ -21,7 +20,7 @@ if __name__ == '__main__':
 		util.setRefreshXBMCSkin()
 		sys.exit()
 		
-import urllib2, re, time, urlparse, binascii, math, textwrap
+import urllib2, re, time, urlparse, binascii, math, textwrap, codecs
 import xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 from lib import util, signals, asyncconnections  # @Reimport
@@ -904,17 +903,21 @@ class PostDialog(windows.BaseWindow):
 			if self.post.isPM:
 				if not FB.doPrivateMessage(self.post,callback=splash.update):
 					self.posted = False
+					splash.close()
 					dialogs.showMessage(T(32050),T(32246),' ',self.post.error or '?',success=False)
 					return
 			else:
 				if not FB.post(self.post,callback=splash.update):
 					self.posted = False
+					splash.close()
 					dialogs.showMessage(T(32050),T(32227),' ',self.post.error or '?',success=False)
 					return
+			splash.close()
 			dialogs.showMessage(T(32304),self.post.isPM and T(32305) or T(32306),' ',str(self.post.successMessage),success=True)
 		except:
 			self.posted = False
 			err = ERROR('Error creating post')
+			splash.close()
 			dialogs.showMessage(T(32050),T(32307),err,error=True)
 			PostDialog.failedPM = self.post
 		finally:
@@ -1647,6 +1650,7 @@ class RepliesWindow(windows.PageWindow):
 		self.stayAtTop = False
 		self.currentPMBox = {}
 		self.timeOffset = 0
+		self._doingMenu = False
 		timeOffset = util.getForumSetting(FB.getForumID(),'time_offset_hours','').replace(':','')
 		if timeOffset:
 			negative = timeOffset.startswith('-') and -1 or 1
@@ -1672,6 +1676,7 @@ class RepliesWindow(windows.PageWindow):
 		self.setTheme()
 		self.setPostButton()
 		self.showThread()
+		self.forumElements = None
 		#self.setFocusId(120)
 				
 	def setPostButton(self):
@@ -2034,6 +2039,13 @@ class RepliesWindow(windows.PageWindow):
 		self.fillRepliesList()
 		
 	def doMenu(self):
+		#Otherwise you can open on top of itself
+		if self._doingMenu:return
+		self._doingMenu = True
+		self.reallyDoMenu()
+		self._doingMenu = False
+		
+	def reallyDoMenu(self):
 		item = self.getControl(120).getSelectedItem()
 		d = dialogs.ChoiceMenu(T(32051),with_splash=True)
 		post = None
