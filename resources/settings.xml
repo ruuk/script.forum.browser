@@ -47,7 +47,7 @@
   </category>
   <category label="32022">
     <setting id="hide_pnp" type="bool" label="32035" default="false" />
-    <setting id="slide_up_on_video" type="bool" label="32578" default="false" />
+    <setting id="slide_up_on_video" type="bool" label="32578" default="false" enable="eq(-1,false)"/>
     <setting id="video_pause_on_dialog" type="bool" label="32034" default="false" />
     <setting id="video_ask_interrupt" type="bool" label="32032" default="true" />
     <setting id="video_return_interrupt" type="bool" label="32033" default="true" />

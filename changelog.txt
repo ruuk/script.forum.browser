@@ -45,6 +45,13 @@ KNOWN ISSUES:
 
 Current Version : 2.1.39
 
+*** 2.1.40 ***
+
+Sequel Skin:
+	Added Forum Settings skin
+	Added Message Dialog skin
+	Added Yes/No Dialog skin
+
 *** 2.1.39 ***
 
 Sequel Skin:

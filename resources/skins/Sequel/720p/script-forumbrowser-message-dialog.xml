@@ -1,0 +1,171 @@
+<window>
+	<defaultcontrol>112</defaultcontrol>
+	<animation effect="slide" end="0,360" time="360">WindowOpen</animation>
+	<animation effect="slide" start="0,360" end="0,0" time="360">WindowClose</animation>
+	<zorder>2</zorder>
+	<coordinates>
+		<system>1</system>
+		<posx>0</posx>
+		<posy>-360</posy>
+	</coordinates>
+	<controls>
+		<control type="group">
+			<posx>0</posx>
+			<posy>0</posy>
+			<control type="image">
+				<description>Large Back</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>1280</width>
+				<height>360</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>EEFFFFFF</colordiffuse>
+			</control>
+			<control type="group">
+				<posx>0</posx>
+				<posy>0</posy>
+				<control type="image">
+					<description>Large Back</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>45</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF606060</colordiffuse>
+				</control>
+				<control type="image">
+					<description>Large Back</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>45</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FFFF0000</colordiffuse>
+					<visible>StringCompare(Window.Property(error),error)</visible>
+				</control>
+				<control type="image">
+					<description>Large Back</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>45</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FFFFFF00</colordiffuse>
+					<visible>StringCompare(Window.Property(error),warning)</visible>
+				</control>
+				<control type="image">
+					<description>Large Back</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>45</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF00FF00</colordiffuse>
+					<visible>StringCompare(Window.Property(error),success)</visible>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>-46</posy>
+					<width>1280</width>
+					<height>91</height>
+					<texture border="5,51,5,5">forum-browser-sequel-menu_bg.png</texture>
+				</control>
+			</control>
+			<control type="label">
+				<description>Caption</description>
+				<posx>0</posx>
+				<posy>10</posy>
+				<width>1280</width>
+				<height>30</height>
+				<font>ForumBrowser-font13</font>
+				<textcolor>FFFFFFFF</textcolor>
+				<aligny>center</aligny>
+				<align>center</align>
+				<label>$INFO[Window.Property(caption)]</label>
+			</control>
+			<control type="textbox">
+				<posx>20</posx>
+				<posy>45</posy>
+				<width>1240</width>
+				<height>285</height>
+				<colordiffuse>FFFFFFFF</colordiffuse>
+				<font>ForumBrowser-font13</font>
+				<scroll>true</scroll>
+				<textcolor>FF000000</textcolor>
+				<visible>true</visible>
+				<pagecontrol>123</pagecontrol>
+				<label>$INFO[Window.Property(message)]</label>
+			</control>
+			
+			<control type="image">
+				<posx>0</posx>
+				<posy>330</posy>
+				<width>1280</width>
+				<height>30</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>BB000000</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>0</posx>
+				<posy>298</posy>
+				<width>1280</width>
+				<height>62</height>
+				<texture>forum-browser-sequel-menu_bg.png</texture>
+			</control>
+			
+			<control type="group" id="112">
+				<control type="image">
+					<posx>540</posx>
+					<posy>330</posy>
+					<width>10</width>
+					<height>28</height>
+					<texture border="3">forum-browser-sequel-vertical_beveled_line.png</texture>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<visible>StringCompare(Window.Property(hidebutton),)</visible>
+				</control>
+				<control type="button" id="111">
+					<textoffsetx>0</textoffsetx>
+					<description>Ok Button</description>
+					<posx>550</posx>
+					<posy>331</posy>
+					<width>180</width>
+					<height>28</height>
+					<onleft>123</onleft>
+					<onright>123</onright>
+					<onup>123</onup>
+					<ondown>123</ondown>
+					<visible>StringCompare(Window.Property(hidebutton),)</visible>
+					<font>font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32913]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+					<onclick>PreviousMenu</onclick>
+				</control>
+				<control type="scrollbar" id="123">
+					<description>Message Scrollbar</description>
+					<posx>1276</posx>
+					<posy>45</posy>
+					<width>4</width>
+					<height>285</height>
+					<onleft>111</onleft>
+					<onright>111</onright>
+					<onup>123</onup>
+					<ondown>123</ondown>
+					<texturesliderbackground>-</texturesliderbackground>
+					<texturesliderbar>forum-browser-panel-full.png</texturesliderbar>
+					<texturesliderbarfocus>forum-browser-black-square.png</texturesliderbarfocus>
+					<textureslidernib>-</textureslidernib>
+					<textureslidernibfocus>-</textureslidernibfocus>
+					<orientation>vertical</orientation>
+					<showonepage>false</showonepage>
+					<colordiffuse>FF555555</colordiffuse>
+				</control>
+			</control>
+		</control>
+	</controls>
+</window>

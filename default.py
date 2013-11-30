@@ -244,7 +244,7 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		self.header = header
 		
 	def onInit(self):
-		self.getControl(250).setLabel('[B]%s[/B]' % self.header)
+		self.getControl(250).setLabel('%s' % self.header)
 		self.fillList()
 		self.setFocusId(320)
 		
