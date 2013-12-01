@@ -52,7 +52,7 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	if os.path.exists(src):
 		theme = THEME
 	elif not os.path.exists(src2):
-		theme = 'Default'
+		theme = 'Sequel'
 		res = '720p'
 	rightAlign = util.getSetting('current_right_align',False)
 	
@@ -837,10 +837,12 @@ class Slider:
 	
 class AlphaColorDialog(BaseDialog):
 	def __init__( self, *args, **kwargs ):
+		BaseDialog.__init__(self)
 		self.hex = kwargs.get('start_color','FF808080') or 'FF808080'
 		self.defaultColor = kwargs.get('default_color','802080FF') or '802080FF'
 		self.previewImage = kwargs.get('preview_image','')
-		self.fade = kwargs.get('fade') or 'A0000000'
+		self.fade = kwargs.get('fade') or 'A0'
+		self.mode = kwargs.get('mode') or 0
 		self.startColor = self.hex
 		self.rSlider = None
 		self.gSlider = None
@@ -875,21 +877,40 @@ class AlphaColorDialog(BaseDialog):
 		self.previewBack = self.getControl(103)
 		self.backFadeLight = self.getControl(104)
 		self.backFadeDark = self.getControl(105)
-		if self.previewImage: self.previewBack.setImage(self.previewImage)
+		if self.previewImage: self.setProperty('preview_image',self.previewImage)
 		self.backFadeLight.setColorDiffuse(self.fade + 'FFFFFF')
 		self.backFadeDark.setColorDiffuse(self.fade + '000000')
-		
+		self.setMode()
 		self.updatePreview()
+		
+	def setMode(self):
+		self.setProperty('mode',str(self.mode))
+		if self.mode == 1:
+			self.setProperty('default_button',util.T(32942))
+		else:
+			self.setProperty('default_button',util.T(32563))
+
 		
 	def onClick(self,controlID):
 		if controlID == 101:
 			self.askHexColor()
 		elif controlID == 110:
-			self.updateColors(self.defaultColor)
+			if self.mode == 1:
+				self.autoColor()
+			else:
+				self.updateColors(self.defaultColor)
 			self.updatePreview()
 		elif controlID == 111:
 			self.updateColors(self.startColor)
 			self.updatePreview()
+		elif controlID > 120 and controlID < 127:
+			self.setPrimaryColor(controlID)
+			
+	def setPrimaryColor(self,controlID):
+		idx = controlID - 121
+		color = ('FF000000','FF7F7F7F','FFFFFFFF','FFFF0000','FF00FF00','FF0000FF')[idx]
+		self.updateColors(color)
+		self.updatePreview() 
 			
 	def onAction(self,action):
 		try:
@@ -1014,6 +1035,23 @@ class AlphaColorDialog(BaseDialog):
 		self.updateColors(hexc)
 		self.updatePreview()
 		
+	def autoColor(self):
+		if not self.previewImage: return
+		import urllib2
+		#print self.previewImage
+		if os.path.exists(self.previewImage):
+			tmp_file = self.image
+		else:
+			tmp_file = os.path.join(util.CACHE_PATH,'temp_logo')
+			try:
+				open(tmp_file,'wb').write(urllib2.urlopen(self.previewImage).read())
+			except:
+				util.ERROR('autoColor(): Failed to get image')
+				return
+		rgb = util.getImageBackgroundColor(tmp_file)
+		os.remove(tmp_file)
+		if not rgb: return
+		self.updateColors(self.hexFromRGB(*rgb))
 		
 	def updatePreview(self,currentID=None):
 		self.updateFades(currentID)
@@ -1026,12 +1064,14 @@ class AlphaColorDialog(BaseDialog):
 		self.colorBox.setColorDiffuse(opaque)
 		self.preview.setColorDiffuse(self.hex)
 		self.hexButton.setLabel(self.hex)
+		self.setProperty('opaque',opaque)
 		
-def showSelectionColorDialog(start_color=None,preview_image=None,fade=None):
-	w = openWindow(AlphaColorDialog,'script-forumbrowser-alpha-color-dialog.xml',modal=False,return_window=True,start_color=start_color,preview_image=preview_image,fade=fade)
+def showSelectionColorDialog(start_color=None,preview_image=None,fade=None,mode=None):
+	w = openWindow(AlphaColorDialog,'script-forumbrowser-alpha-color-dialog.xml',modal=False,return_window=True,start_color=start_color,preview_image=preview_image,fade=fade,mode=mode)
 	w.doModal()
 	hexC = w.hex
 	del w
+	if not dialogYesNo(util.T(32579),util.T(32579)): return None
 	return hexC
 	
 def getHexColor(hexc=None,hlen=6):

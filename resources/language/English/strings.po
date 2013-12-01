@@ -1998,6 +1998,10 @@ msgctxt "#32578"
 msgid "Slide Up On Video (On Suported Skins)"
 msgstr ""
 
+msgctxt "#32579"
+msgid "Use This Color?"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

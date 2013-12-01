@@ -49,12 +49,13 @@
 			<control type="group">
 				<posx>300</posx>
 				<posy>-10</posy>
+				<visible>StringCompare(Window.Property(mode),) | StringCompare(Window.Property(mode),0)</visible>
 				<control type="image" id="103">
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>384</width>
 					<height>216</height>
-					<texture>forum-browser-sequel-transparent_preview.png</texture>
+					<texture>$INFO[Window.Property(preview_image)]</texture>
 				</control>
 				<control type="image" id="104">
 					<posx>0</posx>
@@ -143,6 +144,28 @@
 					<aligny>center</aligny>
 					<align>center</align>
 					<label>$ADDON[script.forum.browser 32570]</label>
+				</control>
+			</control>
+			
+			<control type="group">
+				<posx>300</posx>
+				<posy>-10</posy>
+				<visible>StringCompare(Window.Property(mode),1)</visible>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>384</width>
+					<height>216</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>$INFO[Window.Property(opaque)]</colordiffuse>
+				</control>
+				<control type="image">
+					<posx>48</posx>
+					<posy>10</posy>
+					<width>288</width>
+					<height>196</height>
+					<texture>$INFO[Window.Property(preview_image)]</texture>
+					<aspectratio>keep</aspectratio>
 				</control>
 			</control>
 			
@@ -563,6 +586,128 @@
 					<label>$INFO[Control.GetLabel(101)]</label>
 				</control>
 			</control>
+			
+			<control type="group" id="120">
+				<defaultcontrol>124</defaultcontrol>
+				<posx>-140</posx>
+				<posy>134</posy>
+				<onright>217</onright>
+				<ondown>110</ondown>
+				<control type="button" id="121">
+					<posx>-2</posx>
+					<posy>-2</posy>
+					<width>24</width>
+					<height>24</height>
+					<ondown>124</ondown>
+					<onright>122</onright>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF000000</colordiffuse>
+				</control>
+				<control type="button" id="122">
+					<posx>22</posx>
+					<posy>-2</posy>
+					<width>24</width>
+					<height>24</height>
+					<ondown>125</ondown>
+					<onleft>121</onleft>
+					<onright>123</onright>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>24</posx>
+					<posy>0</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF7F7F7F</colordiffuse>
+				</control>
+				<control type="button" id="123">
+					<posx>46</posx>
+					<posy>-2</posy>
+					<width>24</width>
+					<height>24</height>
+					<ondown>126</ondown>
+					<onleft>122</onleft>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<colordiffuse>FFAAAAAA</colordiffuse>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>48</posx>
+					<posy>0</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FFFFFFFF</colordiffuse>
+				</control>
+				<control type="button" id="124">
+					<posx>-2</posx>
+					<posy>22</posy>
+					<width>24</width>
+					<height>24</height>
+					<onup>121</onup>
+					<onright>125</onright>
+					<ondown>110</ondown>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>0</posx>
+					<posy>24</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FFFF0000</colordiffuse>
+				</control>
+				<control type="button" id="125">
+					<posx>22</posx>
+					<posy>22</posy>
+					<width>24</width>
+					<height>24</height>
+					<onup>122</onup>
+					<onleft>124</onleft>
+					<onright>126</onright>
+					<ondown>110</ondown>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>24</posx>
+					<posy>24</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF00FF00</colordiffuse>
+				</control>
+				<control type="button" id="126">
+					<posx>46</posx>
+					<posy>22</posy>
+					<width>24</width>
+					<height>24</height>
+					<onup>123</onup>
+					<onleft>125</onleft>
+					<ondown>110</ondown>
+					<texturefocus>forum-browser-sequel-white_square.png</texturefocus>
+					<texturenofocus></texturenofocus>
+				</control>
+				<control type="image">
+					<posx>48</posx>
+					<posy>24</posy>
+					<width>20</width>
+					<height>20</height>
+					<texture>forum-browser-sequel-white_square.png</texture>
+					<colordiffuse>FF0000FF</colordiffuse>
+				</control>
+			</control>
 			<control type="group">
 				<posx>-170</posx>
 				<posy>182</posy>
@@ -571,8 +716,7 @@
 					<posy>0</posy>
 					<width>80</width>
 					<height>20</height>
-					<onup>217</onup>
-					<ondown>202</ondown>
+					<onup>120</onup>
 					<onleft>101</onleft>
 					<onright>111</onright>
 					<font>ForumBrowser-font12</font>
@@ -602,7 +746,7 @@
 					<textcolor>FFFFFFFF</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>[UPPERCASE]$ADDON[script.forum.browser 32563][/UPPERCASE]</label>
+					<label>[UPPERCASE]$INFO[Window.Property(default_button)][/UPPERCASE]</label>
 				</control>
 			</control>
 			<control type="group">
@@ -613,8 +757,7 @@
 					<posy>0</posy>
 					<width>80</width>
 					<height>20</height>
-					<onup>217</onup>
-					<ondown>202</ondown>
+					<onup>120</onup>
 					<onleft>110</onleft>
 					<onright>101</onright>
 					<font>ForumBrowser-font12</font>

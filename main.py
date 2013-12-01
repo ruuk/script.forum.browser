@@ -4256,9 +4256,15 @@ def askColor(forumID=None,color=None,logo=None):
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 	color = color or fdata.theme.get('header_color')
 	logo = logo or getCurrentLogo(forumID,fdata.urls.get('logo'))
-	w = dialogs.openWindow(dialogs.ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=logo,hexcolor=color,theme='Default')
-	hexc = w.hexValue()
-	del w
+	try:
+		hexc = dialogs.showSelectionColorDialog('FF' + color, logo, 'FF', 1)
+		if not hexc: return
+		hexc = hexc[2:]
+	except:
+		w = dialogs.openWindow(dialogs.ColorDialog,'script-forumbrowser-color-dialog.xml',return_window=True,image=logo,hexcolor=color,theme='Default')
+		hexc = w.hexValue()
+		del w
+	if not hexc: return
 	return hexc
 	
 def setForumColor(color,forumID=None):
