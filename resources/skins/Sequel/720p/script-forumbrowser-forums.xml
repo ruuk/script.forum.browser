@@ -1058,19 +1058,20 @@
 		</control>
 		<control type="image">
 			<posx>570</posx>
-			<posy>150</posy>
+			<posy>149</posy>
 			<width>10</width>
-			<height>27</height>
+			<height>28</height>
 			<texture border="3">forum-browser-sequel-vertical_beveled_line.png</texture>
+			<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 			<visible>Control.IsVisible(198)</visible>
 		</control>
 		<control type="grouplist" id="198">
 			<visible allowhiddenfocus="true">ControlGroup(198).HasFocus(0)</visible>
 			<itemgap>0</itemgap>
 			<posx>580</posx>
-			<posy>150</posy>
+			<posy>149</posy>
 			<width>710</width>
-			<height>27</height>
+			<height>28</height>
 			<onup>199</onup>
 			<ondown>120</ondown>
 			<orientation>horizontal</orientation>
@@ -1085,6 +1086,7 @@
 				<label>$ADDON[script.forum.browser 32917]</label>
 				<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 				<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 				<textcolor>FFAAAAAA</textcolor>
 				<focusedcolor>FFFFFFFF</focusedcolor>
 				<disabledcolor>44CCCCCC</disabledcolor>
@@ -1099,6 +1101,7 @@
 				<label>$ADDON[script.forum.browser 32918]</label>
 				<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 				<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 				<textcolor>FFAAAAAA</textcolor>
 				<focusedcolor>FFFFFFFF</focusedcolor>
 				<disabledcolor>44CCCCCC</disabledcolor>
@@ -1113,6 +1116,7 @@
 				<label>$ADDON[script.forum.browser 32919]</label>
 				<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
 				<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+				<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 				<textcolor>FFAAAAAA</textcolor>
 				<focusedcolor>FFFFFFFF</focusedcolor>
 				<disabledcolor>44CCCCCC</disabledcolor>

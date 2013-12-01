@@ -43,7 +43,7 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.39
+Current Version : 2.1.40
 
 *** 2.1.40 ***
 
@@ -59,6 +59,8 @@ Sequel Skin:
 	Added Splash Dialog skin
 	Added Options Dialog skin
 	Added Text Dialog skin
+	Added Notifications (normal and small) skins
+	Fixed the menu selection colors for the search buttons
 	
 When posting new/edited posts/messages, the splash now closes before displaying the notification dialog
 Fixed an issue when opening a post bookmark where closing the post view would result in it automatically re-opening

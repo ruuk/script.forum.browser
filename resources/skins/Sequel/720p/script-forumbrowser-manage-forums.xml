@@ -790,15 +790,6 @@
 							<info>ListItem.Property(unread_pms)</info>
 							<visible>StringCompare(ListItem.Property(new_PMs),newpms)</visible>
 						</control>
-							
-						<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>620</width>
-							<height>38</height>
-							<texture>forum-browser-black-outline.png</texture>
-							<visible>ControlGroup(301).HasFocus(0)</visible>
-						</control>
 						<control type="group">
 							<posx>25</posx>
 							<posy>7</posy>
