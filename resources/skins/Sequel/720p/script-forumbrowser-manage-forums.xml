@@ -402,7 +402,7 @@
 				<posy>-28</posy>
 				<width>24</width>
 				<height>24</height>
-				<texture flipy="true">../../Default/media/forum-browser-info.png</texture>
+				<texture flipy="true">../../../media/forum-browser-info.png</texture>
 				<colordiffuse>FF001100</colordiffuse>
 			</control>
 			<control type="image" id="254">
@@ -410,7 +410,7 @@
 				<posy>-28</posy>
 				<width>24</width>
 				<height>24</height>
-				<texture flipy="true">../../Default/media/forum-browser-info.png</texture>
+				<texture flipy="true">../../../media/forum-browser-info.png</texture>
 				<colordiffuse>FFFF0000</colordiffuse>
 				<visible>StringCompare(Window.Property(PulseNotify),1)</visible>
 				<animation effect="fade" start="0" end="100" time="1000" pulse="true" condition="StringCompare(Window.Property(PulseNotify),1)">Conditional</animation>
@@ -555,31 +555,31 @@
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+								<texture>../../../media/forum-browser-tapatalk.png</texture>
 								<visible>StringCompare(ListItem.Property(type),TT)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+								<texture>../../../media/forum-browser-forumrunner.png</texture>
 								<visible>StringCompare(ListItem.Property(type),FR)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-logo-128.png</texture>
+								<texture>../../../media/forum-browser-logo-128.png</texture>
 								<visible>StringCompare(ListItem.Property(type),GB)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-proboards.png</texture>
+								<texture>../../../media/forum-browser-proboards.png</texture>
 								<visible>StringCompare(ListItem.Property(type),PB)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-yuku.png</texture>
+								<texture>../../../media/forum-browser-yuku.png</texture>
 								<visible>StringCompare(ListItem.Property(type),YK)</visible>
 							</control>
 						</control>
@@ -796,31 +796,31 @@
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+								<texture>../../../media/forum-browser-tapatalk.png</texture>
 								<visible>StringCompare(ListItem.Property(type),TT)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+								<texture>../../../media/forum-browser-forumrunner.png</texture>
 								<visible>StringCompare(ListItem.Property(type),FR)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-logo-128.png</texture>
+								<texture>../../../media/forum-browser-logo-128.png</texture>
 								<visible>StringCompare(ListItem.Property(type),GB)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-proboards.png</texture>
+								<texture>../../../media/forum-browser-proboards.png</texture>
 								<visible>StringCompare(ListItem.Property(type),PB)</visible>
 							</control>
 							<control type="image">
 								<width>24</width>
 								<height>24</height>
-								<texture>../../Default/media/forum-browser-yuku.png</texture>
+								<texture>../../../media/forum-browser-yuku.png</texture>
 								<visible>StringCompare(ListItem.Property(type),YK)</visible>
 							</control>
 						</control>

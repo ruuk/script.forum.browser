@@ -44,7 +44,7 @@
 				<posy>-10</posy>
 				<width>148</width>
 				<height>148</height>
-				<texture>../../Default/media/forum-browser-loading-bg.png</texture>
+				<texture>../../../media/forum-browser-loading-bg.png</texture>
 			</control>
 			<control type="image">
 				<description>Loading</description>
@@ -52,7 +52,7 @@
 				<posy>4</posy>
 				<width>120</width>
 				<height>120</height>
-				<texture>../../Default/media/forum-browser-loading.gif</texture>
+				<texture>../../../media/forum-browser-loading.gif</texture>
 			</control>
 		</control>
 	</controls>

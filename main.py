@@ -262,7 +262,9 @@ class ForumSettingsDialog(windows.BaseWindowDialog):
 		item.setProperty('value',str(value))
 		item.setProperty('id',sid)
 		if vtype == 'text.long':
-			item.setProperty('help', u'{0}[CR][COLOR FF999999]{1}[/COLOR][CR][B]Current:[/B][CR][CR]{2}'.format(self.help.get(sid,''),self.helpSep,texttransform.convertHTMLCodes(valueDisplay)))
+			item.setProperty('help', u'{0}[CR][COLOR FF999999]{1}[/COLOR][CR][B]Current:[/B][CR][CR]{2}'.format(self.help.get(sid,''),
+																											self.helpSep,
+																											texttransform.convertHTMLCodes(valueDisplay).decode('utf-8')))
 		else:
 			item.setProperty('help',self.help.get(sid,''))
 		self.items.append(item)
@@ -1233,11 +1235,11 @@ class MessageWindow(windows.BaseWindow):
 				elif link.textIsImage():
 					item.setIconImage(link.text)
 				elif link.isPost():
-					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-post.png'))
+					item.setIconImage('../../../media/forum-browser-post.png')
 				elif link.isThread():
-					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-thread.png'))
+					item.setIconImage('../../../media/forum-browser-thread.png')
 				else:
-					item.setIconImage(os.path.join(MEDIA_PATH,'forum-browser-link.png'))
+					item.setIconImage('../../../media/forum-browser-link.png')
 				self.hasLinks = True
 				ulist.addItem(item)
 				
@@ -1794,7 +1796,7 @@ class RepliesWindow(windows.PageWindow):
 	
 	def updateItem(self,item,post):
 		alt = self.getUserInfoAttributes()
-		defAvatar = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins','Default','media','forum-browser-avatar-none.png'))
+		defAvatar = '../../../media/forum-browser-avatar-none.png'
 		webvid = video.WebVideo()
 		showIndicators = getSetting('show_media_indicators',True)
 		countLinkImages = getSetting('smi_count_link_images',False)
@@ -1887,7 +1889,7 @@ class RepliesWindow(windows.PageWindow):
 			return
 		
 		self.empty = False
-		defAvatar = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('path'),'resources','skins','Default','media','forum-browser-avatar-none.png'))
+		defAvatar = '../../../media/forum-browser-avatar-none.png'
 		#xbmcgui.lock()
 		try:
 			self.getControl(120).reset()
@@ -2975,10 +2977,9 @@ class ForumsWindow(windows.BaseWindow):
 					LOG('ERROR: Could not save logo for: ' + FB.getForumID())
 		if logo: self.getControl(250).setImage(logo)
 		if 'ForumBrowser' in FB.browserType:
-			image = 'forum-browser-logo-128.png'
+			image = '../../../media/forum-browser-logo-128.png'
 		else:
-			image = 'forum-browser-%s.png' % FB.browserType or ''
-		image = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('path')),'resources','skins','Default','media',image)
+			image = '../../../media/forum-browser-%s.png' % FB.browserType or ''
 		self.getControl(249).setImage(image)
 			
 	def setPMCounts(self,pm_counts=False):
@@ -3055,7 +3056,7 @@ class ForumsWindow(windows.BaseWindow):
 		d = dialogs.OptionsChoiceMenu(T(32358))
 		d.setContextCallback(self.showOnlineContext)
 		for u in users:
-			d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or '../../Default/media/forum-browser-avatar-none.png',u.get('status'))
+			d.addItem(u.get('userid'),u.get('user'),u.get('avatar') or '../../../media/forum-browser-avatar-none.png',u.get('status'))
 		d.getResult(close_on_context=False)
 		
 	def showOnlineContext(self,menu,item):
@@ -3928,12 +3929,12 @@ def addForum(current=False):
 	while source:
 		d = dialogs.OptionsChoiceMenu('Choose Database')
 		hlp = dialogs.loadHelp('forumdatabases.help')
-		d.addItem('fb', 'Forum Browser {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-logo-128.png'),hlp.get('fb',''))
-		d.addItem('tt', 'Tapatalk {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-tapatalk.png'),hlp.get('tt',''))
-		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-forumrunner.png'),hlp.get('fr',''))
-		d.addItem('pb', 'ProBoards {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-proboards.png'),hlp.get('pb',''))
-		d.addItem('yk', 'Yuku {0}'.format(T(32558)), os.path.join(util.MEDIA_PATH,'forum-browser-yuku.png'),hlp.get('yk',''))
-		d.addItem('manual', T(32559), os.path.join(util.MEDIA_PATH,'forum-browser-plus.png'),hlp.get('manual',''))
+		d.addItem('fb', 'Forum Browser {0}'.format(T(32558)), '../../../media/forum-browser-logo-128.png',hlp.get('fb',''))
+		d.addItem('tt', 'Tapatalk {0}'.format(T(32558)), '../../../media/forum-browser-tapatalk.png',hlp.get('tt',''))
+		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), '../../../media/forum-browser-forumrunner.png',hlp.get('fr',''))
+		d.addItem('pb', 'ProBoards {0}'.format(T(32558)), '../../../media/forum-browser-proboards.png',hlp.get('pb',''))
+		d.addItem('yk', 'Yuku {0}'.format(T(32558)), '../../../media/forum-browser-yuku.png',hlp.get('yk',''))
+		d.addItem('manual', T(32559), '../../../media/forum-browser-plus.png',hlp.get('manual',''))
 
 		source = d.getResult(select=last)
 		if not source: return None

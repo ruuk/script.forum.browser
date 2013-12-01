@@ -43,12 +43,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.41
+Current Version : 2.1.42
+
+*** 2.1.42 ***
+
+Fixed a decoding error when editing the forum settings of forums with non-ascii descriptions
+Main progress bar now fades out when hiding
+Removed the Dark and Light skins
 
 *** 2.1.41 ***
 
 Use the new color dialog for header color selection
-'Default' button on color dialog is no 'Auto' when setting header color
+'Default' button on color dialog is now 'Auto' when setting header color
 Added Red,Green,Blue,Black,Gray and White buttons to color dialog
 Added a dialog that asks if you want to use the color when exiting the color dialog
 

@@ -363,7 +363,7 @@
 					<posy>18</posy>
 					<width>24</width>
 					<height>24</height>
-					<texture>../../Default/media/forum-browser-wrench.png</texture>
+					<texture>../../../media/forum-browser-wrench.png</texture>
 				</control>
 			</control>
 			
@@ -428,7 +428,7 @@
 				<posy>-32</posy>
 				<width>24</width>
 				<height>24</height>
-				<texture flipy="true">../../Default/media/forum-browser-info.png</texture>
+				<texture flipy="true">../../../media/forum-browser-info.png</texture>
 				<colordiffuse>FFEEFFEE</colordiffuse>
 			</control>
 			<control type="image" id="254">
@@ -582,31 +582,31 @@
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+							<texture>../../../media/forum-browser-tapatalk.png</texture>
 							<visible>StringCompare(ListItem.Property(type),TT)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+							<texture>../../../media/forum-browser-forumrunner.png</texture>
 							<visible>StringCompare(ListItem.Property(type),FR)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-logo-128.png</texture>
+							<texture>../../../media/forum-browser-logo-128.png</texture>
 							<visible>StringCompare(ListItem.Property(type),GB)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-proboards.png</texture>
+							<texture>../../../media/forum-browser-proboards.png</texture>
 							<visible>StringCompare(ListItem.Property(type),PB)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-yuku.png</texture>
+							<texture>../../../media/forum-browser-yuku.png</texture>
 							<visible>StringCompare(ListItem.Property(type),YK)</visible>
 						</control>
 					</control>
@@ -914,31 +914,31 @@
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+							<texture>../../../media/forum-browser-tapatalk.png</texture>
 							<visible>StringCompare(ListItem.Property(type),TT)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+							<texture>../../../media/forum-browser-forumrunner.png</texture>
 							<visible>StringCompare(ListItem.Property(type),FR)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-logo-128.png</texture>
+							<texture>../../../media/forum-browser-logo-128.png</texture>
 							<visible>StringCompare(ListItem.Property(type),GB)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-proboards.png</texture>
+							<texture>../../../media/forum-browser-proboards.png</texture>
 							<visible>StringCompare(ListItem.Property(type),PB)</visible>
 						</control>
 						<control type="image">
 							<width>24</width>
 							<height>24</height>
-							<texture>../../Default/media/forum-browser-yuku.png</texture>
+							<texture>../../../media/forum-browser-yuku.png</texture>
 							<visible>StringCompare(ListItem.Property(type),YK)</visible>
 						</control>
 					</control>

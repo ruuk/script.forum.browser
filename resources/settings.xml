@@ -19,7 +19,7 @@
     <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
   </category>
   <category label="32539">
-  	<setting id="skin" type="enum" label="32005" lvalues="32012|32011|32022|32567" default="0" />
+  	<setting id="skin" type="enum" label="32005" lvalues="32567|32022" default="0" />
     <setting id="hide_image_urls" type="bool" label="32538" default="true" />
     <setting id="hide_link_urls" type="bool" label="32548" default="true" />
     <setting id="show_media_indicators" type="bool" label="32044" default="true" />

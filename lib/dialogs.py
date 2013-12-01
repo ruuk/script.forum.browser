@@ -175,7 +175,7 @@ def showHelp(helptype):
 		if h['id'] == 'sep':
 			dialog.addSep()
 		else:
-			dialog.addItem(h['id'],h['name'],'../../Default/media/forum-browser-info.png',h['help'])
+			dialog.addItem(h['id'],h['name'],'../../../media/forum-browser-info.png',h['help'])
 	result = dialog.getResult()
 	if result == 'changelog':
 		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))

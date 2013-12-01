@@ -1951,7 +1951,7 @@ msgid "Don't Ask For Image Filename When Saving"
 msgstr ""
 
 msgctxt "#32567"
-msgid "Sequel (W.I.P)"
+msgid "Sequel (Default)"
 msgstr ""
 
 msgctxt "#32568"

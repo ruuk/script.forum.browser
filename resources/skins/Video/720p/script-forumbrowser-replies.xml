@@ -126,7 +126,7 @@
 								<posy>3</posy>
 								<width>27</width>
 								<height>27</height>
-								<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+								<texture fallback="../../../media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 								<aspectratio>keep</aspectratio>
 								<visible>true</visible>
 							</control>
@@ -200,7 +200,7 @@
 								<posy>97</posy>
 								<width>64</width>
 								<height>64</height>
-								<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+								<texture fallback="../../../media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 								<visible>true</visible>
 							</control>
 							<control type="label">
@@ -407,7 +407,7 @@
 							<posy>71</posy>
 							<width>64</width>
 							<height>64</height>
-							<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+							<texture fallback="../../../media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 							<visible>true</visible>
 						</control>
 						<control type="image">
@@ -416,7 +416,7 @@
 							<posy>100</posy>
 							<width>90</width>
 							<height>90</height>
-							<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
+							<texture fallback="../../../media/forum-browser-video-avatar-none.png">$INFO[ListItem.Property(avatar)]</texture>
 							<visible>true</visible>
 						</control>
 						<control type="label">

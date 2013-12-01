@@ -130,6 +130,7 @@
 					<colordiffuse>B000FF00</colordiffuse>
 					<texture>forum-browser-sequel-white_square.png</texture>
 					<visible>Control.isVisible(106)</visible>
+					<animation effect="fade" time="500">Hidden</animation>
 				</control>
 			</control>
 			
@@ -574,7 +575,7 @@
 						<posy>-4</posy>
 						<width>40</width>
 						<height>40</height>
-						<texture>../../Default/media/forum-browser-loading-bg.png</texture>
+						<texture>../../../media/forum-browser-loading-bg.png</texture>
 					</control>
 					<control type="image">
 						<description>Loading</description>
@@ -582,7 +583,7 @@
 						<posy>0</posy>
 						<width>32</width>
 						<height>32</height>
-						<texture>../../Default/media/forum-browser-loading.gif</texture>
+						<texture>../../../media/forum-browser-loading.gif</texture>
 					</control>
 				</control>
 			</control>
@@ -653,7 +654,7 @@
 							<posy>0</posy>
 							<width>28</width>
 							<height>34</height>
-							<texture>../../Default/media/forum-browser-sticky.png</texture>
+							<texture>../../../media/forum-browser-sticky.png</texture>
 							<visible>StringCompare(ListItem.Genre,sticky)</visible>
 						</control>
 						<control type="image">
@@ -661,7 +662,7 @@
 							<posy>0</posy>
 							<width>28</width>
 							<height>34</height>
-							<texture>../../Default/media/forum-browser-thread.png</texture>
+							<texture>../../../media/forum-browser-thread.png</texture>
 							<visible>StringCompare(ListItem.Genre,is_forum)</visible>
 						</control>
 						<control type="image">
@@ -887,7 +888,7 @@
 							<posy>0</posy>
 							<width>28</width>
 							<height>34</height>
-							<texture>../../Default/media/forum-browser-sticky.png</texture>
+							<texture>../../../media/forum-browser-sticky.png</texture>
 							<visible>StringCompare(ListItem.Genre,sticky)</visible>
 						</control>
 						<control type="image">
@@ -895,7 +896,7 @@
 							<posy>0</posy>
 							<width>28</width>
 							<height>34</height>
-							<texture>../../Default/media/forum-browser-thread.png</texture>
+							<texture>../../../media/forum-browser-thread.png</texture>
 							<visible>StringCompare(ListItem.Genre,is_forum)</visible>
 						</control>
 						<control type="image">

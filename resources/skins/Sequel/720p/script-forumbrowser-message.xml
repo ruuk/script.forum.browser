@@ -409,7 +409,7 @@
 						<posy>4</posy>
 						<width>128</width>
 						<height>72</height>
-						<texture fallback="../../Default/media/forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="../../../media/forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<aspectratio align="right">keep</aspectratio>
 						<visible>true</visible>
 						<colordiffuse>FFFFFFFF</colordiffuse>
@@ -466,7 +466,7 @@
 						<posy>4</posy>
 						<width>128</width>
 						<height>72</height>
-						<texture fallback="../../Default/media/forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
+						<texture fallback="../../../media/forum-browser-broken-image.png">$INFO[ListItem.Icon]</texture>
 						<aspectratio align="right">keep</aspectratio>
 						<colordiffuse>FFFFFFFF</colordiffuse>
 					</control>
@@ -731,7 +731,7 @@
 					<posy>0</posy>
 					<width>40</width>
 					<height>40</height>
-					<texture fallback="../../Default/media/forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
+					<texture fallback="../../../media/forum-browser-video-avatar-none.png">$INFO[Window.Property(avatar)]</texture>
 				</control>
 			</control>
 			

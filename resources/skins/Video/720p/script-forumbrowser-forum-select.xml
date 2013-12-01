@@ -191,7 +191,7 @@
 							<posy>8</posy>
 							<width>450</width>
 							<height>38</height>
-							<texture border="10" diffuse="../../Default/media/forum-browser-fade-overlay.png">forum-browser-video-select.png</texture>
+							<texture border="10" diffuse="../../../media/forum-browser-fade-overlay.png">forum-browser-video-select.png</texture>
 						</control>
 						<control type="label">
 							<posx>10</posx>
@@ -333,7 +333,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-tapatalk.png</texture>
+					<texture>../../../media/forum-browser-tapatalk.png</texture>
 				</control>
 				<control type="label">
 					<posx>80</posx>
@@ -359,7 +359,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-forumrunner.png</texture>
+					<texture>../../../media/forum-browser-forumrunner.png</texture>
 				</control>
 				<control type="label">
 					<posx>80</posx>
@@ -385,7 +385,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-proboards.png</texture>
+					<texture>../../../media/forum-browser-proboards.png</texture>
 				</control>
 				<control type="label">
 					<posx>80</posx>
@@ -411,7 +411,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-yuku.png</texture>
+					<texture>../../../media/forum-browser-yuku.png</texture>
 				</control>
 				<control type="label">
 					<posx>80</posx>
@@ -437,7 +437,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-logo-128.png</texture>
+					<texture>../../../media/forum-browser-logo-128.png</texture>
 				</control>
 				<control type="label">
 					<posx>80</posx>
@@ -463,7 +463,7 @@
 					<posy>0</posy>
 					<width>64</width>
 					<height>64</height>
-					<texture>../../Default/media/forum-browser-logo-128.png</texture>
+					<texture>../../../media/forum-browser-logo-128.png</texture>
 				</control>
 				
 				<control type="image">
@@ -471,7 +471,7 @@
 					<posy>5</posy>
 					<width>20</width>
 					<height>20</height>
-					<texture>../../Default/media/forum-browser-logged-in.png</texture>
+					<texture>../../../media/forum-browser-logged-in.png</texture>
 					<colordiffuse>$INFO[Container(120).ListItem.Property(function)]</colordiffuse>
 				</control>
 				
@@ -480,7 +480,7 @@
 					<posy>35</posy>
 					<width>20</width>
 					<height>20</height>
-					<texture>../../Default/media/forum-browser-logged-in.png</texture>
+					<texture>../../../media/forum-browser-logged-in.png</texture>
 					<colordiffuse>$INFO[Container(120).ListItem.Property(accuracy)]</colordiffuse>
 				</control>
 				
