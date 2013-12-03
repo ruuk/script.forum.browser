@@ -11,37 +11,55 @@
 		<control type="image">
 			<posx>0</posx>
 			<posy>0</posy>
-			<width>1280</width>
-			<height>360</height>
+			<width>430</width>
+			<height>720</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
 			<colordiffuse>EE000000</colordiffuse>
 		</control>
 		<control type="image">
 			<posx>0</posx>
 			<posy>0</posy>
-			<width>1280</width>
-			<height>406</height>
-			<texture flipy="true" border="5,5,5,51">forum-browser-sequel-menu_bg.png</texture>
+			<width>476</width>
+			<height>720</height>
+			<texture flipy="true" border="5,5,51,5">forum-browser-sequel-left_menu_bg.png</texture>
+		</control>
+		<control type="group">
+			<posx>440</posx>
+			<posy>20</posy>
+			<control type="image">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>820</width>
+				<height>340</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>AA808080</colordiffuse>
+			</control>
+			<control type="image">
+				<posx>2</posx>
+				<posy>2</posy>
+				<width>816</width>
+				<height>336</height>
+				<texture>forum-browser-sequel-white_square.png</texture>
+				<colordiffuse>CC000000</colordiffuse>
+			</control>
+			<control type="textbox" id="310">
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>800</width>
+				<height>310</height>
+				<font>ForumBrowser-font13</font>
+				<textcolor>FFFFFFFF</textcolor>
+				<info>Container(320).ListItem.Property(help)</info>
+			</control>
 		</control>
 		<control type="group">
 			<posx>0</posx>
 			<posy>35</posy>
-			<control type="textbox" id="310">
-				<posx>440</posx>
-				<posy>-10</posy>
-				<width>810</width>
-				<height>305</height>
-				<font>ForumBrowser-font13</font>
-				<textcolor>FFFFFFFF</textcolor>
-				<align>left</align>
-				<info>Container(320).ListItem.Property(help)</info>
-			</control>
-			
 			<control type="image">
 				<posx>20</posx>
-				<posy>-10</posy>
+				<posy>30</posy>
 				<width>390</width>
-				<height>285</height>
+				<height>585</height>
 				<texture>forum-browser-sequel-white_square.png</texture>
 				<colordiffuse>FF999999</colordiffuse>
 			</control>
@@ -49,9 +67,9 @@
 			<!-- ** Required ** Do not change <id> or <type> -->
 			<control type="list" id="320">
 				<posx>20</posx>
-				<posy>-10</posy>
+				<posy>30</posy>
 				<width>400</width>
-				<height>285</height>
+				<height>585</height>
 				<onleft>101</onleft>
 				<onright>100</onright>
 				<onup>100</onup>
@@ -500,30 +518,37 @@
 			</control>
 		</control>
 		<control type="image">
-			<posx>0</posx>
-			<posy>329</posy>
-			<width>1280</width>
+			<posx>35</posx>
+			<posy>669</posy>
+			<width>360</width>
 			<height>31</height>
 			<texture>forum-browser-sequel-white_square.png</texture>
 			<colordiffuse>80808080</colordiffuse>
 		</control>
 		<control type="image">
-			<posx>0</posx>
-			<posy>284</posy>
-			<width>1280</width>
+			<posx>35</posx>
+			<posy>624</posy>
+			<width>360</width>
 			<height>76</height>
 			<texture border="5,51,5,5">forum-browser-sequel-menu_bg.png</texture>
 		</control>
 		
 		<control type="image">
 			<posx>25</posx>
-			<posy>330</posy>
+			<posy>670</posy>
 			<width>10</width>
 			<height>28</height>
 			<texture border="3">forum-browser-sequel-vertical_beveled_line.png</texture>
 			<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
 		</control>
-		$ADDON[script.forum.browser 32928]
+		<control type="image">
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>430</width>
+			<height>50</height>
+			<texture>forum-browser-sequel-white_square.png</texture>
+			<colordiffuse>15FFFFFF</colordiffuse>
+		</control>
 		<control type="label" id="250">
 			<posx>-20</posx>
 			<posy>-20</posy>
@@ -532,20 +557,21 @@
 			<label>$ADDON[script.forum.browser 32928]</label>
 		</control>
 		<control type="label">
-			<posx>395</posx>
-			<posy>330</posy>
-			<width>885</width>
-			<height>38</height>
-			<font>ForumBrowser-font12</font>
+			<posx>20</posx>
+			<posy>15</posy>
+			<width>390</width>
+			<height>30</height>
+			<font>ForumBrowser-font13</font>
 			<textcolor>FFFFFFFF</textcolor>
 			<align>center</align>
-			<label>[B]$INFO[Control.GetLabel(250),$ADDON[script.forum.browser 32928]: ][/B]</label>
+			<aligny>center</aligny>
+			<label>[B]$INFO[Control.GetLabel(250)][/B]</label>
 		</control>
 		<control type="grouplist">
 			<itemgap>0</itemgap>
 			<posx>35</posx>
-			<posy>330</posy>
-			<width>600</width>
+			<posy>670</posy>
+			<width>400</width>
 			<height>28</height>
 			<onup>320</onup>
 			<ondown>320</ondown>

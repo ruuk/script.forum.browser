@@ -18,7 +18,7 @@
 					<width>610</width>
 					<height>277</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>FF808080</colordiffuse>
+					<colordiffuse>AA808080</colordiffuse>
 				</control>
 				<control type="image">
 					<posx>2</posx>
@@ -26,7 +26,7 @@
 					<width>606</width>
 					<height>273</height>
 					<texture>forum-browser-sequel-white_square.png</texture>
-					<colordiffuse>FF000000</colordiffuse>
+					<colordiffuse>CC000000</colordiffuse>
 				</control>
 				<control type="textbox">
 					<posx>10</posx>

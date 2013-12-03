@@ -43,7 +43,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.42
+Current Version : 2.1.43
+
+*** 2.1.43 ***
+
+Sequel skin: Changed the forum settings dialog - moving it to the left and making it larger
+Sequel skin: Improved visibility of activity text in posts list
 
 *** 2.1.42 ***
 

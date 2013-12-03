@@ -508,9 +508,10 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			removeFavorite(forumID)
 			self.refresh()
 		elif controlID == 205:
+			self.setInactive()
 			editForumSettings(forumID)
 			item = self.getControl(220).getSelectedItem()
-			if not item: return
+			if not item: return self.setInactive(False)
 			ndata = util.loadForumSettings(forumID) or {}
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			
@@ -526,7 +527,8 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			path = self.makeColorFile(color, self.colorsDir)
 			item.setProperty('bgfile',path)
 			
-			self.setFocusId(220)
+			#self.setFocusId(220)
+			self.setInactive(False)
 			
 		elif controlID == 207: addCurrentForumToOnlineDatabase(forumID)
 		elif controlID == 208: updateThemeODB(forumID)

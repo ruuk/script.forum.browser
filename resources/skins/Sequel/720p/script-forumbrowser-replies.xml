@@ -702,6 +702,7 @@
 					<control type="group">
 						<posx>130</posx>
 						<posy>6</posy>
+						<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
 						<control type="label">
 							<posx>0</posx>
 							<posy>0</posy>
@@ -710,7 +711,7 @@
 							<font>ForumBrowser-font10</font>
 							<aligny>center</aligny>
 							<align>left</align>
-							<textcolor>FF00BB00</textcolor>
+							<textcolor>FF006600</textcolor>
 							<scroll>false</scroll>
 							<info>ListItem.Property(activity)</info>
 							<visible>!StringCompare(ListItem.Property(activity),)</visible>
@@ -723,7 +724,38 @@
 							<font>ForumBrowser-font10</font>
 							<aligny>center</aligny>
 							<align>left</align>
-							<textcolor>FFAA7788</textcolor>
+							<textcolor>FF441122</textcolor>
+							<scroll>false</scroll>
+							<info>ListItem.Property(last_seen)</info>
+							<visible>StringCompare(ListItem.Property(activity),)</visible>
+						</control>
+					</control>
+					<control type="group">
+						<posx>130</posx>
+						<posy>6</posy>
+						<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
+						<control type="label">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>10</height>
+							<font>ForumBrowser-font10</font>
+							<aligny>center</aligny>
+							<align>left</align>
+							<textcolor>FF55DD55</textcolor>
+							<scroll>false</scroll>
+							<info>ListItem.Property(activity)</info>
+							<visible>!StringCompare(ListItem.Property(activity),)</visible>
+						</control>
+						<control type="label">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>10</height>
+							<font>ForumBrowser-font10</font>
+							<aligny>center</aligny>
+							<align>left</align>
+							<textcolor>FFDDAABB</textcolor>
 							<scroll>false</scroll>
 							<info>ListItem.Property(last_seen)</info>
 							<visible>StringCompare(ListItem.Property(activity),)</visible>
@@ -940,6 +972,7 @@
 					<control type="group">
 						<posx>130</posx>
 						<posy>6</posy>
+						<visible>!StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
 						<control type="label">
 							<posx>0</posx>
 							<posy>0</posy>
@@ -948,7 +981,7 @@
 							<font>ForumBrowser-font10</font>
 							<aligny>center</aligny>
 							<align>left</align>
-							<textcolor>FF00BB00</textcolor>
+							<textcolor>FF006600</textcolor>
 							<scroll>false</scroll>
 							<info>ListItem.Property(activity)</info>
 							<visible>!StringCompare(ListItem.Property(activity),)</visible>
@@ -961,7 +994,38 @@
 							<font>ForumBrowser-font10</font>
 							<aligny>center</aligny>
 							<align>left</align>
-							<textcolor>FFAA7788</textcolor>
+							<textcolor>FF441122</textcolor>
+							<scroll>false</scroll>
+							<info>ListItem.Property(last_seen)</info>
+							<visible>StringCompare(ListItem.Property(activity),)</visible>
+						</control>
+					</control>
+					<control type="group">
+						<posx>130</posx>
+						<posy>6</posy>
+						<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_POST),1)</visible>
+						<control type="label">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>10</height>
+							<font>ForumBrowser-font10</font>
+							<aligny>center</aligny>
+							<align>left</align>
+							<textcolor>FF55DD55</textcolor>
+							<scroll>false</scroll>
+							<info>ListItem.Property(activity)</info>
+							<visible>!StringCompare(ListItem.Property(activity),)</visible>
+						</control>
+						<control type="label">
+							<posx>0</posx>
+							<posy>0</posy>
+							<width>300</width>
+							<height>10</height>
+							<font>ForumBrowser-font10</font>
+							<aligny>center</aligny>
+							<align>left</align>
+							<textcolor>FFDDAABB</textcolor>
 							<scroll>false</scroll>
 							<info>ListItem.Property(last_seen)</info>
 							<visible>StringCompare(ListItem.Property(activity),)</visible>
