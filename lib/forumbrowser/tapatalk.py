@@ -1103,15 +1103,18 @@ class TapatalkForumBrowser(forumbrowser.ForumBrowser):
 	def _getThreads(self,forumid,topic_num,callback,donecallback):
 		if not callback: callback = self.fakeCallback
 		while True:
-			if not callback(10,self.lang(32102)): break
-			announces = self.server.get_topic(forumid,0,49,'ANN').get('topics',[])
-			if not callback(30,self.lang(32103)): break
-			for a in announces: self.createThreadDict(a,True)
-			if not callback(40,self.lang(32102)): break
-			stickys = self.server.get_topic(forumid,0,49,'TOP').get('topics',[])
-			if not callback(60,self.lang(32103)): break
-			for s in stickys: self.createThreadDict(s,True)
-			if not callback(70,self.lang(32102)): break
+			if topic_num == 0:
+				if not callback(10,self.lang(32102)): break
+				announces = self.server.get_topic(forumid,0,49,'ANN').get('topics',[])
+				if not callback(30,self.lang(32103)): break
+				for a in announces: self.createThreadDict(a,True)
+				if not callback(40,self.lang(32102)): break
+				stickys = self.server.get_topic(forumid,0,49,'TOP').get('topics',[])
+				if not callback(50,self.lang(32103)): break
+				for s in stickys: self.createThreadDict(s,True)
+			else:
+				announces = stickys = []
+			if not callback(60,self.lang(32102)): break
 			topics = self.server.get_topic(forumid,topic_num,int(topic_num) + 19)
 			if not callback(90,self.lang(32103)): break
 			pd = self.getPageData(topics,topic_num)

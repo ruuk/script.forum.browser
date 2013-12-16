@@ -276,7 +276,12 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		ThreadWindow.__init__(self)
 		ManagedWindow.__init__(self)
 		
-	def skinLevel(self):
+	def skinLevel(self,check=None):
+		if check is not None:
+			try:
+				return int(self.getProperty('skin_level')) >= check
+			except:
+				return False
 		try:
 			return int(self.getProperty('skin_level'))
 		except:
@@ -460,9 +465,9 @@ class PageWindow(BaseWindow):
 
 	def onClick( self, controlID ):
 		if controlID == 200 or controlID == 180:
-			if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
+			self.gotoPrevPage()
 		elif controlID == 202 or controlID == 181:
-			if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
+			self.gotoNextPage()
 		if controlID == 203 or controlID == 182:
 			if self.pageData.prev: self.gotoPage(self.pageData.getPageNumber(1))
 		elif controlID == 204 or controlID == 183:
@@ -493,6 +498,21 @@ class PageWindow(BaseWindow):
 			self.gotoPage(self.pageData.getPageNumber(-1))
 		else: self.askPageNumber()
 		
+	def gotoPrevPage(self):
+		if self.pageData.prev: self.gotoPage(self.pageData.getPrevPage())
+		
+	def gotoNextPage(self):
+		if self.pageData.next: self.gotoPage(self.pageData.getNextPage())
+		
+	def processPaging(self,paging):
+		if paging:
+			if paging == '1':
+				self.gotoPrevPage()
+			elif paging == '2':
+				self.gotoNextPage()
+			return True
+		return False
+	
 	def askPageNumber(self):
 		page = xbmcgui.Dialog().numeric(0,util.T(32116))
 		try: int(page)

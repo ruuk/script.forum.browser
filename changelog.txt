@@ -43,7 +43,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.43
+Current Version : 2.1.44
+
+*** 2.1.44 ***
+
+Added the ability to change to previous/next pages from the top/bottom of the list on threads and posts views
+Tapatalk: Stickys and announcements now only show on the first page of threads
 
 *** 2.1.43 ***
 

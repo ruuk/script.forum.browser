@@ -20,7 +20,7 @@ if __name__ == '__main__':
 		util.setRefreshXBMCSkin()
 		sys.exit()
 		
-import urllib2, re, time, urlparse, binascii, math, textwrap, codecs
+import urllib2, re, time, urlparse, binascii, textwrap, codecs
 import xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 from lib import util, signals, asyncconnections  # @Reimport
@@ -1906,7 +1906,12 @@ class RepliesWindow(windows.PageWindow):
 			webvid = video.WebVideo()
 			showIndicators = getSetting('show_media_indicators',True)
 			countLinkImages = getSetting('smi_count_link_images',False)
+			prevItem = xbmcgui.ListItem(label='prev')
+			prevItem.setProperty('paging','1')
+			nextItem = xbmcgui.ListItem(label='next')
+			nextItem.setProperty('paging','2')
 			items = []
+			if self.pageData.prev and self.skinLevel(1): items.append(prevItem)
 			lastItem = len(data.data) - 1
 			for post,idx in zip(data.data,range(0,len(data.data))):
 				if self.pid and post.postId == self.pid: select = idx
@@ -1920,6 +1925,7 @@ class RepliesWindow(windows.PageWindow):
 					item.setProperty('end_item','first')
 				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
 				items.append(item)
+			if self.pageData.next and self.skinLevel(1): items.append(nextItem)
 			self.getControl(120).addItems(items)
 			self.setFocusId(120)
 			if select > -1:
@@ -1965,13 +1971,16 @@ class RepliesWindow(windows.PageWindow):
 		for m in miter:
 			urls.append(m)
 		return urls
-		
+	
 	def postSelected(self,itemindex=-1):
 		if itemindex > -1:
 			item = self.getControl(120).getListItem(itemindex)
 		else:
 			item = self.getControl(120).getSelectedItem()
 		if not item: return
+		
+		if self.processPaging(item.getProperty('paging')): return
+		
 		post = self.posts.get(item.getProperty('post'))
 		if self.search and getSetting('search_open_thread',False):
 			return self.openPostThread(post)
@@ -2418,6 +2427,11 @@ class ThreadsWindow(windows.PageWindow):
 	def addThreads(self,threads):
 		self.setProperty('bullet',FB.MC.bullet)
 		if not threads: return False
+		prevItem = xbmcgui.ListItem(label='prev')
+		prevItem.setProperty('paging','1')
+		nextItem = xbmcgui.ListItem(label='next')
+		nextItem.setProperty('paging','2')
+		if self.pageData.prev and self.skinLevel(1): self.getControl(120).addItem(prevItem)
 		for t in threads:
 			if hasattr(t,'groupdict'):
 				tdict = t.groupdict()
@@ -2466,6 +2480,7 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty('views',str(tdict.get('view_number') or ''))
 			item.setProperty('last_reply_time',str(tdict.get('last_reply_time') or ''))
 			self.getControl(120).addItem(item)
+		if self.pageData.next and self.skinLevel(1): self.getControl(120).addItem(nextItem)
 		return True
 			
 	def addForums(self,forums):
@@ -2511,6 +2526,7 @@ class ThreadsWindow(windows.PageWindow):
 				item.setProperty('id',forumElements.get('thread'))
 		else:
 			item = self.getControl(120).getSelectedItem()
+			if self.processPaging(item.getProperty('paging')): return
 		
 		item.setProperty('unread','')
 		fid = item.getProperty('fid') or self.fid
