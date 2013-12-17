@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <window>
 	<defaultcontrol>320</defaultcontrol>
 	<animation effect="slide" end="0,360" time="200">WindowOpen</animation>
@@ -121,7 +122,7 @@
 							<posy>11</posy>
 							<width>16</width>
 							<height>16</height>
-							<texture>forum-browser-logged-in.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FFAAAAAA</colordiffuse>
 							<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 						</control>
@@ -130,7 +131,7 @@
 							<posy>11</posy>
 							<width>16</width>
 							<height>16</height>
-							<texture>forum-browser-logged-in.png</texture>
+							<texture>forum-browser-sequel-logged_in.png</texture>
 							<colordiffuse>FF00FF00</colordiffuse>
 							<visible>StringCompare(ListItem.Label2,booleanTrue)</visible>
 						</control>
@@ -268,7 +269,7 @@
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
-								<texture>forum-browser-logged-in.png</texture>
+								<texture>forum-browser-sequel-logged_in.png</texture>
 								<colordiffuse>FFAAAAAA</colordiffuse>
 								<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 							</control>
@@ -277,7 +278,7 @@
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
-								<texture>forum-browser-logged-in.png</texture>
+								<texture>forum-browser-sequel-logged_in.png</texture>
 								<colordiffuse>FF00FF00</colordiffuse>
 								<visible>StringCompare(ListItem.Label2,booleanTrue)</visible>
 							</control>
@@ -403,7 +404,7 @@
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
-								<texture>forum-browser-logged-in.png</texture>
+								<texture>forum-browser-sequel-logged_in.png</texture>
 								<colordiffuse>FFAAAAAA</colordiffuse>
 								<visible>StringCompare(ListItem.Label2,booleanFalse)</visible>
 							</control>
@@ -412,7 +413,7 @@
 								<posy>11</posy>
 								<width>16</width>
 								<height>16</height>
-								<texture>forum-browser-logged-in.png</texture>
+								<texture>forum-browser-sequel-logged_in.png</texture>
 								<colordiffuse>FF00FF00</colordiffuse>
 								<visible>StringCompare(ListItem.Label2,booleanTrue)</visible>
 							</control>

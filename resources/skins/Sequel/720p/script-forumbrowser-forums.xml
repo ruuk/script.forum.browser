@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <window>
 	<defaultcontrol>120</defaultcontrol>
 	<coordinates>
@@ -48,7 +49,7 @@
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
 				</control>
 			</control>
-			
+
 			<control type="group">
 				<visible>!Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_window_background_FORUM),)</visible>
 				<posx>0</posx>
@@ -80,7 +81,7 @@
 					<visible>StringCompare(Window(10000).Property(ForumBrowser_window_colors_dark_FORUM),1)</visible>
 				</control>
 			</control>
-			
+
 			<control type="image">
 				<description>Header-NoColor</description>
 				<posx>0</posx>
@@ -131,14 +132,14 @@
 					<animation effect="fade" time="500">Hidden</animation>
 				</control>
 			</control>
-			
+
 			<control type="image" id="249">
 				<description>Type Logo</description>
 				<posx>40</posx>
 				<posy>27</posy>
 				<width>64</width>
 				<height>64</height>
-			</control>			
+			</control>
 			<control type="image" id="250">
 				<description>Forum Logo</description>
 				<posx>115</posx>
@@ -147,7 +148,7 @@
 				<height>81</height>
 				<aspectratio align="left">keep</aspectratio>
 			</control>
-			
+
 			<control type="image">
 				<posx>0</posx>
 				<posy>88</posy>
@@ -155,7 +156,7 @@
 				<height>62</height>
 				<texture>forum-browser-sequel-menu_bg.png</texture>
 			</control>
-			
+
 			<control type="image">
 				<posx>30</posx>
 				<posy>121</posy>
@@ -176,134 +177,135 @@
 				<ondown>120</ondown>
 				<orientation>horizontal</orientation>
 				<control type="button" id="202">
-						<textoffsetx>0</textoffsetx>
-						<description>Forums</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32905]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-					</control>
-					<control type="button" id="201">
-						<textoffsetx>0</textoffsetx>
-						<description>Subscriptions</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32904]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-						<visible>Control.IsEnabled(201)</visible>
-					</control>
-					<control type="button" id="203">
-						<textoffsetx>0</textoffsetx>
-						<description>Messages</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32909]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-						<visible>Control.IsEnabled(203)</visible>
-					</control>
-				    <control type="button" id="208">
-						<textoffsetx>0</textoffsetx>
-						<description>Unread Threads</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32565]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-						<visible>Control.IsEnabled(208)</visible>
-					</control>
-					<control type="button" id="204">
-						<textoffsetx>0</textoffsetx>
-						<description>Search</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32916]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-						<onclick>Control.SetFocus(198)</onclick>
-						<visible>Control.IsEnabled(204)</visible>
-					</control>
-					<control type="button" id="200">
-						<textoffsetx>0</textoffsetx>
-						<description>Settings</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<align>center</align>
-						<label>$ADDON[script.forum.browser 32903]</label>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-						<textcolor>FFAAAAAA</textcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<disabledcolor>22CCCCCC</disabledcolor>
-					</control>
-					<control type="button" id="105">
-						<textoffsetx>0</textoffsetx>
-						<description>Stop Button</description>
-						<width>180</width>
-						<height>28</height>
-						<font>ForumBrowser-font12</font>
-						<textcolor>FFAAAAAA</textcolor>
-						<disabledcolor>FFCCCCCC</disabledcolor>
-						<focusedcolor>FFFFFFFF</focusedcolor>
-						<aligny>center</aligny>
-						<align>center</align>
-						<label>[B][UPPERCASE]$ADDON[script.forum.browser 32910][/UPPERCASE][/B]</label>
-						<pulseonselect>false</pulseonselect>
-						<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
-						<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
-						<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
-					</control>
+					<textoffsetx>0</textoffsetx>
+					<description>Forums</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32905]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
 				</control>
-			
-				<control type="label" id="106">
-					<description>Unused Page Label</description>
-					<visible>false</visible>
-					<posx>60</posx>
-					<posy>0</posy>
-					<width>200</width>
-					<height>30</height>
+				<control type="button" id="201">
+					<textoffsetx>0</textoffsetx>
+					<description>Subscriptions</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32904]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+					<visible>Control.IsEnabled(201)</visible>
 				</control>
-			
+				<control type="button" id="203">
+					<textoffsetx>0</textoffsetx>
+					<description>Messages</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32909]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+					<visible>Control.IsEnabled(203)</visible>
+				</control>
+				<control type="button" id="208">
+					<textoffsetx>0</textoffsetx>
+					<description>Unread Threads</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32565]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+					<visible>Control.IsEnabled(208)</visible>
+				</control>
+				<control type="button" id="204">
+					<textoffsetx>0</textoffsetx>
+					<description>Search</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32916]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+					<onclick>Control.SetFocus(198)</onclick>
+					<visible>Control.IsEnabled(204)</visible>
+				</control>
+<!--  				<control type="button" id="200">
+					<textoffsetx>0</textoffsetx>
+					<description>Settings</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<align>center</align>
+					<label>$ADDON[script.forum.browser 32903]</label>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+					<textcolor>FFAAAAAA</textcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<disabledcolor>22CCCCCC</disabledcolor>
+				</control>
+-->
+				<control type="button" id="105">
+					<textoffsetx>0</textoffsetx>
+					<description>Stop Button</description>
+					<width>180</width>
+					<height>28</height>
+					<font>ForumBrowser-font12</font>
+					<textcolor>FFAAAAAA</textcolor>
+					<disabledcolor>FFCCCCCC</disabledcolor>
+					<focusedcolor>FFFFFFFF</focusedcolor>
+					<aligny>center</aligny>
+					<align>center</align>
+					<label>[B][UPPERCASE]$ADDON[script.forum.browser 32910][/UPPERCASE][/B]</label>
+					<pulseonselect>false</pulseonselect>
+					<texturefocus border="3">forum-browser-sequel-vertical_beveled_line_focus.png</texturefocus>
+					<texturenofocus border="3">forum-browser-sequel-vertical_beveled_line.png</texturenofocus>
+					<colordiffuse>$INFO[Window(10000).Property(ForumBrowser_selection_color_FORUM)]</colordiffuse>
+				</control>
+			</control>
+
+			<control type="label" id="106">
+				<description>Unused Page Label</description>
+				<visible>false</visible>
+				<posx>60</posx>
+				<posy>0</posy>
+				<width>200</width>
+				<height>30</height>
+			</control>
+
 			<control type="group">
 				<posx>1160</posx>
 				<posy>119</posy>
 				<control type="button" id="186">
 					<description>Slide Toggle</description>
-					<onleft>200</onleft>
+					<onleft>204</onleft>
 					<onright>187</onright>
 					<onup>120</onup>
 					<ondown>120</ondown>
@@ -355,7 +357,7 @@
 					<height>20</height>
 					<texture flipy="true">forum-browser-sequel-up_nofocus.png</texture>
 				</control>
-				
+
 				<control type="button" id="187">
 					<description>Toggle Light</description>
 					<onleft>186</onleft>
@@ -410,7 +412,7 @@
 					<height>20</height>
 					<texture>forum-browser-sequel-light_bulb_nofocus.png</texture>
 				</control>
-				
+
 				<control type="image">
 					<visible>Control.HasFocus(188)</visible>
 					<posx>58</posx>
@@ -434,7 +436,7 @@
 					<texturenofocus>forum-browser-sequel-settings_nofocus.png</texturenofocus>
 				</control>
 			</control>
-			
+
 			<control type="label" id="103">
 				<description>textarea</description>
 				<posx>20</posx>
@@ -475,7 +477,7 @@
 					<textcolor>FFBBBBBB</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B]]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
 				</control>
 				<control type="label">
 					<visible>!StringCompare(Window.Property(header_is_dark),1)</visible>
@@ -487,10 +489,10 @@
 					<textcolor>FF444444</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts),  [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members),  [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online),  [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B]]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
 				</control>
 			</control>
-		
+
 			<control type="group">
 				<posx>1196</posx>
 				<posy>33</posy>
@@ -548,7 +550,7 @@
 					</control>
 				</control>
 			</control>
-				
+
 			<control type="button" id="110">
 				<textoffsetx>0</textoffsetx>
 				<description>Close Button</description>
@@ -558,7 +560,7 @@
 				<height>28</height>
 				<texturefocus>forum-browser-close-button-focus.png</texturefocus>
 				<texturenofocus>forum-browser-close-button.png</texturenofocus>
-				<!--  visible>system.getbool(input.enablemouse)</visible -->
+				<!-- visible>system.getbool(input.enablemouse)</visible -->
 				<visible>false</visible>
 				<onclick>PreviousMenu</onclick>
 			</control>
@@ -572,7 +574,7 @@
 				<texture>forum-browser-secure.png</texture>
 			</control>
 		</control>
-		
+
 		<control type="label">
 			<description>Time</description>
 			<posx>180r</posx>
@@ -599,7 +601,7 @@
 			<align>right</align>
 			<label>$INFO[Window(10000).Property(ForumBrowser_version)]</label>
 		</control>
-				
+
 		<control type="group">
 			<posx>0</posx>
 			<posy>0</posy>
@@ -660,7 +662,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -671,7 +673,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 							<control type="group">
@@ -685,7 +687,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -696,7 +698,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 						</control>
@@ -750,7 +752,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -761,7 +763,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 							<control type="group">
@@ -775,7 +777,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -786,7 +788,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 						</control>
@@ -885,7 +887,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -896,7 +898,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 							<control type="group">
@@ -910,7 +912,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -921,7 +923,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 						</control>
@@ -975,7 +977,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -986,7 +988,7 @@
 									<aligny>center</aligny>
 									<textcolor>FF333333</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 							<control type="group">
@@ -1000,7 +1002,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]  $INFO[ListItem.Label] [/I]</label>
+									<label>[I] $INFO[ListItem.Label] [/I]</label>
 								</control>
 								<control type="label">
 									<posx>0</posx>
@@ -1011,7 +1013,7 @@
 									<aligny>center</aligny>
 									<textcolor>FFBBBBBB</textcolor>
 									<align>left</align>
-									<label>[I]   $INFO[ListItem.Property(realdescription)] [/I]</label>
+									<label>[I] $INFO[ListItem.Property(realdescription)] [/I]</label>
 								</control>
 							</control>
 						</control>
@@ -1039,7 +1041,7 @@
 				</control>
 			</control>
 		</control>
-		
+
 		<control type="image">
 			<visible>Control.IsVisible(198)</visible>
 			<posx>0</posx>
@@ -1123,7 +1125,7 @@
 				<disabledcolor>44CCCCCC</disabledcolor>
 			</control>
 		</control>
-				
+
 		<control type="group">
 			<visible>Player.Playing + Player.HasVideo + !Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_hidePNP),1)</visible>
 			<posx>640</posx>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <window>
 	<onload>SetProperty(skin_level,1)</onload>
 	<onload>SetProperty(quote_wrap,150)</onload>

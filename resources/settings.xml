@@ -69,7 +69,7 @@
     <setting id="hide_activity_splash" type="bool" label="32017" default="false" />
     <setting id="forumrunner_disable_ssl" type="bool" label="32247" default="true" visible="false"/>
     <setting id="disable_async_connections" type="bool" label="32524" default="false" />
-    <setting id="experimental" type="bool" label="Experimental Stuff" default="false" />
+<!--     <setting id="experimental" type="bool" label="Experimental Stuff" default="false" /> -->
     <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_advanced)"/>
   </category>
 </settings>

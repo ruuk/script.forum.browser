@@ -1158,6 +1158,7 @@ class MessageWindow(windows.BaseWindow):
 		if self.post: FB.updateAppURL(post=self.post.postId)
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		self.viewType = 'MESSAGE'
+		self.registerSettings(['hide_signatures','hide_image_urls','hide_link_urls'])
 		
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
@@ -1165,6 +1166,17 @@ class MessageWindow(windows.BaseWindow):
 		self.started = True
 		self.setLoggedIn()
 		self.setWindowProperties()
+		self.setMessage()
+		self.getControl(102).setImage(self.post.avatarFinal)
+		self.setTheme()
+		self.getLinks()
+		self.getImages()
+		self.setWindowProperties()
+		
+	def onSettingsChanged(self,changed):
+		self.setMessage()
+		
+	def setMessage(self):
 		s = dialogs.showActivitySplash()
 		try:
 			text = '%s[CR] [CR]' % self.post.messageAsDisplay(raw=True,quote_wrap=self.quoteWrap())
@@ -1177,12 +1189,7 @@ class MessageWindow(windows.BaseWindow):
 			self.getControl(122).setLabel(text)
 		except:
 			self.getControl(122).setText(text)
-		self.getControl(102).setImage(self.post.avatarFinal)
-		self.setTheme()
-		self.getLinks()
-		self.getImages()
-		self.setWindowProperties()
-		
+			
 	def setTheme(self):
 		self.getControl(103).setLabel(self.post.cleanUserName() or '')
 		title = []
@@ -1675,7 +1682,13 @@ class RepliesWindow(windows.PageWindow):
 			try:
 				self.timeOffset = negative * ((int(minutes) * 60) + int(seconds)) 
 			except:
-				pass 
+				pass
+		self.registerSettings(['hide_signatures','post_user_info','hide_image_urls','hide_link_urls','show_media_indicators','smi_count_link_images'])
+		if not self.isPM():
+			if self.search:
+				self.registerSettings(['reverse_sort_search'])
+			else:
+				self.registerSettings(['reverse_sort'])
 	
 	def onInit(self):
 		windows.BaseWindow.onInit(self)
@@ -2014,6 +2027,9 @@ class RepliesWindow(windows.PageWindow):
 				self.doClose()
 		del w
 		
+	def onSettingsChanged(self,changed):
+		self.refresh()
+	
 	def onClick(self,controlID):
 		if controlID == 201:
 			self.stopThread()
@@ -2061,6 +2077,10 @@ class RepliesWindow(windows.PageWindow):
 		self.currentPMBox = box
 		self.setTheme()
 		self.fillRepliesList()
+		
+	def refresh(self):
+		self.stopThread()
+		self.fillRepliesList(self.pageData.getPageNumber())
 		
 	def doMenu(self):
 		#Otherwise you can open on top of itself
@@ -2131,8 +2151,7 @@ class RepliesWindow(windows.PageWindow):
 			self.stopThread()
 			self.openPostDialog(post)
 		elif result == 'refresh':
-			self.stopThread()
-			self.fillRepliesList(self.pageData.getPageNumber())
+			self.refresh()
 		elif result == 'edit':
 			splash = dialogs.showActivitySplash(T(32318))
 			try:
@@ -2703,6 +2722,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.lastFB = None
 		self.data = kwargs.get('data')
 		self.viewType = 'FORUM'
+		windows.WM.main = self
 	
 	def newPostsCallback(self,signal,data):
 		self.openForumsManager(external=True)
@@ -3143,7 +3163,7 @@ class ForumsWindow(windows.BaseWindow):
 	def onClick( self, controlID ):
 		if controlID == 200:
 			self.stopThread()
-			self.openSettings()
+			windows.WM.main.openSettings() # @UndefinedVariable
 		elif controlID == 201:
 			self.stopThread()
 			self.openSubscriptionsWindow()
@@ -3303,7 +3323,7 @@ class ForumsWindow(windows.BaseWindow):
 		self.getControl(207).setEnabled(FB.canSearchAdvanced('UNAME'))
 		self.getControl(208).setEnabled(FB.canGetUnreadThreads())
 		
-	def openSettings(self):
+	def openSettings(self,external=False):
 		#if not FB: return
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''
 		doSettings(self)
@@ -3317,11 +3337,11 @@ class ForumsWindow(windows.BaseWindow):
 		skin = util.getSavedTheme(current=THEME)
 		forumbrowser.ForumPost.hideSignature = getSetting('hide_signatures',False)
 		refresh = util.xbmcSkinAwaitingRefresh()
-		if skin != THEME or refresh:
+		if (skin != THEME or refresh) and external:
+			dialogs.showMessage(T(32374),T(32375))
+		elif (skin != THEME or refresh) and not external:
 			THEME = util.getSavedTheme(current=skin,get_current=True)
 			self._doHop(self.data,"script-forumbrowser-forums.xml",refresh)
-			#dialogs.showMessage(T(32374),T(32375))
-
 
 # Functions -------------------------------------------------------------------------------------------------------------------------------------------
 def appendSettingList(key,value,limit=0):
@@ -4597,7 +4617,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 	return FB, forumElements
 
 def startForumBrowser(forumID=None):
-	global PLAYER, SIGNALHUB, STARTFORUM, WM
+	global PLAYER, SIGNALHUB, STARTFORUM
 	PLAYER = util.initPlayer()
 	SIGNALHUB = signals.SignalHub()
 	windows.SIGNALHUB = SIGNALHUB
@@ -4620,8 +4640,8 @@ def startForumBrowser(forumID=None):
 	
 	windows.setWindowProperties()
 	
-	WM = windows.WindowManager()
-	WM.start(ForumsWindow,"script-forumbrowser-forums.xml")
+	windows.startWindowManager(ForumsWindow,"script-forumbrowser-forums.xml")
+
 	#sys.modules.clear()
 	PLAYER.finish()
 	del PLAYER

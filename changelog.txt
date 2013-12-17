@@ -43,7 +43,15 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.44
+Current Version : 2.1.45
+
+*** 2.1.45 ***
+
+Added 'Settings' to the settings button menu for all views
+Removed the 'Settings' button from main window on Sequel skin
+Added XML declarations to all XML files
+Fixed forums settings dialog in Sequel skin: now actually shows toggle indicator for relevant settings
+Sequel skin: Forum subscriptions no longer display 'Started By: FORUM'
 
 *** 2.1.44 ***
 

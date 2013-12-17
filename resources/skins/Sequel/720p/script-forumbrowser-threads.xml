@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <window>
 	<onload>SetProperty(skin_level,1)</onload>
 	<defaultcontrol>120</defaultcontrol>
@@ -719,7 +720,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
-								<visible>StringCompare(ListItem.Director,)</visible>
+								<visible>StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -731,7 +732,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR][/B]</label>
-								<visible>!StringCompare(ListItem.Director,)</visible>
+								<visible>!StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>
@@ -1016,7 +1017,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
-								<visible>StringCompare(ListItem.Director,)</visible>
+								<visible>StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -1028,7 +1029,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][/B][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR]</label>
-								<visible>!StringCompare(ListItem.Director,)</visible>
+								<visible>!StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>

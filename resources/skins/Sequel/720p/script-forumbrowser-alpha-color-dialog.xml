@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <window>
 	<defaultcontrol>202</defaultcontrol>
 	<animation effect="slide" end="0,308" time="200">WindowOpen</animation>

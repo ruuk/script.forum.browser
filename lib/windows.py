@@ -4,6 +4,7 @@ from lib.forumbrowser import forumbrowser
 import util
 
 SIGNALHUB = None
+WM = None
 
 ######################################################################################
 # Base Window Classes
@@ -273,6 +274,7 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		self._externalWindow = None
 		self._progressWidth = 1
 		self.viewType = None
+		self._registeredSettings = []
 		ThreadWindow.__init__(self)
 		ManagedWindow.__init__(self)
 		
@@ -317,12 +319,11 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		
 	def openWindowSettings(self):
 		d = dialogs.ChoiceMenu('Options')
-		d.addItem('back_view','Set Default Background Image For This View')
-		#d.addItem('back_view_forum','Set Background Image For This View On This Forum')
-		d.addItem('clear_back_view','Clear The Default Background Image For This View')
-		#d.addItem('clear_back_view_forum','Clear The Background Image For This View On This Forum')
-		d.addItem('set_fade','Set The Background Fade Level')
-		d.addItem('set_selection_color','Set The List Selection Color')
+		d.addItem('settings',util.T(32903))
+		d.addItem('back_view',util.T(32580))
+		d.addItem('clear_back_view',util.T(32581))
+		d.addItem('set_fade',util.T(32582))
+		d.addItem('set_selection_color',util.T(32583))
 		res = d.getResult()
 		if not res: return
 		if res == 'back_view':
@@ -332,7 +333,6 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 		elif res == 'clear_back_view':
 			setWindowBackgroundImage('',view=self.viewType,clear=True)
 		elif res == 'set_fade':
-			#dialogs.showMessage('Uhh...', 'Hmmm, this is embarassing. I haven\'t implemented this yet :)')
 			dialogs.showFadeDialog(view_type=self.viewType)
 		elif res == 'set_selection_color':
 			image = util.getSetting('window_background_%s' % self.viewType)
@@ -342,6 +342,33 @@ class BaseWindowFunctions(ThreadWindow,ManagedWindow):
 			color = util.getSetting('selection_color_%s' % self.viewType, '802080FF')
 			color = dialogs.showSelectionColorDialog(start_color=color,preview_image=image,fade=fade)
 			setWindowSelectionColors(color,view=self.viewType)
+		elif res == 'settings':
+			external = True
+			if WM.main == self: external = False
+			state = self.checkSettings()
+			WM.main.openSettings(external=external)
+			self.checkSettings(state)
+	
+	def checkSettings(self,state=None):
+		if state:
+			if not self._registeredSettings: return False
+			changed = []
+			for s in self._registeredSettings:
+				if state.get(s) != util.getSettingExternal(s, ''): changed.append(s)
+				
+			if changed: self.onSettingsChanged(changed)
+		else:
+			if not self._registeredSettings: return 'none'
+			state = {}
+			for s in self._registeredSettings: state[s] = util.getSettingExternal(s, '')
+			return state
+	
+	def registerSettings(self,settings_list):
+		if not isinstance(settings_list,list): raise Exception('registerSettings() requires a list')
+		self._registeredSettings += settings_list
+		
+	def onSettingsChanged(self,changed):
+		pass
 	
 	def onAction(self,action):
 		if action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
@@ -539,6 +566,7 @@ class PageWindow(BaseWindow):
 class WindowManager():
 	def __init__(self):
 		self.stack = []
+		self.main = None
 		
 	def start(self,window,xml,**kwargs):
 		wd = self.nextWindow(WindowData().fromData(window,xml,kwargs))
@@ -584,6 +612,11 @@ class WindowData():
 		self.nextKWArgs = kwargs or {}
 		self.nextData = data
 		return self
+	
+def startWindowManager(window,xml,**kwargs):
+	global WM
+	WM = WindowManager()
+	WM.start(window,xml,**kwargs)
 	
 VIEW_TYPES = ('FORUM','THREAD','POST','MESSAGE','EDITOR')
 def setWindowSlideUp(up=None,view=None):
