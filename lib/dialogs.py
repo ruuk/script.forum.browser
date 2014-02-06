@@ -1,5 +1,5 @@
 import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
-import util, asyncconnections
+import util, asyncconnections, mods
 from xbmcconstants import *  # @UnusedWildImport
 from lib.forumbrowser import forumbrowser
 
@@ -58,18 +58,14 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 	
 	if not util.getSetting('use_skin_mods',True):
 		src = os.path.join(path,'resources','skins',theme,res,xmlFilename)
-		#path = util.util.__addon__.getAddonInfo('profile')
 		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,res)
-		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
 		xmlFilename = 'script-forumbrowser-current.xml'
 		if rightAlign: xml = rightAlignXML(xml)
-		open(os.path.join(skin,xmlFilename),'w').write(xml.replace('ForumBrowser-font','font'))
+		open(os.path.join(skin,xmlFilename),'w').write(mods.replaceFonts(xml))
 	elif rightAlign:
 		src = os.path.join(path,'resources','skins',theme,res,xmlFilename)
-		#path = util.util.__addon__.getAddonInfo('profile')
 		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,res)
-		#if not os.path.exists(skin): os.makedirs(skin)
 		xml = open(src,'r').read()
 		xmlFilename = 'script-forumbrowser-current.xml'
 		open(os.path.join(skin,xmlFilename),'w').write(rightAlignXML(xml))

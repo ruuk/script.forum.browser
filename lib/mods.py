@@ -1,4 +1,4 @@
-import os, xbmc, xbmcgui, xbmcvfs, dialogs
+import os, re, xbmc, xbmcgui, xbmcvfs, dialogs
 from distutils.version import StrictVersion
 from util import LOG, ERROR, getSetting, setSetting, __addon__, T
 
@@ -230,3 +230,55 @@ def chooseKeyboardFile(fbPath,currentSkin):
 	skin = skins[idx]
 	setSetting('current_keyboard_mod',skin)
 	return 'DialogKeyboard-%s.xml' % skin.lower()
+
+FTT = None
+IS_1080 = False
+FONT_SIZES = ((10,12),(12,16),(13,20),(30,30))
+FONT_SIZES_1080 = ((10,18),(12,24),(13,30),(30,40))
+def createFontsTranslationTable():
+	global FTT
+	if FTT: return FTT
+	FTT = {10:'',12:'',13:'',30:''}
+	xbmcSkinFonts = getFontList()
+	for name_size, fsize in IS_1080 and FONT_SIZES_1080 or FONT_SIZES:
+		closest = 99
+		for font, name, size in xbmcSkinFonts:
+			test = name.lower() + font.lower()
+			if 'cap' in test or 'bold' in test: continue
+			try:
+				size = int(size)
+			except:
+				continue
+			if fsize == size:
+				FTT[name_size] = name
+				break
+			elif abs(fsize - size) < closest:
+				FTT[name_size] = name
+				closest = abs(fsize - size)
+				
+def replaceFonts(xml,is_1080=False):
+	createFontsTranslationTable()
+	for name_size,fsize in IS_1080 and FONT_SIZES_1080 or FONT_SIZES:  # @UnusedVariable
+		xml = xml.replace('ForumBrowser-font%s' % name_size,FTT[name_size])
+	return xml
+
+def getFontList():
+	with open(getFontXMLPath(),'r') as f: xml = f.read()
+	return re.findall('(<font>.*?<name>(.*?)</name>.*?<size>(.*?)</size>.*?</font>)(?is)',xml.split('</fontset>',1)[0])
+	
+def getDefaultFont(size=12,flist=None):
+	size = str(size)
+	flist = flist or getFontList()
+	for f in flist:
+		if size in f and not 'cap' in f.lower(): return f
+	return 'font%s' % size
+		
+def getFontXMLPath():
+	skinPath = xbmc.translatePath('special://skin')
+	global IS_1080
+	res = '720p'
+	IS_1080 = False
+	if not os.path.exists(os.path.join(skinPath,res)):
+		res = '1080i'
+		IS_1080 = True
+	return os.path.join(skinPath,res,'Font.xml')

@@ -45,6 +45,10 @@ KNOWN ISSUES:
 
 Current Version : 2.1.45
 
+*** 2.1.46 ***
+
+When not using skin modifications, now attempts to use XBMC skin fonts of equivalent size
+
 *** 2.1.45 ***
 
 Added 'Settings' to the settings button menu for all views
