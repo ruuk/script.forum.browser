@@ -25,7 +25,7 @@ import xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
 from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
-from lib.xbmcconstants import * # @UnusedWildImport
+from lib.xbmcconstants import * # analysis:ignore
 
 try:
 	from webviewer import webviewer #@UnresolvedImport
@@ -35,16 +35,8 @@ except:
 	traceback.print_exc()
 	print 'FORUMBROWSER: COULD NOT IMPORT WEB VIEWER'
 
-'''
-TODO:
-
-Read/Delete PM's in xbmc4xbox.org
-
-'''
-
 __plugin__ = 'Forum Browser'
 __author__ = 'ruuk (Rick Phillips)'
-__url__ = 'http://code.google.com/p/forumbrowserxbmc/'
 __date__ = '1-28-2013'
 __version__ = util.__addon__.getAddonInfo('version')
 T = util.T
@@ -82,7 +74,6 @@ FB = None
 
 from lib.forumbrowser import forumbrowser
 from lib.forumbrowser import texttransform
-from lib.crypto import passmanager
 from lib.forumbrowser import tapatalk
 from webviewer import video #@UnresolvedImport
 from lib import dialogs, windows, mods  # @Reimport
@@ -693,7 +684,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				xbmcvfs.delete(os.path.join(path,f))
 				dialogs.showMessage('NOTICE', 'Broken forum file for:', f.split('.',1)[-1], 'was deleted.', error=True)
 				continue
-			ndata = util.loadForumSettings(f) or {}
+			ndata = util.loadForumSettings(f,skip_password=True) or {}
 			name = fdata.name
 			logo = fdata.urls.get('logo','')
 			exists, logopath = util.getCachedLogo(logo,f)
@@ -3585,6 +3576,7 @@ def doFirstRun():
 		if os.path.exists(local): open(xbmc_org,'w').write(open(local,'r').read())
 
 def convertForumSettings_1_1_4():
+	from lib.crypto import passmanager
 	forums = os.listdir(FORUMS_PATH) + os.listdir(FORUMS_STATIC_PATH)
 	for f in forums:
 		username = getSetting('login_user_' + f.replace('.','_'))

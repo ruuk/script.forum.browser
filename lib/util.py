@@ -394,7 +394,7 @@ def getForumSetting(forumID,key,default=None):
 	data = loadForumSettings(forumID)
 	return _processSetting(data.get(key),default)
 
-def loadForumSettings(forumID,get_rules=False,get_both=False):
+def loadForumSettings(forumID,get_rules=False,get_both=False,skip_password=False):
 	fsPath = os.path.join(FORUMS_SETTINGS_PATH,forumID)
 	if not os.path.exists(fsPath):
 		if get_both:
@@ -428,10 +428,13 @@ def loadForumSettings(forumID,get_rules=False,get_both=False):
 	if get_rules:
 		return rules
 	
-	from lib.crypto import passmanager
+	import passwordStorage
 
 	ret['username'] = ret.get('username','')
-	ret['password'] = passmanager.decryptPassword(ret['username'] or '?', ret.get('password',''))
+	if skip_password:
+		ret['password'] = ''
+	else:
+		ret['password'] = passwordStorage.retrieve(forumID.replace('.','_') + '_' + ret['username'],ask_on_fail=False) or ''
 	ret['notify'] = _processSetting(ret.get('notify'),False)
 	ret['right_align'] = _processSetting(ret.get('right_align'),False)
 	ret['ignore_forum_images'] = _processSetting(ret.get('ignore_forum_images'),True)
@@ -462,10 +465,10 @@ def saveForumSettings(forumID,**kwargs):
 	else: data['password'] = password
 	
 	try:
-		from lib.crypto import passmanager
+		import passwordStorage
 
-		password = passmanager.encryptPassword(data['username'] or '?', data['password'])
-		data['password'] = password
+		password = passwordStorage.store(forumID.replace('.','_') + '_' + data['username'], data['password'])
+		del data['password']
 		out = []
 		for k,v in data.items():
 			out.append('%s=%s' % (k,v))
