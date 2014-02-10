@@ -1,25 +1,5 @@
 # -*- coding: utf-8 -*-
 import os, sys, xbmc
-
-if __name__ == '__main__':
-	if sys.argv[-1].startswith('settingshelp_') or sys.argv[-1] == 'smilies':
-		from lib import dialogs, util
-		CACHE_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'cache'))
-		dialogs.CACHE_PATH = CACHE_PATH
-		if sys.argv[-1].startswith('settingshelp_'):
-			dialogs.showHelp('settings-' + sys.argv[-1].split('_')[-1])
-		elif sys.argv[-1] == 'smilies':
-			dialogs.smiliesDialog()
-		sys.exit()
-	elif sys.argv[-1] == 'change_keyboard':
-		from lib import mods,util  # @Reimport
-		if mods.checkForSkinMods(just_check_font=True):
-			mods.installSkinMods()
-		else:
-			mods.installKeyboardMod()
-		util.setRefreshXBMCSkin()
-		sys.exit()
-		
 import urllib2, re, time, urlparse, binascii, textwrap, codecs
 import xbmcgui #@UnresolvedImport
 from distutils.version import StrictVersion
@@ -3574,6 +3554,7 @@ def doFirstRun():
 	if not os.path.exists(xbmc_org):
 		local = os.path.join(FORUMS_STATIC_PATH,'TT.xbmc.org')
 		if os.path.exists(local): open(xbmc_org,'w').write(open(local,'r').read())
+	dialogs.showInfo('first')
 
 def convertForumSettings_1_1_4():
 	from lib.crypto import passmanager

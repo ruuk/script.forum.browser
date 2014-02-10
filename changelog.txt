@@ -43,7 +43,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.46
+Current Version : 2.1.47
+
+*** 2.1.47 ***
+
+Removed encryption settings, as password storage has been moved to the password storage module
+Fixed quote formatting for MyBB forums - notably forum.xbmc.org
+Removed inital dialogs for skin mods
+Moved skin mods settings to section 'Skin Mods'
+Added setting button 'Font Installation' which installs/removed the FB font
+Changed the setting 'Change Keyboard' to 'Install/Change Keyboard'
+Moved and modified inital mod info to the settings 'Help' button in the 'Skin Mods' section
+Added a 'First Run' dialog with a short intro and recommendation to install the mods from settings
 
 *** 2.1.46 ***
 

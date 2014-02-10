@@ -343,15 +343,23 @@ class PlayerMonitor(xbmc.Player):
 		h, m = divmod(m, 60)
 		self.currentTime = (h,m,s,int(ms*1000))
 
-def setRefreshXBMCSkin():
+def setRefreshXBMCSkin(off=False):
+	#We have to write to file because the settings won't be saved if the settings dialog is closed without an OK
+	signal_file = os.path.join(CACHE_PATH,'skin-refresh')
+	if off:
+		setSetting('refresh_skin',False)
+		import xbmcvfs
+		xbmcvfs.delete(signal_file)
+		return
+	with open(signal_file,'w') as f: f.write('True')
 	setSetting('refresh_skin',True)
 	
 def xbmcSkinAwaitingRefresh():
-	return getSetting('refresh_skin',False)
+	return getSetting('refresh_skin',False) or os.path.exists(os.path.join(CACHE_PATH,'skin-refresh'))
 
 def refreshXBMCSkin():
-	if not getSetting('refresh_skin',True): return False
-	setSetting('refresh_skin',False)
+	if not xbmcSkinAwaitingRefresh(): return False
+	setRefreshXBMCSkin(off=True)
 	#showNotice('Forum Browser',T(32542),500)
 	from lib import dialogs
 	with dialogs.xbmcDialogProgress('Forum Browser',T(32542)) as d:

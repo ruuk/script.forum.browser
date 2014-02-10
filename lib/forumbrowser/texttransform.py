@@ -66,7 +66,7 @@ class MessageConverter:
 			def get(self,key,default=None): return default
 			
 		new = SmiliesList()
-		if util.getSetting('use_skin_mods',True):
+		if util.getSetting('use_skin_mods',True) and util.getSetting('font_installed',True):
 			for f,r,x in self.FB.smiliesDefs: #@UnusedVariable
 				f = '(?m)((?:^|\s|\[CR\]))'+ re.escape(f)
 				if '[/COLOR]' in r:
@@ -122,7 +122,7 @@ class MessageConverter:
 		#self.imageReplace = '[COLOR FFFF0000]I[/COLOR][COLOR FFFF8000]M[/COLOR][COLOR FF00FF00]G[/COLOR][COLOR FF0000FF]#[/COLOR][COLOR FFFF00FF]{0}[/COLOR]: [I]{1}[/I] '
 		#self.imageReplace = u'[COLOR FFFF0000]([/COLOR][COLOR FF00FF00]([/COLOR]{0}[COLOR FF0000FF])[/COLOR][COLOR FFFFFF00])[/COLOR]{1}'
 		
-		if util.getSetting('use_skin_mods',True):
+		if util.getSetting('use_skin_mods',True) and util.getSetting('font_installed',True):
 			self.imageConvert = self.imageConvertMod
 			self.imageConvertQuote = self.imageConvertModQuote
 			self.imageReplace = u'[CR][COLOR FF808080]\u250c\u2500\u2500\u2500\u2510[/COLOR][CR]'

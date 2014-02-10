@@ -1,6 +1,6 @@
 import os, re, xbmc, xbmcgui, xbmcvfs, dialogs
 from distutils.version import StrictVersion
-from util import LOG, ERROR, getSetting, setSetting, __addon__, T
+from util import ERROR, LOG, getSetting, setSetting, __addon__, T
 
 DEBUG = None
 CACHE_PATH = None
@@ -70,64 +70,15 @@ def checkKBModRemove(skinPath):
 		if backupPath and dialogPath:
 			xbmcvfs.delete(dialogPath)
 			xbmcvfs.rename(backupPath,dialogPath)
+			setSetting('keyboard_installed',False)
 			dialogs.showMessage(T(32476),T(32476),' ',T(32477))
 			return True
-				
-def checkForSkinMods(just_check_font=False):
-	skinPath = xbmc.translatePath('special://skin')
-	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
-	skinName = os.path.basename(skinPath)
-	version = getSkinVersion(skinPath)
-	LOG('XBMC Skin (In Use): %s %s' % (skinName,version))
-	localAddonsPath = os.path.join(xbmc.translatePath('special://home'),'addons')
-	localSkinPath = os.path.join(localAddonsPath,skinName)
-	version2 = getSkinVersion(localSkinPath)
-	LOG('XBMC Skin   (Home): %s %s' % (skinName,version2))
-	if __addon__.getSetting('use_skin_mods') != 'true':
-		LOG('Skin mods disabled')
-		return checkKBModRemove(localSkinPath)
-	font = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
-	install = True
-	if os.path.exists(font):
-		if StrictVersion(version2) >= StrictVersion(version):
-			fontsXmlFile = os.path.join(localSkinPath,'720p','Font.xml')
-			if not os.path.exists(fontsXmlFile): fontsXmlFile = os.path.join(localSkinPath,'1080i','Font.xml')
-			if os.path.exists(fontsXmlFile):
-				contents = open(fontsXmlFile,'r').read()
-				if 'Forum Browser' in contents:
-					LOG('Fonts mod detected')
-					install = False
-	if just_check_font: return install
-	if not install and not getSetting('use_keyboard_mod',False):
-		LOG('Keyboard mod disabled')
-		return checkKBModRemove(localSkinPath)
-	
-	dialogPath = os.path.join(skinPath,'720p','DialogKeyboard.xml')
-	if not os.path.exists(dialogPath): dialogPath = os.path.join(skinPath,'1080i','DialogKeyboard.xml')
-	if os.path.exists(dialogPath):
-		keyboardcontents = open(dialogPath,'r').read()
-		if 'Forum Browser' in keyboardcontents:
-			LOG('Keyboard mod detected')
-			return
-	
-	dialogs.showInfo('skinmods')
-	yes = xbmcgui.Dialog().yesno(T(32479),T(32480),T(32481),T(32482))
-	if not yes:
-		__addon__.setSetting('use_skin_mods','false')
-		dialogs.showMessage(T(32482),T(32484),' ',T(32485))
-		return
-	LOG('Installing Skin Mods')
-	return installSkinMods()
 
-def installSkinMods(update=False):
-	if not getSetting('use_skin_mods',False): return
-		
-	paths = getPaths()
-	#restart = False
-	
+def ensureLocalSkin(paths=None):
+	paths = paths or getPaths()
 	version = getSkinVersion(paths.skinPath)
 	version2 = getSkinVersion(paths.localSkinPath)
-	
+
 	if not os.path.exists(paths.localSkinPath) or StrictVersion(version2) < StrictVersion(version):
 		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(paths.currentSkin),T(32488),T(32489))
 		if not yesno: return
@@ -143,12 +94,56 @@ def installSkinMods(update=False):
 			dialog.close()
 		#restart = True
 		dialogs.showMessage(T(32304),T(32493),T(32494),success=True)
+		return getPaths()
+	else:
+		return paths
+		
+def fontInstalled(paths=None):
+	paths = paths or getPaths()
 	
-	LOG('Local Addons Path: %s' % paths.localAddonsPath)
-	LOG('Current skin: %s' % paths.currentSkin)
-	LOG('Skin path: %s' % paths.localSkinPath)
-	LOG('Keyboard target path: %s' % paths.dialogPath)
+	font = os.path.join(paths.skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
+	installed = False
+	if os.path.exists(font):
+		if StrictVersion(paths.versionLocal) >= StrictVersion(paths.versionUsed):
+			if os.path.exists(paths.fontPath):
+				contents = open(paths.fontPath,'r').read()
+				if 'Forum Browser' in contents:
+					LOG('Fonts mod detected')
+					installed = True
+	setSetting('font_installed',installed)
+	return installed
 	
+def keyboardInstalled(paths=None):
+	paths = paths or getPaths()
+	if os.path.exists(paths.dialogPath):
+		keyboardcontents = open(paths.dialogPath,'r').read()
+		if 'Forum Browser' in keyboardcontents:
+			LOG('Keyboard mod detected')
+			setSetting('keyboard_installed',True)
+			return True
+	return False
+			
+def checkForSkinMods():
+	paths = getPaths()
+	skinName = os.path.basename(paths.skinPath)
+	LOG('XBMC Skin (In Use): %s %s' % (skinName,paths.versionUsed))
+	LOG('XBMC Skin   (Home): %s %s' % (skinName,paths.versionLocal))
+	update = False
+	
+	if not fontInstalled(paths) and getSetting('font_installed',False):
+		installFont()
+		LOG('Restoring missing font installation')
+		update = True
+	
+	if not keyboardInstalled(paths) and getSetting('keyboard_installed',False):
+		installKeyboardMod(update=False,paths=paths)
+		LOG('Restoring missing keyboard mod installation')
+		update = True
+		
+	return update
+		
+def installFont(paths=None,update=False):
+	paths = ensureLocalSkin(paths)
 	copyFont(paths.sourceFontPath,paths.localSkinPath)
 	fontcontents = open(paths.fontPath,'r').read()
 	if not os.path.exists(paths.fontBackupPath) or not 'Forum Browser' in fontcontents:
@@ -165,13 +160,32 @@ def installSkinMods(update=False):
 		open(paths.fontPath,'w').write(modded)
 	dialogs.showMessage(T(32052),'',T(32495))
 	
-	if update and not getSetting('use_keyboard_mod',False): return True
-	return installKeyboardMod(update,paths)
-	
-def installKeyboardMod(update=True,paths=None):
-	if not paths: paths = getPaths()
-	yes = xbmcgui.Dialog().yesno(T(32496),T(32497),T(32498))
-	setSetting('use_keyboard_mod',yes and 'true' or 'false')
+def unInstallFont(paths=None):
+	paths = paths or getPaths()
+	if not os.path.exists(paths.fontBackupPath): return False
+	if os.path.exists(paths.fontPath): xbmcvfs.delete(paths.fontPath)
+	xbmcvfs.rename(paths.fontBackupPath,paths.fontPath)
+	dialogs.showMessage(T(32417),T(32590))
+	return True
+			
+def toggleFontInstallation():
+	if fontInstalled():
+		yes = dialogs.dialogYesNo(T(32466),T(32588),'',T(32466))
+		if yes:
+			unInstallFont()
+			setSetting('font_installed',False)
+	else:
+		yes = dialogs.dialogYesNo(T(32482),T(32589),'',T(32482))
+		if yes:
+			installFont()
+			setSetting('font_installed',True)
+
+def installKeyboardMod(update=True,paths=None,change=False):
+	paths = ensureLocalSkin(paths)
+	if change:
+		yes = True
+	else:
+		yes = xbmcgui.Dialog().yesno(T(32496),T(32497),T(32498))
 	
 	if yes:
 		keyboardFile = chooseKeyboardFile(paths.fbPath,paths.currentSkin)
@@ -216,6 +230,8 @@ def getPaths():
 			fontPath = fontPath.replace('720p','1080i')
 			fontBackupPath = fontBackupPath.replace('720p','1080i')
 			sourceFontXMLPath = sourceFontXMLPath.replace('720p','1080i')
+		versionUsed = getSkinVersion(skinPath)
+		versionLocal = getSkinVersion(localSkinPath)
 	return paths
 	
 def chooseKeyboardFile(fbPath,currentSkin):
@@ -225,8 +241,18 @@ def chooseKeyboardFile(fbPath,currentSkin):
 		if f.startswith('DialogKeyboard-'):
 			skinName = f.split('-',1)[-1].rsplit('.',1)[0].lower()
 			if skinName in currentSkin.lower() or skinName == 'generic' or skinName == 'video': skins.append(skinName.title())
+	remove = None
+	if keyboardInstalled():
+		remove = len(skins)
+		skins.append('Remove')
 	idx = xbmcgui.Dialog().select(T(32523),skins)
 	if idx < 0: return None
+	if remove and idx == remove:
+		checkKBModRemove(getPaths().skinPath)
+		if not keyboardInstalled():
+			setSetting('keyboard_installed',False) #Checks and resets the installed setting
+			setSetting('current_keyboard_mod','')
+		return None
 	skin = skins[idx]
 	setSetting('current_keyboard_mod',skin)
 	return 'DialogKeyboard-%s.xml' % skin.lower()
@@ -258,6 +284,7 @@ def createFontsTranslationTable():
 				
 def replaceFonts(xml,is_1080=False):
 	createFontsTranslationTable()
+	print FTT
 	for name_size,fsize in IS_1080 and FONT_SIZES_1080 or FONT_SIZES:  # @UnusedVariable
 		xml = xml.replace('ForumBrowser-font%s' % name_size,FTT[name_size])
 	return xml

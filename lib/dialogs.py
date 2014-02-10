@@ -56,7 +56,7 @@ def openWindow(windowClass,xmlFilename,return_window=False,modal=True,theme=None
 		res = '720p'
 	rightAlign = util.getSetting('current_right_align',False)
 	
-	if not util.getSetting('use_skin_mods',True):
+	if not util.getSetting('use_skin_mods',True) or not util.getSetting('font_installed',True):
 		src = os.path.join(path,'resources','skins',theme,res,xmlFilename)
 		skin = os.path.join(xbmc.translatePath(path),'resources','skins',theme,res)
 		xml = open(src,'r').read()

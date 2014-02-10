@@ -1,5 +1,5 @@
 #Forum browser common
-import sys, os, re, urllib, urllib2, texttransform, binascii, time
+import os, re, urllib, urllib2, texttransform, binascii, time
 from lib import asyncconnections, chardet
 from lib import util
 
@@ -841,7 +841,8 @@ class ForumBrowser:
 						'pb':'\[quote(?:="(?P<user>[^"]+?)")?\](?P<quote>.+?)\[/quote\](?is)'
 					}
 	
-	quoteStartFormats = {	'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
+	quoteStartFormats = {	'mb':'(?i)\[quote[^\]]*name="(?P<user>[^"]+)"[^\]]*\]',
+							#'mb':"(?i)\[quote(?:\='?(?P<user>[^']*?)'?(?: pid='(?P<pid>[^']*?)')?(?: dateline='(?P<date>[^']*?)')?)?\]",
 							'xf':'(?i)\[quote(?:\="(?P<user>[^"]*?), post: (?P<pid>[^"]*?), member: (?P<uid>[^"]*?)")?\]',
 							'vb':'(?i)\[quote(?:\=(?P<user>[^;\]]+)(?:;\d+)*)?\]',
 							'ip':'(?i)\[quote(?: name\=\'(?P<user>[^\']+)\')?[^\]]*\]',
