@@ -45,6 +45,10 @@ KNOWN ISSUES:
 
 Current Version : 2.1.47
 
+*** 2.1.48 ***
+
+Fix for post links opening the wrong link when video is in the post
+
 *** 2.1.47 ***
 
 Removed encryption settings, as password storage has been moved to the password storage module

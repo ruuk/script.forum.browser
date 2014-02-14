@@ -1284,6 +1284,12 @@ class ForumBrowser:
 		pct = start + int((ct/float(tot)) * length)
 		#print 'ct: %s tot: %s pct: %s' % (ct,tot,pct)
 		return callback(pct,text)
+		
+	def getForums(self,callback=None,donecallback=None): pass
+	
+	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None): pass
+	
+	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False): pass
 	
 def getSmiley(key):
 	for s in ForumBrowser.smiliesDefs:

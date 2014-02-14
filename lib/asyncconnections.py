@@ -64,9 +64,11 @@ AsyncHTTPResponse = _AsyncHTTPResponse
 class Connection(httplib.HTTPConnection):
 	response_class = AsyncHTTPResponse
 
-class Handler(urllib2.HTTPHandler):
+class _Handler(urllib2.HTTPHandler):
 	def http_open(self, req):
 		return self.do_open(Connection, req)
+
+Handler = _Handler
 
 def createHandlerWithCallback(callback):
 	if getSetting('disable_async_connections',False):
@@ -153,19 +155,24 @@ def create_connection(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
 		setStoppable(False)
 		resetStopRequest()
 		
+OLD_socket_create_connection = socket.create_connection
+
 def setEnabled(enable=True):
-	if not enable:
-		LOG('Asynchronous connections: Disabled')
-		global AsyncHTTPResponse
-		AsyncHTTPResponse = httplib.HTTPResponse
-		
-		global Handler
-		Handler = urllib2.HTTPHandler
-		
 	if enable:
 		LOG('Asynchronous connections: Enabled')
+		global OLD_socket_create_connection, AsyncHTTPResponse, Handler
+		
 		socket.create_connection = create_connection
-
+		AsyncHTTPResponse = _AsyncHTTPResponse
+		Handler = _Handler
+	else:
+		LOG('Asynchronous connections: Disabled')
+		global AsyncHTTPResponse, Handler
+		AsyncHTTPResponse = httplib.HTTPResponse
+		Handler = urllib2.HTTPHandler
+		if OLD_socket_create_connection: socket.create_connection = OLD_socket_create_connection
+		
+	
 # h = Handler()
 # o = urllib2.build_opener(h)
 # f = o.open(url)

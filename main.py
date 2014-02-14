@@ -1184,8 +1184,11 @@ class MessageWindow(windows.BaseWindow):
 		if checkVideo: s = dialogs.showActivitySplash(T(32311))
 			
 		try:
+			ct=0
 			for link in links:
 				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
+				item.setProperty('index',str(ct))
+				ct+=1
 				video = None
 				if checkVideo:
 					try:
@@ -1294,8 +1297,9 @@ class MessageWindow(windows.BaseWindow):
 		#video.play(source)
 		
 	def getSelectedLink(self):
-		idx = self.getControl(148).getSelectedPosition()
-		if idx < 0: return None
+		item = self.getControl(148).getSelectedItem()
+		if not item: return None
+		idx = int(item.getProperty('index'))
 		links = self.post.links()
 		if idx >= len(links): return None
 		return links[idx]
@@ -4539,6 +4543,7 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 		forum = 'TT.xbmc.org'
 	err = ''
 	try:
+		asyncconnections.setEnabled(not getSetting('disable_async_connections',False))
 		if forum.startswith('GB.'):
 			err = 'getForumBrowser(): General'
 			from lib.forumbrowser import genericparserbrowser
@@ -4557,6 +4562,10 @@ def getForumBrowser(forum=None,url=None,donecallback=None,silent=False,no_defaul
 			from lib.forumbrowser import forumrunner
 			if log_function: forumrunner.LOG = log_function
 			FB = forumrunner.ForumrunnerForumBrowser(forum,always_login=getSetting('always_login',False))
+		elif forum.startswith('YT.'):
+			err = 'getForumBrowser(): YouTube'
+			from lib.forumbrowser import youtube
+			FB = youtube.YoutubeForumBrowser(forum,always_login=getSetting('always_login',False))
 	except forumbrowser.ForumMovedException,e:
 		showError(T(32050),T(32470),'\n' + e.message,error=True)
 		return False
