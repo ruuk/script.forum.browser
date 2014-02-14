@@ -310,7 +310,8 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		data['starter'] = ''
 		data['title'] = snippet['title']
 		data['short_content'] = snippet['description'].replace('\n',' | ')
-		data['icon_url'] = snippet['thumbnails']['default']['url']
+		if 'thumbnails' in snippet:
+			data['icon_url'] = snippet['thumbnails']['default']['url']
 		data['subscribed'] = False
 		data['lastposter'] = ''
 		data['sticky'] = False
