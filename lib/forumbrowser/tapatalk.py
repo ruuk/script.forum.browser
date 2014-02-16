@@ -220,7 +220,7 @@ class TapatalkDatabaseInterface:
 	class ForumEntry(forumbrowser.ForumEntry):
 		forumType = 'TT'
 		def __init__(self,jobj):
-			self.displayName = jobj.get('name','ERROR')
+			self.displayName = jobj.get('name','')
 			self.description = jobj.get('description','ERROR')
 			self.logo = jobj.get('logo','logo')
 			url = jobj.get('url','') + '/'

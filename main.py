@@ -3949,6 +3949,7 @@ def addForum(current=False):
 		d.addItem('fr', 'Forumrunner {0}'.format(T(32558)), '../../../media/forum-browser-forumrunner.png',hlp.get('fr',''))
 		d.addItem('pb', 'ProBoards {0}'.format(T(32558)), '../../../media/forum-browser-proboards.png',hlp.get('pb',''))
 		d.addItem('yk', 'Yuku {0}'.format(T(32558)), '../../../media/forum-browser-yuku.png',hlp.get('yk',''))
+		d.addItem('yt', 'YouTube Channels', '../../../media/forum-browser-youtube.png',hlp.get('yt',''))
 		d.addItem('manual', T(32559), '../../../media/forum-browser-plus.png',hlp.get('manual',''))
 
 		source = d.getResult(select=last)
@@ -4025,7 +4026,7 @@ def addItemToMenuNonFB(menu,f,existing,update=False):
 	desc = u'[B]{0}[/B]: [COLOR FFFF9999]{1}[/COLOR][CR][CR][B]{2}[/B]: [COLOR FFFF9999]{3}[/COLOR]'.format(T(32441),f.category,T(32290),util.makeUnicode(desc,'utf-8'))
 	bgcolor = formatHexColorToARGB('FFFFFF')
 	disabled = f.name in existing and 'ALREADY ADDED' or False
-	menu.addItem(f, f.name, f.getLogo(), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
+	menu.addItem(f, f.displayName or f.name, f.getLogo(), desc,disabled=disabled,bgcolor=bgcolor,interface=interface,function=rf,accuracy=ra,update=update,description_window='show')
 			
 def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 	if source == 'fr':
@@ -4035,6 +4036,9 @@ def addForumFromTapatalkDB(stay_open_on_select=False,source=None):
 		db = tapatalk.ProBoardsDatabaseInterface()
 	elif source == 'yk':
 		db = tapatalk.YukuDatabaseInterface()
+	elif source == 'yt':
+		from lib.forumbrowser import youtube
+		db = youtube.YouTubeCategoryInterface()
 	else:
 		db = tapatalk.TapatalkDatabaseInterface()
 	res = True
@@ -4151,7 +4155,7 @@ def doAddForumFromTTorFR_DB(f):
 	if os.path.exists(f.getLogo()):
 		import shutil
 		shutil.copyfile(f.getLogo(), os.path.join(util.CACHE_PATH,os.path.basename(f.getLogo())))
-	saveForum(f.forumType,forumID,f.name,f.description,f.url,f.getLogo(),'FFFFFF')
+	saveForum(f.forumType,forumID,f.displayName or f.name,f.description,f.url,f.getLogo(),'FFFFFF')
 	odb = forumbrowser.FBOnlineDatabase()
 	rules = isinstance(f,dict) and odb.getForumRules(forumID) or {}
 	old_rules = util.loadForumSettings(forumID,get_rules=True)

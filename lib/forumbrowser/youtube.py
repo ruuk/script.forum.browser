@@ -5,7 +5,7 @@ import forumbrowser
 import requests2 as requests
 import texttransform
 import iso8601
-
+		
 class YouTubeAPISection:
 	key = 'AIzaSyCdPQr0OBjSUdLqWoP29Z7oGp2NnBh5gNI'
 	def __init__(self,session,base_url):
@@ -23,6 +23,8 @@ class YouTubeAPI:
 	
 	def __init__(self):
 		self.session = requests.Session()
+		self.GuideCategories = YouTubeAPISection(self.session,self.baseURL + 'guideCategories')
+		self.Search = YouTubeAPISection(self.session,self.baseURL + 'search')
 		self.Channels = YouTubeAPISection(self.session,self.baseURL + 'channels')
 		self.Playlists = YouTubeAPISection(self.session,self.baseURL + 'playlists')
 		self.PlaylistItems = YouTubeAPISection(self.session,self.baseURL + 'playlistItems')
@@ -33,6 +35,85 @@ class YouTubeAPI:
 		req = self.session.get(url)
 		return req.json()
 
+################################################################################
+# YouTubeCategoryInterface
+################################################################################
+class YouTubeCategoryInterface:
+	searchURL = 'https://directory.tapatalk.com/search.php?search={terms}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	categoryURL = 'https://directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	categoryURL2 = 'https://s2directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
+	
+	class ForumEntry(forumbrowser.ForumEntry):
+		forumType = 'YT'
+		def __init__(self,jobj):
+			snippet = jobj['snippet']
+			self.displayName = snippet.get('title','')
+			self.description = snippet.get('description','')
+			if 'thumbnails' in snippet:
+				self.logo = snippet['thumbnails'].get('default',{}).get('url')
+			else:
+				self.logo = ''
+			self.url = jobj['id']
+			if isinstance(self.url,dict): self.url = self.url['channelId']
+			self.name = 'youtube.' + self.displayName.replace(' ','_')
+			self.forumID = 'YT.' + self.name
+			self.category = ''
+			self.categoryID = self.url
+	
+	def __init__(self):
+		self.api = YouTubeAPI()
+		self.initPageData()
+		
+	def initPageData(self):
+		self.page = 1
+		self.prev = None
+		self.next = None
+		
+	def getPageToken(self,page):
+		if page > self.page:
+			return self.next
+		elif page < self.page:
+			return self.prev
+		return None
+		
+	def setPageData(self,page,jobj):
+		self.page = page
+		self.next = jobj.get('nextPageToken')
+		self.prev = jobj.get('prevPageToken')
+		
+	def search(self,terms,page=1,per_page=20,p_dialog=None):
+		pageToken = self.getPageToken(page)
+		if pageToken:
+			channels = self.api.Search.list(part='id,snippet',type='channel',maxResults=per_page,q=terms,pageToken=pageToken)
+		else:
+			channels = self.api.Search.list(part='id,snippet',type='channel',maxResults=per_page,q=terms)
+		return self.processChannels(page,channels)
+	
+	def categories(self,cat_id=0,page=1,per_page=20,p_dialog=None):
+		if cat_id == 0:
+			self.initPageData()
+			return {'cats':self.getCategories()}
+		pageToken = self.getPageToken(page)
+		if pageToken:
+			channels = self.api.Channels.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id,pageToken=pageToken)
+		else:
+			channels = self.api.Channels.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id)
+		return {'forums':self.processChannels(page,channels)}
+	
+	def getCategories(self):
+		ret = []
+		cats = self.api.GuideCategories.list(part='id,snippet',regionCode='us')
+		for i in cats['items']:
+			ret.append({'id':i['id'],'name':i['snippet']['title'],'icon':''})
+		return ret
+		
+	def processChannels(self,page,channels):
+		self.setPageData(page,channels)
+		entries = []
+		for i in channels['items']:
+			entries.append(self.ForumEntry(i))
+		return entries
+		
 ################################################################################
 # ForumPost
 ################################################################################
@@ -206,10 +287,6 @@ class PageData:
 		self.totalItems = total_items
 		self.perPage = per_page
 		self.isReplies = False
-		print next_page
-		print prev_page
-		print total_items
-		print per_page
 	
 	def getPageNumber(self,page=None):
 		return 1
@@ -240,6 +317,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		self.forum = forum[3:]
 		self.channelID = None
 		self.logo = ''
+		self.name = self.forum
 		self.loadForumFile()
 		self.api = YouTubeAPI()
 		self.initialize()
@@ -250,6 +328,8 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		if not os.path.exists(fname):
 			fname = os.path.join(util.FORUMS_STATIC_PATH,forum)
 			if not os.path.exists(fname): return False
+		with open(fname,'r') as f:
+			self.name = f.readline().strip('\n').lstrip('#')
 		self.loadForumData(fname)
 		self.channelID = self.urls.get('server','')
 		self.logo = self.urls.get('logo','')
@@ -257,7 +337,10 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		
 	def initFilters(self):
 		self.filters.update({	'link':'(?P<text>(?P<url>https?://[^\s]+))(?:\s|$)'})
-								
+	
+	def getDisplayName(self):
+		return self.name
+		
 	def canSearch(self): return self.canSearchPosts() or self.canSearchThreads() or self.canSearchAdvanced()
 	def canSearchPosts(self): return False
 	def canSearchThreads(self): return False
@@ -301,6 +384,12 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		forums = []
 		for name, ID in channels['items'][0]['contentDetails']['relatedPlaylists'].items():
 			forums.append({'forumid':ID,'title':name.title(),'description':name.title(),'subscribed':False,'subforum':False})
+		lists = self.api.Playlists.list(part='id,snippet',channelId=self.channelID)
+		for i in lists['items']:
+			title = i['snippet'].get('title','').title()
+			desc = i['snippet'].get('description','') or title
+			thumb = i['snippet']['thumbnails']['default']['url']
+			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb})
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':'','pm_counts':None,'stats':None}),donecallback)
 	
 	def createThreadDict(self,item):

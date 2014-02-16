@@ -259,6 +259,12 @@
 								<texture>../../../media/forum-browser-yuku.png</texture>
 								<visible>StringCompare(ListItem.Property(type),YK)</visible>
 							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../../media/forum-browser-youtube.png</texture>
+								<visible>StringCompare(ListItem.Property(type),YT)</visible>
+							</control>
 						</control>
 					</itemlayout>
 					<focusedlayout height="39">
@@ -500,6 +506,12 @@
 								<height>24</height>
 								<texture>../../../media/forum-browser-yuku.png</texture>
 								<visible>StringCompare(ListItem.Property(type),YK)</visible>
+							</control>
+							<control type="image">
+								<width>24</width>
+								<height>24</height>
+								<texture>../../../media/forum-browser-youtube.png</texture>
+								<visible>StringCompare(ListItem.Property(type),YT)</visible>
 							</control>
 						</control>
 					</focusedlayout>
