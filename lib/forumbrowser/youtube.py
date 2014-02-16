@@ -378,29 +378,57 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 
 	def canOpenLatest(self): return False
 	
-	def getForums(self,callback=None,donecallback=None):
+	def deepDictVal(self,adict,keys):
+		for key in keys:
+			if key in adict:
+				adict = adict[key]
+			else:
+				return ''
+		return adict
+		
+	def getForums(self,callback=None,donecallback=None,token=None):
 		if not callback: callback = self.fakeCallback
-		channels = self.api.Channels.list(part='id,snippet,contentDetails',id=self.channelID)
+		channels = self.api.Channels.list(part='id,snippet,contentDetails,brandingSettings,statistics',id=self.channelID)
+		subscribers = self.deepDictVal(channels['items'][0],('statistics','subscriberCount'))
+		videos = self.deepDictVal(channels['items'][0],('statistics','videoCount'))
+		comments = self.deepDictVal(channels['items'][0],('statistics','commentCount'))
+		stats = {'total_members': subscribers, 'total_threads':videos,'total_posts':comments}
+#		"statistics": {
+#	    "viewCount": "1598085378",
+#	    "commentCount": "29994",
+#	    "subscriberCount": "6321550",
+#	    "hiddenSubscriberCount": false,
+#	    "videoCount": "4279"
+		baseIcon = '../../../media/forum-browser-%s.png'
 		forums = []
-		for name, ID in channels['items'][0]['contentDetails']['relatedPlaylists'].items():
-			forums.append({'forumid':ID,'title':name.title(),'description':name.title(),'subscribed':False,'subforum':False})
-		lists = self.api.Playlists.list(part='id,snippet',channelId=self.channelID)
+		if not token:
+			for name, ID in channels['items'][0]['contentDetails']['relatedPlaylists'].items():
+				forums.append({'forumid':ID,'title':name.title(),'description':name.title(),'subscribed':False,'subforum':False,'logo_url':baseIcon % name})
+		if token:
+			lists = self.api.Playlists.list(part='id,snippet,contentDetails',maxResults=50,pageToken=token,channelId=self.channelID)
+		else:
+			lists = self.api.Playlists.list(part='id,snippet,contentDetails',maxResults=50,channelId=self.channelID)
 		for i in lists['items']:
+			vidCount = self.deepDictVal(i,('contentDetails','itemCount'))
 			title = i['snippet'].get('title','').title()
 			desc = i['snippet'].get('description','') or title
+			title = '{0} ({1})'.format(title,vidCount)
 			thumb = i['snippet']['thumbnails']['default']['url']
-			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb})
-		return self.finish(forumbrowser.FBData(forums,extra={'logo':'','pm_counts':None,'stats':None}),donecallback)
+			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb,'thumb':thumb})
+		if 'nextPageToken' in lists:
+			forums.append({'forumid':'playlists-%s' % lists['nextPageToken'],'title':'More'})
+		logo = self.deepDictVal(channels['items'][0],('brandingSettings','image','bannerMobileImageUrl'))
+		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
 	def createThreadDict(self,item):
 		snippet = item['snippet']
 		data = {}
 		data['threadid'] = snippet['resourceId']['videoId']
-		data['starter'] = ''
+		data['starter'] = snippet.get('channelTitle','')
 		data['title'] = snippet['title']
 		data['short_content'] = snippet['description'].replace('\n',' | ')
 		if 'thumbnails' in snippet:
-			data['icon_url'] = snippet['thumbnails']['default']['url']
+			data['icon_url'] = data['thumb'] = snippet['thumbnails']['default']['url']
 		data['subscribed'] = False
 		data['lastposter'] = ''
 		data['sticky'] = False
@@ -408,6 +436,12 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
+		if forumid.startswith('playlists-'):
+			token = forumid.split('-',1)[-1]
+			forums = self.getForums(None, None,token=token).data
+			fbdata = forumbrowser.FBData([],None)
+			fbdata['forums'] = forums
+			return self.finish(fbdata,donecallback) 
 		try:
 			if not callback(40,''): return None
 			if page and not str(page).isdigit():
@@ -447,7 +481,8 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		tot = len(comments['feed']['entry'])
 		for entry in comments['feed']['entry']:
 			fp = self.getForumPost(entry)
-			fp.avatar = self.api.Channels.list(part='snippet',id=fp.userId)['items'][0]['snippet']['thumbnails']['default']['url']
+			aitems = self.api.Channels.list(part='snippet',id=fp.userId)['items']
+			fp.avatar = len(aitems) and self.deepDictVal(aitems[0],('snippet','thumbnails','default','url')) or ''
 			fp.postNumber = ct
 			citems.append(fp)
 			if not self.updateProgress(callback, 20, 75, pct_ct, tot, util.T(32103)): break

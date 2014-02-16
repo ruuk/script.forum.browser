@@ -2470,6 +2470,7 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty('reply_count',reply_count)
 			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
 			item.setProperty('avatar',str(tdict.get('icon_url') or ''))
+			item.setProperty('thumbnail',str(tdict.get('thumb') or ''))
 			item.setProperty('replies',str(tdict.get('reply_number') or ''))
 			item.setProperty('views',str(tdict.get('view_number') or ''))
 			item.setProperty('last_reply_time',str(tdict.get('last_reply_time') or ''))
@@ -2491,11 +2492,14 @@ class ThreadsWindow(windows.PageWindow):
 			title = texttransform.convertHTMLCodes(re.sub('<[^<>]+?>','',title) or '?',FB)
 			item = xbmcgui.ListItem(label=self.textBase % T(32164),label2=text % title)
 			item.setInfo('video',{"Genre":'is_forum'})
-			item.setProperty("last",self.forum_desc_base % texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB))
+			desc = self.forum_desc_base % texttransform.convertHTMLCodes(FB.MC.tagFilter.sub('',FB.MC.brFilter.sub(' ',desc)),FB)
+			item.setProperty("last",desc)
+			item.setProperty("preview",desc)
 			item.setProperty("title",title)
 			item.setProperty("topic",title)
 			item.setProperty("id",fid)
 			item.setProperty("fid",fid)
+			item.setProperty('thumbnail',str(fdict.get('thumb') or ''))
 			item.setProperty("is_forum",'True')
 			if fdict.get('new_post'): item.setProperty('unread','unread')
 			item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
@@ -2908,7 +2912,7 @@ class ForumsWindow(windows.BaseWindow):
 			if data.error == 'CANCEL': return
 			dialogs.showMessage(T(32050),T(32171),T(32053),'[CR]'+data.error,success=False)
 			return
-		self.setLogo(data.getExtra('logo'))
+		self.setLogo(data.getExtra('logo'),data.getExtra('force',False))
 		self.data = data
 		self.empty = True
 		
@@ -2946,6 +2950,7 @@ class ForumsWindow(windows.BaseWindow):
 				item.setProperty("id",unicode(fid))
 				item.setProperty("link",fdict.get('link',''))
 				item.setProperty("artwork",fdict.get('logo_url') or '')
+				item.setProperty("thumbnail",fdict.get('thumb') or '')
 				if fdict.get('new_post'): item.setProperty('unread','unread')
 				item.setProperty('subscribed',fdict.get('subscribed') and 'subscribed' or '')
 				self.getControl(120).addItem(item)
@@ -2975,11 +2980,11 @@ class ForumsWindow(windows.BaseWindow):
 			return
 		return self.getControl(250).setImage(logopath)
 			
-	def setLogo(self,logo):
+	def setLogo(self,logo,force=False):
 		if not logo: return
 		if getSetting('save_logos',False):
 			exists, logopath = util.getCachedLogo(logo,FB.getForumID())
-			if exists:
+			if exists and not force:
 				logo = logopath
 			else:
 				
@@ -4258,6 +4263,7 @@ def getCurrentLogo(forumID=None,logo=None):
 	if not forumID: forumID = FB.getForumID()
 	if not forumID: return
 	root, ext = os.path.splitext(logo) #@UnusedVariable
+	ext = re.split('[^\w\.]',ext,1)[0]
 	logopath = os.path.join(CACHE_PATH,forumID + (ext or '.jpg'))
 	if os.path.exists(logopath): return logopath
 	logopath = os.path.join(CACHE_PATH,forumID + '.png')

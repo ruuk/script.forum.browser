@@ -43,11 +43,12 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.47
+Current Version : 2.1.48
 
 *** 2.1.48 ***
 
 Fix for post links opening the wrong link when video is in the post
+Added support for YouTube channels as forums
 
 *** 2.1.47 ***
 

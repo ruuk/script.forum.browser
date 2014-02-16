@@ -676,6 +676,13 @@
 								<height>28</height>
 								<texture>$INFO[ListItem.Property(avatar)]</texture>
 							</control>
+							<control type="image">
+								<posx>-20</posx>
+								<posy>38</posy>
+								<width>53</width>
+								<height>40</height>
+								<texture>$INFO[ListItem.Property(thumbnail)]</texture>
+							</control>
 						</control>
 						
 						<control type="group">
@@ -972,6 +979,13 @@
 								<width>28</width>
 								<height>28</height>
 								<texture>$INFO[ListItem.Property(avatar)]</texture>
+							</control>
+							<control type="image">
+								<posx>-20</posx>
+								<posy>38</posy>
+								<width>53</width>
+								<height>40</height>
+								<texture>$INFO[ListItem.Property(thumbnail)]</texture>
 							</control>
 						</control>
 						

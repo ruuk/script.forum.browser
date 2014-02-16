@@ -477,7 +477,7 @@
 					<textcolor>FFBBBBBB</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B]]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
 				</control>
 				<control type="label">
 					<visible>!StringCompare(Window.Property(header_is_dark),1)</visible>
@@ -489,7 +489,7 @@
 					<textcolor>FF444444</textcolor>
 					<aligny>center</aligny>
 					<align>center</align>
-					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B]]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
+					<label>$INFO[Window.Property(stats_total_threads),[B]$ADDON[script.forum.browser 32911]:[/B] ]$INFO[Window.Property(stats_total_posts), [B]$ADDON[script.forum.browser 32912]:[/B] ]$INFO[Window.Property(stats_total_members), [B]$ADDON[script.forum.browser 32546]:[/B] ]$INFO[Window.Property(stats_total_online), [B]$ADDON[script.forum.browser 32547]:[/B] ]</label>
 				</control>
 			</control>
 
@@ -713,6 +713,13 @@
 							<width>40</width>
 							<height>40</height>
 							<texture>$INFO[Listitem.Property(artwork)]</texture>
+						</control>
+						<control type="image">
+							<posx>-70</posx>
+							<posy>0</posy>
+							<width>60</width>
+							<height>50</height>
+							<texture>$INFO[Listitem.Property(thumbnail)]</texture>
 						</control>
 						<control type="group">
 							<visible>StringCompare(ListItem.Genre,)</visible>
@@ -938,6 +945,13 @@
 							<width>40</width>
 							<height>40</height>
 							<texture>$INFO[Listitem.Property(artwork)]</texture>
+						</control>
+						<control type="image">
+							<posx>-70</posx>
+							<posy>0</posy>
+							<width>60</width>
+							<height>50</height>
+							<texture>$INFO[Listitem.Property(thumbnail)]</texture>
 						</control>
 						<control type="group">
 							<visible>StringCompare(ListItem.Genre,)</visible>

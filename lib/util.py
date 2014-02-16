@@ -1,4 +1,4 @@
-import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii, math
+import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii, math, re
 from lib import chardet
 from webviewer import video #@UnresolvedImport
 
@@ -389,7 +389,9 @@ def getForumPath(forumID,just_path=False):
 
 def getCachedLogo(logo,forumID,clear=False):
 	root, ext = os.path.splitext(logo) #@UnusedVariable
+	ext = re.split('[^\w\.]',ext,1)[0]
 	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
+	
 	if not ext:
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.png')
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.gif')
