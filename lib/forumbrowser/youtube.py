@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, time
+import os, time, xbmc, xbmcgui
 from lib import util
 import forumbrowser
 import requests2 as requests
@@ -19,7 +19,13 @@ class YouTubeAPISection:
 		return req.json()
 
 class YouTubeAPI:
+	clientID = '626473115622.apps.googleusercontent.com'
+	clientS = 'KwvZEqA-gI9UxCglFhCC61SY'
 	baseURL = 'https://www.googleapis.com/youtube/v3/'
+	auth1URL = 'https://accounts.google.com/o/oauth2/device/code'
+	auth2URL = 'https://accounts.google.com/o/oauth2/token'
+	authScope = 'https://www.googleapis.com/auth/youtube'
+	grantType = 'http://oauth.net/grant_type/device/1.0'
 	
 	def __init__(self):
 		self.session = requests.Session()
@@ -29,12 +35,70 @@ class YouTubeAPI:
 		self.Playlists = YouTubeAPISection(self.session,self.baseURL + 'playlists')
 		self.PlaylistItems = YouTubeAPISection(self.session,self.baseURL + 'playlistItems')
 		self.Videos = YouTubeAPISection(self.session,self.baseURL + 'videos')
+		self.authPollInterval = 5
+		self.authExpires = time.time()
+		self.deviceCode = ''
+		self.verificationURL = 'http://www.google.com/device'
 		
 	def Comments(self,video_id,url=None):
 		url = url or 'https://gdata.youtube.com/feeds/api/videos/{0}/comments?orderby=published&alt=json'.format(video_id)
 		req = self.session.get(url)
 		return req.json()
+		
+	def authorize(self):
+		userCode = self.getDeviceUserCode()
+		self.showUserCode(userCode)
+		d = xbmcgui.DialogProgress()
+		d.create('Waiting','Waiting for auth...')
+		ct=0
+		while True:
+			d.update(ct,'Waiting for auth...')
+			json = self.pollAuthServer()
+			if 'access_token' in json: break
+			if d.iscanceled(): return
+			for x in range(0,self.authPollInterval):
+				xbmc.sleep(1000)
+				if d.iscanceled(): return
+			ct+=1
+		self.saveData(json)
+		
+	def saveData(self,json):
+		print json
+		
+	def pollAuthServer(self):
+		json = self.session.post(self.auth2URL,data={	'client_id':self.clientID,
+															'client_secret':self.clientS,
+															'code':self.deviceCode,
+															'grant_type':self.grantType
+														})
+		if 'errpr' in json and json['error'] == 'slow_down':
+			self.authPollInterval += 1
+		return json
+#		{
+#		  "access_token":"1/fFAGRNJru1FTz70BzhT3Zg",
+#		  "expires_in":3920,
+#		  "token_type":"Bearer",
+#		  "refresh_token":"1/6BMfW9j53gdGImsixUH6kU5RsR4zwI9lUVX-tqf8JXQ"
+#		}
 
+	def showUserCode(self,user_code):
+		xbmcgui.Dialog().ok('Authorization','Go to: ' + self.verificationURL,'Enter code: ' + user_code,'Click OK when done.')
+		
+	def getDeviceUserCode(self):
+		json = self.session.post(self.auth1URL,data={'client_id':self.clientID,'scope':self.authScope}).json()
+#		{
+#		  "device_code" : "4/L9fTtLrhY96442SEuf1Rl3KLFg3y",
+#		  "user_code" : "a9xfwk9c",
+#		  "verification_url" : "http://www.google.com/device",
+#		  "expires_in" : "1800"
+#		  "interval" : 5,
+#		}
+		self.authPollInterval = json.get('interval',5)
+		self.authExpires = json.get('expires_in',1800) + time.time()
+		self.deviceCode = json.get('device_code','')
+		self.verificationURL = json.get('verification_url',self.verificationURL)
+		json.get('user_code')
+		
 ################################################################################
 # YouTubeCategoryInterface
 ################################################################################
