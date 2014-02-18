@@ -497,9 +497,11 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		self.channelID = None
 		self.logo = ''
 		self.name = self.forum
+		self.userName = ''
 		self.loadForumFile()
 		self.api = YouTubeAPI()
 		self.initialize()
+		self.getUserData()
 	
 	def loadForumFile(self):
 		forum = self.getForumID()
@@ -548,6 +550,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	def canPost(self): return self.isLoggedIn()
 		
 	def canDelete(self,user,target='POST'):
+		if not self.userName == user: return False
 		return target == 'POST' and self.isLoggedIn()
 			
 	def canEditPost(self,user): return False
@@ -561,6 +564,12 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	def isLoggedIn(self):
 		return self.api.authorized()
 		
+	def getUserData(self):
+		if not self.isLoggedIn(): return
+		channel = self.api.Channels.list(part='id,snippet',mine='true')
+		self.userName = deepDictVal(channel['items'][0],('snippet','title'))
+		LOG('USER: {0}'.format(self.userName))
+	
 	def getForums(self,callback=None,donecallback=None,token=None):
 		if not callback: callback = self.fakeCallback
 		channels = self.api.Channels.list(part='id,snippet,contentDetails,brandingSettings,statistics',id=self.channelID)
