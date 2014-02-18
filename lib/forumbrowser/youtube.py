@@ -490,14 +490,15 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	PageData = PageData
 	
 	def __init__(self,forum,always_login=False,message_converter=None):
-		from lib import asyncconnections
-		asyncconnections.setEnabled(False)
 		forumbrowser.ForumBrowser.__init__(self,forum,always_login=always_login,message_converter=texttransform.MessageConverter)
 		self.forum = forum[3:]
 		self.channelID = None
 		self.logo = ''
 		self.name = self.forum
 		self.userName = ''
+		self.googlePlusID = ''
+		self.channelTitle = ''
+		self.channelGooglePlusID = ''
 		self.loadForumFile()
 		self.api = YouTubeAPI()
 		self.initialize()
@@ -550,7 +551,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	def canPost(self): return self.isLoggedIn()
 		
 	def canDelete(self,user,target='POST'):
-		if not self.userName == user: return False
+		if self.userName != user and self.userName != self.channelTitle and self.googlePlusID != self.channelGooglePlusID: return False
 		return target == 'POST' and self.isLoggedIn()
 			
 	def canEditPost(self,user): return False
@@ -566,16 +567,20 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		
 	def getUserData(self):
 		if not self.isLoggedIn(): return
-		channel = self.api.Channels.list(part='id,snippet',mine='true')
-		self.userName = deepDictVal(channel['items'][0],('snippet','title'))
-		LOG('USER: {0}'.format(self.userName))
+		channel = self.api.Channels.list(part='id,snippet,contentDetails',mine='true')['items'][0]
+		self.userName = deepDictVal(channel,('snippet','title'))
+		self.googlePlusID = deepDictVal(channel,('contentDetails','googlePlusUserId'))
+		LOG('USER: {0} ({1})'.format(self.userName,self.googlePlusID))
 	
 	def getForums(self,callback=None,donecallback=None,token=None):
 		if not callback: callback = self.fakeCallback
 		channels = self.api.Channels.list(part='id,snippet,contentDetails,brandingSettings,statistics',id=self.channelID)
-		subscribers = deepDictVal(channels['items'][0],('statistics','subscriberCount'))
-		videos = deepDictVal(channels['items'][0],('statistics','videoCount'))
-		comments = deepDictVal(channels['items'][0],('statistics','commentCount'))
+		channel = channels['items'][0]
+		self.channelTitle = channel['snippet'].get('title')
+		self.channelGooglePlusID = deepDictVal(channel,('contentDetails','googlePlusUserId'))
+		subscribers = deepDictVal(channel,('statistics','subscriberCount'))
+		videos = deepDictVal(channel,('statistics','videoCount'))
+		comments = deepDictVal(channel,('statistics','commentCount'))
 		stats = {'total_members': subscribers, 'total_threads':videos,'total_posts':comments}
 #		"statistics": {
 #	    "viewCount": "1598085378",
@@ -586,7 +591,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		baseIcon = '../../../media/forum-browser-%s.png'
 		forums = []
 		if not token:
-			for name, ID in channels['items'][0]['contentDetails']['relatedPlaylists'].items():
+			for name, ID in channel['contentDetails']['relatedPlaylists'].items():
 				forums.append({'forumid':ID,'title':name.title(),'description':name.title(),'subscribed':False,'subforum':False,'logo_url':baseIcon % name})
 		if token:
 			lists = self.api.Playlists.list(part='id,snippet,contentDetails',maxResults=50,pageToken=token,channelId=self.channelID)
@@ -601,7 +606,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb,'thumb':thumb})
 		if 'nextPageToken' in lists:
 			forums.append({'forumid':'playlists-%s' % lists['nextPageToken'],'title':'More'})
-		logo = deepDictVal(channels['items'][0],('brandingSettings','image','bannerMobileImageUrl'))
+		logo = deepDictVal(channel,('brandingSettings','image','bannerMobileImageUrl'))
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
 	def createThreadDict(self,item):

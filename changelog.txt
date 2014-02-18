@@ -43,12 +43,13 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.48
+Current Version : 2.1.49
 
 *** 2.1.49 ***
 
 YouTube: Added authorization in forum settings
 YouTube: Added the ability to post and delete comments
+YouTube: Fix for errors when trying to add channels
 
 *** 2.1.48 ***
 

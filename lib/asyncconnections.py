@@ -86,74 +86,64 @@ def createHandlerWithCallback(callback):
 	
 	return handler
 
-def create_connection(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
-					  source_address=None):
-	"""Connect to *address* and return the socket object.
-
-	Convenience function.  Connect to *address* (a 2-tuple ``(host,
-	port)``) and return the socket object.  Passing the optional
-	*timeout* parameter will set the timeout on the socket instance
-	before attempting to connect.  If no *timeout* is supplied, the
-	global default timeout setting returned by :func:`getdefaulttimeout`
-	is used.  If *source_address* is set it must be a tuple of (host, port)
-	for the socket to bind as a source address before making the connection.
-	An host of '' or port 0 tells the OS to use the default.
-	"""
-
-	host, port = address
-	err = None
+def checkStop():
+	if xbmc.abortRequested:
+		LOG(' -- XBMC requested abort during wait for connection to server: raising exception -- ')
+		raise AbortRequestedException('socket[asyncconnections].create_connection')
+	elif STOP_REQUESTED:
+		LOG('Stop requested during wait for connection to server: raising exception')
+		resetStopRequest()
+		raise StopRequestedException('socket[asyncconnections].create_connection')
+		
+def waitConnect(sock,timeout):
+	start = time.time()
+	while time.time() - start < timeout:
+		sel = select.select([], [sock], [], 0)
+		if len(sel[1]) > 0:
+			break
+		checkStop()
+		time.sleep(0.1)
+	sock.setblocking(True)
+	return sock
+	
+def create_connection(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, source_address=None):
 	setStoppable(True)
 	try:
-		for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
-			if xbmc.abortRequested:
-				LOG(' -- XBMC requested abort during wait for connection to server: raising exception -- ')
-				raise AbortRequestedException('socket[asyncconnections].create_connection')
-			elif STOP_REQUESTED:
-				LOG('Stop requested during wait for connection to server: raising exception')
-				resetStopRequest()
-				raise StopRequestedException('socket[asyncconnections].create_connection')
-			af, socktype, proto, canonname, sa = res  # @UnusedVariable
-			sock = None
-			try:
-				sock = socket.socket(af, socktype, proto)
-				if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
-					sock.settimeout(timeout)
-				sock.setblocking(False)
-				if source_address:
-					sock.bind(source_address)
-				err = sock.connect_ex(sa)
-				#print os.strerror(err) #Operation now in progress
-				start = time.time()
-				while time.time() - start < timeout:
-					sel = select.select([], [sock], [], 0)
-					if len(sel[1]) > 0:
-						break
-					if xbmc.abortRequested:
-						LOG(' -- XBMC requested abort during wait for connection to server: raising exception -- ')
-						raise AbortRequestedException('socket[asyncconnections].create_connection')
-					elif STOP_REQUESTED:
-						LOG('Stop requested during wait for connection to server: raising exception')
-						resetStopRequest()
-						raise StopRequestedException('socket[asyncconnections].create_connection')
-					#err = sock.connect_ex(sa)
-					#print time.time() #Operation already in progress
-					time.sleep(0.1)
-				#print os.strerror(sock.connect_ex(sa)) #Success
-				sock.setblocking(True)
-				return sock
-	
-			except socket.error as _:
-				err = _
-				if sock is not None:
-					sock.close()
-	
-		if err is not None:
-			raise err
-		else:
-			raise socket.error("getaddrinfo returns an empty list")
+		return _create_connection(address, timeout=timeout, source_address=source_address)
 	finally:
 		setStoppable(False)
 		resetStopRequest()
+		
+def _create_connection(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, source_address=None):
+	host, port = address
+	err = None
+	for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
+		checkStop()
+		af, socktype, proto, canonname, sa = res  # @UnusedVariable
+		sock = None
+		try:
+			sock = socket.socket(af, socktype, proto)
+			if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
+				sock.settimeout(timeout)
+			if source_address:
+				sock.bind(source_address)
+			if port == 443: #SSL
+				sock.connect(sa)
+			else:
+				sock.setblocking(False)
+				err = sock.connect_ex(sa)
+				waitConnect(sock,timeout)
+			return sock
+
+		except socket.error as _:
+			err = _
+			if sock is not None:
+				sock.close()
+
+	if err is not None:
+		raise err
+	else:
+		raise socket.error("getaddrinfo returns an empty list")
 		
 OLD_socket_create_connection = socket.create_connection
 
