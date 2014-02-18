@@ -5,22 +5,55 @@ import forumbrowser
 import requests2 as requests
 import texttransform
 import iso8601
+
+def LOG(msg):
+	util.LOG('YouTube: %s' % msg)
+	
+def authorize(settings):
+	try:
+		api = YouTubeAPI()
+		success = api.authorize()
+	except:
+		util.ERROR('Failed to authorize YouTube user')
+		return False
+	if success:
+		LOG('YouTube user authorized')
+	else:
+		LOG('YouTube not authorized: No Error')
+	return False
+	
+def authorized():
+	return bool(util.getSetting('youtube_access_token'))
+
+def deepDictVal(adict,keys):
+	for key in keys:
+		if key in adict:
+			adict = adict[key]
+		else:
+			return ''
+	return adict
 		
 class YouTubeAPISection:
 	key = 'AIzaSyCdPQr0OBjSUdLqWoP29Z7oGp2NnBh5gNI'
-	def __init__(self,session,base_url):
-		self.session = session
-		self.baseURL = base_url
+	def __init__(self,api,base_url):
+		self.api = api
+		self.session = api.session
+		self.baseURL = api.baseURL + base_url
 		
 	def list(self, **kwargs):
 		params = kwargs
-		params['key'] = self.key
-		req = self.session.get(self.baseURL,params=params)
+		
+		if self.api.authorized():
+			headers = {'Authorization': 'Bearer ' + self.api.getToken()}
+			req = self.session.get(self.baseURL,params=params,headers=headers)
+		else:
+			params['key'] = self.key
+			req = self.session.get(self.baseURL,params=params)
 		return req.json()
 
 class YouTubeAPI:
-	clientID = '626473115622.apps.googleusercontent.com'
-	clientS = 'KwvZEqA-gI9UxCglFhCC61SY'
+	clientID = '626473115622-i9l4ujmcdcn91cpqgq27imqt0l5e4muj.apps.googleusercontent.com'
+	clientS = 'Epukfa1a5ObgsJjxwUG6veuY'
 	baseURL = 'https://www.googleapis.com/youtube/v3/'
 	auth1URL = 'https://accounts.google.com/o/oauth2/device/code'
 	auth2URL = 'https://accounts.google.com/o/oauth2/token'
@@ -29,16 +62,55 @@ class YouTubeAPI:
 	
 	def __init__(self):
 		self.session = requests.Session()
-		self.GuideCategories = YouTubeAPISection(self.session,self.baseURL + 'guideCategories')
-		self.Search = YouTubeAPISection(self.session,self.baseURL + 'search')
-		self.Channels = YouTubeAPISection(self.session,self.baseURL + 'channels')
-		self.Playlists = YouTubeAPISection(self.session,self.baseURL + 'playlists')
-		self.PlaylistItems = YouTubeAPISection(self.session,self.baseURL + 'playlistItems')
-		self.Videos = YouTubeAPISection(self.session,self.baseURL + 'videos')
+		self.GuideCategories = YouTubeAPISection(self, 'guideCategories')
+		self.Search = YouTubeAPISection(self, 'search')
+		self.Channels = YouTubeAPISection(self, 'channels')
+		self.Playlists = YouTubeAPISection(self, 'playlists')
+		self.PlaylistItems = YouTubeAPISection(self, 'playlistItems')
+		self.Videos = YouTubeAPISection(self, 'videos')
 		self.authPollInterval = 5
-		self.authExpires = time.time()
+		self.authExpires = int(time.time())
 		self.deviceCode = ''
 		self.verificationURL = 'http://www.google.com/device'
+		self.loadToken()
+		
+	def loadToken(self):
+		self.token = util.getSetting('youtube_access_token')
+		self.tokenExpires = util.getSetting('youtube_expiration',0)
+		if self.authorized(): LOG('AUTHORIZED')
+
+	def getToken(self):
+		if self.tokenExpires <= int(time.time()):
+			return self.updateToken()
+		return self.token
+		
+	def updateToken(self):
+		LOG('REFRESHING TOKEN')
+		data = {	'client_id':self.clientID,
+					'client_secret':self.clientS,
+					'refresh_token':util.getSetting('youtube_refresh_token'),
+					'grant_type':'refresh_token'}
+		json = self.session.post(self.auth2URL,data=data).json()
+		if 'access_token' in json:
+			self.saveData(json)
+		else:
+			LOG('Failed to update token')
+		return self.token
+		
+#	client_id=21302922996.apps.googleusercontent.com&
+#	client_secret=XTHhXh1SlUNgvyWGwDk1EjXB&
+#	refresh_token=1/6BMfW9j53gdGImsixUH6kU5RsR4zwI9lUVX-tqf8JXQ&
+#	grant_type=refresh_token
+#	The authorization server returns a JSON object that contains a new access token:
+#	
+#	{
+#	  "access_token":"1/fFAGRNJru1FTz70BzhT3Zg",
+#	  "expires_in":3920,
+#	  "token_type":"Bearer"
+#	}
+	
+	def authorized(self):
+		return bool(self.token)
 		
 	def Comments(self,video_id,url=None):
 		url = url or 'https://gdata.youtube.com/feeds/api/videos/{0}/comments?orderby=published&alt=json'.format(video_id)
@@ -47,6 +119,7 @@ class YouTubeAPI:
 		
 	def authorize(self):
 		userCode = self.getDeviceUserCode()
+		if not userCode: return
 		self.showUserCode(userCode)
 		d = xbmcgui.DialogProgress()
 		d.create('Waiting','Waiting for auth...')
@@ -60,19 +133,26 @@ class YouTubeAPI:
 				xbmc.sleep(1000)
 				if d.iscanceled(): return
 			ct+=1
-		self.saveData(json)
+		return self.saveData(json)
 		
 	def saveData(self,json):
-		print json
+		self.token = json.get('access_token','')
+		refreshToken = json.get('refresh_token')
+		self.tokenExpires = json.get('expires_in',3600) + int(time.time())
+		util.setSetting('youtube_access_token',self.token)
+		if refreshToken: util.setSetting('youtube_refresh_token',refreshToken)
+		util.setSetting('youtube_expiration',self.tokenExpires)
+		return self.token and refreshToken
 		
 	def pollAuthServer(self):
 		json = self.session.post(self.auth2URL,data={	'client_id':self.clientID,
 															'client_secret':self.clientS,
 															'code':self.deviceCode,
 															'grant_type':self.grantType
-														})
-		if 'errpr' in json and json['error'] == 'slow_down':
-			self.authPollInterval += 1
+														}).json()
+		if 'error' in json:
+			if json['error'] == 'slow_down':
+				self.authPollInterval += 1
 		return json
 #		{
 #		  "access_token":"1/fFAGRNJru1FTz70BzhT3Zg",
@@ -94,11 +174,45 @@ class YouTubeAPI:
 #		  "interval" : 5,
 #		}
 		self.authPollInterval = json.get('interval',5)
-		self.authExpires = json.get('expires_in',1800) + time.time()
+		self.authExpires = json.get('expires_in',1800) + int(time.time())
 		self.deviceCode = json.get('device_code','')
 		self.verificationURL = json.get('verification_url',self.verificationURL)
-		json.get('user_code')
+		if 'error' in json:
+			LOG('ERROR - YouTube getDeviceUserCode(): ' + json.get('error_description',''))
+		return json.get('user_code','')
 		
+	def postComment(self,videoID,comment):
+		infoURL = 'https://gdata.youtube.com/feeds/api/videos/%s?v=2&alt=json' % videoID
+		json = self.session.get(infoURL).json()
+		postURL = deepDictVal(json,('entry','gd$comments','gd$feedLink','href'))
+		headers = {	'Content-Type': 'application/atom+xml',
+						'Authorization': 'Bearer ' + self.getToken(),
+						'GData-Version':'2',
+						'X-GData-Key': 'key=' + 'AIzaSyCdPQr0OBjSUdLqWoP29Z7oGp2NnBh5gNI'
+		}
+		
+		data = '''<?xml version="1.0" encoding="UTF-8"?>
+		<entry xmlns="http://www.w3.org/2005/Atom"
+		    xmlns:yt="http://gdata.youtube.com/schemas/2007">
+		  <content>{0}</content>
+		</entry>'''.format(comment)
+		req = self.session.post(postURL,headers=headers,data=data)
+		return self.responseOK(req)
+		
+	def deleteComment(self,commentURL):
+		headers = {	'Content-Type': 'application/atom+xml',
+						'Authorization': 'Bearer ' + self.getToken(),
+						'GData-Version':'2',
+						'X-GData-Key': 'key=' + 'AIzaSyCdPQr0OBjSUdLqWoP29Z7oGp2NnBh5gNI'
+		}
+		
+		req = self.session.delete(commentURL,headers=headers)
+		return self.responseOK(req)
+		
+	def responseOK(self,req):
+		return req.status_code > 199 and req.status_code < 300
+
+	
 ################################################################################
 # YouTubeCategoryInterface
 ################################################################################
@@ -258,6 +372,7 @@ class ForumPost(forumbrowser.ForumPost):
 		return
 		
 	def setPostID(self,pid):
+		pid = pid.replace('http://','https://')
 		self.postId = pid
 		self.pid = pid
 		self.isPM = False
@@ -430,9 +545,10 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	
 	def hasSubscriptions(self): return False
 	
-	def canPost(self): return False
+	def canPost(self): return self.isLoggedIn()
 		
-	def canDelete(self,user,target='POST'): return False
+	def canDelete(self,user,target='POST'):
+		return target == 'POST' and self.isLoggedIn()
 			
 	def canEditPost(self,user): return False
 					
@@ -442,20 +558,15 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 
 	def canOpenLatest(self): return False
 	
-	def deepDictVal(self,adict,keys):
-		for key in keys:
-			if key in adict:
-				adict = adict[key]
-			else:
-				return ''
-		return adict
+	def isLoggedIn(self):
+		return self.api.authorized()
 		
 	def getForums(self,callback=None,donecallback=None,token=None):
 		if not callback: callback = self.fakeCallback
 		channels = self.api.Channels.list(part='id,snippet,contentDetails,brandingSettings,statistics',id=self.channelID)
-		subscribers = self.deepDictVal(channels['items'][0],('statistics','subscriberCount'))
-		videos = self.deepDictVal(channels['items'][0],('statistics','videoCount'))
-		comments = self.deepDictVal(channels['items'][0],('statistics','commentCount'))
+		subscribers = deepDictVal(channels['items'][0],('statistics','subscriberCount'))
+		videos = deepDictVal(channels['items'][0],('statistics','videoCount'))
+		comments = deepDictVal(channels['items'][0],('statistics','commentCount'))
 		stats = {'total_members': subscribers, 'total_threads':videos,'total_posts':comments}
 #		"statistics": {
 #	    "viewCount": "1598085378",
@@ -473,7 +584,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			lists = self.api.Playlists.list(part='id,snippet,contentDetails',maxResults=50,channelId=self.channelID)
 		for i in lists['items']:
-			vidCount = self.deepDictVal(i,('contentDetails','itemCount'))
+			vidCount = deepDictVal(i,('contentDetails','itemCount'))
 			title = i['snippet'].get('title','').title()
 			desc = i['snippet'].get('description','') or title
 			title = '{0} ({1})'.format(title,vidCount)
@@ -481,7 +592,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb,'thumb':thumb})
 		if 'nextPageToken' in lists:
 			forums.append({'forumid':'playlists-%s' % lists['nextPageToken'],'title':'More'})
-		logo = self.deepDictVal(channels['items'][0],('brandingSettings','image','bannerMobileImageUrl'))
+		logo = deepDictVal(channels['items'][0],('brandingSettings','image','bannerMobileImageUrl'))
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
 	def createThreadDict(self,item):
@@ -542,16 +653,17 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		citems = [vp]
 		ct=comments['feed']['openSearch$totalResults']['$t']+1
 		pct_ct=0
-		tot = len(comments['feed']['entry'])
-		for entry in comments['feed']['entry']:
-			fp = self.getForumPost(entry)
-			aitems = self.api.Channels.list(part='snippet',id=fp.userId)['items']
-			fp.avatar = len(aitems) and self.deepDictVal(aitems[0],('snippet','thumbnails','default','url')) or ''
-			fp.postNumber = ct
-			citems.append(fp)
-			if not self.updateProgress(callback, 20, 75, pct_ct, tot, util.T(32103)): break
-			ct-=1
-			pct_ct+=1
+		if 'entry' in comments['feed']:
+			tot = len(comments['feed']['entry'])
+			for entry in comments['feed']['entry']:
+				fp = self.getForumPost(entry)
+				aitems = self.api.Channels.list(part='snippet',id=fp.userId)['items']
+				fp.avatar = len(aitems) and deepDictVal(aitems[0],('snippet','thumbnails','default','url')) or ''
+				fp.postNumber = ct
+				citems.append(fp)
+				if not self.updateProgress(callback, 20, 75, pct_ct, tot, util.T(32103)): break
+				ct-=1
+				pct_ct+=1
 		data = {'next_page':None,'prev_page':None}
 		for l in comments['feed']['link']:
 			if l.get('rel') == 'next':
@@ -565,3 +677,16 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		)
 		
 		return self.finish(forumbrowser.FBData(citems,pd),donecallback)
+		
+	def post(self,post,callback=None):
+#		if post.isEdit: return self.editPost(post)
+		LOG('Posting reply')
+		if not post.message: return False
+		if not callback: callback = self.fakeCallback
+		callback(40,util.T(32106))
+		success = self.api.postComment(post.tid,post.message)
+		callback(100,util.T(32052))
+		return success
+
+	def deletePost(self,post):
+		return self.api.deleteComment(post.pid)

@@ -382,8 +382,15 @@ def editForumSettings(forumID):
 	fdata = forumbrowser.ForumData(forumID,FORUMS_PATH)
 	w.setHeader(forumID[3:])
 	w.setHelp(dialogs.loadHelp('forumsettings.help') or {})
-	w.addItem('username',T(32286),sett.get('username',''),'text')
-	w.addItem('password',T(32287),sett.get('password',''),'text.password')
+	
+	if forumID.startswith('YT.'):
+		from lib.forumbrowser import youtube
+		label = 'Authorize'
+		if youtube.authorized(): label = 'Re-authorize'
+		w.addItem('authorize',label,(youtube.authorize,sett),'function')
+	else:
+		w.addItem('username',T(32286),sett.get('username',''),'text')
+		w.addItem('password',T(32287),sett.get('password',''),'text.password')
 	w.addItem('notify',T(32018),sett.get('notify',''),'boolean')
 	w.addItem('extras',T(32288),sett.get('extras',''),'text')
 	w.addItem('time_offset_hours',T(32289),sett.get('time_offset_hours',''),'text.time')
@@ -405,8 +412,8 @@ def editForumSettings(forumID):
 		if forumID.startswith('GB.'):
 			ifi = w.data['ignore_forum_images']['value']
 		util.saveForumSettings(	forumID,
-								username=w.data['username']['value'],
-								password=w.data['password']['value'],
+								username=w.data.get('username',{}).get('value',''),
+								password=w.data.get('password',{}).get('value',''),
 								notify=w.data['notify']['value'],
 								extras=w.data['extras']['value'],
 								time_offset_hours=w.data['time_offset_hours']['value'],
