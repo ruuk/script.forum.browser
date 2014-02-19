@@ -271,7 +271,8 @@ class PlayerMonitor(xbmc.Player):
 		self.played = path
 		self.isSelfPlaying = True
 		if getSetting('video_start_preview',True):
-			video.play(path, preview=True)
+			self.play(path,windowed=True)
+			#video.play(path, preview=True)
 		else:
 			self.play(path)
 		

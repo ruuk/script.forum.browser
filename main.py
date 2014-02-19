@@ -1316,7 +1316,12 @@ class MessageWindow(windows.BaseWindow):
 		try:
 			video = self.videoHandler.getVideoObject(url)
 			if video and video.isVideo:
-				self.showVideo(video.getPlayableURL())
+				if video.sourceName == 'YouTube':
+					from lib.forumbrowser import youtube
+					plr = youtube.VideoHandler(video.ID)
+					self.showVideo(plr.getVideoURL())
+				else:
+					self.showVideo(video.getPlayableURL())
 				return
 		finally:
 			s.close()
