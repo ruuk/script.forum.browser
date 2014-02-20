@@ -37,11 +37,11 @@ def ERROR(message,hide_tb=False):
 		LOG('Stop exception handled')
 		return
 	
-	LOG('ERROR: ' + message)
 	short = str(sys.exc_info()[1])
 	if hide_tb:
-		LOG('ERROR Message: ' + short)
+		LOG('ERROR: {0}: {1}'.format(message,short))
 	else:
+		LOG('ERROR: ' + message)
 		import traceback #@Reimport
 		traceback.print_exc()
 		if getSetting('debug_show_traceback_dialog',False):

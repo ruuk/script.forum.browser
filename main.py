@@ -7,6 +7,10 @@ from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
 from lib.xbmcconstants import * # analysis:ignore
 
+import warnings
+
+warnings.filterwarnings('ignore',category=UnicodeWarning)
+
 try:
 	from webviewer import webviewer #@UnresolvedImport
 	print 'FORUMBROWSER: WEB VIEWER IMPORTED'
@@ -632,35 +636,22 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		self.doClose()
 		
 	def createItems(self):
-		favs = []
+		favs = getFavorites()
 		if not self.forumsWindow and getSetting('notify_dialog_only_enabled'):
 			final = getNotifyList()
 		else:
-			favs = getFavorites()
-			flist_tmp = os.listdir(FORUMS_PATH)
-			rest = sorted(flist_tmp,key=fidSortFunction)
-			if favs:
-				for f in favs:
-					if f in rest: rest.pop(rest.index(f))
-				favs.append('')
-			whole = favs + rest
-			final = []
-			for f in whole:
-				if not f in final and not f.startswith('.'):
-					final.append(f)
+			final = os.listdir(FORUMS_PATH)
+
 		unreadData = self.loadLastData() or {}
 		uitems = []
 		items = []
 		fitems =[]
 		colors = {}
-		last = None
+		datas = []
+		sortkey = lambda x: x.name.lower()
 		for f in final:
-			if not f:
-				if last: last.setProperty('separator','separator')
-				continue
-			flag = False
+			if f.startswith('.'): continue
 			path = util.getForumPath(f,just_path=True)
-			unread = unreadData.get(f) or {}
 			if not path: continue
 			if not os.path.isfile(os.path.join(path,f)): continue
 			try:
@@ -671,10 +662,16 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				xbmcvfs.delete(os.path.join(path,f))
 				dialogs.showMessage('NOTICE', 'Broken forum file for:', f.split('.',1)[-1], 'was deleted.', error=True)
 				continue
-			ndata = util.loadForumSettings(f,skip_password=True) or {}
+			datas.append(fdata)
+		datas.sort(key=sortkey)
+			
+		for fdata in datas:
+			flag = False
+			unread = unreadData.get(fdata.forumID) or {}
+			ndata = util.loadForumSettings(fdata.forumID,skip_password=True) or {}
 			name = fdata.name
 			logo = fdata.urls.get('logo','')
-			exists, logopath = util.getCachedLogo(logo,f)
+			exists, logopath = util.getCachedLogo(logo,fdata.forumID)
 			if exists: logo = logopath
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			item = xbmcgui.ListItem(name,iconImage=logo)
@@ -686,8 +683,8 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				path = self.makeColorFile(color, self.colorsDir)
 				colors[color] = path
 			item.setProperty('bgfile',path)
-			item.setProperty('forumID',f)
-			item.setProperty('type',f[:2])
+			item.setProperty('forumID',fdata.forumID)
+			item.setProperty('type',fdata.forumID[:2])
 			item.setProperty('notify',ndata.get('notify') and 'notify' or '')
 			up = unread.get('PM','')
 			if up:
@@ -704,14 +701,16 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			usubs = usubs and '%s/%s' % (usubs,tsubs) or ''
 			item.setProperty('unread_subs',usubs)
 			item.setProperty('unread_PMs',upms)
-			if f in favs:
+			
+			if fdata.forumID in favs:
 				item.setProperty('favorite','favorite')
-				fitems.append(item)	
+				fitems.append(item)
 			elif flag:
 				uitems.append(item)
 			else:
 				items.append(item)
-			last = item
+		fsortkey = lambda x: favs.index(x.getProperty('forumID'))
+		fitems.sort(key=fsortkey)
 		self.items = fitems + uitems + items
 		idx = 0
 		for item in self.items:
@@ -726,8 +725,8 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		
 	def refresh(self,forumID=None):
 		self.initialForumID = forumID or self.getSelectedForumID()
-		self.getControl(220).reset()
 		self.createItems()
+		self.getControl(220).reset()
 		self.fillList()
 	
 	def makeColorFile(self,color,path):
@@ -1316,7 +1315,7 @@ class MessageWindow(windows.BaseWindow):
 		try:
 			video = self.videoHandler.getVideoObject(url)
 			if video and video.isVideo:
-				if video.sourceName == 'YouTube':
+				if video.sourceName == 'YouTube' and getSetting('youtube_play_internal',True):
 					from lib.forumbrowser import youtube
 					plr = youtube.VideoHandler(video.ID)
 					self.showVideo(plr.getVideoURL())
@@ -3456,7 +3455,7 @@ def listForumSettings():
 	return os.listdir(FORUMS_SETTINGS_PATH)
 	
 def fidSortFunction(fid):
-	if fid[:3] in ['TT.','FR.','PB.','YK.','GB.']: return fid[3:]
+	if fid[:3] in ['TT.','FR.','PB.','YK.','GB.','YT.']: return fid[3:]
 	return fid
 
 def askForum(just_added=False,just_favs=False,caption=T(32386),forumID=None,hide_extra=False):

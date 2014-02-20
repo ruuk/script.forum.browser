@@ -9,29 +9,36 @@ import iso8601
 def LOG(msg):
 	util.LOG('YouTube: %s' % msg)
 	
+def ERROR(msg,hide_tb=False):
+	util.ERROR('YouTube: %s' % msg,hide_tb=hide_tb)
+	
 def authorize(settings):
 	try:
 		api = YouTubeAPI()
 		success = api.authorize()
 	except:
-		util.ERROR('Failed to authorize YouTube user')
+		ERROR('Failed to authorize user')
 		return False
 	if success:
-		LOG('YouTube user authorized')
+		LOG('User authorized')
 	else:
-		LOG('YouTube not authorized: No Error')
+		LOG('Not authorized: No Error')
 	return False
 	
 def authorized():
 	return bool(util.getSetting('youtube_access_token'))
 
 def deepDictVal(adict,keys):
+	if not adict: return ''
 	for key in keys:
 		if key in adict:
 			adict = adict[key]
 		else:
 			return ''
 	return adict
+
+def getTVal(cdict,key):
+	return (cdict.get(key) or {}).get('$t','')
 		
 class YouTubeAPISection:
 	key = 'AIzaSyCdPQr0OBjSUdLqWoP29Z7oGp2NnBh5gNI'
@@ -68,6 +75,7 @@ class YouTubeAPI:
 		self.Playlists = YouTubeAPISection(self, 'playlists')
 		self.PlaylistItems = YouTubeAPISection(self, 'playlistItems')
 		self.Videos = YouTubeAPISection(self, 'videos')
+		self.Subscriptions = YouTubeAPISection(self, 'subscriptions')
 		self.authPollInterval = 5
 		self.authExpires = int(time.time())
 		self.deviceCode = ''
@@ -116,6 +124,30 @@ class YouTubeAPI:
 		url = url or 'https://gdata.youtube.com/feeds/api/videos/{0}/comments?orderby=published&alt=json'.format(video_id)
 		req = self.session.get(url)
 		return req.json()
+		
+	def User(self,userID):
+		if userID == 'UC__NO_YOUTUBE_ACCOUNT__': return None
+		url = 'http://gdata.youtube.com/feeds/api/users/{0}?alt=json'.format(userID)
+		req = self.session.get(url)
+		try:
+			return req.json().get('entry')
+		except:
+			ERROR('api.User() - json failed for ID: {0}'.format(userID),hide_tb=True)
+			return None
+			
+	def Video(self,videoID):
+		try:
+			url = 'http://gdata.youtube.com/feeds/api/videos/{0}?alt=json'.format(videoID)
+			req = self.session.get(url)
+		except:
+			ERROR('api.Video() - get failed for ID: {0}'.format(videoID),hide_tb=True)
+			return None
+		try:
+			return req.json().get('entry')
+		except:
+			if req.text == 'Private video': return None
+			ERROR('api.Video() - json failed for ID: {0}'.format(videoID),hide_tb=True)
+			return None
 		
 	def authorize(self):
 		userCode = self.getDeviceUserCode()
@@ -231,7 +263,7 @@ class YouTubeCategoryInterface:
 				self.logo = snippet['thumbnails'].get('default',{}).get('url')
 			else:
 				self.logo = ''
-			self.url = jobj['id']
+			self.url = deepDictVal(jobj,('snippet','resourceId','channelId')) or jobj['id']
 			if isinstance(self.url,dict): self.url = self.url['channelId']
 			self.name = 'youtube.' + self.displayName.replace(' ','_')
 			self.forumID = 'YT.' + self.name
@@ -272,15 +304,21 @@ class YouTubeCategoryInterface:
 			self.initPageData()
 			return {'cats':self.getCategories()}
 		pageToken = self.getPageToken(page)
+		source = self.api.Channels
+		extraKWArgs = {}
+		if cat_id == 'subscriptions':
+			source = self.api.Subscriptions
+			extraKWArgs['mine'] = 'true'
 		if pageToken:
-			channels = self.api.Channels.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id,pageToken=pageToken)
+			channels = source.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id,pageToken=pageToken,**extraKWArgs)
 		else:
-			channels = self.api.Channels.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id)
+			channels = source.list(part='id,snippet,contentDetails',maxResults=per_page,categoryId=cat_id,**extraKWArgs)
 		return {'forums':self.processChannels(page,channels)}
 	
 	def getCategories(self):
 		ret = []
 		cats = self.api.GuideCategories.list(part='id,snippet',regionCode='us')
+		if self.api.authorized(): ret.append({'id':'subscriptions','name':'Subscriptions','icon':''})
 		for i in cats['items']:
 			ret.append({'id':i['id'],'name':i['snippet']['title'],'icon':''})
 		return ret
@@ -288,6 +326,8 @@ class YouTubeCategoryInterface:
 	def processChannels(self,page,channels):
 		self.setPageData(page,channels)
 		entries = []
+		if not 'items' in channels:
+			return entries
 		for i in channels['items']:
 			entries.append(self.ForumEntry(i))
 		return entries
@@ -300,30 +340,27 @@ class ForumPost(forumbrowser.ForumPost):
 		forumbrowser.ForumPost.__init__(self,fb,pdict)
 			
 	def setVals(self,pdict):
-		self.setPostID(self.getTVal(pdict,'id'))
-		date = self.getTVal(pdict,'published') or self.getTVal(pdict,'publishedAt')
+		self.setPostID(getTVal(pdict,'id'))
+		date = getTVal(pdict,'published') or getTVal(pdict,'publishedAt')
 		if date:
 			datetuple = iso8601.parse_date(date).timetuple()
 			self.unixtime = time.mktime(datetuple)
 			date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
 		self.date = date
-		self.userId = self.getTVal(pdict,'yt$channelId') # self.getTVal('yt$googlePlusUserId')
-		self.userName = self.getTVal(pdict.get('author')[0],'name')
+		self.userId = getTVal(pdict,'yt$channelId') # getTVal('yt$googlePlusUserId')
+		self.userName = getTVal(pdict.get('author')[0],'name')
 		self.avatar = ''
 		self.online = False
-		self.title = self.getTVal(pdict,'title')
-		self.message = self.getTVal(pdict,'content')
+		self.title = getTVal(pdict,'title')
+		self.message = getTVal(pdict,'content')
 		self.signature = ''
 		self.setLikes(None)
 		self._can_like = False
 		self._is_liked = False
 		self.isShort = False
 		self.fid = ''
-		self.tid = self.getTVal(pdict,'yt$videoid')
+		self.tid = getTVal(pdict,'yt$videoid')
 		self.topic = ''
-		
-	def getTVal(self,cdict,key):
-		return (cdict.get(key) or {}).get('$t','')
 		
 	def update(self,data):
 		self.setVals(data)
@@ -427,8 +464,8 @@ class VideoPost(ForumPost):
 			self.unixtime = time.mktime(datetuple)
 			date = time.strftime('%I:%M %p - %A %B %d, %Y',datetuple)
 		self.date = date
-		self.userId = ''
-		self.userName = pdict.get('channelTitle','')
+		self.userId = snippet.get('channelId','')
+		self.userName = snippet.get('channelTitle','')
 		self.avatar = ''
 		self.online = False
 		self.title = snippet.get('title','')
@@ -496,6 +533,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		self.logo = ''
 		self.name = self.forum
 		self.userName = ''
+		self.userChannelID = ''
 		self.googlePlusID = ''
 		self.channelTitle = ''
 		self.channelGooglePlusID = ''
@@ -546,7 +584,8 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 	
 	def isThreadSubscribed(self,tid,default=False): return default
 	
-	def hasSubscriptions(self): return False
+	def hasSubscriptions(self):
+		return bool(self.favoritesID)
 	
 	def canPost(self): return self.isLoggedIn()
 		
@@ -569,8 +608,25 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		if not self.isLoggedIn(): return
 		channel = self.api.Channels.list(part='id,snippet,contentDetails',mine='true')['items'][0]
 		self.userName = deepDictVal(channel,('snippet','title'))
+		self.userChannelID = deepDictVal(channel,('snippet','channelId'))
 		self.googlePlusID = deepDictVal(channel,('contentDetails','googlePlusUserId'))
+		self.favoritesID = deepDictVal(channel,('contentDetails','relatedPlaylists','favorites'))
 		LOG('USER: {0} ({1})'.format(self.userName,self.googlePlusID))
+	
+	def getVideoData(self,videoID):
+		video = self.api.Videos.list(part='id,snippet',id=videoID)
+		if not 'items' in video or not video['items']: return None
+		return video['items'][0]
+		
+	def getChannelData(self,channelID):
+		channel = self.api.Channels.list(part='id,snippet',id=channelID)
+		if not 'items' in channel or not channel['items']: return None
+		return channel['items'][0]
+		
+	def canViewVideo(self,item):
+		if deepDictVal(item,('status','privacyStatus')) != 'private': return True
+		if deepDictVal(item,('snippet','channelId')) == self.userChannelID: return True
+		return False
 	
 	def getForums(self,callback=None,donecallback=None,token=None):
 		if not callback: callback = self.fakeCallback
@@ -609,11 +665,16 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		logo = deepDictVal(channel,('brandingSettings','image','bannerMobileImageUrl'))
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
-	def createThreadDict(self,item):
+	def createThreadDict(self,item,skip_video_data=False):
 		snippet = item['snippet']
 		data = {}
 		data['threadid'] = snippet['resourceId']['videoId']
-		data['starter'] = snippet.get('channelTitle','')
+		if skip_video_data:
+			data['starter'] = snippet.get('channelTitle','')
+		else:
+			video = self.api.Video(data['threadid'])
+			if video and 'author' in video:
+				data['starter'] = getTVal(video['author'][0],'name')
 		data['title'] = snippet['title']
 		data['short_content'] = snippet['description'].replace('\n',' | ')
 		if 'thumbnails' in snippet:
@@ -622,7 +683,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		data['lastposter'] = ''
 		data['sticky'] = False
 		return data
-		
+	
 	def getThreads(self,forumid,page=0,callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		if forumid.startswith('playlists-'):
@@ -632,37 +693,49 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			fbdata['forums'] = forums
 			return self.finish(fbdata,donecallback) 
 		try:
-			if not callback(40,''): return None
+			if not callback(20,''): return None
 			if page and not str(page).isdigit():
-				items = self.api.PlaylistItems.list(part='id,snippet',playlistId=forumid,maxResults='50',pageToken=page)
+				items = self.api.PlaylistItems.list(part='id,snippet,status',playlistId=forumid,maxResults='50',pageToken=page)
 			else:
-				items = self.api.PlaylistItems.list(part='id,snippet',playlistId=forumid,maxResults='50')
-			if not callback(70,''): return None
+				items = self.api.PlaylistItems.list(part='id,snippet,status',playlistId=forumid,maxResults='50')
+			if not callback(30,''): return None
 			threads = []
+			tot = len(items['items'])
+			pct_ct=-1
+			skip = True
+			if forumid[:2] in ('FL','LL','WL','HL'): skip = False
 			for item in items['items']:
-				threads.append(self.createThreadDict(item))
+				pct_ct+=1
+				if not self.canViewVideo(item): continue
+				threads.append(self.createThreadDict(item,skip_video_data=skip))
+				if not self.updateProgress(callback, 30, 75, pct_ct, tot, 'Getting Video Data'): break
 			pd = self.getPageData(	next_page = items.get('nextPageToken'),
 										prev_page = items.get('prevPageToken'),
 										total_items = items['pageInfo']['totalResults'],
 										per_page = items['pageInfo']['resultsPerPage']
 			)
 		except:
-			em = util.ERROR('ERROR GETTING THREADS')
+			em = ERROR('ERROR GETTING CHANNELS')
 			return self.finish(forumbrowser.FBData(error=em))
 		
 		callback(100,util.T(32052))
 		return self.finish(forumbrowser.FBData(threads,pd),donecallback)
 		
+	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
+		threads = self.getThreads(self.favoritesID, page, callback, None)
+		return self.finish(forumbrowser.FBData(threads.data,threads.pageData),donecallback)
+			
 	def getReplies(self,threadid,forumid,page=0,lastid='',pid='',callback=None,donecallback=None,page_data=None,search=False):
 		if not callback: callback = self.fakeCallback
-		video = self.api.Videos.list(part='id,snippet',id=threadid)
+		video = self.getVideoData(threadid)
 		if str(page).startswith('http'):
 			comments = self.api.Comments(threadid,url=page)
 		else:
 			comments = self.api.Comments(threadid)
-		vp = VideoPost(self,video['items'][0])
-		vp.avatar = self.logo
-		vp.userName = video['items'][0]['snippet']['channelTitle']
+		vp = VideoPost(self,video)
+		userData = self.api.User(vp.userId)
+		vp.avatar = deepDictVal(userData,('media$thumbnail','url'))
+		
 		vp.postNumber = 1
 		citems = [vp]
 		ct=comments['feed']['openSearch$totalResults']['$t']+1
@@ -671,8 +744,8 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			tot = len(comments['feed']['entry'])
 			for entry in comments['feed']['entry']:
 				fp = self.getForumPost(entry)
-				aitems = self.api.Channels.list(part='snippet',id=fp.userId)['items']
-				fp.avatar = len(aitems) and deepDictVal(aitems[0],('snippet','thumbnails','default','url')) or ''
+				userData = self.api.User(fp.userId)
+				fp.avatar = deepDictVal(userData,('media$thumbnail','url'))
 				fp.postNumber = ct
 				citems.append(fp)
 				if not self.updateProgress(callback, 20, 75, pct_ct, tot, util.T(32103)): break
@@ -855,7 +928,7 @@ class VideoHandler:
 		link = links.get
 		video_url = ""
 
-		hd_quality = 3
+		hd_quality = util.getSetting('youtube_video_quality',1)
 
 		# SD videos are default, but we go for the highest res
 		if (link(35)):
@@ -879,14 +952,14 @@ class VideoHandler:
 		elif (link(5)):
 			video_url = link(5)
 
-		if hd_quality > 1:	# <-- 720p
+		if hd_quality > 0:	# <-- 720p
 			if (link(22)):
 				video_url = link(22)
 			elif (link(45)):
 				video_url = link(45)
 			elif link(120):
 				video_url = link(120)
-		if hd_quality > 2:
+		if hd_quality > 1:
 			if (link(37)):
 				video_url = link(37)
 			elif link(121):

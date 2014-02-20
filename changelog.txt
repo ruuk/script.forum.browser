@@ -43,7 +43,16 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.50
+Current Version : 2.1.51
+
+*** 2.1.51 ***
+
+Added 'Play YouTube Videos Internally' to Settings:Video (default: True)
+Added 'Max Video Quality' subsetting
+Fixed some language string spellings (British English)
+YouTube: Added the ability to view favorites via 'Subscriptions' 
+YouTube: Now gets correct video author (Started By:) and correct avatar for the video description post
+Fixed sorting on the forums manager
 
 *** 2.1.50 ***
 
