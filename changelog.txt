@@ -43,7 +43,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.53
+Current Version : 2.1.54
+
+*** 2.1.54 ***
+
+Changed WebViewer import requirement to 0.9.16
 
 *** 2.1.53 ***
 
