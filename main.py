@@ -1317,8 +1317,7 @@ class MessageWindow(windows.BaseWindow):
 			if video and video.isVideo:
 				if video.sourceName == 'YouTube' and getSetting('youtube_play_internal',True):
 					from lib.forumbrowser import youtube
-					plr = youtube.VideoHandler(video.ID)
-					self.showVideo(plr.getVideoURL())
+					self.showVideo(youtube.getYouTubeURL(video.ID))
 				else:
 					self.showVideo(video.getPlayableURL())
 				return
