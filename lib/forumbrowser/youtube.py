@@ -123,7 +123,12 @@ class YouTubeAPI:
 	def Comments(self,video_id,url=None):
 		url = url or 'https://gdata.youtube.com/feeds/api/videos/{0}/comments?orderby=published&alt=json'.format(video_id)
 		req = self.session.get(url)
-		return req.json()
+		try:
+			return req.json()
+		except:
+			ERROR('Failed to get comments: {0}'.format(video_id),hide_tb=True)
+			LOG(repr(req.text[:100]))
+			return None
 		
 	def User(self,userID):
 		if userID == 'UC__NO_YOUTUBE_ACCOUNT__': return None
@@ -673,8 +678,10 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			data['starter'] = snippet.get('channelTitle','')
 		else:
 			video = self.api.Video(data['threadid'])
-			if video and 'author' in video:
-				data['starter'] = getTVal(video['author'][0],'name')
+			if video:
+				if 'author' in video: data['starter'] = getTVal(video['author'][0],'name')
+				data['view_number'] = deepDictVal(video,('yt$statistics','viewCount'))
+				data['reply_number'] = deepDictVal(video,('gd$comments','gd$feedLink','countHint'))
 		data['title'] = snippet['title']
 		data['short_content'] = snippet['description'].replace('\n',' | ')
 		if 'thumbnails' in snippet:
@@ -780,6 +787,80 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 
 #Modified from plugin.video.youtube
 class VideoHandler:
+	_formats = {
+		'5': {'ext': 'flv', 'width': 400, 'height': 240},
+		'6': {'ext': 'flv', 'width': 450, 'height': 270},
+		'13': {'ext': '3gp'},
+		'17': {'ext': '3gp', 'width': 176, 'height': 144},
+		'18': {'ext': 'mp4', 'width': 640, 'height': 360},
+		'22': {'ext': 'mp4', 'width': 1280, 'height': 720},
+		'34': {'ext': 'flv', 'width': 640, 'height': 360},
+		'35': {'ext': 'flv', 'width': 854, 'height': 480},
+		'36': {'ext': '3gp', 'width': 320, 'height': 240},
+		'37': {'ext': 'mp4', 'width': 1920, 'height': 1080},
+		'38': {'ext': 'mp4', 'width': 4096, 'height': 3072},
+		'43': {'ext': 'webm', 'width': 640, 'height': 360},
+		'44': {'ext': 'webm', 'width': 854, 'height': 480},
+		'45': {'ext': 'webm', 'width': 1280, 'height': 720},
+		'46': {'ext': 'webm', 'width': 1920, 'height': 1080},
+
+
+		# 3d videos
+		'82': {'ext': 'mp4', 'height': 360, 'resolution': '360p', 'format_note': '3D', 'preference': -20},
+		'83': {'ext': 'mp4', 'height': 480, 'resolution': '480p', 'format_note': '3D', 'preference': -20},
+		'84': {'ext': 'mp4', 'height': 720, 'resolution': '720p', 'format_note': '3D', 'preference': -20},
+		'85': {'ext': 'mp4', 'height': 1080, 'resolution': '1080p', 'format_note': '3D', 'preference': -20},
+		'100': {'ext': 'webm', 'height': 360, 'resolution': '360p', 'format_note': '3D', 'preference': -20},
+		'101': {'ext': 'webm', 'height': 480, 'resolution': '480p', 'format_note': '3D', 'preference': -20},
+		'102': {'ext': 'webm', 'height': 720, 'resolution': '720p', 'format_note': '3D', 'preference': -20},
+
+		# Apple HTTP Live Streaming
+		'92': {'ext': 'mp4', 'height': 240, 'resolution': '240p', 'format_note': 'HLS', 'preference': -10},
+		'93': {'ext': 'mp4', 'height': 360, 'resolution': '360p', 'format_note': 'HLS', 'preference': -10},
+		'94': {'ext': 'mp4', 'height': 480, 'resolution': '480p', 'format_note': 'HLS', 'preference': -10},
+		'95': {'ext': 'mp4', 'height': 720, 'resolution': '720p', 'format_note': 'HLS', 'preference': -10},
+		'96': {'ext': 'mp4', 'height': 1080, 'resolution': '1080p', 'format_note': 'HLS', 'preference': -10},
+		'132': {'ext': 'mp4', 'height': 240, 'resolution': '240p', 'format_note': 'HLS', 'preference': -10},
+		'151': {'ext': 'mp4', 'height': 72, 'resolution': '72p', 'format_note': 'HLS', 'preference': -10},
+
+		# DASH mp4 video
+		'133': {'ext': 'mp4', 'height': 240, 'resolution': '240p', 'format_note': 'DASH video', 'preference': -40},
+		'134': {'ext': 'mp4', 'height': 360, 'resolution': '360p', 'format_note': 'DASH video', 'preference': -40},
+		'135': {'ext': 'mp4', 'height': 480, 'resolution': '480p', 'format_note': 'DASH video', 'preference': -40},
+		'136': {'ext': 'mp4', 'height': 720, 'resolution': '720p', 'format_note': 'DASH video', 'preference': -40},
+		'137': {'ext': 'mp4', 'height': 1080, 'resolution': '1080p', 'format_note': 'DASH video', 'preference': -40},
+		'138': {'ext': 'mp4', 'height': 1081, 'resolution': '>1080p', 'format_note': 'DASH video', 'preference': -40},
+		'160': {'ext': 'mp4', 'height': 192, 'resolution': '192p', 'format_note': 'DASH video', 'preference': -40},
+		'264': {'ext': 'mp4', 'height': 1080, 'resolution': '1080p', 'format_note': 'DASH video', 'preference': -40},
+
+		# Dash mp4 audio
+		'139': {'ext': 'm4a', 'format_note': 'DASH audio', 'vcodec': 'none', 'abr': 48, 'preference': -50},
+		'140': {'ext': 'm4a', 'format_note': 'DASH audio', 'vcodec': 'none', 'abr': 128, 'preference': -50},
+		'141': {'ext': 'm4a', 'format_note': 'DASH audio', 'vcodec': 'none', 'abr': 256, 'preference': -50},
+
+		# Dash webm
+		'167': {'ext': 'webm', 'height': 360, 'width': 640, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'168': {'ext': 'webm', 'height': 480, 'width': 854, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'169': {'ext': 'webm', 'height': 720, 'width': 1280, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'170': {'ext': 'webm', 'height': 1080, 'width': 1920, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'218': {'ext': 'webm', 'height': 480, 'width': 854, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'219': {'ext': 'webm', 'height': 480, 'width': 854, 'format_note': 'DASH video', 'container': 'webm', 'vcodec': 'VP8', 'acodec': 'none', 'preference': -40},
+		'242': {'ext': 'webm', 'height': 240, 'resolution': '240p', 'format_note': 'DASH webm', 'preference': -40},
+		'243': {'ext': 'webm', 'height': 360, 'resolution': '360p', 'format_note': 'DASH webm', 'preference': -40},
+		'244': {'ext': 'webm', 'height': 480, 'resolution': '480p', 'format_note': 'DASH webm', 'preference': -40},
+		'245': {'ext': 'webm', 'height': 480, 'resolution': '480p', 'format_note': 'DASH webm', 'preference': -40},
+		'246': {'ext': 'webm', 'height': 480, 'resolution': '480p', 'format_note': 'DASH webm', 'preference': -40},
+		'247': {'ext': 'webm', 'height': 720, 'resolution': '720p', 'format_note': 'DASH webm', 'preference': -40},
+		'248': {'ext': 'webm', 'height': 1080, 'resolution': '1080p', 'format_note': 'DASH webm', 'preference': -40},
+
+		# Dash webm audio
+		'171': {'ext': 'webm', 'vcodec': 'none', 'format_note': 'DASH webm audio', 'abr': 48, 'preference': -50},
+		'172': {'ext': 'webm', 'vcodec': 'none', 'format_note': 'DASH webm audio', 'abr': 256, 'preference': -50},
+
+		# RTMP (unnamed)
+		'_rtmp': {'protocol': 'rtmp'},
+	}
+	
 	fmt_value = {
 		5: "240p h263 flv container",
 		18: "360p h264 mp4 container | 270 for rtmpe?",
@@ -809,12 +890,14 @@ class VideoHandler:
 
 	# YouTube Playback Feeds
 	urls = {}
-	urls['video_stream'] = "http://www.youtube.com/watch?v=%s&safeSearch=none"
+	urls['video_stream'] = "https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1"
 	urls['embed_stream'] = "http://www.youtube.com/get_video_info?video_id=%s"
 	urls['video_info'] = "http://gdata.youtube.com/feeds/api/videos/%s"
 	
 	def __init__(self,ID):
 		self.ID = ID
+		self.userAgent = 'Mozilla/5.0+(Windows+NT+6.2;+Win64;+x64;+rv:16.0.1)+Gecko/20121011+Firefox/16.0.1'
+		self.session = requests.Session()
 		
 	def getVideoURL(self):
 		html = self.getPageHTML()
@@ -828,31 +911,50 @@ class VideoHandler:
 		return url
 		
 	def getPageHTML(self):
-		return requests.get(self.urls['video_stream'] % self.ID).text
-		
-	def decryptSignature(self, s):
+		return self.session.get(self.urls['video_stream'] % self.ID,headers={'User-Agent':self.userAgent}).text
+	
+	def decryptSignature(self, s, age_gate=False):
 		''' use decryption solution by Youtube-DL project '''
-		if len(s) == 88:
-			return s[48] + s[81:67:-1] + s[82] + s[66:62:-1] + s[85] + s[61:48:-1] + s[67] + s[47:12:-1] + s[3] + s[11:3:-1] + s[2] + s[12]
-		elif len(s) == 87:
-			return s[62] + s[82:62:-1] + s[83] + s[61:52:-1] + s[0] + s[51:2:-1]
-		elif len(s) == 86:
-			return s[2:63] + s[82] + s[64:82] + s[63]
-		elif len(s) == 85:
-			return s[76] + s[82:76:-1] + s[83] + s[75:60:-1] + s[0] + s[59:50:-1] + s[1] + s[49:2:-1]
-		elif len(s) == 84:
-			return s[83:36:-1] + s[2] + s[35:26:-1] + s[3] + s[25:3:-1] + s[26]
-		elif len(s) == 83:
-			return s[6] + s[3:6] + s[33] + s[7:24] + s[0] + s[25:33] + s[53] + s[34:53] + s[24] + s[54:]
-		elif len(s) == 82:
-			return s[36] + s[79:67:-1] + s[81] + s[66:40:-1] + s[33] + s[39:36:-1] + s[40] + s[35] + s[0] + s[67] + s[32:0:-1] + s[34]
-		elif len(s) == 81:
-			return s[6] + s[3:6] + s[33] + s[7:24] + s[0] + s[25:33] + s[2] + s[34:53] + s[24] + s[54:81]
+		if age_gate:
+			# The videos with age protection use another player, so the
+			# algorithms can be different.
+			if len(s) == 86:
+				return s[2:63] + s[82] + s[64:82] + s[63]
+
+		if len(s) == 93:
+			return s[86:29:-1] + s[88] + s[28:5:-1]
 		elif len(s) == 92:
-			return s[25] + s[3:25] + s[0] + s[26:42] + s[79] + s[43:79] + s[91] + s[80:83];
+			return s[25] + s[3:25] + s[0] + s[26:42] + s[79] + s[43:79] + s[91] + s[80:83]
+		elif len(s) == 91:
+			return s[84:27:-1] + s[86] + s[26:5:-1]
+		elif len(s) == 90:
+			return s[25] + s[3:25] + s[2] + s[26:40] + s[77] + s[41:77] + s[89] + s[78:81]
+		elif len(s) == 89:
+			return s[84:78:-1] + s[87] + s[77:60:-1] + s[0] + s[59:3:-1]
+		elif len(s) == 88:
+			return s[7:28] + s[87] + s[29:45] + s[55] + s[46:55] + s[2] + s[56:87] + s[28]
+		elif len(s) == 87:
+			return s[6:27] + s[4] + s[28:39] + s[27] + s[40:59] + s[2] + s[60:]
+		elif len(s) == 86:
+			return s[80:72:-1] + s[16] + s[71:39:-1] + s[72] + s[38:16:-1] + s[82] + s[15::-1]
+		elif len(s) == 85:
+			return s[3:11] + s[0] + s[12:55] + s[84] + s[56:84]
+		elif len(s) == 84:
+			return s[78:70:-1] + s[14] + s[69:37:-1] + s[70] + s[36:14:-1] + s[80] + s[:14][::-1]
+		elif len(s) == 83:
+			return s[80:63:-1] + s[0] + s[62:0:-1] + s[63]
+		elif len(s) == 82:
+			return s[80:37:-1] + s[7] + s[36:7:-1] + s[0] + s[6:0:-1] + s[37]
+		elif len(s) == 81:
+			return s[56] + s[79:56:-1] + s[41] + s[55:41:-1] + s[80] + s[40:34:-1] + s[0] + s[33:29:-1] + s[34] + s[28:9:-1] + s[29] + s[8:0:-1] + s[9]
+		elif len(s) == 80:
+			return s[1:19] + s[0] + s[20:68] + s[19] + s[69:80]
+		elif len(s) == 79:
+			return s[54] + s[77:54:-1] + s[39] + s[53:39:-1] + s[78] + s[38:34:-1] + s[0] + s[33:29:-1] + s[34] + s[28:9:-1] + s[29] + s[8:0:-1] + s[9]
 		else:
 			LOG(u'Unable to decrypt signature, key length %d not supported; retrying might work' % (len(s)))
-
+		return ''
+		
 	def removeAdditionalEndingDelimiter(self, data):
 		pos = data.find("};")
 		if pos != -1:
@@ -917,14 +1019,61 @@ class VideoHandler:
 			if url_desc_map.has_key(u"sig"):
 				url = url + u"&signature=" + url_desc_map[u"sig"][0]
 			elif url_desc_map.has_key(u"s"):
+				import re
+				age_gate = re.search(r'player-age-gate-content">', html) is not None
 				sig = url_desc_map[u"s"][0]
-				url = url + u"&signature=" + self.decryptSignature(sig)
+				url = url + u"&signature=" + self.decryptSignature(sig, age_gate)
 
 			links[key] = url
 
 		return links
-	
+
 	def selectVideoQuality(self, links):
+		quality = util.getSetting('youtube_video_quality',1)
+		minHeight = 0
+		maxHeight = 480
+		if quality > 1:
+			minHeight = 721
+			maxHeight = 1080
+		elif quality > 0:
+			minHeight = 481
+			maxHeight = 720
+			
+		defFormat = None
+		defMax = 0
+		prefFormat = None
+		prefMax = 0
+		keys = sorted(links.keys())
+		fallback = keys[0]
+		for fmt in keys:
+			if not str(fmt) in self._formats: continue
+			fdata = self._formats[str(fmt)]
+			if not 'height' in fdata: continue
+			h = fdata['height']
+			if h >= minHeight and h <= maxHeight:
+				if h > prefMax:
+					prefMax = h
+					prefFormat = fmt
+			elif h > defMax and h <= maxHeight:
+				defMax = h
+				defFormat = fmt
+						
+		LOG('Quality: {0}'.format(quality))
+		if prefFormat:
+			LOG('Using Preferred Format: {0} ({1}x{2})'.format(prefFormat,self._formats[str(prefFormat)].get('width','?'),prefMax))
+			url = links[prefFormat]
+		elif defFormat:
+			LOG('Using Default Format: {0} ({1}x{2})'.format(defFormat,self._formats[str(defFormat)].get('width','?'),defMax))
+			url = links[defFormat]
+		LOG('Using Fallback Format: {0}'.format(fallback))
+		url = links[fallback]
+		
+		if url.find("rtmp") == -1:
+			url += '|' + urllib.urlencode({'User-Agent':self.userAgent})
+
+		return url
+		
+	def selectVideoQualityOld(self, links):
 		link = links.get
 		video_url = ""
 
@@ -973,6 +1122,9 @@ class VideoHandler:
 			return video_url
 
 		if video_url.find("rtmp") == -1:
-			video_url += '|' + urllib.urlencode({'User-Agent':'Mozilla/5.0+(Windows+NT+6.2;+Win64;+x64;+rv:16.0.1)+Gecko/20121011+Firefox/16.0.1'})
+			video_url += '|' + urllib.urlencode({'User-Agent':self.userAgent})
 
 		return video_url
+
+
+

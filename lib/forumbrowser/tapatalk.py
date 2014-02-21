@@ -4,7 +4,7 @@ from lib.util import LOG, ERROR, DEBUG, getSetting
 from lib import util
 from lib import asyncconnections
 asyncconnections.LOG = LOG
-import xmlrpclib, httplib, sys, re, time, os, urlparse, datetime
+import xmlrpclib, httplib, re, time, os, urlparse, datetime
 import cookielib, socket, errno
 import urllib2
 import iso8601, forumbrowser

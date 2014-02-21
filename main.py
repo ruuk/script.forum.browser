@@ -2482,7 +2482,7 @@ class ThreadsWindow(windows.PageWindow):
 			item.setProperty('subscribed',tdict.get('subscribed') and 'subscribed' or '')
 			item.setProperty('avatar',str(tdict.get('icon_url') or ''))
 			item.setProperty('thumbnail',str(tdict.get('thumb') or ''))
-			item.setProperty('replies',str(tdict.get('reply_number') or ''))
+			item.setProperty('replies',reply_count)
 			item.setProperty('views',str(tdict.get('view_number') or ''))
 			item.setProperty('last_reply_time',str(tdict.get('last_reply_time') or ''))
 			self.getControl(120).addItem(item)

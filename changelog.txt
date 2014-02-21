@@ -43,7 +43,13 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.51
+Current Version : 2.1.52
+
+*** 2.1.52 ***
+
+Fix for errors with some videos
+Fix for occasional errors getting comments
+Now shows number of comments and views for channels when available
 
 *** 2.1.51 ***
 
@@ -53,6 +59,7 @@ Fixed some language string spellings (British English)
 YouTube: Added the ability to view favorites via 'Subscriptions' 
 YouTube: Now gets correct video author (Started By:) and correct avatar for the video description post
 Fixed sorting on the forums manager
+YouTube: Added the ability to view subscriptions as a category when adding new channels
 
 *** 2.1.50 ***
 
