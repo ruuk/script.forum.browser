@@ -2051,11 +2051,11 @@ msgid "1080p"
 msgstr ""
 
 msgctxt "#32594"
-msgid "Max Video Quality"
+msgid "Max Streaming Video Quality"
 msgstr ""
 
 msgctxt "#32595"
-msgid "Play YouTube Videos Internally"
+msgid "Disable DASH Video (Recommended)"
 msgstr ""
 
 #empty strings from id 32524 to 32899

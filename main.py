@@ -1135,6 +1135,7 @@ class MessageWindow(windows.BaseWindow):
 		if self.post: FB.updateAppURL(post=self.post.postId)
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		self.viewType = 'MESSAGE'
+		self.videoCache = {}
 		self.registerSettings(['hide_signatures','hide_image_urls','hide_link_urls'])
 		
 	def onInit(self):
@@ -1180,32 +1181,33 @@ class MessageWindow(windows.BaseWindow):
 		ulist = self.getControl(148)
 		mlist = self.getControl(150)
 		links = self.post.links()
-		checkVideo = False
-		for link in links:
-			checkVideo = self.videoHandler.mightBeVideo(link.url)
-			if checkVideo: break
-			checkVideo = self.videoHandler.mightBeVideo(link.text)
-			if checkVideo: break
+		quality = getSetting('video_quality',1)
+		video.disableDashVideo(getSetting('disable_dash_video',True))
+		self.videoCache = {}
 		s = None
-		if checkVideo: s = dialogs.showActivitySplash(T(32311))
-			
 		try:
 			ct=0
 			for link in links:
 				item = xbmcgui.ListItem(link.text or link.url,link.urlShow())
 				item.setProperty('index',str(ct))
 				ct+=1
-				video = None
-				if checkVideo:
-					try:
-						video = self.videoHandler.getVideoObject(link.url)
-						if not video: video = self.videoHandler.getVideoObject(link.text)
-					except:
-						LOG('Error getting video info')
-				if video:
-					item.setIconImage(video.thumbnail)
-					if video.title: item.setLabel(video.title)
-					item.setLabel2('%s: %s' % (video.sourceName,video.ID))
+				vid = None
+				try:
+					if self.videoHandler.mightBeVideo(link.url):
+						vid = self.videoHandler.getVideoObject(link.url,quality=quality)
+						if not s: s = dialogs.showActivitySplash(T(32311))
+					elif self.videoHandler.mightBeVideo(link.text):
+						vid = self.videoHandler.getVideoObject(link.text,quality=quality)
+						if not s: s = dialogs.showActivitySplash(T(32311))
+				except:
+					LOG('Error getting video info')
+					
+				if vid:
+					self.videoCache[str(ct)] = vid
+					item.setProperty('videoID',str(ct))
+					item.setIconImage(vid.thumbnail)
+					if vid.title: item.setLabel(vid.title)
+					item.setLabel2('%s: %s' % (vid.sourceName,vid.ID))
 					item.setProperty('video',link.url)
 					mlist.addItem(item)
 					self.hasImages = True
@@ -1287,7 +1289,7 @@ class MessageWindow(windows.BaseWindow):
 		elif controlID == 150:
 			item = self.getControl(150).getSelectedItem()
 			if item.getProperty('video'):
-				self.handleVideoLinkURL(item.getProperty('video'))
+				self.handleVideoLinkURL(item)
 			else:
 				if self.getProperty('ignore_media_click'):
 					self.setProperty('media_preview', self.getProperty('media_preview') == '1' and '0' or '1')
@@ -1310,16 +1312,27 @@ class MessageWindow(windows.BaseWindow):
 		if idx >= len(links): return None
 		return links[idx]
 		
-	def handleVideoLinkURL(self,url):
+	def handleVideoLinkURL(self,item):
 		s = dialogs.showActivitySplash()
+		video.disableDashVideo(getSetting('disable_dash_video',True))
 		try:
-			video = self.videoHandler.getVideoObject(url)
-			if video and video.isVideo:
-				if video.sourceName == 'YouTube' and getSetting('youtube_play_internal',True):
-					from lib.forumbrowser import youtube
-					self.showVideo(youtube.getYouTubeURL(video.ID))
+			videoID = item.getProperty('videoID')
+			url = item.getProperty('video')
+			if videoID in self.videoCache:
+				vid = self.videoCache[videoID]
+			else:
+				vid = self.videoHandler.getVideoObject(url,quality=getSetting('video_quality',1))
+			if vid and vid.isVideo:
+				if vid.hasMultiplePlayable():
+					d = dialogs.ChoiceMenu('Choose Video')
+					for i in vid.allPlayable:
+						d.addItem(i['url'],i['title'],i['thumbnail'])
+					s.close()
+					url = d.getResult()
+					if not url: return
 				else:
-					self.showVideo(video.getPlayableURL())
+					url = vid.getPlayableURL()
+				self.showVideo(url)
 				return
 		finally:
 			s.close()
@@ -1327,13 +1340,14 @@ class MessageWindow(windows.BaseWindow):
 	def linkSelected(self):
 		link = self.getSelectedLink()
 		if not link: return
+		video.disableDashVideo(getSetting('disable_dash_video',True))
 		if self.videoHandler.mightBeVideo(link.url) or self.videoHandler.mightBeVideo(link.text):
 			s = dialogs.showActivitySplash()
 			try:
-				video = self.videoHandler.getVideoObject(link.url)
-				if not video: video = self.videoHandler.getVideoObject(link.text)
-				if video and video.isVideo:
-					self.showVideo(video.getPlayableURL())
+				vid = self.videoHandler.getVideoObject(link.url,quality=getSetting('video_quality',1))
+				if not vid: vid = self.videoHandler.getVideoObject(link.text,quality=getSetting('video_quality',1))
+				if vid and vid.isVideo:
+					self.showVideo(vid.getPlayableURL())
 					return
 			finally:
 				s.close()
@@ -1394,9 +1408,9 @@ class MessageWindow(windows.BaseWindow):
 			d.addItem('copy',T(32313))
 			if link.isImage():
 				d.addItem('copyimage',T(32314))
-			video = self.videoHandler.getVideoObject(link.url)
-			if not video: video = self.videoHandler.getVideoObject(link.text)
-			if video and video.isVideo: d.addItem('copyvideo',T(32315))
+			vid = self.videoHandler.getVideoObject(link.url,quality=getSetting('video_quality',1))
+			if not vid: vid = self.videoHandler.getVideoObject(link.text,quality=getSetting('video_quality',1))
+			if vid and vid.isVideo: d.addItem('copyvideo',T(32315))
 		#d.addItem('open_as_forum','Open As Forum Link')
 				
 		if d.isEmpty(): return

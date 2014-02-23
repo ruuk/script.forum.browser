@@ -55,9 +55,9 @@
     <setting id="video_stop_on_exit" type="bool" label="32036" default="true" />
     <setting id="video_start_preview" type="bool" label="32043" default="true" />
     <setting id="video_resume_as_preview" type="bool" label="32042" default="false" />
-	<setting id="youtube_play_internal" type="bool" label="32595" default="true" />
-	<setting id="youtube_video_quality" subsetting="true" type="enum" label="32594" lvalues="32591|32592|32593" default="1" enable="eq(-1,true)" />
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_video)"/>
+	<setting id="video_quality" type="enum" label="32594" lvalues="32591|32592|32593" default="1" />
+	<setting id="disable_dash_video" type="bool" label="32595" default="true" />
+    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_video)" />
   </category>
   <category label="32008"> 	
     <setting id="disable_window_stacking" type="bool" label="32536" default="false" />
