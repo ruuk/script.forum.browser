@@ -2058,6 +2058,10 @@ msgctxt "#32595"
 msgid "Disable DASH Video (Recommended)"
 msgstr ""
 
+msgctxt "#32596"
+msgid "Show Forum Specific Background"
+msgstr ""
+
 #empty strings from id 32524 to 32899
 
 #. Previous

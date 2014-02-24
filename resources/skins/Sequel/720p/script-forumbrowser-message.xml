@@ -585,7 +585,21 @@
 				<height>62</height>
 				<texture>forum-browser-sequel-menu_bg.png</texture>
 			</control>
-				
+
+			<control type="label">
+				<posx>240</posx>
+				<posy>58</posy>
+				<width>800</width>
+				<height>32</height>
+				<font>ForumBrowser-font10</font>
+				<aligny>center</aligny>
+				<textcolor>FFFFFFFF</textcolor>
+				<selectedcolor>FFFFFFFF</selectedcolor>
+				<align>center</align>
+				<info>Container(150).ListItem().Label</info>
+				<visible>Control.HasFocus(150)</visible>
+			</control>
+
 			<control type="group">
 				<posx>1160</posx>
 				<posy>59</posy>

@@ -664,19 +664,19 @@ def setWindowColorsDark(dark=None,view=None):
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_fore', 'FF000000')
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_colors_back', 'FFFFFFFF')
 
-def setWindowBackgroundImage(image=None,view=None,clear=False):
+def setWindowBackgroundImage(image=None,view=None,clear=False,save=True):
 	if clear:
 		util.setSetting('window_background_%s' % view, '')
 		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,'')
 		return
-	if image == None:
+	if view == None:
 		for v in VIEW_TYPES:
 			i = util.getSetting('window_background_%s' % v,'')
 			dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % v,i)
 	else:
-		if view:
-			util.setSetting('window_background_%s' % view, image)
-			dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,image)
+		if not image: image = util.getSetting('window_background_%s' % view,'')
+		if save: util.setSetting('window_background_%s' % view, image)
+		dialogs.setGlobalSkinProperty('ForumBrowser_window_background_%s' % view,image)
 			
 def setWindowBackgroundFades():
 	for v in VIEW_TYPES:

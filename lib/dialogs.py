@@ -415,7 +415,7 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 		xbmcgui.WindowXMLDialog.__init__(self)
 		
 	def onInit(self):
-		self.getControl(100).setLabel(self.caption)
+		self.getControl(100).setText(self.caption)
 		if self.modal_callback:
 			callback, args, kwargs = self.modal_callback
 			args = args or []
@@ -423,7 +423,7 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 			callback(self,*args,**kwargs)
 		
 	def update(self,message):
-		self.getControl(100).setLabel(message)
+		self.getControl(100).setText(message)
 		return not self.canceled
 		
 	def onAction(self,action):
@@ -452,6 +452,9 @@ class ActivitySplash():
 		self.close()
 		
 	def update(self,pct,message):
+		self.splash.update(message)
+		
+	def updateMsg(self,message):
 		self.splash.update(message)
 
 	def close(self):

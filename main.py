@@ -1194,11 +1194,15 @@ class MessageWindow(windows.BaseWindow):
 				vid = None
 				try:
 					if self.videoHandler.mightBeVideo(link.url):
+						if not s:
+							s = dialogs.showActivitySplash(T(32311))
+							self.videoHandler.setMessageCallback(s.updateMsg)
 						vid = self.videoHandler.getVideoObject(link.url,quality=quality)
-						if not s: s = dialogs.showActivitySplash(T(32311))
 					elif self.videoHandler.mightBeVideo(link.text):
+						if not s:
+							s = dialogs.showActivitySplash(T(32311))
+							self.videoHandler.setMessageCallback(s.updateMsg)
 						vid = self.videoHandler.getVideoObject(link.text,quality=quality)
-						if not s: s = dialogs.showActivitySplash(T(32311))
 				except:
 					LOG('Error getting video info')
 					
@@ -1238,6 +1242,7 @@ class MessageWindow(windows.BaseWindow):
 			if self.hasImages: self.setProperty('has_media', '1')
 		finally:
 			if s: s.close()
+			self.videoHandler.setMessageCallback(None)
 
 	def getImages(self):
 		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
@@ -2936,6 +2941,7 @@ class ForumsWindow(windows.BaseWindow):
 			if data.error == 'CANCEL': return
 			dialogs.showMessage(T(32050),T(32171),T(32053),'[CR]'+data.error,success=False)
 			return
+		self.setBackground()
 		self.setLogo(data.getExtra('logo'),data.getExtra('force',False))
 		self.data = data
 		self.empty = True
@@ -2996,6 +3002,11 @@ class ForumsWindow(windows.BaseWindow):
 				self.fillForumList()
 		if data.select is not None: self.getControl(120).selectItem(data.select)
 		self.openElements()
+		
+	def setBackground(self):
+		background = None
+		if getSetting('show_forum_specific_backgrounds',True): background = FB.background
+		windows.setWindowBackgroundImage(background,'FORUM',save=False)
 		
 	def setLogoFromFile(self):
 		logopath = getCurrentLogo()
@@ -3332,6 +3343,7 @@ class ForumsWindow(windows.BaseWindow):
 		oldLogin = FB and self.getUsername() + self.getPassword() or ''
 		doSettings(self)
 		newLogin = FB and self.getUsername() + self.getPassword() or ''
+		self.setBackground()
 		if not oldLogin == newLogin:
 			self.resetForum(False)
 			self.setPMCounts()

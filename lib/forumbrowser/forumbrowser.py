@@ -984,6 +984,7 @@ class ForumBrowser:
 		self.messageConvertorClass=message_converter
 		self._encodingConfidence = 0
 		self._encoding = 'utf-8'
+		self.background = ''
 		self.initFilters()
 		
 	def initialize(self):

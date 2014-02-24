@@ -668,6 +668,7 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		if 'nextPageToken' in lists:
 			forums.append({'forumid':'playlists-%s' % lists['nextPageToken'],'title':'More'})
 		logo = deepDictVal(channel,('brandingSettings','image','bannerMobileImageUrl'))
+		self.background = logo = deepDictVal(channel,('brandingSettings','image','bannerTvHighImageUrl'))
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
 	def createThreadDict(self,item,skip_video_data=False):
