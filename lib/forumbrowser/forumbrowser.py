@@ -2,6 +2,7 @@
 import os, re, urllib, urllib2, texttransform, binascii, time
 from lib import asyncconnections, chardet
 from lib import util
+import YDStreamExtractor as StreamExtractor
 
 def getForumIDByURL(url):
 	name = nameFromURL(url)
@@ -775,16 +776,13 @@ class ForumPost:
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		return self.messageToDisplay(message,quote_wrap=quote_wrap)
 		
-	def hasMedia(self,webvid=None,count_link_images=False):
-		if not webvid:
-			from webviewer import video #@UnresolvedImport
-			webvid = video.WebVideo()
+	def hasMedia(self,count_link_images=False):
 		images = False
 		video = False
 		for l in self.links():
 			if l.isImage(): images = True
 			if count_link_images and l.textIsImage(): images = True
-			elif webvid.mightBeVideo(l.url) or webvid.mightBeVideo(l.text): video = True
+			elif StreamExtractor.mightHaveVideo(l.url) or StreamExtractor.mightHaveVideo(l.text): video = True
 		if not images: images = bool(self.imageURLs())
 		return images,video
 			

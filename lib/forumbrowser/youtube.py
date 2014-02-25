@@ -785,10 +785,6 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 
 	def deletePost(self,post):
 		return self.api.deleteComment(post.pid)
-		
-def getYouTubeURL(videoID):
-	from webviewer import video
-	quality = util.getSetting('youtube_video_quality',1)
-	return video.getVideoURL(videoID,quality)
+
 
 

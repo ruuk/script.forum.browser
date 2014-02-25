@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.forum.browser"
        name="Forum Browser"
-       version="2.1.56"
+       version="2.1.57"
        provider-name="Rick Phillips (ruuk)">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.module.simplejson" version="2.0.9"/>
     <import addon="script.web.viewer" version="0.9.17"/>
+    <import addon="script.module.youtube.dl" version="14.225.0"/>
     <import addon="script.module.password.storage" version="0.1.0" />
   </requires>
   <extension point="xbmc.python.script"

@@ -6,6 +6,7 @@ from distutils.version import StrictVersion
 from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
 from lib.xbmcconstants import * # analysis:ignore
+import YDStreamExtractor as StreamExtractor
 
 import warnings
 
@@ -59,7 +60,6 @@ FB = None
 from lib.forumbrowser import forumbrowser
 from lib.forumbrowser import texttransform
 from lib.forumbrowser import tapatalk
-from webviewer import video #@UnresolvedImport
 from lib import dialogs, windows, mods  # @Reimport
 
 util.DEBUG = DEBUG
@@ -72,8 +72,7 @@ dialogs.DEBUG = DEBUG
 mods.CACHE_PATH = CACHE_PATH
 mods.DEBUG = DEBUG
 
-video.LOG = LOG
-video.ERROR = ERROR
+StreamExtractor.DEBUG = DEBUG
 
 asyncconnections.LOG = LOG
 asyncconnections.setEnabled(not getSetting('disable_async_connections',False))
@@ -1057,8 +1056,7 @@ class LinePostDialog(PostDialog):
 		elif share.shareType == 'image':
 			paste = '[img]%s[/img]' % share.url
 		elif share.shareType == 'video':
-			source = video.WebVideo().getVideoObject(share.page).sourceName.lower()
-			paste = '[video=%s]%s[/video]' % (source,share.page)
+			paste = '[video=%s]%s[/video]' % (share.sourceName.lower(),share.page)
 			
 		if before:
 			self.addLineSingle(paste,True,False)
@@ -1131,7 +1129,6 @@ class MessageWindow(windows.BaseWindow):
 		self.interruptedVideo = None
 		self.hasImages = False
 		self.hasLinks = False
-		self.videoHandler = video.WebVideo()
 		if self.post: FB.updateAppURL(post=self.post.postId)
 		windows.BaseWindow.__init__( self, *args, **kwargs )
 		self.viewType = 'MESSAGE'
@@ -1182,7 +1179,7 @@ class MessageWindow(windows.BaseWindow):
 		mlist = self.getControl(150)
 		links = self.post.links()
 		quality = getSetting('video_quality',1)
-		video.disableDashVideo(getSetting('disable_dash_video',True))
+		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 		self.videoCache = {}
 		s = None
 		try:
@@ -1193,16 +1190,16 @@ class MessageWindow(windows.BaseWindow):
 				ct+=1
 				vid = None
 				try:
-					if self.videoHandler.mightBeVideo(link.url):
+					if StreamExtractor.mightHaveVideo(link.url):
 						if not s:
 							s = dialogs.showActivitySplash(T(32311))
-							self.videoHandler.setMessageCallback(s.updateMsg)
-						vid = self.videoHandler.getVideoObject(link.url,quality=quality)
-					elif self.videoHandler.mightBeVideo(link.text):
+							StreamExtractor.setOutputCallback(s.updateMsg)
+						vid = StreamExtractor.getVideoInfo(link.url,quality=quality)
+					elif StreamExtractor.mightHaveVideo(link.text):
 						if not s:
 							s = dialogs.showActivitySplash(T(32311))
-							self.videoHandler.setMessageCallback(s.updateMsg)
-						vid = self.videoHandler.getVideoObject(link.text,quality=quality)
+							StreamExtractor.setOutputCallback(s.updateMsg)
+						vid = StreamExtractor.getVideoInfo(link.text,quality=quality)
 				except:
 					LOG('Error getting video info')
 					
@@ -1242,7 +1239,7 @@ class MessageWindow(windows.BaseWindow):
 			if self.hasImages: self.setProperty('has_media', '1')
 		finally:
 			if s: s.close()
-			self.videoHandler.setMessageCallback(None)
+			StreamExtractor.setOutputCallback(None)
 
 	def getImages(self):
 		urlParentDirFilter = re.compile('(?<!/)/\w[^/]*?/\.\./')
@@ -1302,12 +1299,12 @@ class MessageWindow(windows.BaseWindow):
 				self.showImage(item.getProperty('url'))
 	
 	def showVideo(self,source):
-		if video.isPlaying() and getSetting('video_ask_interrupt',True):
+		if StreamExtractor.isPlaying() and getSetting('video_ask_interrupt',True):
 			line2 = getSetting('video_return_interrupt',True) and T(32254) or ''
 			if not dialogs.dialogYesNo(T(32255),T(32256),line2):
 				return
 		PLAYER.start(source)
-		#video.play(source)
+		#StreamExtractor.play(source)
 		
 	def getSelectedLink(self):
 		item = self.getControl(148).getSelectedItem()
@@ -1319,24 +1316,24 @@ class MessageWindow(windows.BaseWindow):
 		
 	def handleVideoLinkURL(self,item):
 		s = dialogs.showActivitySplash()
-		video.disableDashVideo(getSetting('disable_dash_video',True))
+		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 		try:
 			videoID = item.getProperty('videoID')
 			url = item.getProperty('video')
 			if videoID in self.videoCache:
 				vid = self.videoCache[videoID]
 			else:
-				vid = self.videoHandler.getVideoObject(url,quality=getSetting('video_quality',1))
-			if vid and vid.isVideo:
-				if vid.hasMultiplePlayable():
+				vid = StreamExtractor.getVideoInfo(url,quality=getSetting('video_quality',1))
+			if vid:
+				if vid.hasMultipleStreams():
 					d = dialogs.ChoiceMenu('Choose Video')
-					for i in vid.allPlayable:
+					for i in vid.streams():
 						d.addItem(i['url'],i['title'],i['thumbnail'])
 					s.close()
 					url = d.getResult()
 					if not url: return
 				else:
-					url = vid.getPlayableURL()
+					url = vid.streamURL()
 				self.showVideo(url)
 				return
 		finally:
@@ -1345,14 +1342,14 @@ class MessageWindow(windows.BaseWindow):
 	def linkSelected(self):
 		link = self.getSelectedLink()
 		if not link: return
-		video.disableDashVideo(getSetting('disable_dash_video',True))
-		if self.videoHandler.mightBeVideo(link.url) or self.videoHandler.mightBeVideo(link.text):
+		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
+		if StreamExtractor.mightHaveVideo(link.url) or StreamExtractor.mightHaveVideo(link.text):
 			s = dialogs.showActivitySplash()
 			try:
-				vid = self.videoHandler.getVideoObject(link.url,quality=getSetting('video_quality',1))
-				if not vid: vid = self.videoHandler.getVideoObject(link.text,quality=getSetting('video_quality',1))
-				if vid and vid.isVideo:
-					self.showVideo(vid.getPlayableURL())
+				vid = StreamExtractor.getVideoInfo(link.url,quality=getSetting('video_quality',1))
+				if not vid: vid = StreamExtractor.getVideoInfo(link.text,quality=getSetting('video_quality',1))
+				if vid:
+					self.showVideo(vid.streamURL())
 					return
 			finally:
 				s.close()
@@ -1413,8 +1410,8 @@ class MessageWindow(windows.BaseWindow):
 			d.addItem('copy',T(32313))
 			if link.isImage():
 				d.addItem('copyimage',T(32314))
-			vid = self.videoHandler.getVideoObject(link.url,quality=getSetting('video_quality',1))
-			if not vid: vid = self.videoHandler.getVideoObject(link.text,quality=getSetting('video_quality',1))
+			vid = StreamExtractor.getVideoInfo(link.url,quality=getSetting('video_quality',1))
+			if not vid: vid = StreamExtractor.getVideoInfo(link.text,quality=getSetting('video_quality',1))
 			if vid and vid.isVideo: d.addItem('copyvideo',T(32315))
 		#d.addItem('open_as_forum','Open As Forum Link')
 				
@@ -1430,7 +1427,7 @@ class MessageWindow(windows.BaseWindow):
 			CLIPBOARD.setClipboard(share)
 		elif result == 'copyvideo':
 			share = CLIPBOARD.getShare('script.forum.browser','video')
-			video = self.videoHandler.getVideoObject(link.url)
+			video = StreamExtractor.getVideoInfo(link.url)
 			if video:
 				share.page = link.url
 			else:
@@ -1816,21 +1813,20 @@ class RepliesWindow(windows.PageWindow):
 	def updateItem(self,item,post):
 		alt = self.getUserInfoAttributes()
 		defAvatar = '../../../media/forum-browser-avatar-none.png'
-		webvid = video.WebVideo()
 		showIndicators = getSetting('show_media_indicators',True)
 		countLinkImages = getSetting('smi_count_link_images',False)
 		item.setProperty('alternate1','')
 		item.setProperty('alternate2','')
 		item.setProperty('alternate3','')
 		
-		self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
+		self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,alt)
 		self.setFocusId(120)
 		
 	def fixAvatar(self,url):
 		if not 'http%3A%2F%2F' in url: return url
 		return url + '&time=%s' % str(time.time())
 		
-	def _updateItem(self,item,post,defAvatar,showIndicators,countLinkImages,webvid,alt):
+	def _updateItem(self,item,post,defAvatar,showIndicators,countLinkImages,alt):
 		url = defAvatar
 		if post.avatar: url = FB.makeURL(post.avatar)
 		post.avatarFinal = url
@@ -1846,7 +1842,7 @@ class RepliesWindow(windows.PageWindow):
 		else:
 			item.setProperty('last_seen',post.getActivity(self.timeOffset))
 		if showIndicators:
-			hasimages,hasvideo = post.hasMedia(webvid,countLinkImages)
+			hasimages,hasvideo = post.hasMedia(countLinkImages)
 			item.setProperty('hasimages',hasimages and 'hasimages' or 'noimages')
 			item.setProperty('hasvideo',hasvideo and 'hasvideo' or 'novideo')
 		altused = []
@@ -1920,7 +1916,6 @@ class RepliesWindow(windows.PageWindow):
 			alt = self.getUserInfoAttributes()
 			self.posts = {}
 			select = -1
-			webvid = video.WebVideo()
 			showIndicators = getSetting('show_media_indicators',True)
 			countLinkImages = getSetting('smi_count_link_images',False)
 			prevItem = xbmcgui.ListItem(label='prev')
@@ -1940,7 +1935,7 @@ class RepliesWindow(windows.PageWindow):
 					item.setProperty('end_item','last')
 				elif idx == 0:
 					item.setProperty('end_item','first')
-				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,webvid,alt)
+				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,alt)
 				items.append(item)
 			if self.pageData.next and self.skinLevel(1): items.append(nextItem)
 			self.getControl(120).addItems(items)
@@ -3227,7 +3222,7 @@ class ForumsWindow(windows.BaseWindow):
 		size = 'manage'
 		if external:
 			methods = ('manage','small','full')
-			if video.isPlaying():
+			if StreamExtractor.isPlaying():
 				size = methods[getSetting('notify_method_video',0)]
 			else:
 				size = methods[getSetting('notify_method',0)]
@@ -3637,6 +3632,7 @@ def doSettings(window=None):
 	util.DEBUG = DEBUG
 	signals.DEBUG = DEBUG
 	tapatalk.DEBUG = DEBUG
+	StreamExtractor.DEBUG = DEBUG
 	if FB:
 		FB.MC.resetRegex()
 		FB.MC.setReplaces()

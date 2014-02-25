@@ -44,14 +44,18 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.56
+Current Version : 2.1.57
+
+*** 2.1.57 ***
+
+Moved video functions from WebViewer to new youtube-dl addon module and made the necessary changes to FB
 
 *** 2.1.56 ***
 
 Now shows status message in activity splash when getting video info
 Made activity splash larger
 Added media titles over media strip when focuses
-YouTube: Now shows channel background on forums view
+YouTube: Now shows channel background on forums view when available
 Added setting in Appearance category: Show Forum Specific Background
 
 *** 2.1.55 ***
