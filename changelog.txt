@@ -44,7 +44,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.57
+Current Version : 2.1.58
+
+*** 2.1.58 ***
+
+Added missing requests2 module import
 
 *** 2.1.57 ***
 
