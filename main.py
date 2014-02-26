@@ -1339,6 +1339,17 @@ class MessageWindow(windows.BaseWindow):
 		finally:
 			s.close()
 			
+	def downloadVideo(self,url):
+		s = dialogs.showActivitySplash()
+		try:
+			path = getSetting('last_download_path') or util.CACHE_PATH
+			StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
+			StreamExtractor.setOutputCallback(s.updateMsg)
+			StreamExtractor.downloadVideo(url,path,getSetting('video_quality',1))
+		finally:
+			StreamExtractor.setOutputCallback(None)
+			s.close()
+		
 	def linkSelected(self):
 		link = self.getSelectedLink()
 		if not link: return
@@ -1444,6 +1455,7 @@ class MessageWindow(windows.BaseWindow):
 				
 	def doImageMenu(self):
 		img = self.getControl(150).getSelectedItem().getProperty('url')
+		vid = self.getControl(150).getSelectedItem().getProperty('video')
 		d = dialogs.ChoiceMenu(T(32316))
 		d.addItem('save', T(32129))
 		if CLIPBOARD:
@@ -1456,7 +1468,10 @@ class MessageWindow(windows.BaseWindow):
 			share.url = img
 			CLIPBOARD.setClipboard(share)
 		elif result == 'save':
-			self.saveImage(img)
+			if vid:
+				self.downloadVideo(vid)
+			else:
+				self.saveImage(img)
 			
 	def downloadImage(self,url):
 		base = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'slideshow'))
