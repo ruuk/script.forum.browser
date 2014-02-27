@@ -448,6 +448,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		self.items = None
 		self.stopTimeout = False
 		self.started = False
+		self.folder = None
 		self.createItems()
 		windows.BaseWindowDialog.__init__( self, *args, **kwargs )
 	
@@ -481,7 +482,10 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			if forumID: self.refresh(forumID)
 			self.setInactive(False)
 		elif controlID == 202:
-			if removeForum(forumID): self.refresh()
+			if removeForum(forumID):
+				item = self.getControl(220).getSelectedItem()
+				item.setProperty('removed','1')
+				self.refresh()
 		elif controlID == 203:
 			addFavorite(forumID)
 			self.refresh()
@@ -522,24 +526,109 @@ class NotificationsDialog(windows.BaseWindowDialog):
 		self.setHelp(self.getFocusId())
 		
 	def onAction(self,action):
-		windows.BaseWindowDialog.onAction(self,action)
 		self.stopTimeout = True
-		if action == ACTION_CONTEXT_MENU:
-			focusID = self.getFocusId()
-			if focusID == 220:
-				self.toggleNotify()
-			elif focusID > 199 and focusID < 210:
-				helpname = ''
-				if focusID  == 200: helpname = 'addforum'
-				elif focusID  == 201: helpname = 'addonline'
-				elif focusID  == 202: helpname = 'removeforum'
-				elif focusID  == 203: helpname = 'addfavorite'
-				elif focusID  == 204: helpname = 'removefavorite'
-				elif focusID  == 205: helpname = 'settings'
-				elif focusID  == 207: helpname = 'addcurrentonline'
-				elif focusID  == 208: helpname = 'updatethemeodb'
-				dialogs.showMessage(str(self.getControl(focusID).getLabel()),dialogs.loadHelp('options.help').get(helpname,''))
+		try:
+			if action == ACTION_CONTEXT_MENU:
+				focusID = self.getFocusId()
+				if focusID == 220:
+					self.doMenu()
+				elif focusID > 199 and focusID < 210:
+					helpname = ''
+					if focusID  == 200: helpname = 'addforum'
+					elif focusID  == 201: helpname = 'addonline'
+					elif focusID  == 202: helpname = 'removeforum'
+					elif focusID  == 203: helpname = 'addfavorite'
+					elif focusID  == 204: helpname = 'removefavorite'
+					elif focusID  == 205: helpname = 'settings'
+					elif focusID  == 207: helpname = 'addcurrentonline'
+					elif focusID  == 208: helpname = 'updatethemeodb'
+					dialogs.showMessage(str(self.getControl(focusID).getLabel()),dialogs.loadHelp('options.help').get(helpname,''))
+			elif action == ACTION_PARENT_DIR or action == ACTION_PARENT_DIR2:
+				if self.folder:
+					folder = self.folder
+					self.folder = None
+					self.refresh(folder)
+					return
+		except:
+			windows.BaseWindowDialog.onAction(self,action)
+			raise
+		windows.BaseWindowDialog.onAction(self,action)
+		
 
+	def doMenu(self):
+		item = self.getControl(220).getSelectedItem()
+		if not item: return None
+		d = dialogs.ChoiceMenu('Options')
+		if not item.getProperty('isFolder'): d.addItem('add_to_folder','Add To Folder')
+		if self.folder:
+			d.addItem('remove_from_folder','Remove From Folder')
+		else:
+			if item.getProperty('isFolder'): d.addItem('remove_folder','Remove Folder')
+			d.addItem('add_folder','New Folder')
+		result = d.getResult()
+		if not result: return
+		if result == 'add_folder':
+			self.addFolder()
+		elif result == 'add_to_folder':
+			self.addToFolder(item)
+		elif result == 'remove_from_folder':
+			self.removeFromFolder(item)
+		elif result == 'remove_folder':
+			self.removeFolder(item)
+	
+	def removeFolder(self,item):
+		with dialogs.ActivitySplash():
+			folder = item.getProperty('folder')
+			folders = self.loadFolders()
+			for i in range(0,len(folders)):
+				if folder == folders[i]['name']:
+					folders.pop(i)
+					break
+			self.saveFolders(folders)
+			self.clearForumFolder(folder)
+		self.refresh()
+	
+	def clearForumFolder(self,folder):
+		for forumID in self.getForumIDList():
+			self.removeFolderFromForumSettings(forumID,folder)
+			
+	def removeFromFolder(self,item):
+		forumID = item.getProperty('forumID')
+		self.removeFolderFromForumSettings(forumID,self.folder)
+		item.setProperty('removed','1')
+		self.refresh()
+	
+	def removeFolderFromForumSettings(self,forumID,folder):
+		ndata = util.loadForumSettings(forumID,skip_password=True)
+		folders = util._processSetting(ndata.get('folders',''),[])
+		if folder in folders: folders.remove(folder)
+		util.saveForumSettings(forumID,folders=util._processSettingForWrite(folders))
+		
+	def addToFolder(self,item):
+		d = dialogs.ChoiceMenu('Choose Folder')
+		for f in self.loadFolders():
+			d.addItem(f['name'],f['name'])
+		result = d.getResult()
+		if not result: return
+		forumID = item.getProperty('forumID')
+		ndata = util.loadForumSettings(forumID,skip_password=True)
+		folders = util._processSetting(ndata.get('folders',''),[])
+		if result in folders: return
+		folders.append(result)
+		util.saveForumSettings(forumID,folders=util._processSettingForWrite(folders))
+		if not self.folder and not item.getProperty('favorite'): item.setProperty('removed','1')
+		self.refresh()
+	
+	def addFolder(self):
+		name = dialogs.doKeyboard('Enter Folder Name')
+		if not name: return
+		folders = self.loadFolders()
+		for f in folders:
+			if f['name'] == name: return
+		folders.append({'name':name})
+		self.saveFolders(folders)
+		self.refresh()
+		
 	def onFocus(self, focusID):
 		if focusID < 200 or focusID > 212: return
 		self.setHelp(focusID)
@@ -612,12 +701,23 @@ class NotificationsDialog(windows.BaseWindowDialog):
 	def getSelectedForumID(self):
 		item = self.getControl(220).getSelectedItem()
 		if not item: return None
+		if item.getProperty('removed'):
+			pos = self.getControl(220).getSelectedPosition()
+			pos -= 1
+			if pos < 1: return None
+			item = item = self.getControl(220).getListItem(pos)
 		forumID = item.getProperty('forumID')
 		return forumID or None
 		
+	def changeFolder(self):
+		item = self.getControl(220).getSelectedItem()
+		if not item: return None
+		self.folder = item.getProperty('folder')
+		self.refresh()
+		
 	def changeForum(self):
 		forumID = self.getSelectedForumID()
-		if not forumID: return
+		if not forumID: return self.changeFolder()
 		if self.forumsWindow:
 			self.forumsWindow.changeForum(forumID)
 		else:
@@ -633,23 +733,71 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			furl = util.createForumBrowserURL(forumID,section)
 			xbmc.executebuiltin("RunScript(script.forum.browser,%s)" % furl)
 		self.doClose()
+
+	def getJSON(self):
+		try:
+		    import json
+		except:
+		    import simplejson as json
+		return json
+		
+	def loadFolders(self):
+		path = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forum_folders.json'))
+		if not os.path.exists(path): return []
+		json = self.getJSON()
+		with open(path,'r') as fp:
+			data = json.load(fp)
+		return data.get('folders')
+		
+	def saveFolders(self,folders):
+		path = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'forum_folders.json'))
+		json = self.getJSON()
+		with open(path,'w') as fp:
+			json.dump({'version':1,'folders':folders}, fp)
+		
+	def getColorPath(self,colors,hc):
+		color = hc.upper()[2:]
+		if color in colors:
+			path = colors[color]
+		else:
+			path = self.makeColorFile(color, self.colorsDir)
+			colors[color] = path
+		return path
+		
+	def getForumIDList(self):
+		forums = []
+		for f in os.listdir(FORUMS_PATH):
+			if not f.startswith('.'): forums.append(f)
+		return forums
 		
 	def createItems(self):
+		folders = []
+		colors = {}
+		if not self.folder:
+			foldersList = self.loadFolders()
+			ficon = os.path.join(util.MEDIA_PATH,'forum-browser-thread.png')
+			hcpath = self.getColorPath(colors,'FFEBC987')
+			for f in foldersList:
+				item = xbmcgui.ListItem(f['name'],iconImage=ficon)
+				item.setProperty('folder',f['name'])
+				item.setProperty('isFolder','1')
+				item.setProperty('bgcolor','FFEBC987')
+				
+				item.setProperty('bgfile',hcpath)
+				folders.append(item)
 		favs = getFavorites()
 		if not self.forumsWindow and getSetting('notify_dialog_only_enabled'):
 			final = getNotifyList()
 		else:
-			final = os.listdir(FORUMS_PATH)
+			final = self.getForumIDList()
 
 		unreadData = self.loadLastData() or {}
 		uitems = []
 		items = []
 		fitems =[]
-		colors = {}
 		datas = []
 		sortkey = lambda x: x.name.lower()
 		for f in final:
-			if f.startswith('.'): continue
 			path = util.getForumPath(f,just_path=True)
 			if not path: continue
 			if not os.path.isfile(os.path.join(path,f)): continue
@@ -668,6 +816,13 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			flag = False
 			unread = unreadData.get(fdata.forumID) or {}
 			ndata = util.loadForumSettings(fdata.forumID,skip_password=True) or {}
+			
+			if self.folder:
+				if not self.folder in util._processSetting(ndata.get('folders',''),[]): continue
+			else:
+				if not fdata.forumID in favs:
+					if ndata.get('folders'): continue
+				
 			name = fdata.name
 			logo = fdata.urls.get('logo','')
 			exists, logopath = util.getCachedLogo(logo,fdata.forumID)
@@ -675,12 +830,7 @@ class NotificationsDialog(windows.BaseWindowDialog):
 			hc = 'FF' + fdata.theme.get('header_color','FFFFFF')
 			item = xbmcgui.ListItem(name,iconImage=logo)
 			item.setProperty('bgcolor',hc)
-			color = hc.upper()[2:]
-			if color in colors:
-				path = colors[color]
-			else:
-				path = self.makeColorFile(color, self.colorsDir)
-				colors[color] = path
+			path = self.getColorPath(colors,hc)
 			item.setProperty('bgfile',path)
 			item.setProperty('forumID',fdata.forumID)
 			item.setProperty('type',fdata.forumID[:2])
@@ -710,10 +860,13 @@ class NotificationsDialog(windows.BaseWindowDialog):
 				items.append(item)
 		fsortkey = lambda x: favs.index(x.getProperty('forumID'))
 		fitems.sort(key=fsortkey)
-		self.items = fitems + uitems + items
+		self.items = fitems + folders + uitems + items
 		idx = 0
 		for item in self.items:
-			if item.getProperty('forumID') == self.initialForumID: self.initialIndex = idx
+			if item.getProperty('forumID') == self.initialForumID:
+				self.initialIndex = idx
+			elif item.getProperty('folder') == self.initialForumID:
+				self.initialIndex = idx
 			idx += 1
 		
 	def fillList(self):

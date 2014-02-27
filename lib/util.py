@@ -5,7 +5,7 @@ import YDStreamExtractor as StreamExtractor
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
 
-MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','skins','Default','media'))
+MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','media'))
 GENERIC_MEDIA_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'),'resources','media'))
 SETTINGS_PATH = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('profile')),'settings.xml')
 FORUMS_SETTINGS_PATH = xbmc.translatePath(os.path.join(__addon__.getAddonInfo('profile'),'forums_settings'))
@@ -464,7 +464,7 @@ def saveForumSettings(forumID,**kwargs):
 	data, rules_data = loadForumSettings(forumID,get_both=True) or ({},{})
 	#data.update(kwargs)
 	if rules: rules_data.update(rules)
-	if data: data.update(kwargs)
+	if data != None: data.update(kwargs)
 	
 	if notify == None: data['notify'] = data.get('notify')  or False
 	else: data['notify'] = notify
@@ -487,10 +487,8 @@ def saveForumSettings(forumID,**kwargs):
 			out.append('[rules]')
 			for k,v in rules_data.items():
 				if v != None: out.append('%s=%s' % (k,v))
-		fsFile = open(os.path.join(FORUMS_SETTINGS_PATH,forumID),'w')
-		#fsFile.write('username=%s\npassword=%s\nnotify=%s' % (data['username'],password,data['notify']))
-		fsFile.write('\n'.join(out))
-		fsFile.close()
+		with open(os.path.join(FORUMS_SETTINGS_PATH,forumID),'w') as fsFile:
+			fsFile.write('\n'.join(out))
 		return True
 	except:
 		ERROR('Failed to save forum settings for: %s' % forumID)
