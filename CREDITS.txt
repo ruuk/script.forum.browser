@@ -1,0 +1,30 @@
+Huge thanks to my wife and daughter for putting up with my programming obsession :)
+
+Special thanks to John Hanselman (hasselhof) for his huge volume of testing which helped to make Forum Browser better than would have been without it.
+Also, special thanks to dj_gerbil for his help and testing.
+
+Thanks to the public domain youtube-dl project for all their hard work in making a great free video stream extracting tool
+
+Image attribution:
+	YouTube:
+		Like designed by Marwa Boukarim from the Noun Project
+
+	Tapatalk Categories:
+		Arts & Entertainment: Pete Fecteau, from The Noun Project
+		Hobbies & Interests: Gary Wood, from The Noun Project
+		Automotive: Simon Child, from The Noun Project
+		Sports: ___Lo, from The Noun Project
+		Business: jose luis garcia, from The Noun Project & Jardson Araújo, from The Noun Project
+		Pets: Anne Bittencourt, from The Noun Project
+		Education: Thibault Geffroy, from The Noun Project
+		News: The Noun Project
+		Religion & Spirituality: Dan Codyre, from The Noun Project
+		Travel: matthew hall, from The Noun Project
+		Food & Drink: Amelia Wattenberger, from The Noun Project
+		Personal Finance: Jules Quick, from The Noun Project
+		Society: Nicholas Menghini, from The Noun Project
+		Shopping: Juan Pablo Bravo, from The Noun Project
+		Home & Garden: Erin Gillaspy, from The Noun Project & Gemma Garner, from The Noun Project
+		Law Government & Politics: Márcio Duarte, from The Noun Project
+		Style & Fashion: Diego Naive, from The Noun Project
+		Real Estate: Amelia Wattenberger, from The Noun Project

@@ -2,8 +2,6 @@ Forum Browser Changelog
 
 Special thanks to John Hanselman for all his testing which helped make Forum Browser better than it would have been without it.
 
-Icon attribution: See tapatalk.py for list of attributions from The Noun Project for the Tapatalk category icons
-
 TODO:
  Short Term:
   Forums list folders
@@ -20,19 +18,14 @@ TODO:
   Fix ParserBrowser VB subscribe URLs
   
  Long Term:
-  Check on optional import behavior
   Check for new parser rules automatically or add option to check for new rules
   Image zoom/rotate etc
   Look at using the AlarmClock builtin for the service - Easier to restart and less overall memory usage perhaps?
-  When adding a forum, ask for logo background color (or image?) or ask later
   Option to save posts when exiting and not posting
-  Use new option menus for context?
   Adjustable text size
-  Logo url from field in forum config data?
   Add missing smilies other forum types
   Add missing quote formats for other forum systems
   Find forum mobiquo.php path from tapatalk.js path in html page
-  Newest Threads
   Make a million dollars
   
  Investigated And Possibly Unfixable:
@@ -44,7 +37,14 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.59
+Current Version : 2.1.60
+
+*** 2.1.60 ***
+
+Improved video download progress dialog
+Added 'Download Complete' message including the downloaded file path
+Fixed bookmarks opening to the wrong post when post list has 'Previous Page'
+Credits on forums help must now be clicked to show a large text view to accomodate all the image attributions
 
 *** 2.1.59 ***
 

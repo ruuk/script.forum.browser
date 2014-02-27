@@ -1326,7 +1326,7 @@ class MessageWindow(windows.BaseWindow):
 				vid = StreamExtractor.getVideoInfo(url,quality=getSetting('video_quality',1))
 			if vid:
 				if vid.hasMultipleStreams():
-					d = dialogs.ChoiceMenu('Choose Video')
+					d = dialogs.ChoiceMenu(T(32597))
 					for i in vid.streams():
 						d.addItem(i['url'],i['title'],i['thumbnail'])
 					s.close()
@@ -1339,6 +1339,20 @@ class MessageWindow(windows.BaseWindow):
 		finally:
 			s.close()
 			
+	def videoDownloadCallback(self,prog,data):
+		line1 = os.path.basename(data.info.get('filename',''))
+		line2 = []
+		if data.speedStr: line2.append(data.speedStr)
+		if data.etaStr: line2.append('{0}: {1}'.format(T(32598),data.etaStr))
+		line2 = ' - '.join(line2)
+		line3 = []
+		total = data.info.get('total_bytes')
+		if total: line3.append('{0}: {1}'.format(T(32599),StreamExtractor.simpleSize(total)))
+		downloaded = data.info.get('downloaded_bytes')
+		if downloaded: line3.append('{0}: {1}'.format(T(32600),StreamExtractor.simpleSize(downloaded)))
+		line3 = ' - '.join(line3)
+		return prog.update(data.percent or 0,line1,line2,line3)
+
 	def downloadVideo(self,videoID,url):
 		if videoID in self.videoCache:
 			vid = self.videoCache[videoID]
@@ -1346,7 +1360,7 @@ class MessageWindow(windows.BaseWindow):
 			vid = StreamExtractor.getVideoInfo(url,quality=getSetting('video_quality',1))
 		title=None
 		if vid.hasMultipleStreams():
-			d = dialogs.ChoiceMenu('Choose Video')
+			d = dialogs.ChoiceMenu(T(32597))
 			for i in vid.streams():
 				d.addItem(i,i['title'],i['thumbnail'])
 			info = d.getResult()
@@ -1357,15 +1371,17 @@ class MessageWindow(windows.BaseWindow):
 			formatID = vid.streams()[0].get('formatID')
 
 		path = self.getDownloadPath()
-		with dialogs.xbmcDialogProgress(T(32205)) as prog:
+		with dialogs.xbmcDialogProgress(T(32205),update_callback=self.videoDownloadCallback) as prog:
 			try:
 				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
-				StreamExtractor.setOutputCallback(prog.updateSimple)
+				StreamExtractor.setOutputCallback(prog.updateCallback)
 				result = StreamExtractor.downloadVideo(url,path,formatID,title=title)
 			finally:
 				StreamExtractor.setOutputCallback(None)
 		if not result and result.status != 'canceled':
-				dialogs.showMessage('Download Failed',result.message)
+				dialogs.showMessage(T(32258),result.message,success=False)
+		elif result:
+			dialogs.showMessage(T(32052),T(32601),'',result.filepath,success=True)
 		
 	def linkSelected(self):
 		link = self.getSelectedLink()
@@ -1475,7 +1491,7 @@ class MessageWindow(windows.BaseWindow):
 		vid = self.getControl(150).getSelectedItem().getProperty('videoID')
 		d = dialogs.ChoiceMenu(T(32316))
 		d.addItem('save', T(32129))
-		if CLIPBOARD:
+		if CLIPBOARD and not vid:
 			d.addItem('copy',T(32314))
 		if d.isEmpty(): return
 		result = d.getResult()
@@ -1953,7 +1969,6 @@ class RepliesWindow(windows.PageWindow):
 				data.data.reverse()
 			alt = self.getUserInfoAttributes()
 			self.posts = {}
-			select = -1
 			showIndicators = getSetting('show_media_indicators',True)
 			countLinkImages = getSetting('smi_count_link_images',False)
 			prevItem = xbmcgui.ListItem(label='prev')
@@ -1961,10 +1976,8 @@ class RepliesWindow(windows.PageWindow):
 			nextItem = xbmcgui.ListItem(label='next')
 			nextItem.setProperty('paging','2')
 			items = []
-			if self.pageData.prev and self.skinLevel(1): items.append(prevItem)
 			lastItem = len(data.data) - 1
 			for post,idx in zip(data.data,range(0,len(data.data))):
-				if self.pid and post.postId == self.pid: select = idx
 				self.posts[post.postId] = post
 				user = re.sub('<.*?>','',post.userName)
 				item = xbmcgui.ListItem(label=post.isSent and 'To: ' + user or user)
@@ -1975,12 +1988,11 @@ class RepliesWindow(windows.PageWindow):
 					item.setProperty('end_item','first')
 				self._updateItem(item,post,defAvatar,showIndicators,countLinkImages,alt)
 				items.append(item)
+			if self.pageData.prev and self.skinLevel(1): items.insert(0,prevItem)
 			if self.pageData.next and self.skinLevel(1): items.append(nextItem)
 			self.getControl(120).addItems(items)
 			self.setFocusId(120)
-			if select > -1:
-				self.getControl(120).selectItem(int(select))
-			elif self.firstRun and getSetting('open_thread_to_newest',False) and FB.canOpenLatest() and self.shouldDropToBottom():
+			if not self.pid and self.firstRun and getSetting('open_thread_to_newest',False) and FB.canOpenLatest() and self.shouldDropToBottom():
 				self.getControl(120).selectItem(self.getControl(120).size() - 1)
 			self.firstRun = False
 		except:
@@ -1990,9 +2002,11 @@ class RepliesWindow(windows.PageWindow):
 			dialogs.showMessage(T(32050),T(32133),error=True)
 			raise
 		#xbmcgui.unlock()
-		if select > -1 and not self.dontOpenPD:
-			self.dontOpenPD = False
-			self.postSelected(itemindex=select)
+		if self.pid:
+			item = util.selectListItemByProperty(self.getControl(120),'post',self.pid)
+			if item and not self.dontOpenPD:
+				self.dontOpenPD = False
+				self.postSelected(item=item)
 		
 		self.getControl(104).setLabel('[B]%s[/B]' % self.topic)
 		self.pid = ''
@@ -2002,7 +2016,7 @@ class RepliesWindow(windows.PageWindow):
 	def openElements(self):
 		if not self.forumElements: return
 		if self.forumElements.get('post'):
-			item = util.selectListItemByProperty(self.getControl(120),'post',self.forumElements.get('post'))
+			util.selectListItemByProperty(self.getControl(120),'post',self.forumElements.get('post'))
 			if item: self.onClick(120)
 		self.forumElements = None
 			
@@ -2022,11 +2036,12 @@ class RepliesWindow(windows.PageWindow):
 			urls.append(m)
 		return urls
 	
-	def postSelected(self,itemindex=-1):
-		if itemindex > -1:
-			item = self.getControl(120).getListItem(itemindex)
-		else:
-			item = self.getControl(120).getSelectedItem()
+	def postSelected(self,itemindex=-1,item=None):
+		if not item:
+			if itemindex > -1:
+				item = self.getControl(120).getListItem(itemindex)
+			else:
+				item = self.getControl(120).getSelectedItem()
 		if not item: return
 		
 		if self.processPaging(item.getProperty('paging')): return

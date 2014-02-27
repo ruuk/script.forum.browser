@@ -177,6 +177,10 @@ def showHelp(helptype):
 		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
 		changelogPath = os.path.join(addonPath,'changelog.txt')
 		showText('Changelog',open(changelogPath,'r').read().replace('\t','    '))
+	elif result == 'credits':
+		addonPath = xbmc.translatePath(util.__addon__.getAddonInfo('path'))
+		changelogPath = os.path.join(addonPath,'CREDITS.txt')
+		showText('Credits',open(changelogPath,'r').read().replace('\t','    '))
 
 def showInfo(infotype):
 	infotype += '.info'
@@ -722,11 +726,12 @@ class ImageChoiceMenu(ChoiceMenu):
 		return self.items[result]['id']
 
 class xbmcDialogProgress:
-	def __init__(self,heading,line1='',line2='',line3=''):
+	def __init__(self,heading,line1='',line2='',line3='',update_callback=None):
 		self.heading = heading
 		self.line1 = line1
 		self.line2 = line2
 		self.line3 = line3
+		self._updateCallback = update_callback
 		self.lastPercent = 0
 		self.setRange()
 		self.dialog = xbmcgui.DialogProgress()
@@ -766,6 +771,10 @@ class xbmcDialogProgress:
 		pct = 0
 		if hasattr(message,'percent'): pct = message.percent
 		return self.update(pct,message)
+		
+	def updateCallback(self,a):
+		if self._updateCallback: return self._updateCallback(self,a)
+		return True
 		
 	def iscanceled(self):
 		return self.dialog.iscanceled()

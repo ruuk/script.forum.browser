@@ -39,9 +39,6 @@ The forum description (if available) is shown below the forums list.
 
 [B]Refresh[/B]: Refresh the forums list. This is especially useful if there was an error displaying the list (timeout, etc).
 @item:credits=Credits
-Special thanks to John Hanselman (hasselhof) for his huge volume of testing which helped to make Forum Browser better than would have been without it.
-Also, special thanks to dj_gerbil for his help and testing.
-Image attribution:
- Like designed by Marwa Boukarim from the Noun Project
+Click to see who helped make Forum Browser possible
 @item:changelog=Changelog
 Click for the Forum Browser changelog

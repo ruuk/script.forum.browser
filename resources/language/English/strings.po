@@ -709,7 +709,7 @@ msgid "Failed"
 msgstr ""
 
 msgctxt "#32258"
-msgid "Failed to download file."
+msgid "Download Failed"
 msgstr ""
 
 msgctxt "#32259"
@@ -2060,6 +2060,26 @@ msgstr ""
 
 msgctxt "#32596"
 msgid "Show Forum Specific Background"
+msgstr ""
+
+msgctxt "#32597"
+msgid "Choose Video"
+msgstr ""
+
+msgctxt "#32598"
+msgid "ETA"
+msgstr ""
+
+msgctxt "#32599"
+msgid "Size"
+msgstr ""
+
+msgctxt "#32600"
+msgid "Received"
+msgstr ""
+
+msgctxt "#32601"
+msgid "Download Complete"
 msgstr ""
 
 #empty strings from id 32524 to 32899
