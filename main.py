@@ -1339,16 +1339,33 @@ class MessageWindow(windows.BaseWindow):
 		finally:
 			s.close()
 			
-	def downloadVideo(self,url):
-		s = dialogs.showActivitySplash()
-		try:
-			path = getSetting('last_download_path') or util.CACHE_PATH
-			StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
-			StreamExtractor.setOutputCallback(s.updateMsg)
-			StreamExtractor.downloadVideo(url,path,getSetting('video_quality',1))
-		finally:
-			StreamExtractor.setOutputCallback(None)
-			s.close()
+	def downloadVideo(self,videoID,url):
+		if videoID in self.videoCache:
+			vid = self.videoCache[videoID]
+		else:
+			vid = StreamExtractor.getVideoInfo(url,quality=getSetting('video_quality',1))
+		title=None
+		if vid.hasMultipleStreams():
+			d = dialogs.ChoiceMenu('Choose Video')
+			for i in vid.streams():
+				d.addItem(i,i['title'],i['thumbnail'])
+			info = d.getResult()
+			if not info: return
+			formatID = info.get('formatID')
+			title = info.get('title')
+		else:
+			formatID = vid.streams()[0].get('formatID')
+
+		path = self.getDownloadPath()
+		with dialogs.xbmcDialogProgress(T(32205)) as prog:
+			try:
+				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
+				StreamExtractor.setOutputCallback(prog.updateSimple)
+				result = StreamExtractor.downloadVideo(url,path,formatID,title=title)
+			finally:
+				StreamExtractor.setOutputCallback(None)
+		if not result and result.status != 'canceled':
+				dialogs.showMessage('Download Failed',result.message)
 		
 	def linkSelected(self):
 		link = self.getSelectedLink()
@@ -1455,7 +1472,7 @@ class MessageWindow(windows.BaseWindow):
 				
 	def doImageMenu(self):
 		img = self.getControl(150).getSelectedItem().getProperty('url')
-		vid = self.getControl(150).getSelectedItem().getProperty('video')
+		vid = self.getControl(150).getSelectedItem().getProperty('videoID')
 		d = dialogs.ChoiceMenu(T(32316))
 		d.addItem('save', T(32129))
 		if CLIPBOARD:
@@ -1469,7 +1486,8 @@ class MessageWindow(windows.BaseWindow):
 			CLIPBOARD.setClipboard(share)
 		elif result == 'save':
 			if vid:
-				self.downloadVideo(vid)
+				url = self.getControl(150).getSelectedItem().getProperty('video')
+				self.downloadVideo(vid,url)
 			else:
 				self.saveImage(img)
 			
@@ -1478,6 +1496,17 @@ class MessageWindow(windows.BaseWindow):
 		if not os.path.exists(base): os.makedirs(base)
 		clearDirFiles(base)
 		return Downloader(message=T(32148)).downloadURLs(base,[url],'.jpg')
+		
+	def getDownloadPath(self):
+		path = getSetting('last_download_path') or ''
+		if path:
+			if not util.getSetting('assume_default_image_save_path', False):
+				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
+				if new: path = ''
+		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True)
+		if not path: return
+		setSetting('last_download_path',path)
+		return path
 		
 	def saveImage(self,source):
 		#browse(type, heading, shares[, mask, useThumbs, treatAsFolder, default])
@@ -1489,14 +1518,8 @@ class MessageWindow(windows.BaseWindow):
 				return
 			source = result[0]
 
-		path = getSetting('last_download_path') or ''
-		if path:
-			if not util.getSetting('assume_default_image_save_path', False):
-				new = dialogs.dialogYesNo(T(32560),T(32561)+'[CR]',path,'[CR]'+T(32562),T(32563),T(32276))
-				if new: path = ''
-		if not path: path = xbmcgui.Dialog().browse(3,T(32260),'files','',False,True)
-		if not path: return
-		setSetting('last_download_path',path)
+		path = self.getDownloadPath()
+		
 		if not os.path.exists(source): return
 		if util.getSetting('dont_ask_image_filename', False):
 			filename = firstfname

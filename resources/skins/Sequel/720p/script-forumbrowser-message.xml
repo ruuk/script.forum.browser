@@ -59,9 +59,9 @@
 				<posy>90</posy>
 				<control type="image">
 					<posx>0</posx>
-					<posy>0</posy>
+					<posy>-30</posy>
 					<width>1280</width>
-					<height>760</height>
+					<height>720</height>
 					<texture>$INFO[Window(10000).Property(ForumBrowser_window_background_MESSAGE)]</texture>
 					<aspectratio>scale</aspectratio>
 				</control>
@@ -94,6 +94,7 @@
 					
 		<control type="group" id="127">
 			<animation effect="slide" end="0,-72" time="200" condition="!Control.IsVisible(149)">Conditional</animation>
+			<animation effect="slide" end="0,60" time="0" condition="StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)">Conditional</animation>
 			<posx>20</posx>
 			<posy>163</posy>
 			<control type="group">
@@ -102,7 +103,7 @@
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>1240</width>
-					<height>690</height>
+					<height>558</height>
 					<pagecontrol>123</pagecontrol>
 					<font>ForumBrowser-font13</font>
 					<scroll>true</scroll>
@@ -143,7 +144,7 @@
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>1240</width>
-					<height>690</height>
+					<height>558</height>
 					<pagecontrol>124</pagecontrol>
 					<font>ForumBrowser-font13</font>
 					<scroll>true</scroll>
@@ -209,9 +210,10 @@
 				<aspectratio>keep</aspectratio>
 			</control>
 		</control>
-		
-			<control type="group" id="149">
+
+		<control type="group" id="149">
 			<visible>StringCompare(Window.Property(has_media),1)</visible>
+			<animation effect="zoom" end="183" center="640,90" time="0" condition="StringCompare(Window(10000).Property(ForumBrowser_window_slide_up_MESSAGE),1)">Conditional</animation>
 			<description>Images</description>
 			<posx>-64</posx>
 			<posy>90</posy>

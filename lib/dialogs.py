@@ -1,6 +1,6 @@
-import os, sys, re, fnmatch, binascii, xbmc, xbmcgui
+import os, re, fnmatch, binascii, xbmc, xbmcgui
 import util, asyncconnections, mods
-from xbmcconstants import *  # @UnusedWildImport
+from xbmcconstants import *  #analysis:ignore
 from lib.forumbrowser import forumbrowser
 
 DEBUG = None
@@ -336,7 +336,10 @@ class ImageChoiceDialog(BaseDialog):
 				idx+=1
 		
 	def doFilter(self):
-		self.getControl(199).setVisible(False)
+		try:
+			self.getControl(199).setVisible(False)
+		except:
+			pass
 		try:
 			terms = doKeyboard(util.T(32517),self.terms)
 			self.terms = terms or ''
@@ -353,7 +356,10 @@ class ImageChoiceDialog(BaseDialog):
 		except:
 			util.ERROR('Error handling search terms')
 		finally:
-			self.getControl(199).setVisible(True)
+			try:
+				self.getControl(199).setVisible(True)
+			except:
+				pass
 	
 	def makeColorFile(self,color,path):
 		try:
@@ -436,10 +442,6 @@ class ActivitySplashWindow(xbmcgui.WindowXMLDialog):
 		if self.cancelStopsConnections:
 			asyncconnections.StopConnection()
 	
-	def onClick(self,controlID):
-		if controlID == 200:
-			self.cancel()
-	
 class ActivitySplash():
 	def __init__(self,caption=util.T(32248),cancel_stops_connections=False,modal_callback=None):
 		self.splash = openWindow(ActivitySplashWindow,'script-forumbrowser-loading-splash.xml',return_window=True,modal=bool(modal_callback),theme='Default',caption=caption,cancel_stops_connections=cancel_stops_connections,modal_callback=modal_callback)
@@ -452,10 +454,10 @@ class ActivitySplash():
 		self.close()
 		
 	def update(self,pct,message):
-		self.splash.update(message)
+		return self.splash.update(message)
 		
 	def updateMsg(self,message):
-		self.splash.update(message)
+		return self.splash.update(message)
 
 	def close(self):
 		if not self.splash: return
@@ -760,6 +762,11 @@ class xbmcDialogProgress:
 		self.dialog.update(pct,line1,line2,line3)
 		return True
 	
+	def updateSimple(self,message):
+		pct = 0
+		if hasattr(message,'percent'): pct = message.percent
+		return self.update(pct,message)
+		
 	def iscanceled(self):
 		return self.dialog.iscanceled()
 	

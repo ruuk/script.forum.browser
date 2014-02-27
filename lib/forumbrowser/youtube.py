@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, time, urllib, urlparse, xbmc, xbmcgui
+import os, time, re, xbmc, xbmcgui
 from lib import util
 import forumbrowser
 import requests2 as requests
@@ -263,7 +263,7 @@ class YouTubeCategoryInterface:
 		def __init__(self,jobj):
 			snippet = jobj['snippet']
 			self.displayName = snippet.get('title','')
-			self.description = snippet.get('description','')
+			self.description = re.sub('[\n\r]+',' | ',snippet.get('description',''))
 			if 'thumbnails' in snippet:
 				self.logo = snippet['thumbnails'].get('default',{}).get('url')
 			else:
@@ -662,13 +662,13 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 			vidCount = deepDictVal(i,('contentDetails','itemCount'))
 			title = i['snippet'].get('title','').title()
 			desc = i['snippet'].get('description','') or title
-			title = '{0} ({1})'.format(title,vidCount)
+			title = '{0} ({1})'.format(title.encode('utf-8'),vidCount)
 			thumb = i['snippet']['thumbnails']['default']['url']
 			forums.append({'forumid':i['id'],'title':title,'description':desc,'subscribed':False,'subforum':False,'logo_url':thumb,'thumb':thumb})
 		if 'nextPageToken' in lists:
 			forums.append({'forumid':'playlists-%s' % lists['nextPageToken'],'title':'More'})
-		logo = deepDictVal(channel,('brandingSettings','image','bannerMobileImageUrl'))
-		self.background = logo = deepDictVal(channel,('brandingSettings','image','bannerTvHighImageUrl'))
+		logo = deepDictVal(channel,('brandingSettings','image','bannerMobileImageUrl')) #bannerTabletLowImageUrl
+		self.background = deepDictVal(channel,('brandingSettings','image','bannerTvHighImageUrl')) or deepDictVal(channel,('brandingSettings','image','backgroundImageUrl','default')) 
 		return self.finish(forumbrowser.FBData(forums,extra={'logo':logo,'force':True,'pm_counts':None,'stats':stats}),donecallback)
 	
 	def createThreadDict(self,item,skip_video_data=False):

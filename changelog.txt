@@ -44,7 +44,14 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.58
+Current Version : 2.1.59
+
+*** 2.1.59 ***
+
+Added the ability to download videos
+Fix for broken scrolling on post view where the bottom of each page was not visible when the window was slid down and the media bar was visible
+YouTube: Fix for channels being added broken
+Improve window background placement
 
 *** 2.1.58 ***
 

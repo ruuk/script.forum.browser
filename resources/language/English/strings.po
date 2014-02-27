@@ -347,7 +347,7 @@ msgid "Add Line Before"
 msgstr ""
 
 msgctxt "#32129"
-msgid "Save Image"
+msgid "Save"
 msgstr ""
 
 msgctxt "#32130"
@@ -1931,7 +1931,7 @@ msgid "Default"
 msgstr ""
 
 msgctxt "#32564"
-msgid "Use Default Image Save Path Without Asking"
+msgid "Use Default Media Save Path Without Asking"
 msgstr ""
 
 msgctxt "#32565"
