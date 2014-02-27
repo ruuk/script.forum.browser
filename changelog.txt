@@ -41,6 +41,7 @@ Current Version : 2.1.61
 *** 2.1.61 ***
 
 Added the ability to create folders and add forums to folders in the forums manager
+Now when deleting a forum in the forums manager, focus drops to the item above it instead of the top of the list
 
 *** 2.1.60 ***
 
