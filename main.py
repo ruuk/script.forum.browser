@@ -7,6 +7,7 @@ from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
 from lib.xbmcconstants import * # analysis:ignore
 import YDStreamExtractor as StreamExtractor
+import YDStreamUtils as StreamUtils
 
 import warnings
 
@@ -1452,12 +1453,12 @@ class MessageWindow(windows.BaseWindow):
 				self.showImage(item.getProperty('url'))
 	
 	def showVideo(self,source):
-		if StreamExtractor.isPlaying() and getSetting('video_ask_interrupt',True):
+		if StreamUtils.isPlaying() and getSetting('video_ask_interrupt',True):
 			line2 = getSetting('video_return_interrupt',True) and T(32254) or ''
 			if not dialogs.dialogYesNo(T(32255),T(32256),line2):
 				return
 		PLAYER.start(source)
-		#StreamExtractor.play(source)
+		#StreamUtils.play(source)
 		
 	def getSelectedLink(self):
 		item = self.getControl(148).getSelectedItem()
@@ -1491,20 +1492,6 @@ class MessageWindow(windows.BaseWindow):
 				return
 		finally:
 			s.close()
-			
-	def videoDownloadCallback(self,prog,data):
-		line1 = os.path.basename(data.info.get('filename',''))
-		line2 = []
-		if data.speedStr: line2.append(data.speedStr)
-		if data.etaStr: line2.append('{0}: {1}'.format(T(32598),data.etaStr))
-		line2 = ' - '.join(line2)
-		line3 = []
-		total = data.info.get('total_bytes')
-		if total: line3.append('{0}: {1}'.format(T(32599),StreamExtractor.simpleSize(total)))
-		downloaded = data.info.get('downloaded_bytes')
-		if downloaded: line3.append('{0}: {1}'.format(T(32600),StreamExtractor.simpleSize(downloaded)))
-		line3 = ' - '.join(line3)
-		return prog.update(data.percent or 0,line1,line2,line3)
 
 	def downloadVideo(self,videoID,url):
 		if videoID in self.videoCache:
@@ -1524,7 +1511,7 @@ class MessageWindow(windows.BaseWindow):
 			formatID = vid.streams()[0].get('formatID')
 
 		path = self.getDownloadPath()
-		with dialogs.xbmcDialogProgress(T(32205),update_callback=self.videoDownloadCallback) as prog:
+		with StreamUtils.DownloadProgress() as prog:
 			try:
 				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 				StreamExtractor.setOutputCallback(prog.updateCallback)
@@ -3428,7 +3415,7 @@ class ForumsWindow(windows.BaseWindow):
 		size = 'manage'
 		if external:
 			methods = ('manage','small','full')
-			if StreamExtractor.isPlaying():
+			if StreamUtils.isPlaying():
 				size = methods[getSetting('notify_method_video',0)]
 			else:
 				size = methods[getSetting('notify_method',0)]

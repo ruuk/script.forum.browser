@@ -1,6 +1,6 @@
 import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii, math, re
 from lib import chardet
-import YDStreamExtractor as StreamExtractor
+import YDStreamUtils as StreamUtils
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
@@ -252,7 +252,7 @@ class PlayerMonitor(xbmc.Player):
 	def start(self,path):
 		interrupted = None
 		if getSetting('video_return_interrupt',True):
-			interrupted = StreamExtractor.current()
+			interrupted = StreamUtils.current()
 			self.getCurrentTime()
 		self.interrupted = interrupted
 		self.doPlay(path)
@@ -272,7 +272,7 @@ class PlayerMonitor(xbmc.Player):
 		self.isSelfPlaying = True
 		if getSetting('video_start_preview',True):
 			self.play(path,windowed=True)
-			#StreamExtractor.play(path, preview=True)
+			#StreamUtils.play(path, preview=True)
 		else:
 			self.play(path)
 		
@@ -302,14 +302,14 @@ class PlayerMonitor(xbmc.Player):
 			if getSetting('video_bypass_resume_dialog',True) and self.currentTime:
 				try:
 					xbmc.sleep(1000)
-					StreamExtractor.playAt(self.interrupted, *self.currentTime)
+					StreamUtils.playAt(self.interrupted, *self.currentTime)
 				except:
 					ERROR('PLAYER: Failed manually resume video - sending to XBMC')
 					xbmc.sleep(1000)
-					StreamExtractor.play(self.interrupted)
+					StreamUtils.play(self.interrupted)
 			else:
 				xbmc.sleep(1000)
-				StreamExtractor.play(self.interrupted,getSetting('video_resume_as_preview',False))
+				StreamUtils.play(self.interrupted,getSetting('video_resume_as_preview',False))
 		self.interrupted = None
 		self.currentTime = None
 	
@@ -325,17 +325,17 @@ class PlayerMonitor(xbmc.Player):
 		self.playInterrupted()
 		
 	def pauseStack(self):
-		if not self.stack: StreamExtractor.pause()
+		if not self.stack: StreamUtils.pause()
 		self.stack += 1
 		
 	def resumeStack(self):
 		self.stack -= 1
 		if self.stack < 1:
 			self.stack = 0
-			StreamExtractor.resume()
+			StreamUtils.resume()
 		
 	def getCurrentTime(self):
-		if not StreamExtractor.isPlaying(): return None
+		if not StreamUtils.isPlaying(): return None
 		offset = getSetting('video_resume_offset',0)
 		val = self.getTime() - offset
 		if val < 0: val = 0

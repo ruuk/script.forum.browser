@@ -19,9 +19,9 @@ def LOG(txt): pass
 util.LOG = LOG
 
 FB = None
-from lib.util import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #@UnusedImport
-from main import getForumBrowser, listForumSettings, forumsManager, getNotifyList #@UnusedImport
-import YDStreamExtractor as StreamExtractor
+from lib.util import FORUMS_PATH, FORUMS_STATIC_PATH, CACHE_PATH #analysis:ignore
+from main import getForumBrowser, listForumSettings, forumsManager, getNotifyList #analysis:ignore
+import YDStreamUtils as StreamUtils
 
 
 ADDONID = util.__addon__.getAddonInfo('id')
@@ -95,7 +95,7 @@ class ForumBrowserService:
 			self.stop = True
 		
 	def notify(self,message='',header='Forum Browser',ntype='all'):
-		if StreamExtractor.isPlaying():
+		if StreamUtils.isPlaying():
 			method = self.notifyMethodVideo
 		else:
 			method = self.notifyMethod
