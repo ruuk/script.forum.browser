@@ -36,7 +36,11 @@ TODO:
 KNOWN ISSUES:
   Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
 
-Current Version : 2.1.62
+Current Version : 2.1.63
+
+*** 2.1.63 ***
+
+More Internal modifications to match youtube-dl module refactoring
 
 *** 2.1.62 ***
 

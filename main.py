@@ -1482,13 +1482,12 @@ class MessageWindow(windows.BaseWindow):
 				if vid.hasMultipleStreams():
 					d = dialogs.ChoiceMenu(T(32597))
 					for i in vid.streams():
-						d.addItem(i['url'],i['title'],i['thumbnail'])
+						d.addItem(i,i['title'],i['thumbnail'])
 					s.close()
-					url = d.getResult()
-					if not url: return
-				else:
-					url = vid.streamURL()
-				self.showVideo(url)
+					info = d.getResult()
+					if not info: return
+					vid.selectStream(info)
+				self.showVideo(vid.streamURL())
 				return
 		finally:
 			s.close()
@@ -1498,30 +1497,26 @@ class MessageWindow(windows.BaseWindow):
 			vid = self.videoCache[videoID]
 		else:
 			vid = StreamExtractor.getVideoInfo(url,quality=getSetting('video_quality',1))
-		title=None
 		if vid.hasMultipleStreams():
 			d = dialogs.ChoiceMenu(T(32597))
 			for i in vid.streams():
 				d.addItem(i,i['title'],i['thumbnail'])
 			info = d.getResult()
 			if not info: return
-			formatID = info.get('formatID')
-			title = info.get('title')
-		else:
-			formatID = vid.streams()[0].get('formatID')
+			vid.selectStream(info)
 
 		path = self.getDownloadPath()
 		with StreamUtils.DownloadProgress() as prog:
 			try:
 				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
-				StreamExtractor.setOutputCallback(prog.updateCallback)
-				result = StreamExtractor.downloadVideo(url,path,formatID,title=title)
+				StreamExtractor.setOutputCallback(prog)
+				result = StreamExtractor.downloadVideo(vid,path)
 			finally:
 				StreamExtractor.setOutputCallback(None)
 		if not result and result.status != 'canceled':
-				dialogs.showMessage(T(32258),result.message,success=False)
+				dialogs.showMessage(T(32258),'[CR]',result.message,success=False)
 		elif result:
-			dialogs.showMessage(T(32052),T(32601),'',result.filepath,success=True)
+			dialogs.showMessage(T(32052),T(32601),'[CR]',result.filepath,success=True)
 		
 	def linkSelected(self):
 		link = self.getSelectedLink()

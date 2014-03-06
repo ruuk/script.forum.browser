@@ -191,7 +191,11 @@ class CookieTransport(xmlrpclib.Transport):
 			connection.endheaders()
 			if request_body: connection.send(request_body)
 		else:
-			connection.endheaders(request_body)
+			try:
+				connection.endheaders(request_body)
+			except util.StopRequestedException:
+				LOG('CookieTransport.send_content() aborted due to StopRequestedException')
+				return
 			
 	def gzip_encode(self,data,gzip):
 		import StringIO

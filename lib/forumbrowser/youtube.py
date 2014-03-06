@@ -254,10 +254,6 @@ class YouTubeAPI:
 # YouTubeCategoryInterface
 ################################################################################
 class YouTubeCategoryInterface:
-	searchURL = 'https://directory.tapatalk.com/search.php?search={terms}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
-	categoryURL = 'https://directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
-	categoryURL2 = 'https://s2directory.tapatalk.com/get_forums_by_iab_category.php?cat_id={cat_id}&page={page}&per_page={per_page}&app_key=fGdHrdjlH755GdF3&app_id=5'
-	
 	class ForumEntry(forumbrowser.ForumEntry):
 		forumType = 'YT'
 		def __init__(self,jobj):
