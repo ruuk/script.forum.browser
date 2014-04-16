@@ -72,7 +72,7 @@
 				<height>30</height>
 				<texture border="10">forum-browser-video-box-header.png</texture>
 			</control>
-			<control type="label" id="100">
+			<control type="textbox" id="100">
 				<posx>10</posx>
 				<posy>10</posy>
 				<width>148</width>

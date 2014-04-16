@@ -447,11 +447,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			
 	def checkBrowser(self):
 		if not self.mechanize:
-			from webviewer.mechanize import _urllib2_fork
+			from webviewer.webviewer import mechanize
 			def http_open(self, req):
 				return self.do_open(asyncconnections.Connection, req)
-			_urllib2_fork.HTTPHandler.http_open = http_open
-			from webviewer import mechanize #@UnresolvedImport
+			mechanize._urllib2_fork.HTTPHandler.http_open = http_open
 			import xbmc
 			cookiesPath = os.path.join(xbmc.translatePath(util.__addon__.getAddonInfo('profile')),'cache','cookies')
 			LOG('Cookies will be saved to: ' + cookiesPath)

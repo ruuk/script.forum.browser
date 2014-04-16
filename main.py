@@ -1506,6 +1506,7 @@ class MessageWindow(windows.BaseWindow):
 			vid.selectStream(info)
 
 		path = self.getDownloadPath()
+		if not path: return
 		with StreamUtils.DownloadProgress() as prog:
 			try:
 				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
@@ -4050,7 +4051,7 @@ def selectForumCategory(with_all=False):
 		d.addItem('search',T(32421))
 		d.addItem('all',T(32422))
 	for x in range(0,17):
-		d.addItem(str(x), str(T(32500 + x)))
+		d.addItem(str(x), unicode(T(32500 + x)))
 	return d.getResult()
 
 def addForumManual(current=False):

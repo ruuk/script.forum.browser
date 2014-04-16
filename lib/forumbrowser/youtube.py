@@ -742,7 +742,10 @@ class YoutubeForumBrowser(forumbrowser.ForumBrowser):
 		
 		vp.postNumber = 1
 		citems = [vp]
-		ct=comments['feed']['openSearch$totalResults']['$t']+1
+		try:
+			ct=comments['feed']['openSearch$totalResults']['$t']+1
+		except:
+			ct=1
 		pct_ct=0
 		if 'entry' in comments['feed']:
 			tot = len(comments['feed']['entry'])

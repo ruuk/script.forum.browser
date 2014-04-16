@@ -53,7 +53,7 @@
 			</control>
 			
 			<control type="group">
-				<visible>!Control.IsVisible(115) + !StringCompare(Window(10000).Property(ForumBrowser_window_background_THREAD),)</visible>
+				<visible>!Control.IsVisible(115) + !IsEmpty(Window(10000).Property(ForumBrowser_window_background_THREAD))</visible>
 				<posx>0</posx>
 				<posy>90</posy>
 				<control type="image">
@@ -623,7 +623,7 @@
 				<scrolltime>200</scrolltime>
 				<itemlayout height="100">
 					<control type="group">
-						<visible>StringCompare(ListItem.Property(paging),)</visible>
+						<visible>IsEmpty(ListItem.Property(paging))</visible>
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
@@ -698,7 +698,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<info>ListItem.Label2</info>
-								<visible> StringCompare(ListItem.property(unread),)</visible>
+								<visible> IsEmpty(ListItem.property(unread))</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -727,7 +727,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
-								<visible>StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
+								<visible>IsEmpty(ListItem.Director) + IsEmpty(ListItem.Property(is_forum))</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -739,7 +739,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR][/B]</label>
-								<visible>!StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
+								<visible>!IsEmpty(ListItem.Director) + IsEmpty(ListItem.Property(is_forum))</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>
@@ -751,7 +751,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32162] $INFO[ListItem.Property(lastposter)] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-								<visible>!StringCompare(ListItem.Property(lastposter),) + StringCompare(ListItem.Studio,)</visible>
+								<visible>!IsEmpty(ListItem.Property(lastposter)) + IsEmpty(ListItem.Studio)</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>
@@ -763,7 +763,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32162] [B]$INFO[ListItem.Property(lastposter)][COLOR FFFF0000]$INFO[ListItem.Studio][/COLOR][/B] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-								<visible>!StringCompare(ListItem.Property(lastposter),) + !StringCompare(ListItem.Studio,)</visible>
+								<visible>!IsEmpty(ListItem.Property(lastposter)) + !IsEmpty(ListItem.Studio)</visible>
 							</control>
 							<control type="group">
 								<posx>990</posx>
@@ -788,7 +788,7 @@
 									<align>left</align>
 									<label>$INFO[ListItem.Property(replies)]</label>
 								</control>
-								<visible>!StringCompare(ListItem.Property(replies),)</visible>
+								<visible>!IsEmpty(ListItem.Property(replies))</visible>
 							</control>
 							<control type="group">
 								<posx>1100</posx>
@@ -813,7 +813,7 @@
 									<align>left</align>
 									<label>$INFO[ListItem.Property(views)]</label>
 								</control>
-								<visible>!StringCompare(ListItem.Property(views),)</visible>
+								<visible>!IsEmpty(ListItem.Property(views))</visible>
 							</control>
 						</control>
 						
@@ -909,7 +909,7 @@
 				
 				<focusedlayout height="100">
 					<control type="group">
-						<visible>StringCompare(ListItem.Property(paging),)</visible>
+						<visible>IsEmpty(ListItem.Property(paging))</visible>
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
@@ -1002,7 +1002,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<info>ListItem.Label2</info>
-								<visible> StringCompare(ListItem.property(unread),)</visible>
+								<visible>IsEmpty(ListItem.property(unread))</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -1031,7 +1031,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] $INFO[ListItem.Label]</label>
-								<visible>StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
+								<visible>IsEmpty(ListItem.Director) + IsEmpty(ListItem.Property(is_forum))</visible>
 							</control>
 							<control type="label">
 								<posx>0</posx>
@@ -1043,7 +1043,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32526] [B]$INFO[ListItem.Label][/B][COLOR FFFF0000]$INFO[ListItem.Director][/COLOR]</label>
-								<visible>!StringCompare(ListItem.Director,) + StringCompare(ListItem.Property(is_forum),)</visible>
+								<visible>!IsEmpty(ListItem.Director) + IsEmpty(ListItem.Property(is_forum))</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>
@@ -1055,7 +1055,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32162] $INFO[ListItem.Property(lastposter)] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-								<visible>!StringCompare(ListItem.Property(lastposter),) + StringCompare(ListItem.Studio,)</visible>
+								<visible>!IsEmpty(ListItem.Property(lastposter)) + IsEmpty(ListItem.Studio)</visible>
 							</control>
 							<control type="label">
 								<posx>320</posx>
@@ -1067,7 +1067,7 @@
 								<textcolor>$INFO[Window(10000).Property(ForumBrowser_window_colors_fore_THREAD)]</textcolor>
 								<align>left</align>
 								<label>$ADDON[script.forum.browser 32162] [B]$INFO[ListItem.Property(lastposter)][COLOR FFFF0000]$INFO[ListItem.Studio][/COLOR][/B] $INFO[ListItem.Property(last_reply_time),(,)]</label>
-								<visible>!StringCompare(ListItem.Property(lastposter),) + !StringCompare(ListItem.Studio,)</visible>
+								<visible>!IsEmpty(ListItem.Property(lastposter)) + !IsEmpty(ListItem.Studio)</visible>
 							</control>
 							<control type="group">
 								<posx>990</posx>
@@ -1092,7 +1092,7 @@
 									<align>left</align>
 									<label>$INFO[ListItem.Property(replies)]</label>
 								</control>
-								<visible>!StringCompare(ListItem.Property(replies),)</visible>
+								<visible>!IsEmpty(ListItem.Property(replies))</visible>
 							</control>
 							<control type="group">
 								<posx>1100</posx>
@@ -1117,7 +1117,7 @@
 									<align>left</align>
 									<label>$INFO[ListItem.Property(views)]</label>
 								</control>
-								<visible>!StringCompare(ListItem.Property(views),)</visible>
+								<visible>!IsEmpty(ListItem.Property(views))</visible>
 							</control>
 						</control>
 						
