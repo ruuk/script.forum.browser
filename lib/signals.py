@@ -1,5 +1,5 @@
-import xbmc, xbmcaddon, os, filelock
-from util import LOG, ERROR, getSettingExternal, setSettingExternal
+import xbmc, xbmcaddon, os, json
+from util import LOG, ERROR
 
 DEBUG = False
 
@@ -11,8 +11,6 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 	def __init__(self):
 		self.currID = 0
 		self.registry = {}
-		self._lastSignal = ''
-		clearSignals()
 		xbmc.Monitor.__init__(self)  # @UndefinedVariable
 		
 	def registerReceiver(self,signal,registrant,callback):
@@ -48,64 +46,36 @@ class SignalHub(xbmc.Monitor): # @UndefinedVariable
 					self.registry[signal].pop(i)
 					break
 				i+=1
-				
+
 	def unSelfRegister(self,signal,registrant):
 		signal = signal + '.' + str(registrant._receiverID)
 		return self.unRegister(signal, registrant)
 	
-	def validSignal(self):
-		trigger = getSettingExternal('SignalHubSignal')
-		if trigger == self._lastSignal: return False
-		self._lastSignal = trigger
-		return True
-	
-	def onSettingsChanged(self):
-		if not self.validSignal(): return
-		signals = getSignals()
-		if not signals: return
+	def onNotification(self, sender, method, data):
+		if not sender == 'script.forum.browser.SIGNAL': return
+		signal = method.split('.',1)[-1]
+		if data:
+			args = json.loads(data)
+			if args:
+				data = args.get('data')
+				
 		if DEBUG:
 			import threading
 			LOG('SignalHub: Thread: %s' % str(threading.currentThread().getName()))
-			if len(signals) > 1: LOG('SignalHub: Multiple signals: %s' % len(signals))
-			
-		for signal in signals:
-			if not ':' in signal: continue
-			signal,data = signal.split(':',1)
-			
-			if not signal in self.registry: return
-			for reg,cb in self.registry[signal]:  # @UnusedVariable
-				if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s (%s)' % (signal,reg._receiverID,reg.__class__.__name__,data))
-				try:
-					cb(signal,data)
-				except:
-					ERROR('SignalHub: Callback Error')
-					continue
-		
-def clearSignals():
-	with open(SIGNAL_CACHE_PATH,'w') as f:
-		f.write('')
-	
-def getSignals():
-	with filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5,delay=0.1):
-		with open(SIGNAL_CACHE_PATH,'r+') as f:
-			signals = f.read()
-			f.truncate(0)
-	if not signals: return []
-	return signals.split('\n')
 
-def addSignal(signal):
-	signals = getSignals()
-	signals.append(signal)
-	
-	with filelock.FileLock(SIGNAL_CACHE_PATH, timeout=5, delay=0.1):
-		with open(SIGNAL_CACHE_PATH,'w') as f:
-			f.write('\n'.join(signals))
+		
+		if not signal in self.registry: return
+		for reg,cb in self.registry[signal]:  # @UnusedVariable
+			if DEBUG: LOG('SignalHub: Callback in response to signal %s for [%s] %s (%s)' % (signal,reg._receiverID,reg.__class__.__name__,data))
+			try:
+				cb(signal,data)
+			except:
+				ERROR('SignalHub: Callback Error')
+				continue
 	
 def sendSignal(signal,data=''):
-	addSignal(signal + ':' + str(data))
-	global SIGNAL_COUNTER
-	setSettingExternal('SignalHubSignal',str(SIGNAL_COUNTER))
-	SIGNAL_COUNTER+=1
+	command = 'XBMC.NotifyAll(script.forum.browser.SIGNAL,{0},"{{\\"data\\":\\"{1}\\"}}")'.format(signal,data)
+	xbmc.executebuiltin(command)
 	if DEBUG: LOG('SignalHub: Sending signal %s (%s)' % (signal,data))
 	
 def sendSelfSignal(sender,signal,data=''):

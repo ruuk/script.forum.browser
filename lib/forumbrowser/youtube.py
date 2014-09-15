@@ -5,6 +5,7 @@ import forumbrowser
 import requests2 as requests
 import texttransform
 import iso8601
+import OAuthHelper
 
 def LOG(msg):
 	util.LOG('YouTube: %s' % msg)
@@ -58,17 +59,17 @@ class YouTubeAPISection:
 			req = self.session.get(self.baseURL,params=params)
 		return req.json()
 
-class YouTubeAPI:
-	clientID = '626473115622-i9l4ujmcdcn91cpqgq27imqt0l5e4muj.apps.googleusercontent.com'
-	clientS = 'Epukfa1a5ObgsJjxwUG6veuY'
+class YouTubeAPI(OAuthHelper.GoogleOAuthorizer):
 	baseURL = 'https://www.googleapis.com/youtube/v3/'
-	auth1URL = 'https://accounts.google.com/o/oauth2/device/code'
-	auth2URL = 'https://accounts.google.com/o/oauth2/token'
-	authScope = 'https://www.googleapis.com/auth/youtube'
-	grantType = 'http://oauth.net/grant_type/device/1.0'
 	
 	def __init__(self):
-		self.session = requests.Session()
+		OAuthHelper.GoogleOAuthorizer.__init__(self,
+			addon_id='script.forum.browser',
+			client_id='626473115622-i9l4ujmcdcn91cpqgq27imqt0l5e4muj.apps.googleusercontent.com',
+			client_secret='Epukfa1a5ObgsJjxwUG6veuY',
+			auth_scope='https://www.googleapis.com/auth/youtube'
+		)
+
 		self.GuideCategories = YouTubeAPISection(self, 'guideCategories')
 		self.Search = YouTubeAPISection(self, 'search')
 		self.Channels = YouTubeAPISection(self, 'channels')
@@ -76,50 +77,13 @@ class YouTubeAPI:
 		self.PlaylistItems = YouTubeAPISection(self, 'playlistItems')
 		self.Videos = YouTubeAPISection(self, 'videos')
 		self.Subscriptions = YouTubeAPISection(self, 'subscriptions')
-		self.authPollInterval = 5
-		self.authExpires = int(time.time())
-		self.deviceCode = ''
-		self.verificationURL = 'http://www.google.com/device'
-		self.loadToken()
-		
-	def loadToken(self):
-		self.token = util.getSetting('youtube_access_token')
-		self.tokenExpires = util.getSetting('youtube_expiration',0)
-		if self.authorized(): LOG('AUTHORIZED')
 
-	def getToken(self):
-		if self.tokenExpires <= int(time.time()):
-			return self.updateToken()
-		return self.token
-		
-	def updateToken(self):
-		LOG('REFRESHING TOKEN')
-		data = {	'client_id':self.clientID,
-					'client_secret':self.clientS,
-					'refresh_token':util.getSetting('youtube_refresh_token'),
-					'grant_type':'refresh_token'}
-		json = self.session.post(self.auth2URL,data=data).json()
-		if 'access_token' in json:
-			self.saveData(json)
-		else:
-			LOG('Failed to update token')
-		return self.token
-		
-#	client_id=21302922996.apps.googleusercontent.com&
-#	client_secret=XTHhXh1SlUNgvyWGwDk1EjXB&
-#	refresh_token=1/6BMfW9j53gdGImsixUH6kU5RsR4zwI9lUVX-tqf8JXQ&
-#	grant_type=refresh_token
-#	The authorization server returns a JSON object that contains a new access token:
-#	
-#	{
-#	  "access_token":"1/fFAGRNJru1FTz70BzhT3Zg",
-#	  "expires_in":3920,
-#	  "token_type":"Bearer"
-#	}
-	
-	def authorized(self):
-		return bool(self.token)
-		
+	def _setSetting(self,key,value):
+		util.setSetting('youtube_{0}'.format(key),self.value)
+
+	def _getSetting(self,key,default=None):
+		return util.getSetting('youtube_{0}'.format(key),default)
+
 	def Comments(self,video_id,url=None):
 		url = url or 'https://gdata.youtube.com/feeds/api/videos/{0}/comments?orderby=published&alt=json'.format(video_id)
 		req = self.session.get(url)
@@ -153,70 +117,6 @@ class YouTubeAPI:
 			if req.text == 'Private video': return None
 			ERROR('api.Video() - json failed for ID: {0}'.format(videoID),hide_tb=True)
 			return None
-		
-	def authorize(self):
-		userCode = self.getDeviceUserCode()
-		if not userCode: return
-		self.showUserCode(userCode)
-		d = xbmcgui.DialogProgress()
-		d.create('Waiting','Waiting for auth...')
-		ct=0
-		while True:
-			d.update(ct,'Waiting for auth...')
-			json = self.pollAuthServer()
-			if 'access_token' in json: break
-			if d.iscanceled(): return
-			for x in range(0,self.authPollInterval):
-				xbmc.sleep(1000)
-				if d.iscanceled(): return
-			ct+=1
-		return self.saveData(json)
-		
-	def saveData(self,json):
-		self.token = json.get('access_token','')
-		refreshToken = json.get('refresh_token')
-		self.tokenExpires = json.get('expires_in',3600) + int(time.time())
-		util.setSetting('youtube_access_token',self.token)
-		if refreshToken: util.setSetting('youtube_refresh_token',refreshToken)
-		util.setSetting('youtube_expiration',self.tokenExpires)
-		return self.token and refreshToken
-		
-	def pollAuthServer(self):
-		json = self.session.post(self.auth2URL,data={	'client_id':self.clientID,
-															'client_secret':self.clientS,
-															'code':self.deviceCode,
-															'grant_type':self.grantType
-														}).json()
-		if 'error' in json:
-			if json['error'] == 'slow_down':
-				self.authPollInterval += 1
-		return json
-#		{
-#		  "access_token":"1/fFAGRNJru1FTz70BzhT3Zg",
-#		  "expires_in":3920,
-#		  "token_type":"Bearer",
-#		  "refresh_token":"1/6BMfW9j53gdGImsixUH6kU5RsR4zwI9lUVX-tqf8JXQ"
-#		}
-
-	def showUserCode(self,user_code):
-		xbmcgui.Dialog().ok('Authorization','Go to: ' + self.verificationURL,'Enter code: ' + user_code,'Click OK when done.')
-		
-	def getDeviceUserCode(self):
-		json = self.session.post(self.auth1URL,data={'client_id':self.clientID,'scope':self.authScope}).json()
-#		{
-#		  "device_code" : "4/L9fTtLrhY96442SEuf1Rl3KLFg3y",
-#		  "user_code" : "a9xfwk9c",
-#		  "verification_url" : "http://www.google.com/device",
-#		  "expires_in" : "1800"
-#		  "interval" : 5,
-#		}
-		self.authPollInterval = json.get('interval',5)
-		self.authExpires = json.get('expires_in',1800) + int(time.time())
-		self.deviceCode = json.get('device_code','')
-		self.verificationURL = json.get('verification_url',self.verificationURL)
-		if 'error' in json:
-			LOG('ERROR - YouTube getDeviceUserCode(): ' + json.get('error_description',''))
-		return json.get('user_code','')
 		
 	def postComment(self,videoID,comment):
 		infoURL = 'https://gdata.youtube.com/feeds/api/videos/%s?v=2&alt=json' % videoID
