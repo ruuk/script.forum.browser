@@ -535,7 +535,6 @@ def getImageBackgroundColor(path):
 		img = Image.open(path).convert('RGB')
 		h = img.histogram()
 		rgb = tuple([b.index(max(b)) for b in [ h[i*256:(i+1)*256] for i in range(3) ]])
-		print rgb
 		return rgb
 	except:
 		ERROR('getImageBackgroundColor(): Failed to get background color')

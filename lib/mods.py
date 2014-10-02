@@ -207,6 +207,7 @@ def installKeyboardMod(update=True,paths=None,change=False):
 		#else:
 		dialogs.showMessage(T(32052),'',T(32499))
 	else:
+		setSetting('keyboard_installed',False)
 		dialogs.showMessage(T(32483),T(32521),' ',T(32522))
 	return True
 
@@ -284,7 +285,6 @@ def createFontsTranslationTable():
 				
 def replaceFonts(xml,is_1080=False):
 	createFontsTranslationTable()
-	print FTT
 	for name_size,fsize in IS_1080 and FONT_SIZES_1080 or FONT_SIZES:  # @UnusedVariable
 		xml = xml.replace('ForumBrowser-font%s' % name_size,FTT[name_size])
 	return xml

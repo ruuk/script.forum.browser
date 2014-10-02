@@ -1186,7 +1186,6 @@ class ColorDialog(xbmcgui.WindowXMLDialog):
 	def autoColor(self):
 		if not self.image: return
 		import urllib2
-		print self.image
 		if os.path.exists(self.image):
 			tmp_file = self.image
 		else:

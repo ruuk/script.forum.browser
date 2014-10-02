@@ -33,6 +33,10 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+*** 2.1.66 ***
+
+Fixed: If keyboard mod becomes removed externally (i.e. skin upgrade) the addon would ask if you wanted to re-install it even after you said no
+
 *** 2.1.65 ***
 
 Now requires Gotham
