@@ -33,10 +33,12 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
-KNOWN ISSUES:
-  Corrupted color display on longer posts. XBMC bug as of Frodo 12.1 (Fixed in Gotham 13)
+*** 2.1.65 ***
 
-Current Version : 2.1.64
+Now requires Gotham
+Updated language strings
+Use notifications for internal signal handling
+Update module requirements to new versions
 
 *** 2.1.64 ***
 
