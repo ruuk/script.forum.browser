@@ -16,7 +16,7 @@
     <setting id="save_logos" type="bool" label="32245" default="false" />
     <setting id="assume_default_image_save_path" type="bool" label="32564" default="false" />
     <setting id="dont_ask_image_filename" type="bool" label="32566" default="false" />
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_general)"/>
   </category>
   <category label="32539">
   	<setting id="skin" type="enum" label="32005" lvalues="32567|32022" default="0" />
@@ -26,7 +26,7 @@
     <setting id="smi_count_link_images" type="bool" label="32045" subsetting="true" default="false" enable="eq(-1,true)"/>
     <setting id="use_skin_mods" type="bool" label="32234" default="true" />
 	<setting id="show_forum_specific_backgrounds" type="bool" label="32596" default="true" />
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_appearance)"/>
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_appearance)"/>
   </category>
   <category label="32018">
     <setting id="notify_enabled" type="bool" label="32019" default="false" />
@@ -42,7 +42,7 @@
     <setting id="notify_dialog_only_enabled" type="bool" label="32041" default="true" enable="eq(-10,true)"/>
     <setting id="notify_open_subs_pms" type="bool" label="32519" default="true" enable="eq(-11,true)"/>
     <setting id="notify_prefer_subs" type="bool" label="32520" subsetting="true" default="false" enable="eq(-12,true) + eq(-1,true)"/>
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_notify)"/>
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_notify)"/>
   </category>
   <category label="32022">
     <setting id="hide_pnp" type="bool" label="32035" default="false" />
@@ -58,7 +58,7 @@
     <setting id="video_resume_as_preview" type="bool" label="32042" default="false" />
 	<setting id="video_quality" type="enum" label="32594" lvalues="32591|32592|32593" default="1" />
 	<setting id="disable_dash_video" type="bool" label="32595" default="true" />
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_video)" />
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_video)" />
   </category>
   <category label="32008"> 	
     <setting id="disable_window_stacking" type="bool" label="32536" default="false" />
@@ -69,16 +69,16 @@
     <setting id="forumrunner_disable_ssl" type="bool" label="32247" default="true" visible="false"/>
     <setting id="disable_async_connections" type="bool" label="32524" default="false" />
 <!--     <setting id="experimental" type="bool" label="Experimental Stuff" default="false" /> -->
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_advanced)"/>
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingshelp_advanced)"/>
   </category>
   <category label="32479">
     <setting label="32584" type="lsep"/>
     <setting label="32585" type="lsep"/>
     <setting label="32586" type="lsep"/>
     <setting label="32587" type="lsep"/>
-    <setting label="32480" type="action" action="RunScript(script.forum.browser,install_font)" id=""/>
-    <setting label="32541" type="action" action="RunScript(script.forum.browser,change_keyboard)" id="" />
+    <setting id="font_install_action" label="32480" type="action" action="RunScript(script.forum.browser,install_font)" id=""/>
+    <setting id="keyb_install_action" label="32541" type="action" action="RunScript(script.forum.browser,change_keyboard)" id="" />
     <setting label="32481" type="lsep"/>
-    <setting label="32244" type="action" action="RunScript(script.forum.browser,settingsinfo_skinmods)"/>
+    <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingsinfo_skinmods)"/>
   </category>
 </settings>

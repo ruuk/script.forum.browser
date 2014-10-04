@@ -236,4 +236,6 @@ class ForumBrowserService:
 		self.log('CHECKING FORUMS: FINISHED')
 		
 if __name__ == '__main__':
+	print 'service'
+	print sys.argv
 	ForumBrowserService().start()
