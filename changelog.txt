@@ -33,6 +33,10 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+*** 2.1.68 ***
+
+Fix error in settings.xml causing settings to unable to open
+
 *** 2.1.67 ***
 
 Fix for action items in settings not functioning on Helix builds (ex. help buttons)

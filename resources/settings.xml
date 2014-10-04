@@ -76,8 +76,8 @@
     <setting label="32585" type="lsep"/>
     <setting label="32586" type="lsep"/>
     <setting label="32587" type="lsep"/>
-    <setting id="font_install_action" label="32480" type="action" action="RunScript(script.forum.browser,install_font)" id=""/>
-    <setting id="keyb_install_action" label="32541" type="action" action="RunScript(script.forum.browser,change_keyboard)" id="" />
+    <setting id="font_install_action" label="32480" type="action" action="RunScript(script.forum.browser,install_font)" />
+    <setting id="keyb_install_action" label="32541" type="action" action="RunScript(script.forum.browser,change_keyboard)" />
     <setting label="32481" type="lsep"/>
     <setting id="help_action" label="32244" type="action" action="RunScript(script.forum.browser,settingsinfo_skinmods)"/>
   </category>
