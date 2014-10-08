@@ -33,6 +33,10 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+*** 2.1.70 ***
+
+Change OAuth Helper dependency to 0.0.7
+
 *** 2.1.69 ***
 
 Remove requests2 module dependency
