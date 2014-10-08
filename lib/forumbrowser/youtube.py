@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import os, time, re, xbmc, xbmcgui
+import os, time, re
 from lib import util
 import forumbrowser
-import requests2 as requests
 import texttransform
 import iso8601
 import OAuthHelper
