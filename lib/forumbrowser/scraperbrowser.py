@@ -14,7 +14,7 @@ ENCODING = loc[1] or 'utf-8'
 ######################################################################################
 # Forum Browser Classes
 ######################################################################################
-		
+
 ################################################################################
 # ForumPost
 ################################################################################
@@ -23,7 +23,7 @@ class ForumPost(forumbrowser.ForumPost):
 		if pmatch:
 			pdict = pmatch.groupdict()
 		forumbrowser.ForumPost.__init__(self, fb, pdict)
-			
+
 	def setVals(self,pdict):
 		self.setPostID(pdict.get('postid',pdict.get('pmid','')))
 		self.date = pdict.get('date','')
@@ -41,7 +41,7 @@ class ForumPost(forumbrowser.ForumPost):
 		self.joinDate = pdict.get('joindate') or ''
 		self.boxid = pdict.get('boxid') or ''
 		self.extras = pdict.get('extras') or self.extras
-	
+
 	def messageToText(self,html):
 		html = self.MC.lineFilter.sub('',html)
 		html = re.sub('<br[^>]*?>','\n',html)
@@ -50,28 +50,28 @@ class ForumPost(forumbrowser.ForumPost):
 		html = html.replace('</div>','\n')
 		html = re.sub('<[^>]*?>','',html)
 		return texttransform.convertHTMLCodes(html).strip()
-	
+
 	def setPostID(self,pid):
 		pid = str(pid) or repr(time.time())
 		self.postId = pid
 		self.pid = pid
 		self.isPM = pid.startswith('PM')
-	
+
 	def getID(self):
 		if self.pid.sartswith('PM'): return self.pid[2:]
 		return self.pid
-		
+
 	def cleanUserName(self):
 		return self.MC.tagFilter.sub('',self.userName)
-	
+
 	def getMessage(self):
 		sig = ''
 		if self.signature and not self.hideSignature: sig = '\n__________\n' + self.signature
 		return self.message + sig
-	
+
 	def messageAsText(self):
 		return self.messageToText(self.getMessage())
-		
+
 	def messageAsDisplay(self,short=False,raw=False,quote_wrap=80):
 		if self.isPM:
 			self.MC = texttransform.BBMessageConverter(self.FB)
@@ -81,35 +81,35 @@ class ForumPost(forumbrowser.ForumPost):
 		message = re.sub('\[(/?)b\]',r'[\1B]',message)
 		message = re.sub('\[(/?)i\]',r'[\1I]',message)
 		return message
-		
+
 	def messageAsQuote(self):
 		pm = self.FB.getPostAsQuote(self)
 		if pm:
 			return pm.message
 		else:
 			return self.MC.messageAsQuote(self.message)
-		
+
 	def imageURLs(self):
 		return self.MC.imageFilter.findall(self.getMessage())
-		
+
 	def linkImageURLs(self):
 		return re.findall('<a.+?href="(https?://.+?\.(?:jpg|jpeg|png|gif|bmp))".+?</a>',self.message)
-		
+
 	def linkURLs(self):
 		return self.MC.linkFilter.finditer(self.getMessage())
-		
+
 	def links(self):
 		links = []
 		for m in self.linkURLs(): links.append(self.FB.getPMLink(m))
 		return links
-		
+
 	def makeAvatarURL(self):
 		base = self.FB.urls.get('avatar')
 		if base and not self.avatar:
 			self.avatar = base.replace('!USERID!',self.userId)
 		return self.avatar
-	
-			
+
+
 ################################################################################
 # PageData
 ################################################################################
@@ -136,12 +136,12 @@ class PageData:
 		self.first = True
 		self.doInit(page_match, next_match, prev_match, page_type, total_items, page_urls)
 		self.first = False
-		
+
 	def doInit(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items='',page_urls=None):
 		self.pageType = page_type or self.pageType
 		self.totalitems = total_items or self.totalitems
 		self.pageURLs = page_urls or self.pageURLs
-		
+
 		self.endPage = self.FB.formats.get('no_9999') == 'True' and 1 or 9999
 		page_set = False
 		if page_match:
@@ -204,9 +204,9 @@ class PageData:
 				self.prev = int(self.page) > 1
 			except:
 				if not next_match: self.useURLs = True
-			
+
 		if not self.FB.urls.get('page_arg'): self.useURLs = True
-			
+
 		if self.useURLs:
 			if self.pageURLs:
 				totalPages = self.totalPages
@@ -218,13 +218,13 @@ class PageData:
 					if int(self.page) > int(self.totalPages): self.totalPages = self.page
 				self.prev = bool(self.getPrevPageURL())
 				self.next = bool(self.getNextPageURL())
-				
+
 		if int(self.totalPages) < int(self.page): self.totalPages = self.page
-		
+
 	def update(self,page_match=None,next_match=None,prev_match=None,page_type='',total_items='',page_urls=None):
 		self.doInit(page_match, next_match, prev_match, page_type, total_items, page_urls)
 		return self
-		
+
 	def getCurrentFromMissing(self):
 		if not self.first: return self.page
 		missing = []
@@ -232,15 +232,15 @@ class PageData:
 			if not str(x) in self.pageURLs:
 				missing.append(x)
 		if '1' in missing: return '1'
-		if not missing: return str(int(self.totalPages) + 1) 
+		if not missing: return str(int(self.totalPages) + 1)
 		for m in missing:
 			under = m - 1
 			over = m + 1
 			if not under in missing and not over in missing: return str(m)
 		else:
 			return str(missing[-1] + 1)
-			
-	
+
+
 	def getPageNumber(self,page=None):
 		if page == None: page = self.page
 		if self.useURLs:
@@ -276,11 +276,11 @@ class PageData:
 			except:
 				ERROR('CALCULATE START PAGE ERROR - PAGE: %s' % page)
 		return page
-		
+
 	def setThreadData(self,topic,threadid):
 		self.topic = topic
 		self.tid = threadid
-				
+
 	def getNextPage(self):
 		if self.useURLs: return self.getNextPageURL(set_page=True)
 		if self.urlMode == 'PAGE':
@@ -290,7 +290,7 @@ class PageData:
 				return '1'
 		else:
 			return self.nextStart
-			
+
 	def getPrevPage(self):
 		if self.useURLs: return self.getPrevPageURL(set_page=True)
 		if self.urlMode == 'PAGE':
@@ -300,7 +300,7 @@ class PageData:
 				return '1'
 		else:
 			return self.prevStart
-		
+
 	def getNextPageURL(self,set_page=False):
 		if not self.pageURLs: return ''
 		try:
@@ -312,7 +312,7 @@ class PageData:
 		except:
 			ERROR('getNextPageURL()')
 			return ''
-	
+
 	def getPrevPageURL(self,set_page=False):
 		if not self.pageURLs: return ''
 		try:
@@ -324,7 +324,7 @@ class PageData:
 		except:
 			ERROR('getNextPageURL()')
 			return ''
-			
+
 	def getPageDisplay(self):
 		if self.pageDisplay: return self.pageDisplay
 		totalPages = self.totalPages
@@ -335,12 +335,12 @@ class PageData:
 			totalPages = str(totalPages) + '?'
 		if self.page and self.totalPages:
 			return 'Page %s of %s' % (self.page,totalPages)
-		
+
 class ForumMessage:
 	def __init__(self,message,is_error=False):
 		self.message = message
 		self.isError = is_error
-		
+
 ######################################################################################
 # Forum Browser API
 ######################################################################################
@@ -359,13 +359,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.alwaysLogin = always_login
 		self.lastHTML = ''
 		self.cookieJar = None
-		
+
 		self.reloadForumData(forum)
 		self.initialize()
-		
+
 	def getForumID(self):
 		return self.forum
-	
+
 	def isLoggedIn(self):
 		check = self.formats.get('login_check')
 		if check and self.lastHTML:
@@ -374,10 +374,10 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if self.lastHTML:
 			return bool(re.search('log[\s-]?out(?i)',self.lastHTML)) and not self.needsLogin
 		return self._loggedIn
-	
+
 	def resetBrowser(self):
 		self.browser = None
-		
+
 	def reloadForumData(self,forum):
 		self.urls = {}
 		self.filters = {}
@@ -385,11 +385,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self.forms = {}
 		self.formats = {}
 		self.smilies = {}
-		
+
 		if not self.loadForumData(forum): raise Exception('Forum Load Failure')
-			#self.forum = 'forum.xbmc.org'
+			#self.forum = 'forum.kodi.tv'
 			#self.loadForumData(self.forum)
-		
+
 	def loadForumData(self,forum):
 		self.needsLogin = True
 		fname = os.path.join(FORUMS_STATIC_PATH,forum)
@@ -444,7 +444,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		self._url = self.urls.get('base','')
 		self.forum = forum
 		return True
-			
+
 	def checkBrowser(self):
 		if not self.mechanize:
 			from webviewer.webviewer import mechanize
@@ -469,7 +469,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 #				def http_response(self, request, response):
 #					if not hasattr(response, "seek"):
 #						response = mechanize.response_seek_wrapper(response)
-#			
+#
 #					if response.info().dict.has_key('content-type') and ('html' in response.info().dict['content-type']):
 #						data = response.get_data()
 #						response.set_data(re.sub('<!(?!-)[^>]*?>','',data))
@@ -483,7 +483,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			if '.php?' in i:
 				sec = self.doCaptcha(i)
 				if sec: c.value = sec
-			
+
 	def doCaptcha(self,url):
 		cachePath = CACHE_PATH
 		captchaPath = os.path.join(cachePath,'captcha'+str(time.time()))
@@ -493,14 +493,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		class CaptchaWindow(xbmcgui.WindowXMLDialog):
 			def __init__(self,*args,**kwargs):
 				self.url = kwargs.get('url')
-				
+
 			def init(self):
 				LOG('Showing Captch: ' + self.url)
 				self.getControl(100).setImage(self.url)
-				
+
 			def update(self,url):
 				self.getControl(100).setImage(url)
-				
+
 		w = CaptchaWindow('script-forumbrowser-captcha.xml',xbmc.translatePath(util.__addon__.getAddonInfo('path')),'Default','720p',url=url)
 		w.show()
 		w.update(url)
@@ -510,7 +510,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			os.remove(captchaPath)
 			w.close()
 			del w
-		
+
 	def login(self,url=''):
 		if self.doLogin(url):
 			return True
@@ -524,7 +524,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		LOG('Login Failed. Attempting to find re-direct login link...')
 		return self.doLogin(url,generic=True)
-		
+
 	def ungzipResponse(self,r):
 		headers = r.info()
 		if headers.get('Content-Encoding') =='gzip':
@@ -535,17 +535,17 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			headers["Content-type"] = "text/html; charset=utf-8"
 			r.set_data( html )
 			self.browser.set_response(r)
-		
+
 	def browserOpen(self,url):
 		r = self.browser.open(url)
 		self.ungzipResponse(r)
 		return r
-		
+
 	def browserSubmit(self):
 		r = self.browser.submit()
 		self.ungzipResponse(r)
 		return r
-	
+
 	def doLogin(self,url='',generic=False):
 		if generic:
 			usercontrol = 'user'
@@ -553,7 +553,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		else:
 			usercontrol = self.forms['login_user']
 			passcontrol = self.forms['login_pass']
-			
+
 		if not self.canLogin():
 			self._loggedIn = False
 			return False
@@ -649,7 +649,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 									break
 								except:
 									ERROR('WRONG FORM (Password): %s' % ct,hide_tb=True)
-										
+
 					if not userset or not passset:
 						LOG('FAILED TO FIND USER AND/OR PASSWORD CONTROLS')
 						return False
@@ -667,14 +667,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		#if not 'action="%s' % self.forms.get('login_action','@%+#') in html:
 		if self.cookieJar is not None:
 			self.cookieJar.save()
-			
+
 		self._loggedIn = True
 		if self.isLoggedIn():
 			LOG('LOGGED IN')
 			return True
 		LOG('FAILED TO LOGIN')
 		return False
-		
+
 	def checkLogin(self,callback=None,callback_percent=5):
 		#raise Exception('TEST')
 		loginURL = ''
@@ -683,7 +683,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			loginURL = url
 		elif 'login.php?' in self.lastURL:
 			loginURL = self.lastURL
-			
+
 		if self.isLoggedIn(): return True
 		if not callback: callback = self.fakeCallback
 		if not self.canLogin():
@@ -696,18 +696,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				self._loggedIn = False
 			else:
 				self._loggedIn = True
-		
+
 		return self._loggedIn
-		
+
 	def checkForLoginLink(self):
 		m = re.search('<a.+href=["\']?([^"\']+)["\']?.*>(?:Login|Sign In)</a>(?i)',self.lastHTML)
 		if not m: return None
 		sub = m.group(1)
 		if sub.startswith('http'): return sub
 		return forumbrowser.fullURL(sub, self._url)
-		
-		
-		
+
+
+
 	def browserReadURL(self,url,callback):
 		if not callback(30,T(32101)): return ''
 		response = self.browserOpen(url)
@@ -717,13 +717,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		if not callback(60,T(32102)): return ''
 		encoding = response.info().get('content-type','utf-8').split('charset=')[-1]
 		return unicode(response.read(),encoding).encode(ENCODING)
-	
+
 	def readURL(self,url,callback=None,force_login=False,is_html=True,force_browser=False):
 		if not url:
 			LOG('ERROR - EMPTY URL IN readURL()')
 			return ''
 		if not callback: callback = self.fakeCallback
-		
+
 		if force_browser:
 			self.checkBrowser()
 			data = self.browserReadURL(url,callback)
@@ -745,7 +745,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			req.close()
 		if is_html: self.lastHTML = data
 		return data
-		
+
 	def makeURL(self,phppart):
 		if not phppart: return ''
 		if phppart.startswith('http://'):
@@ -757,7 +757,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				url = url.rsplit('/',1)[0] + '/'
 			url = url + phppart
 		return url.replace('&amp;','&').replace('/./','/')
-		
+
 	def getPMCounts(self,html=''):
 		if not html: html = self.MC.lineFilter.sub('',self.lastHTML)
 		if not html: return None
@@ -771,7 +771,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				break
 		if pm_counts: return pm_counts.groupdict()
 		return None
-		
+
 	def getLogo(self,html):
 		logo = self.urls.get('logo')
 		if logo: return logo
@@ -781,7 +781,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			ERROR("ERROR GETTING LOGO IMAGE")
 		if logo: return self.makeURL(logo)
 		return  'http://%s/favicon.ico' % self.forum
-		
+
 	def getForums(self,callback=None,donecallback=None):
 		if not callback: callback = self.fakeCallback
 		try:
@@ -790,18 +790,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			em = ERROR('ERROR GETTING FORUMS')
 			callback(-1,'%s' % em)
 			return self.finish(FBData(error=em),donecallback)
-		
+
 		if not html or not callback(80,T(32103)):
 			return self.finish(FBData(error=html and 'CANCEL' or 'EMPTY HTML'),donecallback)
-		
+
 		html = self.MC.lineFilter.sub('',html)
 		forums = re.finditer(self.filters['forums'],html)
 		logo = self.getLogo(html)
 		pm_counts = self.getPMCounts(html)
 		callback(100,T(32052))
-		
+
 		return self.finish(FBData(forums,extra={'logo':logo,'pm_counts':pm_counts}),donecallback)
-		
+
 	def getThreads(self,forumid,page='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'threads',fid=forumid)
@@ -816,7 +816,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
-		
+
 	def getReplies(self,threadid,forumid,page='',lastid='',pid='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		url = self.getPageUrl(page,'replies',tid=threadid,fid=forumid,lastid=lastid,pid=pid)
@@ -841,12 +841,12 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pd = self.getPageInfo(html,page,page_type='replies')
 		pd.setThreadData(topic,threadid)
 		callback(100,T(32052))
-		
+
 		return self.finish(FBData(sreplies,pd),donecallback)
-		
+
 	def hasPM(self):
 		return bool(self.urls.get('private_messages_xml') or self.urls.get('private_messages_csv'))
-	
+
 	def getPMBoxes(self,update=True):
 		boxes = self.getPrivateMessages(get_boxes=True)
 		if not boxes: return None
@@ -859,9 +859,9 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					'type':b.upper()
 					}
 			ret.append(box)
-			
+
 		return ret
-					
+
 	def getPrivateMessages(self,callback=None,donecallback=None,boxid=None,get_boxes=False):
 		if not callback: callback = self.fakeCallback
 		#if not self.checkLogin(callback=callback): return None, None
@@ -883,7 +883,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				p.message = re.sub('[\t\r]','',p.message)
 				p.makeAvatarURL()
 				pms.append(p)
-				
+
 		elif self.urls.get('private_messages_csv'):
 			if self.forms.get('private_messages_csv_action'):
 				csvstring = self.getPMCSVFromForm(self.getURL('private_messages_csv'))
@@ -903,7 +903,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						boxes[d.get('boxid')] += 1
 					else:
 						boxes[d.get('boxid')] = 0
-					
+
 				if folder and folder == d.get('boxid','').lower():
 					p = self.getForumPost(pdict=d)
 					p.setPostID(len(pms))
@@ -911,11 +911,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					pms.append(p)
 			if get_boxes: return boxes
 		if get_boxes: return None
-			
+
 		callback(100,T(32052))
 		pms.reverse()
 		return self.finish(FBData(pms),donecallback)
-		
+
 	def getPMCSVFromForm(self,url):
 		res = self.browserOpen(url)
 		res.read()
@@ -928,11 +928,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			html = res.read()
 		#open('/home/ruuk/test.txt','w').write(html)
 		return html
-		
-			
+
+
 	def hasSubscriptions(self):
 		return bool(self.urls.get('subscriptions'))
-	
+
 	def getSubscriptions(self,page='',callback=None,donecallback=None,page_data=None):
 		if not callback: callback = self.fakeCallback
 		#if not self.checkLogin(callback=callback): return None
@@ -944,7 +944,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		callback(100,T(32052))
 		pd = self.getPageInfo(html,page,page_type='threads')
 		return self.finish(FBData(threads,pd),donecallback)
-		
+
 	def getPageInfo(self,html,page,page_type='',page_urls=None,page_data=None):
 		if not self.filters.get('page') and not self.filters.get('next'): return None
 		next_page = self.filters.get('next') and re.search(self.filters['next'],html) or None
@@ -956,7 +956,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return page_data.update(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
 		else:
 			return self.getPageData(page_disp,next_page,prev_page,page_type=page_type,page_urls=page_urls)
-		
+
 	def getPageUrl(self,page,sub,pid='',tid='',fid='',lastid='',suburl='',prefix=''):
 		suburl = suburl or self.urls.get(sub,'')
 		if not suburl: return None
@@ -979,7 +979,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 						fid = fid[:-1]
 					if int(page) > 0: page = str((int(page) - 1) * mult)
 				####-- For SMF --################################
-					
+
 				try:
 					if int(page) < 0: page = '9999'
 				except:
@@ -994,14 +994,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		base_url += prefix
 		#print base_url
 		return base_url + sub
-		
+
 	def getURL(self,name):
 		return self.makeURL(self.urls.get(name,''))
 		#return self._url + self.urls.get(name,'')
-		
+
 	def predicateLogin(self,formobj):
 		return self.forms.get('login_action','@%+#') in formobj.action
-		
+
 	def getForm(self,html,action,name=None):
 		if not action: return None
 		try:
@@ -1016,7 +1016,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			LOG('NO FORM 2')
 		except:
 			ERROR('PARSE ERROR')
-			
+
 	def URLSubs(self,url,pid='',tid='',fid='',page='',post=None):
 		if post:
 			url = url.replace('!POSTID!',str(post.pid)).replace('!THREADID!',str(post.tid)).replace('!FORUMID!',str(post.fid)).replace('!PAGE!',str(page))
@@ -1024,24 +1024,24 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			url = url.replace('!POSTID!',str(pid)).replace('!THREADID!',str(tid)).replace('!FORUMID!',str(fid)).replace('!PAGE!',str(page))
 		#removes empty vars
 		return re.sub('(?:\w+=&)|(?:\w+=$)','',url)
-		
+
 	def postURL(self,post):
 		return self.URLSubs(self.getURL('newpost'),post=post)
-	
+
 	def editURL(self,post):
 		return self.URLSubs(self.getURL('editpost'),post=post)
-	
+
 	def quoteURL(self,post):
 		return self.URLSubs(self.getURL('quotepost'),post=post)
-	
+
 	def predicatePost(self,formobj):
 		return self.forms.get('post_action','@%+#') in formobj.action
-	
+
 	def predicateEditPost(self,formobj):
 		return self.forms.get('edit_post_action','@%+#') in formobj.action
-		
+
 	def fakeCallback(self,pct,message=''): return True
-	
+
 	def selectForm(self,action_sub=None,ID=None):
 		if action_sub:
 			for f in self.browser.forms():
@@ -1055,7 +1055,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					self.browser.form = f
 					return
 			raise Exception('No Matching Form Found')
-			
+
 	def post(self,post,callback=None,edit=False,get_for_edit=False,quote=False):
 		if not callback: callback = self.fakeCallback
 		if not self.checkLogin(callback=callback):
@@ -1103,7 +1103,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			selected = True
 		except:
 			ERROR('NO FORM 1')
-			
+
 		if not selected:
 			form = self.getForm(html,self.forms.get(pre + 'post_action',''),self.forms.get(pre + 'post_name',''))
 			if form:
@@ -1121,7 +1121,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				moderated = False
 				if re.search('approv\w+[^<]*?moderat\w+',html) or re.search('moderat\w+[^<]*?approv\w+',html): moderated = True
 				return (title,message,moderated)
-			
+
 			if post.title and self.forms.get(pre + 'post_title'): self.browser[self.forms[pre + 'post_title']] = post.title
 			self.browser[self.forms[pre + 'post_message']] = post.message
 			self.setControls(pre + 'post_controls%s')
@@ -1139,19 +1139,19 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					return False
 				else:
 					post.successMessage = err.message
-					
+
 			callback(100,T(32052))
 		except:
 			post.error = ERROR('FORM ERROR')
 			return False
-			
+
 		#message = self.checkForError(html)
 		#if message: post.successMessage = message
 		moderated = False
 		if re.search('approv\w+[^<]*?moderat\w+',html) or re.search('moderat\w+[^<]*?approv\w+',html): moderated = True
 		post.moderated = moderated
 		return True
-		
+
 	def checkForError(self,html):
 		#open('/home/ruuk/test.txt','w').write(html)
 		errm = re.search('(<div[^>]*?(?:class|id)="[^"]*?(?:error|message)[^>]*?>)(.*?)</div>(?is)',html)
@@ -1166,20 +1166,20 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				if re.search('[^_\w]message[^_\w]',errm.group(1).lower()): #To catch only real messages (hopefully) and not things like post_message
 					return ForumMessage(message,is_error=False)
 		return None
-	
+
 	def doPrivateMessage(self,post,callback=None):
 		return self.doForm(	self.urls.get('pm_new_message'),
 							self.forms.get('pm_name'),
 							self.forms.get('pm_action'),
 							{self.forms.get('pm_recipient'):post.to,self.forms.get('pm_title'):post.title,self.forms.get('pm_message'):post.message},
 							callback=callback)
-		
+
 	def canPrivateMessage(self):
 		return bool(self.isLoggedIn() and self.urls.get('pm_new_message'))
-		
+
 	def deletePrivateMessage(self,post,callback=None):
 		return self.deletePrivateMessageViaIndex(post, callback)
-		
+
 	def deletePrivateMessageViaIndex(self,post,callback=None):
 		html = self.readURL(self.urls.get('private_messages_inbox'),callback=callback,force_login=True)
 		if not html: return False
@@ -1191,13 +1191,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			err = ERROR('DELETE PM VIA INDEX ERROR')
 			post.error = err
 			return False
-			
+
 		return self.doForm(	self.urls.get('private_messages_delete').replace('!PMID!',pmid),
 							self.forms.get('pm_delete_name'),
 							self.forms.get('pm_delete_action'),
 							controls='pm_delete_control%s',
 							callback=callback)
-						
+
 	def doForm(self,url,form_name=None,action_match=None,field_dict=None,controls=None,submit_name=None,submit_value=None,wait='1',callback=None):
 		field_dict = field_dict or {}
 		if not callback: callback = self.fakeCallback
@@ -1222,14 +1222,14 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 					selected = True
 				except:
 					ERROR('browser.select_form() failed. Trying self.selectForm()...',hide_tb=True)
-					
+
 				if not selected:
 					self.selectForm(action_match)
 				LOG('FORM SELECTED BY ACTION')
 			selected = True
 		except:
 			ERROR('NO FORM 1',hide_tb=True)
-			
+
 		if not selected:
 			form = self.getForm(html,action_match,form_name)
 			if form:
@@ -1249,13 +1249,13 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		except:
 			ERROR('FORM ERROR')
 			return False
-			
+
 		return True
-		
+
 	def predicateDeletePost(self,formobj):
 		if self.forms.get('delete_action','@%+#') in formobj.action: return True
 		return False
-		
+
 	def deletePost(self,post):
 		post.error = 'Failed'
 		if not self.checkLogin(): return post
@@ -1271,7 +1271,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 				html = res.read()
 			except:
 				post.error = ERROR('Error deleting post')
-			
+
 		selected = False
 		try:
 			self.selectForm(self.forms.get('delete_action', '@%+#'))
@@ -1279,7 +1279,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			selected = True
 		except:
 			ERROR('DELETE NO FORM 1')
-			
+
 		if not selected:
 			form = self.getForm(html,self.forms.get('delete_action',''),self.forms.get('delete_name',''))
 			if form:
@@ -1309,7 +1309,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			return False
 		#open('/home/ruuk/test.html','w').write(res.read())
 		return True
-	
+
 	def setControls(self,control_string):
 		if not control_string: return
 		x=1
@@ -1326,18 +1326,18 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 			elif ctype == 'checkbox':
 				control.items[0].selected = value == 'True'
 			x+=1
-		
+
 	def canPost(self): return bool(self.isLoggedIn() and self.urls.get('newpost'))
-	
+
 	def canDelete(self,user,target='POST'):
 		if target == 'POST':
 			return bool(self.user == user and self.urls.get('deletepost') and self.isLoggedIn())
 		else:
 			return bool(self.urls.get('private_messages_delete')) and self.isLoggedIn()
-	
+
 	def getQuoteFormat(self):
 		return None
-	
+
 	def getPostForEdit(self,post):
 		result = self.post(post, edit=True, get_for_edit=True)
 		if not result: return None
@@ -1348,7 +1348,7 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pm.isEdit = True
 		pm.moderated = moderated
 		return pm
-		
+
 	def getPostAsQuote(self,post):
 		pm =  forumbrowser.PostMessage().fromPost(post)
 		result = self.post(pm, get_for_edit=True,quote=True)
@@ -1359,12 +1359,11 @@ class ScraperForumBrowser(forumbrowser.ForumBrowser):
 		pm.isEdit = True
 		pm.moderated = moderated
 		return pm
-	
+
 	def editPost(self,pm,callback=None):
 		return self.post(pm,callback,edit=True)
-	
+
 	def canEditPost(self,user): return bool(user == self.user and self.isLoggedIn() and self.urls.get('editpost'))
-	
+
 	def getQuoteStartFormat(self):
 		return self.quoteStartFormats.get(self.getForumType(),self.filters.get('quote_start','\[quote[^\]]*?\]'))
-	

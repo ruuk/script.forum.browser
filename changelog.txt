@@ -15,7 +15,7 @@ TODO:
   Implement get_participated_forum
   Post/thread/forum bookmarks
   Fix ParserBrowser VB subscribe URLs
-  
+
  Long Term:
   Check for new parser rules automatically or add option to check for new rules
   Image zoom/rotate etc
@@ -26,12 +26,17 @@ TODO:
   Add missing quote formats for other forum systems
   Find forum mobiquo.php path from tapatalk.js path in html page
   Make a million dollars
-  
+
  Investigated And Possibly Unfixable:
   Skip forward on remote causes XBMC dialog
- 
+
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
+
+*** 2.1.71 ***
+
+Change default forum from xbmc.org to kodi.tv and remove xbmc.org
+Add conversion from xbmc.org to kodi.tv for favorites, forums and forum settings
 
 *** 2.1.70 ***
 
@@ -137,7 +142,7 @@ Now shows number of comments and views for channels when available
 Added 'Play YouTube Videos Internally' to Settings:Video (default: True)
 Added 'Max Video Quality' subsetting
 Fixed some language string spellings (British English)
-YouTube: Added the ability to view favorites via 'Subscriptions' 
+YouTube: Added the ability to view favorites via 'Subscriptions'
 YouTube: Now gets correct video author (Started By:) and correct avatar for the video description post
 Fixed sorting on the forums manager
 YouTube: Added the ability to view subscriptions as a category when adding new channels
@@ -220,7 +225,7 @@ Sequel Skin:
 	Added Text Dialog skin
 	Added Notifications (normal and small) skins
 	Fixed the menu selection colors for the search buttons
-	
+
 When posting new/edited posts/messages, the splash now closes before displaying the notification dialog
 Fixed an issue when opening a post bookmark where closing the post view would result in it automatically re-opening
 Fixed a bug where videos were not playing when being clicked from the media list on the post view
@@ -369,10 +374,10 @@ Fix for encoding errors preventing the display of the post view on some forums
 Now shows and uses Forumrunner forum icons from the FR database
 Added category icons for Tapatalk database
 Added search, next and previous icons for databases
-Fixed error when adding forums (created in last update) 
+Fixed error when adding forums (created in last update)
 Added 'Back' option when browsing FR/TT databases to return to the categories/search menu or parent category
 Exiting FB/TT/FR database browsing now returns to the FB/TT/FR menu
-Removed the 'Add From Online' button. Now 'Add Forum' will show a choice between Forum Browser DB, Tapatalk DB, Forumrunner DB and adding manually 
+Removed the 'Add From Online' button. Now 'Add Forum' will show a choice between Forum Browser DB, Tapatalk DB, Forumrunner DB and adding manually
 Exiting the 'Add Forum' hierarchy will now cause a jump to the last added forum for all databases
 Updated language files from Transifex
 
@@ -433,7 +438,7 @@ Added the ability to remove bookmarks
 Added Bookmarks dialog
 Added 'Add Bookmarks' to context menu for threads, posts, and message views (May be moved to a button later)
 Fix (hopefully) for font not being updated when updating mod
-Added forums select skin for Video skin. Used when adding from online database and for bookmarks 
+Added forums select skin for Video skin. Used when adding from online database and for bookmarks
 
 *** 2.1.7 ***
 
@@ -478,7 +483,7 @@ Tapatalk: User info now cached, which should speed up browsing through the pages
 *** 2.1.3 ***
 
 Added smilies to Confluence keyboard skin
-Added missing smilies dialog (for site smilies) for the light/dark skins 
+Added missing smilies dialog (for site smilies) for the light/dark skins
 
 *** 2.1.2 ***
 
@@ -646,7 +651,7 @@ Changes to ensure skin refreshed on FB restart after installing/removing skin mo
 *** 1.4.3 ***
 
 Keyboard mods now can change between "Normal" and mod appearance, and "Normal" is moved down some to accommodate captchas
-Keyboard now only displays modified view when editing posts 
+Keyboard now only displays modified view when editing posts
 
 *** 1.4.2 ***
 
@@ -660,7 +665,7 @@ Time offset is now in format -mmm:ss. The original offset I added this for turne
 Now uses xbmcvfs to copy files. Fixes copying errors when installing skin mods on Android (At least on MY phone =] )
 Now indicates file copy activity when copying skin directory to local dir
 Focusing wrench tab on forums manager now slides out the buttons. Useful on touch interfaces
-Added to the help for the 'Share To Online DB' button 
+Added to the help for the 'Share To Online DB' button
 Added DST adjustment to post dates
 Added notifications settings 'Open Subscriptions/PMs Window Automatically On Open Forum' and subsetting 'If Both Subs and PMs, Open Subs Window Instead' and updated help
 'Global' search history is now in the correct order
@@ -712,7 +717,7 @@ Added an info window that explains the mods (what they do and the caveats) befor
 Added a setting 'Use keyboard mod' subsetting below 'Use skin modifications' in general settings
 Fixed a bug causing full message view not to display when 'Searching Posts: Open Thread On Post Click' is enabled
 Fixed a bug causing infinite loop when 'Searching Posts: Open Thread On Post Click' is enabled
-Fixed a bug causing 'None' to be displayed when returning from full message view to post search results 
+Fixed a bug causing 'None' to be displayed when returning from full message view to post search results
 
 *** 1.3.4 ***
 
@@ -730,7 +735,7 @@ Added 'Search User Posts' button in 'Search' button menu which allows you to ent
 Added 'Search In Posts Of <USER>' in online users list context menu
 Improved display of posts by creating items first and then adding them to the list all at once
 Fix for some post encoding errors
-Fix improvement for 'Forbidden' errors issue that doesn't cause any extra delays 
+Fix improvement for 'Forbidden' errors issue that doesn't cause any extra delays
 
 *** 1.3.2 ***
 
@@ -817,7 +822,7 @@ Previous items under 'Options' have been migrated to the Forums manager
 The 'Set Login Page' option now asks if you want to use the URL after exiting WebViewer
 Moved the 'Manage Parser Rules' option from posts context and 'Set Login Page' to the Forums Manager 'Parser Browser' button (clicking the button brings up a menu asking which one you want to do)
 Fixed a bug where some forums caused 'Forbidden' errors when making calls too quickly (Notably xbmc.org)
-Taptalk: Now sets 'return_html' when getting posts which gives bold, italics, underline and color data. 
+Taptalk: Now sets 'return_html' when getting posts which gives bold, italics, underline and color data.
 
 *** 1.2.3 ***
 
@@ -852,7 +857,7 @@ Added the ability to filter forum lists in the add from online database dialog b
 Added 'Search Database' to the the category list in the add from online database dialog
 When clicking the stop button, focus now moves to the 'Change Forum' button
 Options dialog can now open with no connection, options that require a connection will be disabled
-Clicking disabled items in a dialog will no longer close the dialog, they will just do nothing 
+Clicking disabled items in a dialog will no longer close the dialog, they will just do nothing
 Forums window context menu will now popup when no connection, showing only 'Refresh' and 'Help'
 Removed attempt to compensate for DST in activity times in the posts list as it appears unnecessary (and breaks the time)
 Added the 'Post User Attributes To Display' to General section in settings, allowing users to define info shown in posts lists
@@ -932,7 +937,7 @@ Fixed a bug where forums with a bad header color string would cause the ODB foru
 
 *** 1.1.0 ***
 
-Version bump for push to main repo 
+Version bump for push to main repo
 
 *** 1.0.16 ***
 
@@ -967,7 +972,7 @@ Added settings option 'Parser Browser: Ignore Forum Images' - when enabled it wi
 Added the ability to set a theme (just 'header' color for now) for the forums display with a new color dialog (options menu)
 Added the ability to share current forum theme to the online database (options menu)
 Online database now replaces existing forum details instead of reporting that it already exists
-Online database now pointing to domain 2ndmind.tk (with new hosting) until I can get my crappy registrar (also provider of my crappy old hosting) to answer my emails, chats or phone calls  
+Online database now pointing to domain 2ndmind.tk (with new hosting) until I can get my crappy registrar (also provider of my crappy old hosting) to answer my emails, chats or phone calls
 
 *** 1.0.12 ***
 
@@ -1057,7 +1062,7 @@ If you're closing the post/pm window when a title or message has been entered, i
 When sending a PM from the posts list, FB will now ask if you want to quote the message instead of doing it automatically
 Fixed a bug caused by local forum.xbmc.org forum def causing duplicate entries by changing to xbmc.org
 Fixed a bug in 'add to online database' code that was causing it to fail in some instances
- 
+
 Experimental:
 - PhpBB: Added the ability to create and edit posts
 - Can now detect some forum posting error messages (ie you are not allowed to post in this forum, your post is too short)
@@ -1082,13 +1087,13 @@ Experimental:
 Added ability to create threads with Tapatalk and Forumrunner forums from context menu on threads view
 When creating a PM or new thread, the Post Editor will now OPEN the set title dialog instead of just focusing the button
 Added ability to PM author of selected post from the context menu
-Now, when post or PM fails do to error (such as timeout), the post/PM will be saved and when next attempting to PM the same user or post in the same thread, FB will ask if you want to re-use that post/PM 
+Now, when post or PM fails do to error (such as timeout), the post/PM will be saved and when next attempting to PM the same user or post in the same thread, FB will ask if you want to re-use that post/PM
 
 *** 1.0.1 ***
 
 Links list will now show images from the link 'text' (ie thumbnail) in preference to an image the link points to
 Links that are detected as images that have images in the link 'text' (ie thumbnail) will now open in Web Viewer
- 
+
 Experimental:
 - Posting options will no longer show if not available
 - VBulletin: Can now create a post, edit a post and delete a post (only tested on forum.boxee.tv)
@@ -1115,7 +1120,7 @@ Experimental:
  - IPBoard: logins, view forum and thread subscriptions
  - Generic: logins, view thread subscriptions
  - Captcha handling
- - Pre-forum-list login page handling 
+ - Pre-forum-list login page handling
  - Now handles <object> tags as links (mainly for embedded video)
  - Better login handling
  - New backend html parser based on html5lib (should now handle most html well)
@@ -1130,7 +1135,7 @@ Error when getting video info will no longer cause links not to be displayed
 Now plays embedded video (ie [video] tags) - shows them as links
 
 Experimental:
- - VBulletin: Added logins and viewing of subscriptions (only tested with Boxee) 
+ - VBulletin: Added logins and viewing of subscriptions (only tested with Boxee)
 
 *** 0.9.50 RC8 ***
 
@@ -1272,7 +1277,7 @@ Now using custom font on forums view and threads view
 Forumrunner: Fixed a bug causing an error with no message on login failure
 When 'reverse posts' and 'open thread at newest post' are enabled it no longer jumps to the bottom
 Reversed PM listings so that newest is at the top.
-Fixed new bug with boxee error when showing private messages 
+Fixed new bug with boxee error when showing private messages
 
 *** 0.9.36 ***
 
@@ -1356,7 +1361,7 @@ Fixed boxee forums with new parsing method (mostly)
 
 Changed quote delimiters and removed italics
 Nested quotes now alternate color infinitely
-Skin mod install option now includes font modification 
+Skin mod install option now includes font modification
 Improved quote decorations
 Fix focus issues when forums list is empty
 
@@ -1478,7 +1483,7 @@ Added 'Enable SSL' option in settings which causes Forum Browser to connect with
 *** 0.9.12 ***
 
 Man I hope this is the final fix for the xmlrpclib python version conflicts :)
-Added 'Edit' to message view context menu 
+Added 'Edit' to message view context menu
 
 *** 0.9.11 ***
 
@@ -1613,13 +1618,13 @@ Follow links in Web Viewer
 Fixed: dvhk.pl now works again (Can view and create PM's but PM counts on the message button don't work - I will have to fix that)
 Fixed: Selecting the post editor list when empty caused error
 Added close buttons for mouse users
-Missing images in Post Message window now show a default if XBMC fails to display them 
+Missing images in Post Message window now show a default if XBMC fails to display them
 Fixed: Clicking on empty list while loading was aborting load
 Now disables "Messages" button when not implemented (for example xbmc4xbox.org, currently)
 Experimental: Added an option in settings to use a text editor instead of the current 'line' editor
   for editing posts/PM's. Currently needs a keyboard and will probably only work with US keyboards.
   XBMC doesn't have a multi-line text input so I had to do some fancy tricks to make to make this work.
-  Expect a few minor quirks with text navigation. Also - and = will work but will also change the volume. 
+  Expect a few minor quirks with text navigation. Also - and = will work but will also change the volume.
   Use CTRL-\ for backslash otherwise you'll just toggle fullscreen and there's nothing I can do about that :)
   Controls: Use the context menu button/right mouse click for options. CTRL-PgUp/PgDn will operate on
     the preview window.
