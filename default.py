@@ -2,8 +2,6 @@
 import os, sys, xbmc
 
 if __name__ == '__main__':
-	print 'default'
-	print sys.argv
 	if sys.argv[-1].startswith('settings') or sys.argv[-1] == 'smilies':
 		from lib import dialogs, util
 		CACHE_PATH = xbmc.translatePath(os.path.join(util.__addon__.getAddonInfo('profile'),'cache'))

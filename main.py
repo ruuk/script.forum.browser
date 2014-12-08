@@ -10,7 +10,7 @@ import YDStreamExtractor as StreamExtractor
 import YDStreamUtils as StreamUtils
 
 StreamExtractor.overrideParam('noplaylist',True)
-StreamExtractor.generateBlacklist(('.*:(?:user|channel|search)$',))
+StreamExtractor.generateBlacklist(('.*:(?:user|channel|search)$','(?i)generic.*'))
 
 import warnings
 
@@ -1336,7 +1336,6 @@ class MessageWindow(windows.BaseWindow):
 		mlist = self.getControl(150)
 		links = self.post.links()
 		quality = getSetting('video_quality',1)
-		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 		self.videoCache = {}
 		s = None
 		try:
@@ -1473,7 +1472,6 @@ class MessageWindow(windows.BaseWindow):
 
 	def handleVideoLinkURL(self,item):
 		s = dialogs.showActivitySplash()
-		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 		try:
 			videoID = item.getProperty('videoID')
 			url = item.getProperty('video')
@@ -1512,7 +1510,6 @@ class MessageWindow(windows.BaseWindow):
 		if not path: return
 		with StreamUtils.DownloadProgress() as prog:
 			try:
-				StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 				StreamExtractor.setOutputCallback(prog)
 				result = StreamExtractor.downloadVideo(vid,path)
 			finally:
@@ -1525,7 +1522,6 @@ class MessageWindow(windows.BaseWindow):
 	def linkSelected(self):
 		link = self.getSelectedLink()
 		if not link: return
-		StreamExtractor.disableDASHVideo(getSetting('disable_dash_video',True))
 		if StreamExtractor.mightHaveVideo(link.url) or StreamExtractor.mightHaveVideo(link.text):
 			s = dialogs.showActivitySplash()
 			try:
