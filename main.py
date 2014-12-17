@@ -2,7 +2,7 @@
 import os, sys, xbmc
 import urllib2, re, time, urlparse, binascii, textwrap, codecs
 import xbmcgui #@UnresolvedImport
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 from lib import util, signals, asyncconnections  # @Reimport
 from lib.util import LOG, ERROR, getSetting, setSetting
 from lib.xbmcconstants import * # analysis:ignore
@@ -3763,17 +3763,17 @@ def browseWebURL(url):
 
 def updateOldVersion():
 	lastVersion = getSetting('last_version') or '0.0.0'
-	if StrictVersion(__version__) <= StrictVersion(lastVersion): return False
+	if LooseVersion(__version__) <= LooseVersion(lastVersion): return False
 	setSetting('last_version',__version__)
 	LOG('NEW VERSION (OLD: %s): Converting any old formats...' % lastVersion)
-	if StrictVersion(lastVersion) < StrictVersion('1.1.4'):
+	if LooseVersion(lastVersion) < LooseVersion('1.1.4'):
 		convertForumSettings_1_1_4()
-	if StrictVersion(lastVersion) < StrictVersion('2.1.30') and not lastVersion == '0.0.0':
+	if LooseVersion(lastVersion) < LooseVersion('2.1.30') and not lastVersion == '0.0.0':
 		if getSetting('use_skin_mods',False):
 			dialogs.showMessage(T(32393),T(32394))
 			mods.installSkinMods(update=True)
 			util.setRefreshXBMCSkin()
-	if StrictVersion(lastVersion) < StrictVersion('2.1.71') and not lastVersion == '0.0.0':
+	if LooseVersion(lastVersion) < LooseVersion('2.1.71') and not lastVersion == '0.0.0':
 		updateToKodi()
 	if lastVersion == '0.0.0': doFirstRun()
 	return True
