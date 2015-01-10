@@ -1,5 +1,5 @@
 import os, re, xbmc, xbmcgui, xbmcvfs, dialogs
-from distutils.version import StrictVersion
+import verlib
 from util import ERROR, LOG, getSetting, setSetting, __addon__, T
 
 DEBUG = None
@@ -19,7 +19,7 @@ def copyFont(sourceFontPath,skinPath):
 	dst = os.path.join(skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	if os.path.exists(dst): xbmcvfs.delete(dst)
 	xbmcvfs.copy(sourceFontPath,dst)
-	
+
 def copyTree2(source,target):
 	try:
 		import distutils.dir_util
@@ -27,9 +27,9 @@ def copyTree2(source,target):
 	except:
 		import shutil
 		copyTree = shutil.copytree
-		
+
 	copyTree(source, target)
-		
+
 def copyTree(source,target,dialog=None):
 	pct = 0
 	mod = 5
@@ -56,14 +56,14 @@ def getSkinVersion(skin_path):
 	if not os.path.exists(addon): return '0.0.0'
 	acontent = open(addon,'r').read()
 	return acontent.split('<addon',1)[-1].split('version="',1)[-1].split('"',1)[0]
-	
+
 
 def getSkinFilePath(skinPath,skinFile):
 	skinPath = os.path.join(skinPath,'720p',skinFile)
 	if not os.path.exists(skinPath): skinPath = os.path.join(skinPath,'1080i',skinFile)
 	if not os.path.exists(skinPath): return None
 	return skinPath
-	
+
 def checkKBModRemove(skinPath):
 		backupPath = getSkinFilePath(skinPath,'DialogKeyboard.xml.FBbackup')
 		dialogPath = getSkinFilePath(skinPath,'DialogKeyboard.xml')
@@ -79,7 +79,7 @@ def ensureLocalSkin(paths=None):
 	version = getSkinVersion(paths.skinPath)
 	version2 = getSkinVersion(paths.localSkinPath)
 
-	if not os.path.exists(paths.localSkinPath) or StrictVersion(version2) < StrictVersion(version):
+	if not os.path.exists(paths.localSkinPath) or verlib.NormalizedVersion(version2) < verlib.NormalizedVersion(version):
 		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(paths.currentSkin),T(32488),T(32489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
@@ -97,14 +97,14 @@ def ensureLocalSkin(paths=None):
 		return getPaths()
 	else:
 		return paths
-		
+
 def fontInstalled(paths=None):
 	paths = paths or getPaths()
-	
+
 	font = os.path.join(paths.skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	installed = False
 	if os.path.exists(font):
-		if StrictVersion(paths.versionLocal) >= StrictVersion(paths.versionUsed):
+		if verlib.NormalizedVersion(paths.versionLocal) >= verlib.NormalizedVersion(paths.versionUsed):
 			if os.path.exists(paths.fontPath):
 				contents = open(paths.fontPath,'r').read()
 				if 'Forum Browser' in contents:
@@ -112,7 +112,7 @@ def fontInstalled(paths=None):
 					installed = True
 	setSetting('font_installed',installed)
 	return installed
-	
+
 def keyboardInstalled(paths=None):
 	paths = paths or getPaths()
 	if os.path.exists(paths.dialogPath):
@@ -122,26 +122,26 @@ def keyboardInstalled(paths=None):
 			setSetting('keyboard_installed',True)
 			return True
 	return False
-			
+
 def checkForSkinMods():
 	paths = getPaths()
 	skinName = os.path.basename(paths.skinPath)
 	LOG('XBMC Skin (In Use): %s %s' % (skinName,paths.versionUsed))
 	LOG('XBMC Skin   (Home): %s %s' % (skinName,paths.versionLocal))
 	update = False
-	
+
 	if not fontInstalled(paths) and getSetting('font_installed',False):
 		installFont()
 		LOG('Restoring missing font installation')
 		update = True
-	
+
 	if not keyboardInstalled(paths) and getSetting('keyboard_installed',False):
 		installKeyboardMod(update=False,paths=paths)
 		LOG('Restoring missing keyboard mod installation')
 		update = True
-		
+
 	return update
-		
+
 def installFont(paths=None,update=False):
 	paths = ensureLocalSkin(paths)
 	copyFont(paths.sourceFontPath,paths.localSkinPath)
@@ -149,7 +149,7 @@ def installFont(paths=None,update=False):
 	if not os.path.exists(paths.fontBackupPath) or not 'Forum Browser' in fontcontents:
 		LOG('Creating backup of original Font.xml file: ' + paths.fontBackupPath)
 		open(paths.fontBackupPath,'w').write(fontcontents)
-		
+
 	if not 'Forum Browser' in fontcontents or update:
 		LOG('Modifying contents of Font.xml with: ' + paths.sourceFontXMLPath)
 		if os.path.exists(paths.fontBackupPath): #because we're updating
@@ -159,7 +159,7 @@ def installFont(paths=None,update=False):
 		modded = original.replace('<font>',open(paths.sourceFontXMLPath,'r').read() + '<font>',1)
 		open(paths.fontPath,'w').write(modded)
 	dialogs.showMessage(T(32052),'',T(32495))
-	
+
 def unInstallFont(paths=None):
 	paths = paths or getPaths()
 	if not os.path.exists(paths.fontBackupPath): return False
@@ -167,7 +167,7 @@ def unInstallFont(paths=None):
 	xbmcvfs.rename(paths.fontBackupPath,paths.fontPath)
 	dialogs.showMessage(T(32417),T(32590))
 	return True
-			
+
 def toggleFontInstallation():
 	if fontInstalled():
 		yes = dialogs.dialogYesNo(T(32466),T(32588),'',T(32466))
@@ -186,7 +186,7 @@ def installKeyboardMod(update=True,paths=None,change=False):
 		yes = True
 	else:
 		yes = xbmcgui.Dialog().yesno(T(32496),T(32497),T(32498))
-	
+
 	if yes:
 		keyboardFile = chooseKeyboardFile(paths.fbPath,paths.currentSkin)
 		if not keyboardFile: return True
@@ -197,7 +197,7 @@ def installKeyboardMod(update=True,paths=None,change=False):
 		if not os.path.exists(paths.backupPath) or not 'Forum Browser' in keyboardcontents:
 			LOG('Creating backup of original DialogKeyboard.xml file: ' + paths.backupPath)
 			open(paths.backupPath,'w').write(open(paths.dialogPath,'r').read())
-		
+
 		if not 'Forum Browser' in keyboardcontents or update:
 			LOG('Replacing DialogKeyboard.xml with: ' + sourcePath)
 			os.remove(paths.dialogPath)
@@ -234,7 +234,7 @@ def getPaths():
 		versionUsed = getSkinVersion(skinPath)
 		versionLocal = getSkinVersion(localSkinPath)
 	return paths
-	
+
 def chooseKeyboardFile(fbPath,currentSkin):
 	files = os.listdir(os.path.join(fbPath,'keyboard'))
 	skins = []
@@ -282,7 +282,7 @@ def createFontsTranslationTable():
 			elif abs(fsize - size) < closest:
 				FTT[name_size] = name
 				closest = abs(fsize - size)
-				
+
 def replaceFonts(xml,is_1080=False):
 	createFontsTranslationTable()
 	for name_size,fsize in IS_1080 and FONT_SIZES_1080 or FONT_SIZES:  # @UnusedVariable
@@ -292,14 +292,14 @@ def replaceFonts(xml,is_1080=False):
 def getFontList():
 	with open(getFontXMLPath(),'r') as f: xml = f.read()
 	return re.findall('(<font>.*?<name>(.*?)</name>.*?<size>(.*?)</size>.*?</font>)(?is)',xml.split('</fontset>',1)[0])
-	
+
 def getDefaultFont(size=12,flist=None):
 	size = str(size)
 	flist = flist or getFontList()
 	for f in flist:
 		if size in f and not 'cap' in f.lower(): return f
 	return 'font%s' % size
-		
+
 def getFontXMLPath():
 	skinPath = xbmc.translatePath('special://skin')
 	global IS_1080
