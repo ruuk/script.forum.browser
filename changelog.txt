@@ -35,7 +35,7 @@ TODO:
 
 *** 2.1.73b ***
 
-Actuall remove dependency on distutils.version.StrictVersion
+Actually remove dependency on distutils.version.StrictVersion
 
 *** 2.1.72b ***
 
