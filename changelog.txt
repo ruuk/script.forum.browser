@@ -33,6 +33,10 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+*** 2.1.72b ***
+
+Remove dependency on distutils.version and allow for version suffixes
+
 *** 2.1.71 ***
 
 Change default forum from xbmc.org to kodi.tv and remove xbmc.org
