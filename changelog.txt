@@ -33,6 +33,10 @@ TODO:
  Awaiting Future Developments:
   Show more extra info in tapatalk (e.g. followers) - TTv4
 
+*** 2.1.74b ***
+
+Fix version checking
+
 *** 2.1.73b ***
 
 Actually remove dependency on distutils.version.StrictVersion

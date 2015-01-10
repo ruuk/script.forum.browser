@@ -1,6 +1,7 @@
 import os, sys, xbmc, xbmcaddon, filelock, threading, urllib, urlparse, binascii, math, re
 from lib import chardet
 import YDStreamUtils as StreamUtils
+import verlib
 
 __addon__ = xbmcaddon.Addon(id='script.forum.browser')
 T = __addon__.getLocalizedString
@@ -25,7 +26,7 @@ PLAYER = None
 class AbortRequestedException(Exception): pass
 class StopRequestedException(Exception): pass
 
-LOG_PREFIX = 'FORUMBROWSER' 
+LOG_PREFIX = 'FORUMBROWSER'
 
 def ERROR(message,hide_tb=False):
 	if sys.exc_info()[0] == AbortRequestedException:
@@ -36,7 +37,7 @@ def ERROR(message,hide_tb=False):
 	elif sys.exc_info()[0] == StopRequestedException:
 		LOG('Stop exception handled')
 		return
-	
+
 	short = str(sys.exc_info()[1])
 	if hide_tb:
 		LOG('ERROR: {0}: {1}'.format(message,short))
@@ -48,9 +49,12 @@ def ERROR(message,hide_tb=False):
 			import dialogs #import dialogs here so we can import this module into dialogs
 			dialogs.showText('Traceback', traceback.format_exc())
 	return short
-	
+
 def LOG(message):
 	print '%s: %s' % (LOG_PREFIX,message)
+
+def Version(ver_string):
+    return verlib.NormalizedVersion(verlib.suggest_normalized_version(ver_string))
 
 def getSetting(key,default=None):
 	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
@@ -66,21 +70,21 @@ def _processSetting(setting,default):
 	elif isinstance(default,list):
 		if setting: return setting.split(':!,!:')
 		else: return default
-	
+
 	return setting
 
 def setSetting(key,value):
 	value = _processSettingForWrite(value)
 	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
 		__addon__.setSetting(key,value)
-	
+
 def _processSettingForWrite(value):
 	if isinstance(value,list):
 		value = ':!,!:'.join(value)
 	elif isinstance(value,bool):
 		value = value and 'true' or 'false'
 	return str(value)
-		
+
 def getSettingExternal(key,default=None):
 	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
 		setting = xbmcaddon.Addon(id='script.forum.browser').getSetting(key)
@@ -90,7 +94,7 @@ def setSettingExternal(key,value):
 	value = _processSettingForWrite(value)
 	with filelock.FileLock(SETTINGS_PATH, timeout=5, delay=0.1):
 		xbmcaddon.Addon(id='script.forum.browser').setSetting(key,value)
-	
+
 def parseForumBrowserURL(url):
 	if not url.startswith('forumbrowser://'):
 		return {'forumID':url}
@@ -122,13 +126,13 @@ def createForumBrowserURL(forumID,section='',forum='',thread='',post='',args=Non
 	if args:
 		ret += '?' + urllib.urlencode(args)
 	return ret.strip('/')
-	
+
 def getListItemByProperty(clist,prop,value):
 	for idx in range(0,clist.size()):
 		item = clist.getListItem(idx)
 		if item.getProperty(prop) == value: return item
 	return None
-	
+
 def selectListItemByProperty(clist,prop,value):
 	for idx in range(0,clist.size()):
 		item = clist.getListItem(idx)
@@ -142,7 +146,7 @@ def getSavedTheme(current=None,get_current=False):
 		global CURRENT_THEME
 		CURRENT_THEME = current
 	if get_current and CURRENT_THEME: return CURRENT_THEME
-	try:			
+	try:
 		return ('Sequel','Video')[getSetting('skin',0)]
 	except:
 		return 'Sequel'
@@ -171,13 +175,13 @@ class StoppableThread(threading.Thread):
 		kwargs = kwargs or {}
 		self._stop = threading.Event()
 		threading.Thread.__init__(self,group=group, target=target, name=name, args=args, kwargs=kwargs)
-		
+
 	def stop(self):
 		self._stop.set()
-		
+
 	def stopped(self):
 		return self._stop.isSet()
-	
+
 	def _get_my_tid(self):
 		"""determines this (self's) thread id
 
@@ -236,19 +240,19 @@ def initPlayer():
 	global PLAYER
 	PLAYER = PlayerMonitor()
 	return PLAYER
-	
+
 class PlayerMonitor(xbmc.Player):
 	def __init__(self,core=None):
 		self.init()
 		xbmc.Player.__init__(core)
-		
+
 	def init(self):
 		self.interrupted = None
 		self.isSelfPlaying = False
 		self.stack = 0
 		self.currentTime = None
 		self.FBisRunning = True
-		
+
 	def start(self,path):
 		interrupted = None
 		if getSetting('video_return_interrupt',True):
@@ -256,7 +260,7 @@ class PlayerMonitor(xbmc.Player):
 			self.getCurrentTime()
 		self.interrupted = interrupted
 		self.doPlay(path)
-		
+
 	def finish(self):
 		self.FBisRunning = False
 		if getSetting('video_stop_on_exit',True):
@@ -266,7 +270,7 @@ class PlayerMonitor(xbmc.Player):
 			if getSetting('video_return_interrupt_after_exit',False) and self.interrupted:
 				self.waitLong()
 		LOG('PLAYER: Exiting')
-		
+
 	def doPlay(self,path):
 		self.played = path
 		self.isSelfPlaying = True
@@ -275,12 +279,12 @@ class PlayerMonitor(xbmc.Player):
 			#StreamUtils.play(path, preview=True)
 		else:
 			self.play(path)
-		
+
 	def doStop(self):
 		if not self.isSelfPlaying: return
 		LOG('PLAYER: Stopping forum video')
 		self.stop()
-		
+
 	def wait(self):
 		LOG('PLAYER: Waiting for video to stop...')
 		ct = 0
@@ -288,12 +292,12 @@ class PlayerMonitor(xbmc.Player):
 			xbmc.sleep(1000)
 			ct+=1
 			if ct > 19: break #Don't know if this is necessary, but it's here just in case.
-			
+
 	def waitLong(self):
 		LOG('PLAYER: Waiting after FB close to resume interrupted video...')
 		while self.interrupted and not xbmc.abortRequested:
 			xbmc.sleep(1000)
-		
+
 	def playInterrupted(self):
 		if not self.isSelfPlaying: return
 		self.isSelfPlaying = False
@@ -312,28 +316,28 @@ class PlayerMonitor(xbmc.Player):
 				StreamUtils.play(self.interrupted,getSetting('video_resume_as_preview',False))
 		self.interrupted = None
 		self.currentTime = None
-	
+
 	def onPlayBackStarted(self):
 		if self.FBisRunning and getSetting('video_resume_as_preview',False) and not self.isSelfPlaying:
 			xbmc.sleep(1000)
 			xbmc.executebuiltin('Action(FullScreen)')
-		
+
 	def onPlayBackEnded(self):
 		self.playInterrupted()
-		
+
 	def onPlayBackStopped(self):
 		self.playInterrupted()
-		
+
 	def pauseStack(self):
 		if not self.stack: StreamUtils.pause()
 		self.stack += 1
-		
+
 	def resumeStack(self):
 		self.stack -= 1
 		if self.stack < 1:
 			self.stack = 0
 			StreamUtils.resume()
-		
+
 	def getCurrentTime(self):
 		if not StreamUtils.isPlaying(): return None
 		offset = getSetting('video_resume_offset',0)
@@ -354,7 +358,7 @@ def setRefreshXBMCSkin(off=False):
 		return
 	with open(signal_file,'w') as f: f.write('True')
 	setSetting('refresh_skin',True)
-	
+
 def xbmcSkinAwaitingRefresh():
 	return getSetting('refresh_skin',False) or os.path.exists(os.path.join(CACHE_PATH,'skin-refresh'))
 
@@ -370,11 +374,11 @@ def refreshXBMCSkin():
 	LOG('! REFRESHING XBMC SKIN !')
 	xbmc.executebuiltin('ReloadSkin()')
 	return True
-	
+
 def showNotice(header,message,mtime='',image=__addon__.getAddonInfo('icon')):
 	xbmc.executebuiltin('Notification(%s,%s,%s,%s)' % (header,message,mtime,image))
 
-###################################################################	
+###################################################################
 ## Forum Settings
 ###################################################################
 def getForumPath(forumID,just_path=False):
@@ -392,7 +396,7 @@ def getCachedLogo(logo,forumID,clear=False):
 	root, ext = os.path.splitext(logo) #@UnusedVariable
 	ext = re.split('[^\w\.]',ext,1)[0]
 	logopath = os.path.join(CACHE_PATH,forumID + ext or '.jpg')
-	
+
 	if not ext:
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.png')
 		if not os.path.exists(logopath): logopath = os.path.join(CACHE_PATH,forumID + '.gif')
@@ -435,10 +439,10 @@ def loadForumSettings(forumID,get_rules=False,get_both=False,skip_password=False
 			return {},{}
 		else:
 			return {}
-		
+
 	if get_rules:
 		return rules
-	
+
 	import passwordStorage
 
 	ret['username'] = ret.get('username','')
@@ -449,7 +453,7 @@ def loadForumSettings(forumID,get_rules=False,get_both=False,skip_password=False
 	ret['notify'] = _processSetting(ret.get('notify'),False)
 	ret['right_align'] = _processSetting(ret.get('right_align'),False)
 	ret['ignore_forum_images'] = _processSetting(ret.get('ignore_forum_images'),True)
-		
+
 	if get_both:
 		return ret,rules
 	else:
@@ -460,21 +464,21 @@ def saveForumSettings(forumID,**kwargs):
 	password=kwargs.pop('password',None)
 	notify=kwargs.pop('notify',None)
 	rules=kwargs.pop('rules',None)
-	
+
 	data, rules_data = loadForumSettings(forumID,get_both=True) or ({},{})
 	#data.update(kwargs)
 	if rules: rules_data.update(rules)
 	if data != None: data.update(kwargs)
-	
+
 	if notify == None: data['notify'] = data.get('notify')  or False
 	else: data['notify'] = notify
-	
+
 	if username == None: data['username'] = data.get('username') or ''
 	else: data['username'] = username
-	
+
 	if password == None: data['password'] = data.get('password') or ''
 	else: data['password'] = password
-	
+
 	try:
 		import passwordStorage
 
@@ -493,10 +497,10 @@ def saveForumSettings(forumID,**kwargs):
 	except:
 		ERROR('Failed to save forum settings for: %s' % forumID)
 		return False
-	
-###################################################################	
+
+###################################################################
 ## Bookmarks
-###################################################################	
+###################################################################
 def addBookmark(url,name):
 	bookmarks = loadBookmarks()
 	bookmarks.append((url,name))
@@ -567,14 +571,14 @@ def makeColorGif(hex6color,outpath):
 		with open(sourceGIF,'r') as c:
 			t.write(c.read().replace(gifReplace,replace))
 	return outpath
-	
-###################################################################	
+
+###################################################################
 ## XBMCControlConditionalVisiblity
-###################################################################	
+###################################################################
 class XBMCControlConditionalVisiblity:
 	def __init__(self):
 		self.cache = {}
-		
+
 	def __getattr__(self,attr):
 		if attr in self.cache: return self.cache[attr]
 		def method(control=0,group=None):
@@ -582,10 +586,9 @@ class XBMCControlConditionalVisiblity:
 				return bool(xbmc.getCondVisibility('ControlGroup(%s).%s(%s)' % (group,attr,control)))
 			else:
 				return bool(xbmc.getCondVisibility('Control.%s(%s)' % (attr,control)))
-										
+
 		self.cache[attr] = method
-		return method		
-		
+		return method
+
 Control = XBMCControlConditionalVisiblity()
 
-		

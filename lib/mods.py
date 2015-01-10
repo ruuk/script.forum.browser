@@ -1,6 +1,5 @@
 import os, re, xbmc, xbmcgui, xbmcvfs, dialogs
-import verlib
-from util import ERROR, LOG, getSetting, setSetting, __addon__, T
+from util import ERROR, LOG, getSetting, setSetting, __addon__, T, Version
 
 DEBUG = None
 CACHE_PATH = None
@@ -79,7 +78,7 @@ def ensureLocalSkin(paths=None):
 	version = getSkinVersion(paths.skinPath)
 	version2 = getSkinVersion(paths.localSkinPath)
 
-	if not os.path.exists(paths.localSkinPath) or verlib.NormalizedVersion(version2) < verlib.NormalizedVersion(version):
+	if not os.path.exists(paths.localSkinPath) or Version(version2) < Version(version):
 		yesno = xbmcgui.Dialog().yesno(T(32486),T(32487).format(paths.currentSkin),T(32488),T(32489))
 		if not yesno: return
 		dialog = xbmcgui.DialogProgress()
@@ -104,7 +103,7 @@ def fontInstalled(paths=None):
 	font = os.path.join(paths.skinPath,'fonts','ForumBrowser-DejaVuSans.ttf')
 	installed = False
 	if os.path.exists(font):
-		if verlib.NormalizedVersion(paths.versionLocal) >= verlib.NormalizedVersion(paths.versionUsed):
+		if Version(paths.versionLocal) >= Version(paths.versionUsed):
 			if os.path.exists(paths.fontPath):
 				contents = open(paths.fontPath,'r').read()
 				if 'Forum Browser' in contents:
